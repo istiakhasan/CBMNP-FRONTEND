@@ -1,0 +1,36 @@
+export enum tagTypes {
+      mainCategory="mainCategory",
+      vendor="vendor",
+      brand="brand",
+      products="products",
+      order="order",
+      division="division",
+      auth="auth",
+      delivery="delivery",
+      users="users",
+      office="office",
+      department="department",
+      slider="slider",
+      subscriber="subscriber",
+      productByVendor="productByVendor",
+      requisition="requisition",
+
+  }
+  
+  export const tagTypesList = [
+    tagTypes.mainCategory,
+    tagTypes.vendor,
+    tagTypes.brand,
+    tagTypes.products,
+    tagTypes.order,
+    tagTypes.auth,
+    tagTypes.delivery,
+    tagTypes.division,
+    tagTypes.users,
+    tagTypes.office,
+    tagTypes.department,
+    tagTypes.slider,
+    tagTypes.subscriber,
+    tagTypes.productByVendor,
+    tagTypes.requisition,
+  ];
