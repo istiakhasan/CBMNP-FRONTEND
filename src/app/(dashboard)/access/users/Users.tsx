@@ -18,10 +18,11 @@ import GbModal from "@/components/ui/GbModal";
 import axios from "axios";
 import { useGetAllUsersQuery } from "@/redux/api/usersApi";
 import AddUsers from "./AddUsers";
+import moment from "moment";
 const Users = () => {
   //Add user modal
-  const [openAddUserModal,setOpenAddUserModal]=useState(false) 
-  const [users,setUsers]=useState([])
+  const [openAddUserModal, setOpenAddUserModal] = useState(false);
+  const [users, setUsers] = useState([]);
   const query: Record<string, any> = {};
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
@@ -40,7 +41,7 @@ const Users = () => {
       render: (text, record, index) => {
         return (
           <span
-            onClick={() => router.push(`/product/${record?.id}`)}
+            onClick={() => router.push(`/access/users/${record?.userId}`)}
             className="text-[#278ea5] cursor-pointer"
           >
             {record?.name}
@@ -53,14 +54,7 @@ const Users = () => {
       key: 2,
       //@ts-ignore
       render: (text, record, index) => {
-        return (
-          <span
-            onClick={() => router.push(`/product/${record?.id}`)}
-            className="text-[#278ea5] cursor-pointer"
-          >
-            {record?.email}
-          </span>
-        );
+        return <span className=" cursor-pointer">{record?.email}</span>;
       },
     },
     {
@@ -68,14 +62,7 @@ const Users = () => {
       key: 3,
       //@ts-ignore
       render: (text, record, index) => {
-        return (
-          <span
-            onClick={() => router.push(`/product/${record?.id}`)}
-            className="text-[#278ea5] cursor-pointer"
-          >
-            {record?.phone}
-          </span>
-        );
+        return <span className=" cursor-pointer">{record?.phone}</span>;
       },
     },
     {
@@ -84,10 +71,7 @@ const Users = () => {
       //@ts-ignore
       render: (text, record, index) => {
         return (
-          <span
-            onClick={() => router.push(`/product/${record?.id}`)}
-            className="text-[#278ea5] cursor-pointer"
-          >
+          <span className="text-[#278ea5] uppercase font-semibold cursor-pointer">
             {record?.role}
           </span>
         );
@@ -98,14 +82,7 @@ const Users = () => {
       key: 5,
       //@ts-ignore
       render: (text, record, index) => {
-        return (
-          <span
-            onClick={() => router.push(`/product/${record?.id}`)}
-            className="text-[#278ea5] cursor-pointer"
-          >
-            Pending
-          </span>
-        );
+        return <span className=" cursor-pointer">N/A</span>;
       },
     },
     {
@@ -113,14 +90,7 @@ const Users = () => {
       key: 6,
       //@ts-ignore
       render: (text, record, index) => {
-        return (
-          <span
-            onClick={() => router.push(`/product/${record?.id}`)}
-            className="text-[#278ea5] cursor-pointer"
-          >
-             {record?.address}
-          </span>
-        );
+        return <span className=" cursor-pointer">{record?.address}</span>;
       },
     },
     {
@@ -134,13 +104,13 @@ const Users = () => {
             checkedChildren="Active"
             unCheckedChildren="Inactive"
             onChange={async (a) => {
-            //   const res = await updateProduct({
-            //     id: record?.id,
-            //     data: {
-            //       status: a,
-            //     },
-            //   });
-            //   console.log(a, "adsf");
+              //   const res = await updateProduct({
+              //     id: record?.id,
+              //     data: {
+              //       status: a,
+              //     },
+              //   });
+              //   console.log(a, "adsf");
             }}
             defaultChecked={record?.status}
           />
@@ -151,15 +121,19 @@ const Users = () => {
     {
       title: "Created At",
       key: 6,
-      align:"end",
+      align: "end",
       //@ts-ignore
       render: (text, record, index) => {
+        const formattedDate = moment(record?.createdAt).format(
+          "MMMM D, YYYY h:mm A"
+        );
+
         return (
           <span
             onClick={() => router.push(`/product/${record?.id}`)}
             className="text-[#278ea5] cursor-pointer"
           >
-            Pending
+            {formattedDate}
           </span>
         );
       },
@@ -180,7 +154,6 @@ const Users = () => {
     value: key,
   }));
 
-
   return (
     <>
       <GbHeader />
@@ -188,7 +161,10 @@ const Users = () => {
         <div className="flex justify-between items-center py-4 px-2">
           <p className="text-[20px]">Users</p>
           <div className="flex items-center gap-3 flex-wrap">
-            <button onClick={()=>setOpenAddUserModal(true)} className="bg-[#47a2b3] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]">
+            <button
+              onClick={() => setOpenAddUserModal(true)}
+              className="bg-[#47a2b3] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]"
+            >
               Add User
             </button>
           </div>
@@ -258,7 +234,7 @@ const Users = () => {
         width="500px"
         cls="custom_ant_modal"
       >
-       <AddUsers setOpenAddUserModal={setOpenAddUserModal} />
+        <AddUsers setOpenAddUserModal={setOpenAddUserModal} />
       </GbModal>
     </>
   );
