@@ -18,6 +18,11 @@ const menuItems: MenuItem[] = [
     icon: 'ri-bar-chart-box-line',
   },
   {
+    href: '/orders',
+    title: 'Orders',
+    icon: 'ri-shopping-bag-3-line',
+  },
+  {
     href: '/inventory',
     title: 'Inventory',
     icon: 'ri-ancient-gate-line',

@@ -4,12 +4,12 @@ import type { TreeProps } from 'antd';
 
 
 const GbTree = ({ treeData, setCheckedKeys, checkedKeys,defaultKey }: any) => {
-    console.log(defaultKey,"dfa");
+  console.log(defaultKey,"adsfas");
   // Function to recursively get all keys based on titles matching the array
-  const getMatchingKeys = (data: any[], matchArray: string[]) => {
+  const getMatchingKeys = (data: any[], matchArray: any[]) => {
     let keys: React.Key[] = [];
-    data?.forEach(item => {
-      if (matchArray?.includes(item.title)) {
+    data?.forEach((item:any) => {
+      if (matchArray?.find(jtem=>item.key===jtem?.permissinId)) {
         keys.push(item.key);
       }
       if (item.children) {
@@ -47,6 +47,7 @@ const GbTree = ({ treeData, setCheckedKeys, checkedKeys,defaultKey }: any) => {
   };
 
   const onCheck: TreeProps['onCheck'] = (checkedKeysValue) => {
+    console.log(checkedKeys,"abdd");
     setCheckedKeys(checkedKeysValue as React.Key[]);
   };
 

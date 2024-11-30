@@ -14,6 +14,7 @@ export enum tagTypes {
       subscriber="subscriber",
       productByVendor="productByVendor",
       requisition="requisition",
+      userPermission="userPermission",
 
   }
   
@@ -33,4 +34,5 @@ export enum tagTypes {
     tagTypes.subscriber,
     tagTypes.productByVendor,
     tagTypes.requisition,
+    tagTypes.userPermission,
   ];

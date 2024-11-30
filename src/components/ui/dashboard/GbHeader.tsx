@@ -3,7 +3,7 @@
 import { Avatar, MenuProps, Space } from "antd";
 import GbDropdown from "./GbDropdown";
 import Link from "next/link";
-const GbHeader = () => {
+const GbHeader = ({title}:{title?:string}) => {
   const items: MenuProps["items"] = [
     {
       label: (
@@ -78,6 +78,7 @@ const GbHeader = () => {
 
   return (
     <div className="bg-light gb-header h-[65px] px-[16px] flex items-center sticky top-0 z-50">
+       <h1 className="text-2xl  text-primary">{title}</h1>
       <div className="ml-auto flex items-center gap-[32px]">
         <div>
           <i
