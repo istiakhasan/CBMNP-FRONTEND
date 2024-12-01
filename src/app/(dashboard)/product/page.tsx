@@ -236,7 +236,7 @@ const Page = () => {
       key: "1",
     },
   ];
-  console.log(data,"data");
+
   return (
     <>
     <GbHeader />

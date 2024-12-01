@@ -43,17 +43,7 @@ const GbTable = ({
 
   return (
     <div>
-      {loading ? (
-        <>
-          <Skeleton
-            rootClassName="abc"
-            active
-            title={false}
-            paragraph={{ rows: 11, width: "100%" }}
-            // style={{ margin: 0 }}
-          />
-        </>
-      ) : (
+  
         <Table
           // className={`custom_table ${subscriber_table}`}
           loading={loading}
@@ -61,10 +51,10 @@ const GbTable = ({
           dataSource={dataSource}
           pagination={paginationConfig}
           onChange={onTableChange}
-          rowKey={"id"}
+          rowKey={id?id:'id'}
           rowSelection={rowSelection}
         />
-      )}
+  
     </div>
   );
 };

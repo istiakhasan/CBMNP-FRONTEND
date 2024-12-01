@@ -5,7 +5,7 @@ export const orderApi = baseApi.injectEndpoints({
 	endpoints: (build) => ({
 		createOrder: build.mutation({
 			query: (data) => ({
-				url: "/order",
+				url: "/orders",
 				method: "POST",
 				data
 			}),
@@ -13,7 +13,7 @@ export const orderApi = baseApi.injectEndpoints({
 		}),
 		getAllOrders: build.query({
 			query: (arg) => ({
-				url: "/order",
+				url: "/orders",
 				method: "GET",
 				params: arg,
 			}),
