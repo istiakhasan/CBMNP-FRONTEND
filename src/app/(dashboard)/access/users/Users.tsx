@@ -16,13 +16,12 @@ import { useRouter } from "next/navigation";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
 import GbModal from "@/components/ui/GbModal";
 import axios from "axios";
-import { useGetAllUsersQuery } from "@/redux/api/usersApi";
+import { useGetAllUsersQuery, useUpdateUserByIdMutation } from "@/redux/api/usersApi";
 import AddUsers from "./AddUsers";
 import moment from "moment";
 const Users = () => {
   //Add user modal
   const [openAddUserModal, setOpenAddUserModal] = useState(false);
-  const [users, setUsers] = useState([]);
   const query: Record<string, any> = {};
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
@@ -31,6 +30,7 @@ const Users = () => {
   query["limit"] = size;
   query["searchProducts"] = searchTerm;
   const { data, isLoading } = useGetAllUsersQuery(query);
+  const [updateUser]=useUpdateUserByIdMutation()
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const tableColumn = [
@@ -104,15 +104,15 @@ const Users = () => {
             checkedChildren="Active"
             unCheckedChildren="Inactive"
             onChange={async (a) => {
-              //   const res = await updateProduct({
-              //     id: record?.id,
-              //     data: {
-              //       status: a,
-              //     },
-              //   });
-              //   console.log(a, "adsf");
+                const res = await updateUser({
+                  id: record?.userId,
+                  data: {
+                    active: a,
+                  },
+                });
+                console.log(res, "response");
             }}
-            defaultChecked={record?.status}
+            defaultChecked={record?.active}
           />
         </div>
       ),
