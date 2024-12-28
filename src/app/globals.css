@@ -254,9 +254,25 @@ aside.gb_sidebar {
   
 
   /* custom scroll */
-  ::-webkit-scrollbar{
-    display: none;
-  }
+  /* width */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #adadad;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
 
   .gb_border{
    border:  1px solid #f0f0f0;
@@ -307,8 +323,16 @@ aside.gb_sidebar {
   padding-right: 0;
   background: #F6F6F6;
  }
+.floating-label-input.err{
+  border: 1px solid #F44336;
+ }
+
 .floating-label-input:focus-within{
   border:1px solid var(--primaryColor);
+  transition: .3s ease-in-out;
+ }
+.floating-label-input.err:focus-within{
+  border:1px solid #F44336 !important;
   transition: .3s ease-in-out;
  }
 .floating-label-input:focus-within label{
@@ -420,3 +444,60 @@ aside.gb_sidebar {
 	/* background: #f7f9fb !important; */
 	overflow: hidden;
 }
+
+
+/* bar spinner  */
+
+.bar-spinner {
+  display: flex;
+  /* justify-content: space-between; */
+  gap: 5px;
+  align-items: center;
+  width: 60px;
+  height: 20px;
+  align-items: end;
+}
+
+.bar {
+  width: 2px;
+  height: 10px;
+  background-color: #000000;
+  animation: waveAnimation 2s ease-in-out infinite;
+}
+
+.bar:nth-child(5) {
+  animation-delay: 0.2s;
+}
+
+.bar:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+.bar:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+.bar:nth-child(2) {
+  animation-delay: 0.8s;
+}
+
+.bar:nth-child(1) {
+  animation-delay: 1s;
+}
+
+@keyframes waveAnimation {
+  0%,
+  100% {
+    height: 5px;
+  }
+  25% {
+    height: 20px;
+  }
+  50% {
+    height: 10px;
+  }
+  75% {
+    height: 20px;
+  }
+}
+

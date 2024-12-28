@@ -35,7 +35,7 @@ const GbFormTextArea = ({
         name={name}
         control={control}
         render={({ field }) => (
-          <div className="floating-label-input">
+          <div className={`floating-label-input ${errorMessage?'err':''}`}>
             <label className="text-[#999] text-[12px]">{label}</label>
           <Input.TextArea
             rows={rows}

@@ -38,6 +38,7 @@ const Page = () => {
   query["limit"] = size;
   query["searchProducts"] = searchTerm;
   const { data, isLoading } = useGetAllProductQuery(query);
+  console.log(data,"chck data");
   const [deleteBrandHandle] = useDeleteProductByIdMutation();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -60,7 +61,7 @@ const Page = () => {
           <Image
             height={44}
             width={44}
-            src={`${getBaseUrl()}/${record?.product_gallery?.length>0?record?.product_gallery[0]:''}`}
+            src={`${getBaseUrl()}/images/${record?.images[0]}`}
             alt=""
           />
         );
@@ -102,7 +103,7 @@ const Page = () => {
       align: "start",
       //@ts-ignore
       render: (text, record, index) => {
-        return <h1 className="border-[1px] border-[#ebebeb] w-fit px-5 py-1">{record?.volumeUnit+": "+record?.weight}</h1>;
+        return <h1 className="border-[1px] border-[#ebebeb] w-fit px-5 py-1">{record?.unit+": "+record?.weight}</h1>;
       },
     },
     {
@@ -138,7 +139,7 @@ const Page = () => {
       render: (text, record, index) => {
         return (
           <>
-            <h1>BTD {record?.distributorPrice || "0.00"}</h1>
+            <h1>BTD {record?.distributionPrice || "0.00"}</h1>
           </>
         );
       },
@@ -151,7 +152,7 @@ const Page = () => {
       render: (text, record, index) => {
         return (
           <>
-            <h1>BTD {record?.retailerPrice || "0.00"}</h1>
+            <h1>BTD {record?.retailPrice || "0.00"}</h1>
           </>
         );
       },
@@ -343,7 +344,7 @@ const Page = () => {
           </div>
           <Pagination
             pageSize={size}
-            total={data?.total}
+            total={data?.meta?.total}
             onChange={(v, d) => {
               setPage(v);
               setSize(d);
@@ -358,7 +359,7 @@ const Page = () => {
             columns={newColumns}
             dataSource={data?.data}
             pageSize={size}
-            totalPages={data?.total}
+            // totalPages={data?.meta?.total}
             onPaginationChange={onPaginationChange}
             // showPagination={true}
             rowSelection={rowSelection}

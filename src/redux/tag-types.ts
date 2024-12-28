@@ -15,6 +15,7 @@ export enum tagTypes {
       productByVendor="productByVendor",
       requisition="requisition",
       userPermission="userPermission",
+      customer="customer",
 
   }
   
@@ -35,4 +36,5 @@ export enum tagTypes {
     tagTypes.productByVendor,
     tagTypes.requisition,
     tagTypes.userPermission,
+    tagTypes.customer,
   ];

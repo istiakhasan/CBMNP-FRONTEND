@@ -1,5 +1,5 @@
 import React from 'react';
-import OrdersPage from './OrdersPage';
+import OrdersPage from './_component/OrdersPage';
 
 const Page = () => {
     return (

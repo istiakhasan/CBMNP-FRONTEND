@@ -15,27 +15,14 @@ const AddSimpleProuct = () => {
     const handleSubmit=async(data:any)=>{
       try {
         const payload={...data}
-        payload['volumeUnit']=data?.volumeUnit?.value
-        payload['weightUnit']=data?.weightUnit?.value
-        payload['category']=Number(data?.category[0]?.id)
-        payload['status']=true
-        payload['addProductType']="single-product"
-        delete payload["product_image"]
-        const formdata = new FormData();
-        for (let item in payload) {
-          formdata.append(item, payload[item]);
-        }
-        for (let item in data["product_image"]) {
-          formdata.append(
-            "product_gallery",
-            data["product_image"][item]?.originFileObj
-          );
-        }
-        const res=await createProduct(formdata).unwrap()
-        message.success('Product create successfully...')
+
+     
+        console.log(payload,"payload");
+        return
+
         
       } catch (error) {
-        
+        console.log(error,"error");
       }
     }
   return (
@@ -104,7 +91,7 @@ const AddSimpleProuct = () => {
 
         <div className="bg-white py-[30px] sticky bottom-0 flex items-center gap-2 justify-end">
           <button className="text-[#278ea5] border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[15px] py-[4px]">Clear</button>
-          <button className="bg-[#278ea5] text-white border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[15px] py-[4px]">Create</button>
+          <button type="submit" className="bg-[#278ea5] text-white border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[15px] py-[4px]">Create</button>
         </div>
     </GbForm>
   );

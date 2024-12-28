@@ -91,7 +91,15 @@ const AllOrders = ({}: any) => {
       title: "Order Status",
       key: "orderStatus",
       align: "start",
-      render: (_: any, record: any) => <span>Pending</span>,
+      render: (_: any, record: any) => (
+        <>
+        {record?.status?.label==="Pending" && <span className="bg-[#FFC107] font-semibold text-[10px] px-2 py-[3px] w-[80px] text-center inline-block">{record?.status?.label}</span>}
+        {record?.status?.label==="Approved" && <span className="bg-[#4CAF50] text-[white] font-semibold text-[10px] px-2 py-[3px] w-[80px] text-center inline-block">{record?.status?.label}</span>}
+        {record?.status?.label==="In-Pogress" && <span className="bg-[#2196F3] font-semibold text-[10px] px-2 py-[3px] w-[80px] text-center inline-block">{record?.status?.label}</span>}
+        {record?.status?.label==="Cancel" && <span className="bg-[#F44336] font-semibold text-[10px] px-2 py-[3px] w-[80px] text-center inline-block">{record?.status?.label}</span>}
+        {!record?.status?.label && <span className="border bg-white text-black font-semibold text-[10px] px-2 py-[3px] w-[80px] text-center inline-block">N/A</span>}
+        </>
+      ),
     },
     {
       title: "Product Value",

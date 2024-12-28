@@ -38,10 +38,11 @@ const GbFormInput = ({
   } = useFormContext();
 
   const errorMessage = getErrorMessageByPropertyName(errors, name);
+ 
 
   return (
     <>
-      <div className="floating-label-input">
+      <div className={`floating-label-input ${errorMessage?'err':''}`}>
         {label && (
           <label htmlFor={name} className="text-[#999] text-[12px]">
             {required && (
@@ -70,7 +71,7 @@ const GbFormInput = ({
               size={size}
               style={
                 errorMessage
-                  ? {}
+                  ? {border:"1px solid red"}
                   : {
                       boxShadow: "none",
                       border: "none",

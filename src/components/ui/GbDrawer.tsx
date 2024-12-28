@@ -5,10 +5,12 @@ const GbDrawer = ({
   children,
   open,
   setOpen,
+  title
 }: {
   children: React.ReactNode;
   open: any;
   setOpen: any;
+  title?:any
 }) => {
   const onClose = () => {
     setOpen(false);
@@ -25,7 +27,7 @@ const GbDrawer = ({
         open={open}
       >
         <div className="flex justify-between items-center sticky top-0 z-20 bg-white py-4">
-          <h1 className="text-[24px] text-[#00171d] ">Add Product</h1>
+          <h1 className="text-[24px] text-[#00171d] ">{title}</h1>
           <i
             onClick={onClose}
             style={{ fontSize: "20px" }}

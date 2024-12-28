@@ -52,7 +52,7 @@ const GbFormSelect = ({
 				name={name}
 				render={({ field: { onChange, value } }) => (
 					// <div>
-					<div style={{padding:"5px 0"}} className="floating-label-input px-0">
+					<div style={{padding:"5px 0"}} className={`floating-label-input px-0 ${errorMessage?'err':''}`}>
 						 <label className="text-[#999] px-[15px] text-[12px]">{label}</label>
 					<Select 
 					 dropdownStyle={{

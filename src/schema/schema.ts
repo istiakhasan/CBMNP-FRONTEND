@@ -134,3 +134,46 @@ export const subscriberOrderSubmittionSchema = yup.object().shape({
   orderNumber: yup.string().required('Order Number  is required'),
   orderDate: yup.string().required('Order date  is required'),
 });
+
+
+
+export const createCustomerSchema = yup.object().shape({
+  customerName: yup.string().required(),
+  customerPhoneNumber: yup.string().required('Phone number is required'),
+  customerType: yup
+    .object()
+    .shape({
+      label: yup.string().required('Customer type label is required'),
+      value: yup.string().required('Customer type value is required'),
+    })
+    .test('customerType-required', 'Customer type is required', (value) => !!value && !!value.label && !!value.value),
+  address: yup.string().required(),
+  division: yup.object().when('customerType', (customerType:any, schema) => {
+    console.log(customerType,"check");
+    if (customerType[0].value === 'NON_PROBASHI') {
+      return schema.required('Division is required for NON_PROBASHI customer type');
+    }
+    return schema;
+  }),
+  district: yup.object().when('customerType', (customerType:any, schema) => {
+    console.log(customerType,"check");
+    if (customerType[0].value === 'NON_PROBASHI') {
+      return schema.required('Division is required for NON_PROBASHI customer type');
+    }
+    return schema;
+  }),
+  thana: yup.object().when('customerType', (customerType:any, schema) => {
+    console.log(customerType,"check");
+    if (customerType[0].value === 'NON_PROBASHI') {
+      return schema.required('Division is required for NON_PROBASHI customer type');
+    }
+    return schema;
+  }),
+  country: yup.object().when('customerType', (customerType:any, schema) => {
+    console.log(schema,"check schema");
+    if (customerType[0].value === 'PROBASHI') {
+      return schema.required('Division is required for NON_PROBASHI customer type');
+    }
+    return schema;
+  }),
+});

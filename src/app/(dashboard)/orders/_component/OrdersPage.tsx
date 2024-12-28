@@ -5,13 +5,14 @@ import convertNumberToShorthand from "@/util/convertNumberToShorthand";
 import { Spin } from "antd";
 
 import React, { useState } from "react";
-import AllOrders from "./_component/AllOrders";
+import { useRouter } from "next/navigation";
+import AllOrders from "./AllOrders";
 
 const OrdersPage = () => {
   // all states
   const [activeTab, setActiveTab] = useState<string>("1");
   const [searchTerm, setSearchTerm] = useState("");
-
+   const router=useRouter()
   const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
     id: "R-000000001",
   });
@@ -59,7 +60,7 @@ const OrdersPage = () => {
             {permission?.includes("CREATE_ORDERS") && (
               <div className="flex items-center justify-end gap-3 flex-wrap">
                 <button
-                  //   onClick={() => setOpenAddUserModal(true)}
+                    onClick={() => router.push('/orders/create-order')}
                   className="bg-[#47a2b3] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]"
                 >
                   Create order
