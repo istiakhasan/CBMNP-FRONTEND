@@ -35,12 +35,12 @@ const CubicMeters = () => {
                 value: "Tonnes",
               },
             ]}
-            name="weightUnit"
+            name="unit"
             size="small"
             label="Unit"
           />
         </div>
-        <div className="mb-4">
+        {/* <div className="mb-4">
           <GbFormInput 
             disabled={watch()?.volumeUnit?.value === "Cubic Meters"}
             value={
@@ -89,7 +89,7 @@ const CubicMeters = () => {
             size="small"
             label="Unit"
           />
-        </div>
+        </div> */}
       </div>
       <div>
         {watch()?.volumeUnit?.value === "Cubic Meters" && (

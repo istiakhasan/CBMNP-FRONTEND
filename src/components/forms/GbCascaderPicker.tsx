@@ -9,8 +9,9 @@ import {
 import { useFormContext } from "react-hook-form";
 
 
-const GbCascaderPicker = ({name}:any) => {
-  const {setValue}=useFormContext()
+
+const GbCascaderPicker = ({name,selectedValue,setSelectedValue}:any) => {
+  const {setValue,watch}=useFormContext()
   const { data } = useGetAllMainCategoryQuery(undefined);
   const [handleCreateCategory] = useCreateMainCategoryMutation();
   const [handleUpdateCategory] = useUpdateCategoryMutation();
@@ -23,10 +24,11 @@ const GbCascaderPicker = ({name}:any) => {
   const onChange: any = (value: string[], selectedOptions: any) => {
     console.log(value, selectedOptions,"hi");
     setValue(name,selectedOptions)
+    setSelectedValue(value);
   };
 
   const addCategory = async () => {
-    const res = await handleCreateCategory({ name: newCategory });
+    const res = await handleCreateCategory({ label: newCategory });
     if (res) {
       setNewCategory("");
     }
@@ -41,7 +43,7 @@ const GbCascaderPicker = ({name}:any) => {
     const res=await handleUpdateCategory({
         id:editingValue?.id,
         data:{
-            name:editingValue?.name
+            label:editingValue?.name
         }
     })
     if(res){
@@ -55,18 +57,20 @@ const GbCascaderPicker = ({name}:any) => {
   };
 
   useEffect(() => {
-    const modifyCategoryData = data?.map((item: any) => {
+    const modifyCategoryData = data?.data?.map((item: any) => {
       return {
         ...item,
         code: item?.id,
-        name: item?.name,
+        name: item?.label,
       };
     });
     setCategoryOptions(modifyCategoryData);
   }, [data]);
+  
   return (
     <div className="custom_selector" style={{ width: "100%" }}>
       <Cascader
+      value={selectedValue}
         style={{
           borderRadius: "0px",
           width: "100%",

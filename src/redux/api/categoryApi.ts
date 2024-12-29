@@ -5,7 +5,7 @@ export const categoryApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     getAllMainCategory: build.query({
       query: (arg) => ({
-        url: "/categories",
+        url: "/category",
         method: "GET",
         params: arg
       }),
@@ -13,7 +13,7 @@ export const categoryApi = baseApi.injectEndpoints({
     }),
     createMainCategory: build.mutation({
       query: (data) => ({
-        url: "/categories",
+        url: "/category",
         method: "POST",
         data,
       }),
@@ -21,7 +21,7 @@ export const categoryApi = baseApi.injectEndpoints({
     }),
     updateCategory: build.mutation({
       query: (data) => ({
-        url: `/categories/${data?.id}`,
+        url: `/category/${data?.id}`,
         method: "PATCH",
         data: data?.data
       }),

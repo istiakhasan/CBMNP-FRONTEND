@@ -9,19 +9,36 @@ import { useCreateProductMutation } from "@/redux/api/productApi";
 import CubicMeters from "./CubicMeters";
 import { useForm, useFormContext } from "react-hook-form";
 import { message } from "antd";
+import { useState } from "react";
 
-const AddSimpleProuct = () => {
+const AddSimpleProuct = ({setDrawerOpen}:any) => {
+  const [selectedValue, setSelectedValue] = useState<any>([]);
   const [createProduct]=useCreateProductMutation()
-    const handleSubmit=async(data:any)=>{
+    const handleSubmit=async(data:any,reset:any)=>{
       try {
-        const payload={...data}
-
-     
-        console.log(payload,"payload");
-        return
-
-        
+        const {category,unit,images,...rest}=data
+        const payload={...rest}
+        payload['categoriesId']=category[0]?.id
+        payload['unit']=unit?.label
+        const formData=new FormData()
+        for(let item in payload){
+             formData.append(item,payload[item])
+        }
+        for (let item in images) {
+          formData.append(
+            "images",
+            images[item]?.originFileObj
+          );
+        }
+        const res=await createProduct(formData).unwrap()
+        if(!!res?.success){
+          message.success(res?.message)
+          setDrawerOpen(false)
+          setSelectedValue([])
+          reset()
+        }
       } catch (error) {
+        message.error('Something went wrong ,please debug the error')
         console.log(error,"error");
       }
     }
@@ -30,7 +47,7 @@ const AddSimpleProuct = () => {
       <p className="text-[rgba(0,0,0,.85)] text-[15px]   mb-4">
         Product Images
       </p>
-      <GbFileUpload name="product_image" />
+      <GbFileUpload name="images" />
       <p className="text-[#999] text-[12px]">
         Please upload maximum 6 images. (.jpeg, .jpg or .png. Max size
         1MB/file.)
@@ -45,13 +62,13 @@ const AddSimpleProuct = () => {
       <div className="mb-4">
         <GbFormTextArea
           rows={1}
-          name="productSummary"
+          name="description"
           size="small"
           label="Product Summary"
         />
       </div>
       <div className="mb-4">
-        <GbCascaderPicker name="category" />
+        <GbCascaderPicker selectedValue={selectedValue} setSelectedValue={setSelectedValue} name="category" />
       </div>
       <p className="text-[rgba(0,0,0,.85)] text-[15px]   mb-4 mt-4">
         Product Specifications
@@ -71,10 +88,10 @@ const AddSimpleProuct = () => {
           <GbBTDInput addon={'BTD'} placeholder="0.00" name="salePrice" size="small" label="Sale" />
         </div>
         <div className="mb-4">
-          <GbBTDInput addon={'BTD'} placeholder="0.00" name="retailerPrice" size="small" label="Retail Price" />
+          <GbBTDInput addon={'BTD'} placeholder="0.00" name="retailPrice" size="small" label="Retail Price" />
         </div>
         <div className="mb-4">
-          <GbBTDInput addon={'BTD'} placeholder="0.00" name="distributorPrice" size="small" label="Distributor Price" />
+          <GbBTDInput addon={'BTD'} placeholder="0.00" name="distributionPrice" size="small" label="Distributor Price" />
         </div>
         <div className="mb-4">
           <GbBTDInput addon={'BTD'} placeholder="0.00" name="purchasePrice" size="small" label="Purchase Price" />

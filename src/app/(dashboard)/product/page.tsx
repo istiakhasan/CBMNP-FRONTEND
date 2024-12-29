@@ -37,8 +37,9 @@ const Page = () => {
   query["page"] = page;
   query["limit"] = size;
   query["searchProducts"] = searchTerm;
-  const { data, isLoading } = useGetAllProductQuery(query);
-  console.log(data,"chck data");
+  const { data, isLoading } = useGetAllProductQuery(query,{
+    refetchOnMountOrArgChange:true
+  });
   const [deleteBrandHandle] = useDeleteProductByIdMutation();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -245,7 +246,7 @@ const Page = () => {
       <div className="flex justify-between items-center py-4 px-2">
         <GbDrawer open={drawerOpen} setOpen={setDrawerOpen}>
           {" "}
-          <AddSimpleProuct />{" "}
+          <AddSimpleProuct setDrawerOpen={setDrawerOpen} />{" "}
         </GbDrawer>
         <p className="text-[20px]">Products & Pricing</p>
         <div className="flex gap-[20px]">

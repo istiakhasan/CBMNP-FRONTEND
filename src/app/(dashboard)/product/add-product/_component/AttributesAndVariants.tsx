@@ -40,19 +40,23 @@ const AttributesAndVariants = () => {
   };
 
   function generateNestedArray(data: any) {
+    console.log(data,"check data");
     function combine(arrays: any, index = 0, current: any = []) {
       if (index === arrays.length) {
+        console.log(index,arrays.length);
         result.push(current);
         return;
       }
+      console.log(arrays[index],'robin=',index);
       arrays[index].forEach((item: any) => {
         combine(arrays, index + 1, [...current, item]);
       });
     }
     const valueArrays = data.map((category: any) =>category.attributesvalue);
-
+    console.log(valueArrays,"value array");
     const result: any = [];
     combine(valueArrays);
+    console.log(result,"final result");
     return result;
   }
   return (
