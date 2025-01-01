@@ -8,125 +8,129 @@ import GbCascaderPicker from "../forms/GbCascaderPicker";
 import CubicMeters from "@/app/(dashboard)/product/_component/CubicMeters";
 import GbBTDInput from "../forms/GbBTDInput";
 import AttributesAndVariants from "@/app/(dashboard)/product/add-product/_component/AttributesAndVariants";
-import { useCreateProductMutation, useCreateVariantProductMutation } from "@/redux/api/productApi";
+import {  useCreateVariantProductMutation } from "@/redux/api/productApi";
+import { uploadImageToImagebb } from "@/util/commonUtil";
 
-const steps = [
-  {
-    title: "Product Details",
-    content: (
-      <div className="w-[427px]   mx-auto">
-        <div>
-          <p className="text-[rgba(0,0,0,.85)] text-[15px] mb-2">
-            Product Images
-          </p>
-          <GbFileUpload name="product_image" />
-          <p className="text-[#999] text-[12px]">
-            Please upload maximum 6 images. (.jpeg, .jpg or .png. Max size
-            1MB/file.)
-          </p>
-          <p className="text-[rgba(0,0,0,.85)] text-[15px]   mb-4 mt-4">
-            Product Details
-          </p>
 
-          <div className="mb-4">
-            <GbFormInput name="name" size="small" label="Product Name" />
-          </div>
-          <div className="mb-4">
-            <GbFormTextArea
-              rows={1}
-              name="productSummary"
-              size="small"
-              label="Product Summary"
-            />
-          </div>
-          <div className="mb-4">
-            <GbCascaderPicker name="category" />
-          </div>
-          <p className="text-[rgba(0,0,0,.85)] text-[15px]   mb-4 mt-4">
-            Product Specifications
-          </p>
-          <CubicMeters />
-          <p className="text-[rgba(0,0,0,.85)] text-[15px]   mb-4 mt-4">
-            Prices
-          </p>
-          <p className="text-[rgba(0,0,0,.85)] text-[15px]   mb-4 mt-4">MRP</p>
-          <div className="mb-4">
-            <GbBTDInput
-              addon={"BTD"}
-              placeholder="0.00"
-              name="regularPrice"
-              size="small"
-              label="Regular"
-            />
-          </div>
-          <div className="mb-4">
-            <GbBTDInput
-              addon={"BTD"}
-              placeholder="0.00"
-              name="salePrice"
-              size="small"
-              label="Sale"
-            />
-          </div>
-          <div className="mb-4">
-            <GbBTDInput
-              addon={"BTD"}
-              placeholder="0.00"
-              name="retailerPrice"
-              size="small"
-              label="Retail Price"
-            />
-          </div>
-          <div className="mb-4">
-            <GbBTDInput
-              addon={"BTD"}
-              placeholder="0.00"
-              name="distributorPrice"
-              size="small"
-              label="Distributor Price"
-            />
-          </div>
-          <div className="mb-4">
-            <GbBTDInput
-              addon={"BTD"}
-              placeholder="0.00"
-              name="purchasePrice"
-              size="small"
-              label="Purchase Price"
-            />
-          </div>
-          <p className="text-[rgba(0,0,0,.85)] text-[15px]   mb-4 mt-4">
-            Additional Information
-          </p>
-          <div className="mb-4">
-            <GbBTDInput
-              addon={"BTD"}
-              placeholder="0.00"
-              name="sku"
-              size="small"
-              label="SKU"
-            />
-          </div>
-          <div className="mb-4">
-            <GbBTDInput
-              addon={"BTD"}
-              placeholder="0.00"
-              name="internalId"
-              size="small"
-              label="Internal ID"
-            />
-          </div>
-        </div>
-      </div>
-    ),
-  },
-  {
-    title: "Attributes & Variants",
-    content: <AttributesAndVariants />,
-  },
-];
 
 const GbSteps: React.FC = () => {
+  const [selectedValue, setSelectedValue] = useState<any>([]);
+  const steps = [
+    {
+      title: "Product Details",
+      content: (
+        <div className="w-[427px]   mx-auto">
+          <div>
+            <p className="text-[rgba(0,0,0,.85)] text-[15px] mb-2">
+              Product Images
+            </p>
+            <GbFileUpload name="product_image" />
+            <p className="text-[#999] text-[12px]">
+              Please upload maximum 6 images. (.jpeg, .jpg or .png. Max size
+              1MB/file.)
+            </p>
+            <p className="text-[rgba(0,0,0,.85)] text-[15px]   mb-4 mt-4">
+              Product Details
+            </p>
+  
+            <div className="mb-4">
+              <GbFormInput name="name" size="small" label="Product Name" />
+            </div>
+            <div className="mb-4">
+              <GbFormTextArea
+                rows={1}
+                name="description"
+                size="small"
+                label="Product Summary"
+              />
+            </div>
+            <div className="mb-4">
+              <GbCascaderPicker selectedValue={selectedValue} setSelectedValue={setSelectedValue}  name="category" />
+            </div>
+            <p className="text-[rgba(0,0,0,.85)] text-[15px]   mb-4 mt-4">
+              Product Specifications
+            </p>
+            <CubicMeters />
+            <p className="text-[rgba(0,0,0,.85)] text-[15px]   mb-4 mt-4">
+              Prices
+            </p>
+            <p className="text-[rgba(0,0,0,.85)] text-[15px]   mb-4 mt-4">MRP</p>
+            <div className="mb-4">
+              <GbBTDInput
+                addon={"BTD"}
+                placeholder="0.00"
+                name="regularPrice"
+                size="small"
+                label="Regular"
+              />
+            </div>
+            <div className="mb-4">
+              <GbBTDInput
+                addon={"BTD"}
+                placeholder="0.00"
+                name="salePrice"
+                size="small"
+                label="Sale"
+              />
+            </div>
+            <div className="mb-4">
+              <GbBTDInput
+                addon={"BTD"}
+                placeholder="0.00"
+                name="retailPrice"
+                size="small"
+                label="Retail Price"
+              />
+            </div>
+            <div className="mb-4">
+              <GbBTDInput
+                addon={"BTD"}
+                placeholder="0.00"
+                name="distributionPrice"
+                size="small"
+                label="Distributor Price"
+              />
+            </div>
+            <div className="mb-4">
+              <GbBTDInput
+                addon={"BTD"}
+                placeholder="0.00"
+                name="purchasePrice"
+                size="small"
+                label="Purchase Price"
+              />
+            </div>
+            <p className="text-[rgba(0,0,0,.85)] text-[15px]   mb-4 mt-4">
+              Additional Information
+            </p>
+            <div className="mb-4">
+              <GbBTDInput
+                addon={"BTD"}
+                placeholder="0.00"
+                name="sku"
+                size="small"
+                label="SKU"
+              />
+            </div>
+            <div className="mb-4">
+              <GbBTDInput
+                addon={"BTD"}
+                placeholder="0.00"
+                name="internalId"
+                size="small"
+                label="Internal ID"
+              />
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Attributes & Variants",
+      content: <AttributesAndVariants   selectedValue={selectedValue}
+      setSelectedValue={setSelectedValue} />,
+    },
+  ];
   const { token } = theme.useToken();
   const [current, setCurrent] = useState(0);
   const divRef: any = useRef();
@@ -145,47 +149,83 @@ const GbSteps: React.FC = () => {
     minHeight: "100vh",
   };
 
-
-  const submitHandler=async(data:any)=>{
+  const submitHandler = async (abc: any) => {
     try {
+      const transformProductData = async (data: any) => {
+       
+        const mapImages = async (images: any) => {
+          const imagePromises = images.map(async (item: any) => {
+            const formData = new FormData();
+            formData.append('image', item.originFileObj);
+            const uploadedImage = await uploadImageToImagebb(formData);
+            console.log(uploadedImage, "check");
+            return uploadedImage;
+          });
   
-      const payload={...data}
-      payload['volumeUnit']=data?.volumeUnit?.value
-      payload['weightUnit']=data?.weightUnit?.value
-      payload['category']=Number(data?.category[0]?.id)
-      payload['status']=true
-      payload['addProductType']="variants"
-      delete payload["product_image"]
-      payload['variants']=data?.variants?.map((item:any)=>{
-          const {id,...rest}=item
-          return {
-            ...rest,
-            attributes:item?.attributes?.map((jtem:any)=>{
-              return {
-                attributesName:jtem?.attributeName,
-                attributesValue:jtem?.value,
-              }
-            })
-          }
-      })
+          const uploadedImages = await Promise.all(imagePromises);
+          console.log(uploadedImages, "Uploaded Images");
+          return uploadedImages;
+        };
+  
+        const transformVariant = async (variant: any) => ({
+          name: variant.name,
+          description: variant.description,
+          weight: variant.weight,
+          unit: variant.unit?.label || "",
+          volume: variant.volume || "",
+          volumeUnit: variant.volumeUnit || "",
+          isBaseProduct: false,
+          regularPrice: variant.regularPrice,
+          salePrice: variant.salePrice || "",
+          retailPrice: variant.retailPrice,
+          distributionPrice: Number(variant.distributionPrice) || "",
+          purchasePrice: variant.purchasePrice,
+          variantSku: variant.variantSku,
+          internalId: variant.internalId,
+          images: await mapImages(variant.product_image || []),
+          attributes: variant.attributes?.map((item:any)=>{
+            return {
+              label:item?.label,
+              attributeName:item?.attributeName
+            }
+          }) || [],
+          categoryId: data.category?.[0]?.id?.toString() || null,
+          productType: "Base Product",
+        });
+  
+        const transformedData = {
+          name: data.name,
+          description: data.description,
+          weight: data.weight,
+          unit: data.unit?.label || "",
+          regularPrice: data.regularPrice,
+          salePrice: data.salePrice,
+          retailPrice: data.retailPrice,
+          distributionPrice: Number(data.distributionPrice),
+          purchasePrice: data.purchasePrice,
+          sku: data.sku,
+          internalId: data.internalId,
+          isBaseProduct: true,
+          images: await mapImages(data.product_image || []),
+          categoryId: data.category?.[0]?.id?.toString() || null,
+          variants: await Promise.all((data.variants || []).map(transformVariant)),
+          productType: "Variant",
+        };
+  
+        return transformedData;
+      };
+
+      const result = await transformProductData(abc);
+
+        const res = await createProduct(result).unwrap();
+        message.success('Product created successfully...');
       
-    
-      // const formdata = new FormData();
-      // for (let item in payload) {
-      //   formdata.append(item, payload[item]);
-      // }
-      // for (let item in data["product_image"]) {
-      //   formdata.append(
-      //     "product_gallery",
-      //     data["product_image"][item]?.originFileObj
-      //   );
-      // }
-      const res=await createProduct(payload).unwrap()
-      // message.success('Product create successfully...') 
     } catch (error) {
-      
+      console.error('Error during product creation:', error);
+      // Handle error appropriately (e.g., show error message)
     }
-  }
+  };
+  
 
   return (
     <div className="">

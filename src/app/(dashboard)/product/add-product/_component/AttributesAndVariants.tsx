@@ -11,7 +11,7 @@ const panelStyle: React.CSSProperties = {
   backgroundColor: "white",
   borderBottom: "1px solid rgba(0,0,0,.1)",
 };
-const AttributesAndVariants = () => {
+const AttributesAndVariants = ({setSelectedValue,selectedValue}:any) => {
   const [attributes, setAttributes] = useState<any>([]);
   const [inputValue, setInputValue] = useState("");
   const { watch, control, setValue } = useFormContext();
@@ -22,15 +22,15 @@ const AttributesAndVariants = () => {
   const addVariant = () => {
     append({
       name: "",
-      productSummary: "",
+      description: "",
       weight: "",
-      weightUnit: "",
+      unit: "",
       volume: "",
       volumeUnit: "",
       regularPrice: "",
       salePrice: "",
-      retailerPrice: "",
-      distributorPrice: "",
+      retailPrice: "",
+      distributionPrice: "",
       purchasePrice: "",
       variantSku: "",
       internalId: "",
@@ -40,23 +40,18 @@ const AttributesAndVariants = () => {
   };
 
   function generateNestedArray(data: any) {
-    console.log(data,"check data");
     function combine(arrays: any, index = 0, current: any = []) {
       if (index === arrays.length) {
-        console.log(index,arrays.length);
         result.push(current);
         return;
       }
-      console.log(arrays[index],'robin=',index);
       arrays[index].forEach((item: any) => {
         combine(arrays, index + 1, [...current, item]);
       });
     }
     const valueArrays = data.map((category: any) =>category.attributesvalue);
-    console.log(valueArrays,"value array");
     const result: any = [];
     combine(valueArrays);
-    console.log(result,"final result");
     return result;
   }
   return (
@@ -122,15 +117,15 @@ const AttributesAndVariants = () => {
               combinations.forEach((combination:any) => {
                 append({
                   name: "",
-                  productSummary: "",
+                  description: "",
                   weight: "",
-                  weightUnit: "",
+                  unit: "",
                   volume: "",
                   volumeUnit: "",
                   regularPrice: "",
                   salePrice: "",
-                  retailerPrice: "",
-                  distributorPrice: "",
+                  retailPrice: "",
+                  distributionPrice: "",
                   purchasePrice: "",
                   variantSku: "",
                   internalId: "",

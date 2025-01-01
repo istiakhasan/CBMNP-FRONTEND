@@ -86,7 +86,7 @@ const GbCascaderPicker = ({name,selectedValue,setSelectedValue}:any) => {
             <div className="h-[200px] overflow-auto">
               {editMode ? (
                 <div className="h-[2s00px] overflow-auto">
-                  {categoryOptions.map((option:any, index:any) => (
+                  {categoryOptions?.map((option:any, index:any) => (
                     <div
                       key={option.code}
                       style={{

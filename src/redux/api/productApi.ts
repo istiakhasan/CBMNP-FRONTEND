@@ -5,18 +5,17 @@ import { authKey } from "@/constants/storageKey";
 
 export const productApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    createProduct: build.mutation({
+    createSimpleProduct: build.mutation({
       query: (data) => ({
         url: `/products`,
         method: "POST",
          data,
-         contentType: "multipart/form-data",
       }),
       invalidatesTags: [tagTypes.products],
     }),
     createVariantProduct: build.mutation({
       query: (data) => ({
-        url: `/products`,
+        url: `/products/variant`,
         method: "POST",
          data,
       }),
@@ -33,8 +32,7 @@ export const productApi = baseApi.injectEndpoints({
       query: (data) => ({
         url: `/products/${data?.id}`,
         method: "PATCH",
-        data: data?.data,
-        contentType: "multipart/form-data",
+        data: data?.data
       }),
       invalidatesTags: [tagTypes.products],
     }),
@@ -73,7 +71,7 @@ export const productApi = baseApi.injectEndpoints({
 
 export const {
   useGetAllProductQuery,
-  useCreateProductMutation,
+  useCreateSimpleProductMutation,
   useCreateVariantProductMutation,
   useDeleteProductByIdMutation,
   useGetAllProductBySearchQuery,

@@ -1,12 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import GbTable from "@/components/GbTable";
 import {
   Checkbox,
   CheckboxOptionType,
   Image,
   MenuProps,
+  message,
   Pagination,
   Popover,
   Switch,
@@ -24,9 +25,10 @@ import GbDrawer from "@/components/ui/GbDrawer";
 import AddSimpleProuct from "./_component/AddSimpleProuct";
 import { getBaseUrl } from "@/helpers/config/envConfig";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
+import { customError } from "@/constants/variableConstant";
+import StatsContainer from "./_component/StatusContainer";
 const Page = () => {
   const [updateProduct] = useUpdateProductMutation();
-  const {data:skuCount}=useGetProductCountQuery(undefined)
   const [drawerOpen, setDrawerOpen] = useState(false);
   const query: Record<string, any> = {};
   const [page, setPage] = useState<number>(1);
@@ -37,6 +39,7 @@ const Page = () => {
   query["page"] = page;
   query["limit"] = size;
   query["searchProducts"] = searchTerm;
+  query["sortBy"] = "id";
   const { data, isLoading } = useGetAllProductQuery(query,{
     refetchOnMountOrArgChange:true
   });
@@ -50,7 +53,7 @@ const Page = () => {
       key: 1,
       //@ts-ignore
       render: (text, record, index) => {
-        return <span onClick={()=>router.push(`/product/${record?.id}`)} className="text-[#278ea5] cursor-pointer">{record?.sku}</span>;
+        return <span onClick={()=>router.push(`/product/${record?.id}`)} className="text-[#278ea5] cursor-pointer">{record?.sku || "N/A"}</span>;
       },
     },
     {
@@ -62,7 +65,7 @@ const Page = () => {
           <Image
             height={44}
             width={44}
-            src={`${getBaseUrl()}/images/${record?.images[0]}`}
+            src={record?.images[0]}
             alt=""
           />
         );
@@ -77,9 +80,7 @@ const Page = () => {
           <>
             <span onClick={()=>router.push(`/product/${record?.id}`)} className="block mb-2 text-[#278ea5] cursor-pointer">{record?.name}</span>
             <button className="bg-[#e8f0f2] px-[8px] py-[4px] text-[#000] font-semibold">
-              {record?.addProductType === "single-product"
-                ? "Simple Product"
-                : "Variant"}
+              {record?.productType}
             </button>
           </>
         );
@@ -93,7 +94,7 @@ const Page = () => {
       render: (text, record, index) => {
         return (
           <>
-            <h1 className="">{record?.categories?.name || "--"}</h1>
+            <h1 className="">{record?.category?.label || "N/A"}</h1>
           </>
         );
       },
@@ -104,7 +105,7 @@ const Page = () => {
       align: "start",
       //@ts-ignore
       render: (text, record, index) => {
-        return <h1 className="border-[1px] border-[#ebebeb] w-fit px-5 py-1">{record?.unit+": "+record?.weight}</h1>;
+        return <h1 className="border-[1px] border-[#ebebeb] w-fit px-5 py-1">Weight :{record?.weight+record?.unit}</h1>;
       },
     },
     {
@@ -113,7 +114,17 @@ const Page = () => {
       align: "start",
       //@ts-ignore
       render: (text, record, index) => {
-        return <h1>N/A</h1>;
+        return (
+          <>
+           {
+            record?.attributes?.map((item:{attributeName:string,label:string},i:number)=>(
+              <Fragment key={i}> 
+              <span className="border-[1px] border-[#ebebeb] w-fit px-5 py-1 mr-2">{item?.attributeName} :{item?.label}</span>
+              </Fragment>
+            ))
+           }
+          </>
+        );
       },
     },
     {
@@ -183,15 +194,21 @@ const Page = () => {
             checkedChildren="Active"
             unCheckedChildren="Inactive"
             onChange={async (a) => {
-              const res = await updateProduct({
-                id: record?.id,
-                data: {
-                  status: a,
-                },
-              });
-              console.log(a, "adsf");
+              try {
+                const res = await updateProduct({
+                  id: record?.id,
+                  data: {
+                    active: a,
+                  },
+                }).unwrap();
+                if(res?.success){
+                  message.success(`Product ${record?.name} ${a?'active':'inactive'} successfully`)
+                }
+              } catch (error) {
+                message.error(customError)
+              }
             }}
-            defaultChecked={record?.status}
+            defaultChecked={record?.active}
           />
         </div>
       ),
@@ -239,6 +256,8 @@ const Page = () => {
     },
   ];
 
+
+
   return (
     <>
     <GbHeader />
@@ -249,53 +268,7 @@ const Page = () => {
           <AddSimpleProuct setDrawerOpen={setDrawerOpen} />{" "}
         </GbDrawer>
         <p className="text-[20px]">Products & Pricing</p>
-        <div className="flex gap-[20px]">
-          <div className="px-[18px] py-[8px] min-h-[24px]   border-[1px] border-[#f0f0f0]">
-            <h1 className="text-[#656565]  text-[16px]  flex gap-4 items-center">
-              Total SKU{" "}
-              <Tooltip title="Total number of active and inactive SKUs">
-                <i className="ri-information-line cursor-pointer"></i>
-              </Tooltip>
-            </h1>
-            <h1 className="text-[#47a2b3] text-[20px] font-semibold">{skuCount?.totalSKUs || 0}</h1>
-          </div>
-          <div className="px-[18px] py-[8px] min-h-[24px]   border-[1px] border-[#f0f0f0]">
-            <h1 className="text-[#656565]  text-[16px]  flex gap-4 items-center">
-              Total Variants{" "}
-              <Tooltip title="Total number of active and inactive Product variants">
-                <i className="ri-information-line cursor-pointer"></i>
-              </Tooltip>
-            </h1>
-            <h1 className="text-[#47a2b3] text-[20px] font-semibold">0</h1>
-          </div>
-          <div className="px-[18px] py-[8px] min-h-[24px]   border-[1px] border-[#f0f0f0]">
-            <h1 className="text-[#656565]  text-[16px]  flex gap-4 items-center">
-               New SKU{" "}
-              <Tooltip title="Total number of New SKU">
-                <i className="ri-information-line cursor-pointer"></i>
-              </Tooltip>
-            </h1>
-            <h1 className="text-[#f6b44f] text-[20px] font-semibold">{skuCount?.newSKUs || 0}</h1>
-          </div>
-          <div className="px-[18px] py-[8px] min-h-[24px]   border-[1px] border-[#f0f0f0]">
-            <h1 className="text-[#656565]  text-[16px]  flex gap-4 items-center">
-               Active SKU{" "}
-              <Tooltip title="Total number of active SKU">
-                <i className="ri-information-line cursor-pointer"></i>
-              </Tooltip>
-            </h1>
-            <h1 className="text-[#656565] text-[20px] font-semibold">{skuCount?.activeSKUs || 0}</h1>
-          </div>
-          <div className="px-[18px] py-[8px] min-h-[24px]   border-[1px] border-[#f0f0f0]">
-            <h1 className="text-[#656565]  text-[16px]  flex gap-4 items-center">
-               Inactive SKU{" "}
-              <Tooltip title="Total number of inactive SKU">
-                <i className="ri-information-line cursor-pointer"></i>
-              </Tooltip>
-            </h1>
-            <h1 className="text-[#656565] text-[20px] font-semibold">{skuCount?.inactiveSKUs || 0}</h1>
-          </div>
-        </div>
+        <StatsContainer />
         <div className="flex items-center gap-3 flex-wrap">
           <button className="border-[#47a2b3] border text-[#47a2b3]  font-bold text-[12px]  px-[20px] py-[5px]">
             Action

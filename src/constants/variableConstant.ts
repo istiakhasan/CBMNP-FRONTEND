@@ -1,0 +1,1 @@
+export const customError="এটাই বাস্তব"

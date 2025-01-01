@@ -78,9 +78,9 @@ const VariantsCollaps = ({ remove, fields, attributes }: any) => {
               </div>
               <div className="mb-2">
                 <GbFormInput
-                  name={`variants[${i}].productSummary`}
+                  name={`variants[${i}].description`}
                   size="small"
-                  label="Product Summary"
+                  label="Product Description"
                 />
               </div>
             </div>
@@ -105,7 +105,7 @@ const VariantsCollaps = ({ remove, fields, attributes }: any) => {
                     { label: "Ounces", value: "Ounces" },
                     { label: "Tonnes", value: "Tonnes" },
                   ]}
-                  name={`variants[${i}].weightUnit`}
+                  name={`variants[${i}].unit`}
                   size="small"
                   label="Unit"
                 />
@@ -158,7 +158,7 @@ const VariantsCollaps = ({ remove, fields, attributes }: any) => {
                 <GbBTDInput
                   addon={"BTD"}
                   placeholder="0.00"
-                  name={`variants[${i}].retailerPrice`}
+                  name={`variants[${i}].retailPrice`}
                   size="small"
                   label="Retail Price"
                 />
@@ -167,7 +167,7 @@ const VariantsCollaps = ({ remove, fields, attributes }: any) => {
                 <GbBTDInput
                   addon={"BTD"}
                   placeholder="0.00"
-                  name={`variants[${i}].distributorPrice`}
+                  name={`variants[${i}].distributionPrice`}
                   size="small"
                   label="Distributor Price"
                 />
