@@ -1,5 +1,5 @@
 import { useGetProductCountQuery } from "@/redux/api/productApi";
-import { Tooltip } from "antd";
+import { ConfigProvider, Spin, Tooltip } from "antd";
 
 const stats = [
     {
@@ -28,24 +28,35 @@ const stats = [
     },
   ];
   
-  const StatCard = ({ title, tooltip, color, count }: { title: string; tooltip: string; color: string; count: number }) => (
-    <div className="px-[18px] py-[8px] min-h-[24px] border-[1px] border-[#f0f0f0]">
+  const StatCard = ({ title, tooltip, color, count,isLoading }: { title: string; tooltip: string; color: string; count: number;isLoading:boolean }) => (
+    <div className="px-[18px] py-[4px] flex">
       <h1 className="text-[#656565] text-[16px] flex gap-4 items-center">
         {title}
-        <Tooltip title={tooltip}>
+        {/* <Tooltip title={tooltip}>
           <i className="ri-information-line cursor-pointer"></i>
-        </Tooltip>
+        </Tooltip> */}
       </h1>
-      <h1 className="text-[20px] font-semibold" style={{ color }}>
-        {count}
+      <h1 className="text-[16px] font-semibold border-[1px] border-[#f0f0f0] px-[10px] ml-2" style={{ background: color,color:"white" }}>
+        {
+            isLoading? <ConfigProvider
+            theme={{
+              token: {
+                colorPrimary: "white", // Default primary color (used in Spin)
+              },
+            }}
+          >
+            <Spin size="small" />
+          </ConfigProvider>:<>{count}</>
+        }
+        
       </h1>
     </div>
   );
   
   const StatsContainer = () => {
-      const {data:skuCount}=useGetProductCountQuery(undefined)
+      const {data:skuCount,isLoading}=useGetProductCountQuery(undefined)
     return (
-      <div className="flex gap-[20px]">
+      <div className="flex">
         {stats.map(({ title, tooltip, color, status }) => (
           <StatCard
             key={status}
@@ -53,6 +64,7 @@ const stats = [
             tooltip={tooltip}
             color={color}
             count={skuCount?.data?.find((item: any) => item?.status === status)?.count || 0}
+            isLoading={isLoading}
           />
         ))}
       </div>

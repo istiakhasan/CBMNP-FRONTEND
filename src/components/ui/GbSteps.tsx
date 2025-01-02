@@ -10,6 +10,8 @@ import GbBTDInput from "../forms/GbBTDInput";
 import AttributesAndVariants from "@/app/(dashboard)/product/add-product/_component/AttributesAndVariants";
 import {  useCreateVariantProductMutation } from "@/redux/api/productApi";
 import { uploadImageToImagebb } from "@/util/commonUtil";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { createVariantProductSchema } from "@/schema/IepSchema";
 
 
 
@@ -229,7 +231,7 @@ const GbSteps: React.FC = () => {
 
   return (
     <div className="">
-      <GbForm submitHandler={submitHandler}>
+      <GbForm resolver={yupResolver(createVariantProductSchema)} submitHandler={submitHandler}>
         <div
           style={{ top: 60 }}
           className="flex sticky bg-[white] py-[15px]  z-20   items-center justify-center"

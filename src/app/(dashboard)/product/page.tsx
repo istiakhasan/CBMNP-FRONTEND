@@ -260,15 +260,13 @@ const Page = () => {
 
   return (
     <>
-    <GbHeader />
+    <GbHeader title="Products & Pricing" />
     <div className="p-[16px]">
-      <div className="flex justify-between items-center py-4 px-2">
+      <div className="flex justify-end items-center py-4 px-2">
         <GbDrawer open={drawerOpen} setOpen={setDrawerOpen}>
           {" "}
           <AddSimpleProuct setDrawerOpen={setDrawerOpen} />{" "}
         </GbDrawer>
-        <p className="text-[20px]">Products & Pricing</p>
-        <StatsContainer />
         <div className="flex items-center gap-3 flex-wrap">
           <button className="border-[#47a2b3] border text-[#47a2b3]  font-bold text-[12px]  px-[20px] py-[5px]">
             Action
@@ -315,6 +313,7 @@ const Page = () => {
                 Filter Column
               </div>
             </Popover>
+            <StatsContainer />
           </div>
           <Pagination
             pageSize={size}
@@ -327,7 +326,7 @@ const Page = () => {
             // onShowSizeChange={false}
           />
         </div>
-        <div className="max-h-[500px] overflow-scroll">
+        <div className="max-h-[600px] overflow-scroll">
           <GbTable
             loading={isLoading}
             columns={newColumns}

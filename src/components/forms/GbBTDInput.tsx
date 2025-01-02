@@ -70,7 +70,7 @@ const GbBTDInput = ({
         name={name}
         defaultValue={value}
         render={({ field }) => (
-          <div className="floating-label-input">
+          <div style={errorMessage && {border:"1px solid red"}} className="floating-label-input">
             <label className="text-[#999] text-[12px]">{label}</label>
             <Input
               autoFocus

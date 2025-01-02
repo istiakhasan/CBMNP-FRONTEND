@@ -13,6 +13,8 @@ import { useState } from "react";
 import { uploadImageToImagebb } from "@/util/commonUtil";
 import { LoadingOutlined } from "@ant-design/icons";
 import GbNotification from "@/components/ui/GbNotification";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { createSimpleProductSchema } from "@/schema/IepSchema";
 const AddSimpleProuct = ({ setDrawerOpen }: any) => {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [selectedValue, setSelectedValue] = useState<any>([]);
@@ -67,7 +69,7 @@ const AddSimpleProuct = ({ setDrawerOpen }: any) => {
   };
   
   return (
-    <GbForm submitHandler={handleSubmit}>
+    <GbForm resolver={yupResolver(createSimpleProductSchema)} submitHandler={handleSubmit}>
        {contextHolder}
       <p className="text-[rgba(0,0,0,.85)] text-[15px]   mb-4">
         Product Images
@@ -104,7 +106,6 @@ const AddSimpleProuct = ({ setDrawerOpen }: any) => {
       </p>
       <CubicMeters />
       <p className="text-[rgba(0,0,0,.85)] text-[15px]   mb-4 mt-4">Prices</p>
-      <p className="text-[rgba(0,0,0,.85)] text-[15px]   mb-4 mt-4">MRP</p>
 
       <div className="mb-4">
         <GbBTDInput

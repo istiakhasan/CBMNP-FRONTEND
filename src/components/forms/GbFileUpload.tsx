@@ -23,7 +23,8 @@ const GbFileUpload: React.FC<GbFileUploadProps> = ({ name }) => {
   const [previewImage, setPreviewImage] = useState('');
   const [fileList, setFileList] = useState<UploadFile[]>([]);
 
-  const { setValue } = useFormContext();
+  const { setValue,formState:{errors} } = useFormContext();
+ 
 
   const handlePreview = async (file: UploadFile) => {
     if (!file.url && !file.preview) {
@@ -73,6 +74,7 @@ const GbFileUpload: React.FC<GbFileUploadProps> = ({ name }) => {
 
   return (
     <>
+     {!!errors[name] &&  <p className='text-red-500'><small>Please select  an image</small></p>}
       <Upload 
         className='custom_upload'
         action="/api/file"
@@ -82,7 +84,7 @@ const GbFileUpload: React.FC<GbFileUploadProps> = ({ name }) => {
         onChange={handleChange}
         beforeUpload={beforeUpload}
         style={{
-          border: '1px solid gray',
+          border: '1px solid red',
           borderRadius: '0',
         }}
       >
