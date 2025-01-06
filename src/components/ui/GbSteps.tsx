@@ -160,7 +160,6 @@ const GbSteps: React.FC = () => {
             const formData = new FormData();
             formData.append('image', item.originFileObj);
             const uploadedImage = await uploadImageToImagebb(formData);
-            console.log(uploadedImage, "check");
             return uploadedImage;
           });
   
@@ -191,7 +190,7 @@ const GbSteps: React.FC = () => {
               attributeName:item?.attributeName
             }
           }) || [],
-          categoryId: data.category?.[0]?.id?.toString() || null,
+          categoryId: data.category?.id?.toString() || null,
           productType: "Base Product",
         });
   
@@ -209,13 +208,14 @@ const GbSteps: React.FC = () => {
           internalId: data.internalId,
           isBaseProduct: true,
           images: await mapImages(data.product_image || []),
-          categoryId: data.category?.[0]?.id?.toString() || null,
+          categoryId: data.category?.id?.toString() || null,
           variants: await Promise.all((data.variants || []).map(transformVariant)),
           productType: "Variant",
         };
   
         return transformedData;
       };
+      console.log(abc,"abc");
 
       const result = await transformProductData(abc);
 

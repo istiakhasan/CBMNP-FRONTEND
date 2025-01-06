@@ -11,19 +11,16 @@ import {
   Pagination,
   Popover,
   Switch,
-  Tooltip,
 } from "antd";
 import { useRouter } from "next/navigation";
 import {
   useDeleteProductByIdMutation,
   useGetAllProductQuery,
-  useGetProductCountQuery,
   useUpdateProductMutation,
 } from "@/redux/api/productApi";
 import GbDropdown from "@/components/ui/dashboard/GbDropdown";
 import GbDrawer from "@/components/ui/GbDrawer";
 import AddSimpleProuct from "./_component/AddSimpleProuct";
-import { getBaseUrl } from "@/helpers/config/envConfig";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
 import { customError } from "@/constants/variableConstant";
 import StatsContainer from "./_component/StatusContainer";
@@ -65,7 +62,7 @@ const Page = () => {
           <Image
             height={44}
             width={44}
-            src={record?.images[0]}
+            src={record?.images?.length>0 &&record?.images[0]?.url}
             alt=""
           />
         );
@@ -255,8 +252,6 @@ const Page = () => {
       key: "1",
     },
   ];
-
-
 
   return (
     <>

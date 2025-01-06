@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+"use client";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Cascader, Input, Button, Divider, Space } from "antd";
 import { EditOutlined, SaveOutlined, CloseOutlined } from "@ant-design/icons";
 import {
@@ -8,25 +9,24 @@ import {
 } from "@/redux/api/categoryApi";
 import { useFormContext } from "react-hook-form";
 
-
-
-const GbCascaderPicker = ({name,selectedValue,setSelectedValue}:any) => {
-  const {setValue,watch}=useFormContext()
+const GbCascaderPicker = React.memo(({ name, selectedValue, setSelectedValue }: any) => {
+  const { setValue, watch,formState:{errors} } = useFormContext();
   const { data } = useGetAllMainCategoryQuery(undefined);
   const [handleCreateCategory] = useCreateMainCategoryMutation();
   const [handleUpdateCategory] = useUpdateCategoryMutation();
-  const [categoryOptions, setCategoryOptions] =useState<any>([]);
+  const [categoryOptions, setCategoryOptions] = useState<any>([]);
   const [newCategory, setNewCategory] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingValue, setEditingValue] = useState<any>({});
-
+ console.log(errors,"check");
   const onChange: any = (value: string[], selectedOptions: any) => {
-    console.log(value, selectedOptions,"hi");
-    setValue(name,selectedOptions)
-    setSelectedValue(value);
+    if(selectedOptions?.length>0){
+      setValue(name, selectedOptions[0]);
+    }else{
+      setValue(name, undefined);
+    }
   };
-
   const addCategory = async () => {
     const res = await handleCreateCategory({ label: newCategory });
     if (res) {
@@ -39,15 +39,15 @@ const GbCascaderPicker = ({name,selectedValue,setSelectedValue}:any) => {
     setEditingValue(option);
   };
 
-  const saveEditing = async() => {
-    const res=await handleUpdateCategory({
-        id:editingValue?.id,
-        data:{
-            label:editingValue?.name
-        }
-    })
-    if(res){
-        cancelEditing();
+  const saveEditing = async () => {
+    const res = await handleUpdateCategory({
+      id: editingValue?.id,
+      data: {
+        label: editingValue?.name,
+      },
+    });
+    if (res) {
+      cancelEditing();
     }
   };
 
@@ -56,28 +56,26 @@ const GbCascaderPicker = ({name,selectedValue,setSelectedValue}:any) => {
     setEditingValue("");
   };
 
-  useEffect(() => {
-    const modifyCategoryData = data?.data?.map((item: any) => {
-      return {
-        ...item,
-        code: item?.id,
-        name: item?.label,
-      };
-    });
+  useMemo(() => {
+    const modifyCategoryData = data?.data?.map((item: any) => ({
+      ...item,
+      code: item?.id,
+      name: item?.label,
+      label: item?.label,
+    }));
     setCategoryOptions(modifyCategoryData);
   }, [data]);
-  
   return (
     <div className="custom_selector" style={{ width: "100%" }}>
       <Cascader
-      value={selectedValue}
+        value={watch()?.category?.label}
         style={{
           borderRadius: "0px",
           width: "100%",
           height: "55px",
           background: "#F6F6F6",
         }}
-        fieldNames={{ label: "name", value: "code", children: "items" }}
+        fieldNames={{ label: "name", value: "id", children: "items" }}
         options={categoryOptions}
         onChange={onChange}
         placeholder="Product Category"
@@ -85,20 +83,15 @@ const GbCascaderPicker = ({name,selectedValue,setSelectedValue}:any) => {
           <div>
             <div className="h-[200px] overflow-auto">
               {editMode ? (
-                <div className="h-[2s00px] overflow-auto">
-                  {categoryOptions?.map((option:any, index:any) => (
-                    <div
-                      key={option.code}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: 8,
-                      }}
-                    >
+                <div className="h-[200px] overflow-auto">
+                  {categoryOptions?.map((option: any, index: any) => (
+                    <div key={option.code} style={{ display: "flex", alignItems: "center", padding: 8 }}>
                       {editingIndex === index ? (
                         <Input
                           value={editingValue?.name}
-                          onChange={(e) => setEditingValue({...editingValue,name: e.target.value})}
+                          onChange={(e) =>
+                            setEditingValue({ ...editingValue, name: e.target.value })
+                          }
                           style={{ marginRight: 8 }}
                         />
                       ) : (
@@ -106,16 +99,8 @@ const GbCascaderPicker = ({name,selectedValue,setSelectedValue}:any) => {
                       )}
                       {editingIndex === index ? (
                         <Space>
-                          <Button
-                            htmlType="button"
-                            icon={<SaveOutlined />}
-                            onClick={saveEditing}
-                          />
-                          <Button
-                            htmlType="button"
-                            icon={<CloseOutlined />}
-                            onClick={cancelEditing}
-                          />
+                          <Button htmlType="button" icon={<SaveOutlined />} onClick={saveEditing} />
+                          <Button htmlType="button" icon={<CloseOutlined />} onClick={cancelEditing} />
                         </Space>
                       ) : (
                         <Button
@@ -133,24 +118,21 @@ const GbCascaderPicker = ({name,selectedValue,setSelectedValue}:any) => {
             </div>
             <Divider style={{ margin: "8px 0" }} />
             <div style={{ padding: "20px" }}>
-              <input 
+              <input
                 className="mb-3 py-[20px] w-full outline-none"
                 placeholder="Category Name"
                 value={newCategory}
                 onKeyDown={(e) => {
                   if (e.key === "Backspace") {
-                    if(newCategory?.length>0){
-                        setNewCategory(
-                            newCategory.slice(0, newCategory?.length - 1)
-                          );
+                    if (newCategory?.length > 0) {
+                      setNewCategory(newCategory.slice(0, newCategory?.length - 1));
                     }
-                   
                     e.stopPropagation();
                     e.preventDefault();
                   }
                 }}
-                onChange={(e) =>setNewCategory(e.target.value)}
-                style={{ borderRadius: "0px", padding: "10px",border:"1px solid #47A2B3" }}
+                onChange={(e) => setNewCategory(e.target.value)}
+                style={{ borderRadius: "0px", padding: "10px", border: "1px solid #47A2B3" }}
               />
               <button
                 type="button"
@@ -186,6 +168,8 @@ const GbCascaderPicker = ({name,selectedValue,setSelectedValue}:any) => {
       />
     </div>
   );
-};
+});
+
+GbCascaderPicker.displayName = "GbCascaderPicker";
 
 export default GbCascaderPicker;

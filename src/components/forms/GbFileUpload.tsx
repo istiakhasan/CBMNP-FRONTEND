@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { PlusOutlined } from '@ant-design/icons';
 import { Image, Upload, message } from 'antd';
 import type { GetProp, UploadFile, UploadProps } from 'antd';
@@ -16,16 +16,15 @@ const getBase64 = (file: FileType): Promise<string> =>
 
 interface GbFileUploadProps {
   name: string;
+  defaultValue?: object[];
 }
 
-const GbFileUpload: React.FC<GbFileUploadProps> = ({ name }) => {
+const GbFileUpload: React.FC<GbFileUploadProps> = ({ name,defaultValue }) => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
   const [fileList, setFileList] = useState<UploadFile[]>([]);
 
-  const { setValue,formState:{errors} } = useFormContext();
- 
-
+  const { setValue,formState:{errors},watch } = useFormContext();
   const handlePreview = async (file: UploadFile) => {
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj as FileType);
@@ -72,6 +71,19 @@ const GbFileUpload: React.FC<GbFileUploadProps> = ({ name }) => {
     </button>
   );
 
+  useEffect(()=>{
+    if(defaultValue){
+      setFileList(defaultValue?.map((item:any,i:any)=>{
+        return {
+          uid: i,
+          name: `image-${i}`,
+          status: 'done',
+          url: item?.url,
+        }
+      }))
+    }
+  },[defaultValue])
+
   return (
     <>
      {!!errors[name] &&  <p className='text-red-500'><small>Please select  an image</small></p>}
@@ -88,7 +100,7 @@ const GbFileUpload: React.FC<GbFileUploadProps> = ({ name }) => {
           borderRadius: '0',
         }}
       >
-        {fileList.length >= 6 ? null : uploadButton}
+        {fileList?.length >= 6 ? null : uploadButton}
       </Upload>
       {previewImage && (
         <Image 

@@ -28,6 +28,7 @@ const AddSimpleProuct = ({ setDrawerOpen }: any) => {
       placement: "bottomLeft",
     });
   };
+  console.log(selectedValue,"check");
   const handleSubmit = async (data: any, reset: any) => {
     try {
       setSubmitLoading(true);
@@ -38,15 +39,13 @@ const AddSimpleProuct = ({ setDrawerOpen }: any) => {
           const uploadedImage = await uploadImageToImagebb(formData);
           return uploadedImage;
         });
-
         const uploadedImages = await Promise.all(imagePromises);
-        console.log(uploadedImages, "Uploaded Images");
         return uploadedImages;
       };
 
       const { category, unit, images, ...rest } = data;
       const payload = { ...rest };
-      payload["categoryId"] = category[0]?.id;
+      payload["categoryId"] = category?.id;
       payload["unit"] = unit?.label;
       payload["images"] = await mapImages(data.images || []);
       payload["productType"] = "Simple product";

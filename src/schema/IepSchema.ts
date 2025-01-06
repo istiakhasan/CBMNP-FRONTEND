@@ -2,7 +2,7 @@ import * as yup from "yup";
 export const createSimpleProductSchema = yup.object().shape({
   name: yup.string().required(),
   description: yup.string().required(),
-  category: yup.array().required(),
+  category: yup.object().required(),
   weight: yup.string().required(),
   unit: yup.object().required(),
   regularPrice: yup.string().required(),
@@ -15,7 +15,7 @@ export const createSimpleProductSchema = yup.object().shape({
 export const createVariantProductSchema = yup.object().shape({
   name: yup.string().required(),
   description: yup.string().required(),
-  category: yup.array().required(),
+  category: yup.object().required(),
   weight: yup.string().required(),
   unit: yup.object().required(),
   regularPrice: yup.string().required(),
