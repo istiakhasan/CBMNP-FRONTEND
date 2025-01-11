@@ -47,6 +47,11 @@ const menuItems: MenuItem[] = [
              }
     ]
   },
+  {
+    href: '/warehouse',
+    title: 'Warehouse',
+    icon: 'ri-map-pin-fill'
+  },
 ];
 const GbSidebar = () => {
   const pathName=usePathname()
