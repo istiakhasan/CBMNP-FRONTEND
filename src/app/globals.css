@@ -349,6 +349,10 @@ aside.gb_sidebar {
   border:none !important;
  }
 
+ .ant-select-item.ant-select-item-option{
+   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+   border-radius: 0 !important;
+ }
  /* custom cascede */
  .custom-dropdown {
   position: relative;
@@ -443,6 +447,7 @@ aside.gb_sidebar {
 	padding: 0px !important;
 	/* background: #f7f9fb !important; */
 	overflow: hidden;
+  border-radius: 0px !important;
 }
 
 

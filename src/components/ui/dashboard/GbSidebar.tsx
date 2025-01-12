@@ -52,6 +52,11 @@ const menuItems: MenuItem[] = [
     title: 'Warehouse',
     icon: 'ri-map-pin-fill'
   },
+  {
+    href: '/delivery-partner',
+    title: 'Delivery Partner',
+    icon: 'ri-truck-line'
+  },
 ];
 const GbSidebar = () => {
   const pathName=usePathname()

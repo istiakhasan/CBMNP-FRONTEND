@@ -19,10 +19,19 @@ export const warehouseApi = baseApi.injectEndpoints({
       }),
       providesTags: [tagTypes.warehouse],
     }),
+    loadAllWarehouseOptions: build.query({
+      query: () => ({
+        url: "/warehouse/options",
+        method: "GET"
+      }),
+      providesTags: [tagTypes.warehouse],
+    })
+ 
   }),
 });
 
 export const {
     useLoadAllWarehouseQuery,
-    useCreateWarehouseMutation
+    useCreateWarehouseMutation,
+    useLoadAllWarehouseOptionsQuery
 } = warehouseApi;

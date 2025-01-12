@@ -9,7 +9,8 @@ import {
   useGetAllProductQuery,
 } from "@/redux/api/productApi";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
-import { useLoadAllInventoryQuery } from "@/redux/api/inventoryApi";
+import { useLoadAllInventoryQuery, useLoadAllTransactionQuery } from "@/redux/api/inventoryApi";
+
 const Page = () => {
   const search = useSearchParams();
   console.log(search.get("tab"), "params");
@@ -21,6 +22,7 @@ const Page = () => {
   query["limit"] = size;
   query["searchProducts"] = searchTerm;
   const { data, isLoading } = useLoadAllInventoryQuery(query);
+  const { data:transactionData, isLoading:isTransactionLoading } = useLoadAllTransactionQuery(query);
   const [deleteBrandHandle] = useDeleteProductByIdMutation();
   const router = useRouter();
   console.log(data, "data");
@@ -196,7 +198,7 @@ const Page = () => {
       key: 1,
       //@ts-ignore
       render: (text, record, index) => {
-        return <span className="text-[#278ea5] cursor-pointer">Pending</span>;
+        return <span className="text-[#278ea5] cursor-pointer">{record?.location?.name || "Inventory"}</span>;
       },
     },
     {
@@ -204,7 +206,7 @@ const Page = () => {
       key: 2,
       //@ts-ignore
       render: (text, record, index) => {
-        return <span className="text-[#278ea5] cursor-pointer">Pending</span>;
+        return <span>{record?.product?.sku || "N/A"}</span>;
       },
     },
     {
@@ -215,7 +217,7 @@ const Page = () => {
         return (
           <>
             <span className="block mb-2 text-[#278ea5] cursor-pointer">
-              Pending
+              {record?.product?.name}
             </span>
           </>
         );
@@ -229,8 +231,8 @@ const Page = () => {
       render: (text, record, index) => {
         return (
           <>
-            <span className="block mb-2 text-[#278ea5] cursor-pointer">
-              Pending
+            <span>
+              {`${record?.type==="IN"?"+":"-"}${record?.quantity}`}
             </span>
           </>
         );
@@ -244,7 +246,7 @@ const Page = () => {
       render: (text, record, index) => {
         return (
           <>
-            <span className="block mb-2 text-[#278ea5] cursor-pointer">
+            <span>
               Pending
             </span>
           </>
@@ -259,7 +261,7 @@ const Page = () => {
       render: (text, record, index) => {
         return (
           <>
-            <span className="block mb-2 text-[#278ea5] cursor-pointer">
+            <span>
               Pending
             </span>
           </>
@@ -282,6 +284,7 @@ const Page = () => {
       },
     },
   ];
+  console.log(transactionData,"transaction data");
   const onPaginationChange = (page: number, pageSize: number) => {
     setPage(page);
     setSize(pageSize);
@@ -354,7 +357,7 @@ const Page = () => {
               columns={
                 search.get("tab") === "logs" ? logsTableColumn : tableColumn
               }
-              dataSource={data?.data}
+              dataSource={ search.get("tab") === "logs" ?transactionData?.data :data?.data}
               pageSize={size}
               totalPages={data?.total}
               onPaginationChange={onPaginationChange}
