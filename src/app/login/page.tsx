@@ -3,11 +3,10 @@ import Image from "next/image";
 import LoginImage from "../../assets/images/login-img.png";
 import GbForm from "@/components/forms/GbForm";
 import Link from "next/link";
-import { Button } from "antd";
+import { Button, message } from "antd";
 import GbLoginInput from "@/components/forms/GbLoginInput";
 import { useSignInMutation } from "@/redux/api/authApi";
 import { redirect, useRouter } from "next/navigation";
-import { ToastContainer, toast } from "react-toastify";
 import { getUserInfo, storeUserInfo } from "@/service/authService";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { loginSchema } from "@/schema/schema";
@@ -34,13 +33,13 @@ const Page = () => {
 
          router.push('/employee/profile')
         }
-         toast.success(res?.message)
+         message.success(res?.message)
       }
       storeUserInfo({ accessToken: res?.data?.token });
     } catch (error:any) {
         if(error){
             error?.data?.errorMessages?.forEach((item:{message:string})=>{
-                toast.error(item?.message)
+                message.error(item?.message)
             })
         }
     }
@@ -99,7 +98,7 @@ const Page = () => {
   </p> */}
 </GbForm>
 </div>
-      <ToastContainer />
+ 
     </section>
   );
 };

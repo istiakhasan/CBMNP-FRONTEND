@@ -1,3 +1,4 @@
+"use client"
 import React, { useState, useEffect } from 'react';
 import { Tree } from 'antd';
 import type { TreeProps } from 'antd';

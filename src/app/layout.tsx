@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "@/lib/Providers";
 import 'remixicon/fonts/remixicon.css'
-import 'react-toastify/dist/ReactToastify.css';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 import 'react-quill/dist/quill.snow.css';
 const inter = Inter({ subsets: ["latin"] });

@@ -1,3 +1,4 @@
+"use client"
 import GbForm from "@/components/forms/GbForm";
 import {
   useCreateCustomerMutation,
@@ -10,12 +11,13 @@ import { Input, message } from "antd";
 import { createCustomerSchema } from "@/schema/schema";
 import GbDrawer from "@/components/ui/GbDrawer";
 import moment from "moment";
+import axios from "axios";
 
 const CreateCustomer = ({ setCustomer, customer }: any) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isFocus, setIsFocus] = useState(false);
-
+  const [orderCount,setOrderCount]=useState<any>([])
   const containerRef: any = useRef(null);
   const { data: customerData, isLoading } = useGetAllCustomersQuery(
     {
@@ -51,6 +53,7 @@ const CreateCustomer = ({ setCustomer, customer }: any) => {
       if (!!data?.country) {
         payload["country"] = data?.country?.value;
       }
+
       const res = await handleCreateCustomer(payload).unwrap();
       if (res?.success === true) {
         setCustomer(res?.data);
@@ -64,12 +67,10 @@ const CreateCustomer = ({ setCustomer, customer }: any) => {
           message.error(item?.message);
         });
       }
-      console.log(error, "error");
       message.error("Something went wrong");
       reset();
     }
   };
-  console.log(customerData, "customer");
   return (
     <div className="w-[400px] h-[90vh] overflow-x-auto  pr-[16px] border-r  custom_scroll">
       <div className="sticky top-0  pt-[15px] bg-white">
@@ -110,7 +111,9 @@ const CreateCustomer = ({ setCustomer, customer }: any) => {
                   {" "}
                   {customerData?.data?.map((item: any) => (
                     <div
-                      onClick={() => {
+                      onClick={async() => {
+                        const res=await axios.get(`http://localhost:8080/api/v1/customers/orders-count/${item?.customer_Id}`)
+                        setOrderCount(res?.data?.data)
                         setCustomer(item);
                         setIsFocus(false);
                       }}
@@ -186,42 +189,60 @@ const CreateCustomer = ({ setCustomer, customer }: any) => {
 
 
               <span className="bg-[#F6B44F] px-[15px] py-[5px] font-bold">
-                {customer?.orders?.length}
+              {
+                  orderCount?.find(
+                    (ft: any) => ft?.label === "Total"
+                  )?.count
+                }
               </span>
             </div>
             <p className="text-[12px] flex justify-between font-[500] text-[#000] mb-3">
               Total:{" "}
               <span className="inline-block bg-[#ececec] px-2 ml-2 ">
-                {customer?.orders?.length}
+              {
+                  orderCount?.find(
+                    (ft: any) => ft?.label === "Total"
+                  )?.count
+                }
               </span>
             </p>
             <p className="text-[12px] flex justify-between font-[500] text-[#000] mb-3">
               Approved:{" "}
               <span className="inline-block bg-[#ececec] px-2 ml-2 ">
                 {
-                  customer?.orders?.filter(
-                    (ft: any) => ft?.orderStatus?.name === "Approved"
-                  )?.length
+                  orderCount?.find(
+                    (ft: any) => ft?.label === "Approved"
+                  )?.count
+                }
+              </span>
+            </p>
+            <p className="text-[12px] flex justify-between font-[500] text-[#000] mb-3">
+              Cancel:{" "}
+              <span className="inline-block bg-[#ececec] px-2 ml-2 ">
+                {
+                  orderCount?.find(
+                    (ft: any) => ft?.label === "Cancel"
+                  )?.count
                 }
               </span>
             </p>
             <p className="text-[12px] flex justify-between font-[500] text-[#000] mb-3">
               Pending:{" "}
               <span className="inline-block bg-[#ececec] px-2 ml-2 ">
-                {
-                  customer?.orders?.filter(
-                    (ft: any) => ft?.orderStatus?.name === "Pending"
-                  )?.length
+              {
+                  orderCount?.find(
+                    (ft: any) => ft?.label === "Pending"
+                  )?.count
                 }
               </span>
             </p>
             <p className="text-[12px] flex justify-between font-[500] text-[#000] mb-3">
               Store:{" "}
               <span className="inline-block bg-[#ececec] px-2 ml-2 ">
-                {
-                  customer?.orders?.filter(
-                    (ft: any) => (ft?.orderStatus?.name).toLowerCase() === "store"
-                  )?.length
+              {
+                  orderCount?.find(
+                    (ft: any) => ft?.label === "Store"
+                  )?.count
                 }
               </span>
             </p>

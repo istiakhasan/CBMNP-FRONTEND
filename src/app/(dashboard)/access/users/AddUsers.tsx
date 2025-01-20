@@ -15,9 +15,7 @@ const AddUsers = ({setOpenAddUserModal}:any) => {
         message.success(res?.message)
         setOpenAddUserModal(false)
       }
-      console.log(res);
     } catch (error:any) {
-      console.log(error?.data?.errorMessages);
       error?.data?.errorMessages?.forEach((item:any)=>{
         message.error(item?.message)
       })

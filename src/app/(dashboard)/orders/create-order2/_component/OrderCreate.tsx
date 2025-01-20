@@ -15,7 +15,6 @@ const OrderCreate = () => {
   const [orderSuccessResponse, setOrderSuccessResponse] = useState<any>(null);
   const [orderSuccessModal, setOrderSuccessModal] = useState(false);
   const [copyLoading, setCopyLoading] = useState(false);
-  console.log(orderSuccessResponse,"response");
   const handleCopy = () => {
     setCopyLoading(true);
   
@@ -79,9 +78,7 @@ const OrderCreate = () => {
           />
         </div>
   
-      {/* </GbForm> */}
 
-      {/* order success modal */}
       <GbModal
         width="500px"
         isModalOpen={orderSuccessModal}

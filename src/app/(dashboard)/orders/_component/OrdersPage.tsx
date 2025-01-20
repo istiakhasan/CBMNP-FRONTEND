@@ -3,46 +3,59 @@ import GbHeader from "@/components/ui/dashboard/GbHeader";
 import { useGetUserByIdQuery } from "@/redux/api/usersApi";
 import convertNumberToShorthand from "@/util/convertNumberToShorthand";
 import { Spin } from "antd";
-
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import AllOrders from "./AllOrders";
+import PendingOrders from "./PendingOrders";
+import ApprovedOrders from "./ApprovedOrders";
+import HoldOrders from "./HoldOrders";
+import StoreOrders from "./StoreOrders";
+import PackingOrders from "./PackingOrders";
+import InTransitOrders from "./InTransitOrders";
+import Delivered from "./Delivered";
+import UnreachableOrders from "./UnreachableOrders";
+import CancelOrders from "./CancelOrders";
+import { useGetOrdersCountQuery } from "@/redux/api/statusApi";
 
 const OrdersPage = () => {
-  // all states
   const [activeTab, setActiveTab] = useState<string>("1");
   const [searchTerm, setSearchTerm] = useState("");
    const router=useRouter()
   const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
     id: "R-000000001",
   });
+  const { data: countData, isLoading: countLoading } = useGetOrdersCountQuery({
+    id: "R-000000001",
+  });
   const permission = userData?.permission?.map((item: any) => item?.label);
   const tabs = [
-    { id: "1", name: "Pending BD", count: 100 },
-    { id: "2", name: "Pending NRB", count: 10000 },
-    { id: "3", name: "Approved", count: 100 },
-    { id: "4", name: "Hold", count: 100 },
-    { id: "5", name: "Store", count: 100 },
-    { id: "6", name: "Packing", count: 100 },
-    { id: "7", name: "In-Transit", count: 100 },
-    { id: "8", name: "Delivered", count: 100 },
-    { id: "10", name: "Unreachable", count: 100 },
-    { id: "11", name: "Cancel", count: 100 },
-    { id: "9", name: "All", count: 100 },
-  ];
+    { id: "1", name: "Pending", count: 100 ,color:"bg-[#FFC107]"},
+    { id: "3", name: "Approved", count: 100 ,color:"bg-[#4CAF50]"},
+    { id: "4", name: "Hold", count: 100 ,color:"bg-[#9C27B0]"},
+    { id: "5", name: "Store", count: 100 ,color:"bg-[#FF9800]"},
+    { id: "6", name: "Packing", count: 100 ,color:"bg-[#3F51B5]"},
+    { id: "7", name: "In-Transit", count: 100 ,color:"bg-[#00BCD4]"},
+    { id: "8", name: "Delivered", count: 100 ,color:"bg-[#009688]"},
+    { id: "10", name: "Unreachable", count: 100 ,color:"bg-[#795548]"},
+    { id: "11", name: "Cancel", count: 100 ,color:"bg-[#F44336]"},
+    { id: "9", name: "All", count: 100 ,color:"bg-[#009688]"},
+  ].map((item) => ({
+    ...item,
+    //@ts-ignore
+    count: countData?.data?.find((od:any)=>od?.label?.toLowerCase()===item?.name?.toLowerCase())?.count || "0",
+  }));
 
   const components: { [key: string]: any } = {
-    // "1": <PendingBd dateRange={dateRange} activeUsers={users} searchTerm={searchTerm} />,
-    // "2": <PendingNRB activeUsers={users} dateRange={dateRange} searchTerm={searchTerm} />,
-    // "3": <Approved activeUsers={users} dateRange={dateRange} searchTerm={searchTerm}  />,
-    // "4": <Hold activeUsers={users} dateRange={dateRange} searchTerm={searchTerm}  />,
+    "1": <PendingOrders  searchTerm={searchTerm} />,
+    "3": <ApprovedOrders  searchTerm={searchTerm}  />,
+    "4": <HoldOrders  searchTerm={searchTerm}  />,
     "9": <AllOrders searchTerm={searchTerm} />,
-    // "5": <Store activeUsers={users} dateRange={dateRange} searchTerm={searchTerm}  />,
-    // "6": <Packing activeUsers={users} dateRange={dateRange} searchTerm={searchTerm}  />,
-    // "7": <InTransit activeUsers={users} dateRange={dateRange} searchTerm={searchTerm}  />,
-    // "8": <Delivered activeUsers={users} dateRange={dateRange} searchTerm={searchTerm}  />,
-    // "10": <Unreachable activeUsers={users} dateRange={dateRange} searchTerm={searchTerm}  />,
-    // "11": <Cancel activeUsers={users} dateRange={dateRange} searchTerm={searchTerm}  />,
+    "5": <StoreOrders  searchTerm={searchTerm}  />,
+    "6": <PackingOrders  searchTerm={searchTerm}  />,
+    "7": <InTransitOrders  searchTerm={searchTerm}  />,
+    "8": <Delivered  searchTerm={searchTerm}  />,
+    "10": <UnreachableOrders  searchTerm={searchTerm}  />,
+    "11": <CancelOrders  searchTerm={searchTerm}  />,
   };
 
   return (
@@ -52,7 +65,7 @@ const OrdersPage = () => {
         {getUserLoading ? (
           <>
             <div className="flex items-center justify-center h-screen">
-              <Spin size="large" />
+              <Spin size="small" />
             </div>
           </>
         ) : (
@@ -81,14 +94,13 @@ const OrdersPage = () => {
                     id={`tab-${tab.id}`}
                   >
                     {tab.name}{" "}
-                    <span className=" primary_border bg-primary text-white text-[10px] px-[4px]  top-[5px]">
+                    <span className={` ${tab?.color} text-white text-[10px] px-[4px]  top-[5px]`}>
                       {convertNumberToShorthand(tab?.count || 0)}
                     </span>
                   </p>
                 ))}
               </>
             </div>
-
             {components[activeTab]}
           </>
         )}

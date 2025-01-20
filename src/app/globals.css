@@ -254,6 +254,10 @@ aside.gb_sidebar {
   
 
   /* custom scroll */
+  .custom_scroll::-webkit-scrollbar {
+    width: 0px;
+    height: 0;
+  }
   /* width */
 ::-webkit-scrollbar {
   width: 5px;
@@ -504,5 +508,26 @@ aside.gb_sidebar {
   75% {
     height: 20px;
   }
+}
+
+
+.db_table{
+  width: 100%;
+}
+.db_table tr{
+ 
+}
+.db_table tr td,.db_table thead tr th{
+  border-bottom: 1px solid rgba(0, 100, 0, 0.1);
+  text-align: start;
+  padding: 5px 10px;
+  color: rgb(140, 140, 140);
+}
+.db_table thead tr th{
+  color: black;
+}
+
+.db_card .ant-card-body{
+  padding: 0 !important;
 }
 

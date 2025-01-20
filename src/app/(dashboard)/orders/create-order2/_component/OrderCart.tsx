@@ -165,7 +165,7 @@ const OrderCart = ({
                   <div className="flex items-center gap-2 ">
                     <img
                       className="w-[70px] h-[70px] gb_border p-[2px] object-cover"
-                      src={`${getBaseUrl()}/${item?.image}`}
+                      src={`${item?.images[0]?.url}`}
                       alt=""
                     />
                     <div>
@@ -173,7 +173,7 @@ const OrderCart = ({
                         {item?.productNameEn}{" "}
                       </p>
                       <p className=" font-semibold text-[14px]">
-                        BTD: {item?.current_prices?.toFixed(2)}
+                        BTD: {(+item?.salePrice || 0)?.toFixed(2)}
                       </p>
                       <span className="text-[12px] gb_border bg-[white] px-[15px] py-[4px]  inline-block">
                         Pack Size: {item?.productWeight}
@@ -193,7 +193,7 @@ const OrderCart = ({
                         Price
                       </label>
 
-                      <p>BTD {item?.subTotal?.toFixed(2)}</p>
+                      <p>BTD {(item?.salePrice * item?.productQuantity)?.toFixed(2)}</p>
                     </div>
 
                     <div className="border border-[#278EA5] h-fit">
@@ -280,7 +280,7 @@ const OrderCart = ({
               <div className="p-5 bg-[#E8F0F2] font-bold text-[16px] text-end mt-[20px] pr-[30px]">
                 Total:
                 {cart
-                  ?.reduce((acc: any, b: any) => acc + b.subTotal, 0)
+                  ?.reduce((acc: any, b: any) => acc + (+b.salePrice*b?.productQuantity), 0)
                   .toFixed(2)}
               </div>
               <div className="flex justify-end my-5">

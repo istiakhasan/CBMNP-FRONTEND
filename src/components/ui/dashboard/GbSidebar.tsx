@@ -1,7 +1,8 @@
+"use client"
 import { Tooltip } from "antd";
 import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 
 // Define the type for menu items
 interface MenuItem {
@@ -62,17 +63,29 @@ const GbSidebar = () => {
   const pathName=usePathname()
   const [isActive, setIsActive] = useState(false);
   const [subMenuActive,setSubMenuActive]=useState<any>(null)
+  const [loading, setLoading] = useState(false);
+  const router=useRouter()
   useEffect(()=>{
     setSubMenuActive(null)
+    setLoading(false);
   },[pathName])
+  const handleButtonClick = (path:any) => {
+    if(pathName !==path){
+      setLoading(true);
+      router.push(path);
+    }
+  };
+
   return (
+    <>
+     {loading && <Loader />} {/* Show Loader when loading */}
     <aside className={`gb_sidebar ${isActive ? "show" : "hide"}`}>
       <div className="toggle_btn">
         <i onClick={() => setIsActive(!isActive)} className="ri-menu-fill"></i>
       </div>
-      <ul className="menu_list_wraper">
-        {menuItems.map((item, index) => (
-          <>
+      <div className="menu_list_wraper">
+        {menuItems?.map((item, index) => (
+          <Fragment key={index}>
           {item?.children?<>
             <div key={index} className={`${(index===subMenuActive && isActive)&&"border"} duration-300 relative`}>
             <Tooltip placement="right" title={isActive ? '' : item.title}>
@@ -88,38 +101,66 @@ const GbSidebar = () => {
               </div>
             </Tooltip>
             
-             {isActive && <ul className={`sub_menu ${subMenuActive===index?'active':''}`}>
+             {isActive && <div className={`sub_menu ${subMenuActive===index?'active':''}`}>
              {
               item?.children?.map((child:any,count:any)=>(
-                <Link key={count} href={child?.href}>
+                <div key={count} onClick={()=>handleButtonClick(child?.href)}>
                 <li  className={`${pathName===child?.href&&"sum_link_active"}`}>{child?.title}</li>
-                </Link>
+                </div>
               ))
-             }
-             </ul>}
-             {!isActive && <ul className={`sub_menu_collaps ${subMenuActive===index?'active':''}`}>
+            }
+             </div>}
+             {!isActive && <div className={`sub_menu_collaps ${subMenuActive===index?'active':''}`}>
              {
-              item?.children?.map((child:any,count:any)=>(
-                <Link key={count} href={child?.href}>
+               item?.children?.map((child:any,count:any)=>(
+                 <div onClick={()=>handleButtonClick(child?.href)} key={count}>
                 <li  className={`${pathName===child?.href&&"sum_link_active"}`}>{child?.title}</li>
-                </Link>
+                </div>
               ))
-             }
-             </ul>}
+            }
+             </div>}
           </div>
-          </>:<Link key={index} href={item.href}>
+          </>:<div onClick={()=>handleButtonClick(item?.href)} key={index} >
             <Tooltip placement="right" title={isActive ? '' : item.title}>
               <div className={`menu_list ${pathName?.split('/').includes(item?.href?.slice(1,item?.href?.length))   ? 'active' : ''}`}>
                 <i className={item.icon}></i>{" "}
                 <p className="ml-[10px]">{item.title}</p>
               </div>
             </Tooltip>
-          </Link>}
-          </>
+          </div>}
+          </Fragment>
         ))}
-      </ul>
+      </div>
     </aside>
+        </>
   );
 };
 
 export default GbSidebar;
+
+
+
+
+export const Loader = () => (
+  <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-75 z-[1000001]">
+    <div className="loader"></div>
+    <style jsx>{`
+      .loader {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #343434;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    `}</style>
+  </div>
+);

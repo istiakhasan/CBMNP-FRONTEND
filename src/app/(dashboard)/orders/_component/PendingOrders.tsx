@@ -20,7 +20,7 @@ import moment from "moment";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-const AllOrders = ({}: any) => {
+const PendingOrders = ({}: any) => {
   // all states
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
@@ -29,6 +29,7 @@ const AllOrders = ({}: any) => {
     page,
     limit: size,
     searchTerm,
+    statusId:"1"
   });
 
   const router = useRouter();
@@ -37,6 +38,7 @@ const AllOrders = ({}: any) => {
     {
       title: "SL",
       dataIndex: "sl",
+      key: "sl",
       render: (text: string, record: any, i: any) => {
         const slNumber = page * size + (i + 1) - size;
         // 1*10+(0+1)-10
@@ -76,6 +78,7 @@ const AllOrders = ({}: any) => {
     {
       title: "Phone Number",
       dataIndex: "phone_number",
+      key: "phone_number",
       render: (text: string, record: any) => (
         <>
           <span className="color_primary font-[500]">
@@ -145,6 +148,7 @@ const AllOrders = ({}: any) => {
     {
       title: "Order date",
       dataIndex: "Order date",
+      key: "Order date",
       align: "start",
       render: (text: string, record: any, i: any) => {
         return (
@@ -157,6 +161,7 @@ const AllOrders = ({}: any) => {
     {
       title: "Order Age",
       dataIndex: "orderAge",
+      key: "orderAge",
       render: (text: string, record: any) => (
         <span className="text-[#7D7D7D]  color_primary font-[500]">
           {moment(record?.createdAt).fromNow()}
@@ -255,4 +260,4 @@ const AllOrders = ({}: any) => {
   );
 };
 
-export default AllOrders;
+export default PendingOrders;

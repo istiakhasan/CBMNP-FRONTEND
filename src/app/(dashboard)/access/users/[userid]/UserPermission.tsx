@@ -34,7 +34,6 @@ const UserPermission = () => {
       if(res?.success){
         message.success(res?.message)
       }
-      console.log(res,"transform");
     } catch (error) {
       console.log(error);
     }

@@ -110,7 +110,6 @@ const Users = () => {
                     active: a,
                   },
                 });
-                console.log(res, "response");
             }}
             defaultChecked={record?.active}
           />

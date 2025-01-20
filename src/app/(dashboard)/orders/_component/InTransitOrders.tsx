@@ -1,26 +1,19 @@
 "use client";
 import GbTable from "@/components/GbTable";
-import { getBaseUrl } from "@/helpers/config/envConfig";
 import { useGetAllOrdersQuery } from "@/redux/api/orderApi";
-import { useGetAllProductQuery } from "@/redux/api/productApi";
-import { useGetUserByIdQuery } from "@/redux/api/usersApi";
 import StatusBadge from "@/util/StatusBadge";
+
 import {
-  Button,
   Checkbox,
   CheckboxOptionType,
-  Image,
   Pagination,
   Popover,
-  Spin,
-  Switch,
 } from "antd";
-import axios from "axios";
 import moment from "moment";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, {  useState } from "react";
 
-const AllOrders = ({}: any) => {
+const InTransitOrders = ({}: any) => {
   // all states
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
@@ -29,6 +22,7 @@ const AllOrders = ({}: any) => {
     page,
     limit: size,
     searchTerm,
+    statusId:"7"
   });
 
   const router = useRouter();
@@ -94,7 +88,7 @@ const AllOrders = ({}: any) => {
       align: "start",
       render: (_: any, record: any) => (
         <>
-         <StatusBadge status={record?.status} />
+       <StatusBadge status={record?.status} />
         </>
       ),
     },
@@ -255,4 +249,4 @@ const AllOrders = ({}: any) => {
   );
 };
 
-export default AllOrders;
+export default InTransitOrders;

@@ -20,7 +20,7 @@ import moment from "moment";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-const AllOrders = ({}: any) => {
+const CancelOrders = ({}: any) => {
   // all states
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
@@ -29,6 +29,7 @@ const AllOrders = ({}: any) => {
     page,
     limit: size,
     searchTerm,
+    statusId:"4"
   });
 
   const router = useRouter();
@@ -255,4 +256,4 @@ const AllOrders = ({}: any) => {
   );
 };
 
-export default AllOrders;
+export default CancelOrders;

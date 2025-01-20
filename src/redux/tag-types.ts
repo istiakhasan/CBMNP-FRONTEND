@@ -18,6 +18,7 @@ export enum tagTypes {
       customer="customer",
       inventory="inventory",
       warehouse="warehouse",
+      status="status",
 
   }
   
@@ -41,4 +42,5 @@ export enum tagTypes {
     tagTypes.customer,
     tagTypes.inventory,
     tagTypes.warehouse,
+    tagTypes.status,
   ];

@@ -1,21 +1,20 @@
 import GbFormSelect from "@/components/forms/GbFormSelect";
-import {
-  useGetAllDivisionQuery,
-  useGetDistrictByIdQuery,
-  useGetThanaByIdQuery,
-} from "@/redux/api/divisionsApi";
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { countryData } from "./countryCode";
 
 const CustomerType = () => {
-  const { watch, setValue } = useFormContext();
-  const [districtId, setDistrictId] = useState("");
-  const [divisioinId, setDivisionId] = useState("");
-  const { data: divisionData } = useGetAllDivisionQuery(undefined);
-  const { data: districtData } = useGetDistrictByIdQuery({ id: divisioinId });
-  const { data: thanaData } = useGetThanaByIdQuery({ id: districtId });
+  const { watch } = useFormContext();
+  const [divisionData,setDivisionData]=useState([])
+  const [districtData,setdistrictData]=useState([])
+  const [thanaData,setThanaData]=useState([])
+  useEffect(()=>{
+    axios.get(`https://ghorerbazartech.xyz/divisions`)
+    .then(res=>setDivisionData(res?.data))
+    .catch(error=>console.log(error))
+  },[])
+
   return (
     <>
       {watch()?.customerType?.value === "NON_PROBASHI" && (
@@ -28,8 +27,10 @@ const CustomerType = () => {
                   value: db?.id,
                 };
               })}
-              handleChange={(data: any) => {
-                setDivisionId(data?.value);
+              handleChange={(option: any) => {
+                axios.get(`https://ghorerbazartech.xyz/divisions/${option?.value}`)
+               .then(res=>setdistrictData(res?.data?.district_info))
+               .catch(error=>console.log(error))
               }}
               name="division"
               label="Division"
@@ -44,8 +45,10 @@ const CustomerType = () => {
                   value: db?.id,
                 };
               })}
-              handleChange={(data: any) => {
-                setDistrictId(data?.value);
+              handleChange={(option: any) => {
+                axios.get(`https://ghorerbazartech.xyz/districts/${option?.value}`)
+               .then(res=>setThanaData(res?.data?.thana_info))
+               .catch(error=>console.log(error))
               }}
               name="district"
               label="District"

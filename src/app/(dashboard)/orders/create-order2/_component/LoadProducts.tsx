@@ -10,11 +10,10 @@ const LoadProducts = ({ setCart, cart }: any) => {
     searchProducts: searchTerm,
     limit: "200",
   });
-  console.log(data,"data");
   return (
-    <div className="flex-1   h-[85vh] overflow-hidden   p-[10px] pt-0 ">
-      <div className="px-4 ">
-        <div className="pb-[30px] sticky top-0 pt-[15px] ">
+    <div className="flex-1   h-[85vh] overflow-scroll  custom_scroll  px-[10px] mt-[15px] ">
+      <div className="px-4 pt-[15px]">
+        <div className="pb-[30px] sticky top-0  z-50">
           <div className="floating-label-input ">
             <label
               htmlFor="customerSearch"
@@ -35,15 +34,15 @@ const LoadProducts = ({ setCart, cart }: any) => {
             <div className="flex items-center gap-2">
               <img
                 className="w-[60px] h-[60px] gb_border p-[2px]"
-                src={`${getBaseUrl()}/${item?.product_image}`}
+                src={`${item?.images[0]?.url}`}
                 alt=""
               />
              <div>
              <p className="text-gray-600 text-[14px] font-[400]">
                 {item?.product_title_en}
               </p>
-              <p className={` text-[12px] font-semibold ${(!item?.inventory?.productQuantity || item?.inventory?.productQuantity<1)?"text-red-400":"color_primary"}`}>
-                  QTY: {item?.inventory?.productQuantity || 0}
+              <p className={` text-[12px] font-semibold ${(!item?.inventories?.stock || item?.inventories?.stock<1)?"text-red-400":"color_primary"}`}>
+                  QTY: {item?.inventories?.stock || 0}
                 </p>
              </div>
             </div>
@@ -59,25 +58,22 @@ const LoadProducts = ({ setCart, cart }: any) => {
                 </span>
               </div>
               <div>
-                {cart?.some((exist: any) => exist?.productId === item?.id) ? (
+                {cart?.some((exist: any) => exist?.id === item?.id) ? (
                   <>
                     <div className="border">
                     <span
                         onClick={() => {
                           const _data = [...cart];
                           const findProduct = _data?.find(
-                            (j: any) => j.productId === item?.id
+                            (j: any) => j.id === item?.id
                           );
-                          console.log(item,cart);
                           const newQuantity = findProduct?.productQuantity - 1;
                           if (newQuantity < 1) {
-                            const filterProduct=cart?.filter((fp:any)=>item?.id !==fp?.productId)
+                            const filterProduct=cart?.filter((fp:any)=>item?.id !==fp?.id)
                             setCart(filterProduct)
                             return 
                           }
                           findProduct.productQuantity = newQuantity;
-                          (findProduct.subTotal =
-                            findProduct.current_prices * newQuantity),
                             setCart(_data);
                         }}
                         className="inline-block px-3  bg-primary text-white cursor-pointer py-[4px] gb_border"
@@ -89,18 +85,18 @@ const LoadProducts = ({ setCart, cart }: any) => {
                       </span>
                       
                       <span className="inline-block px-[20px]  cursor-pointer   text-[18px]  py-[4px] ">
-                        {cart.find((ct: any) => ct.productId === item?.id)
+                        {cart.find((ct: any) => ct.id === item?.id)
                           ?.productQuantity || 0}
                       </span>
                       <span
                         onClick={() => {
                           const _data = [...cart];
                           const findProduct = _data?.find(
-                            (j: any) => j.productId === item?.id
+                            (j: any) => j.id === item?.id
                           );
-
-                          const newQuantity = findProduct?.productQuantity + 1;
-                          if (newQuantity > item?.inventory?.productQuantity) {
+                       
+                          const newQuantity = (findProduct?.productQuantity || 0) + 1;
+                          if (newQuantity > item?.inventories?.stock) {
                             return message.error(
                               "Stock is not enough for the ordered amount of products"
                             );
@@ -110,10 +106,8 @@ const LoadProducts = ({ setCart, cart }: any) => {
                               "Quantity should not be zero "
                             );
                           }
-                          findProduct.productQuantity = newQuantity;
-                          (findProduct.subTotal =
-                            findProduct.current_prices * newQuantity),
-                            setCart(_data);
+                           findProduct.productQuantity=newQuantity
+                           setCart(_data);
                         }}
                         className="inline-block px-3  bg-primary text-white cursor-pointer py-[4px] gb_border"
                       >
@@ -138,30 +132,17 @@ const LoadProducts = ({ setCart, cart }: any) => {
                   </>
                 ) : (
                   <button 
-                    disabled={(!item?.inventory?.productQuantity || item?.inventory?.productQuantity<1)?true:false}
+                    disabled={(!item?.inventories?.stock  || item?.inventory?.inventories?.stock<1)?true:false}
                     onClick={() => {
                       if (
-                        !item?.inventory?.productQuantity ||
-                        item?.inventory?.productQuantity < 1
+                        !item?.inventories?.stock ||
+                        item?.inventories?.stock < 1
                       ) {
                         return message.error("Product is not in stock");
                       }
-                      const payload = {
-                        productId: item?.id,
-                        current_prices: item?.current_prices,
-                        productNameEn: item?.product_title_en,
-                        singleProductPrices: item?.current_prices,
-                        productQuantity: item?.productQuantity || 1,
-                        subTotal:
-                          item.current_prices * (item.productQuantity || 1),
-                        isCancel: false,
-                        productWeight: item?.pack_size,
-                        image: item?.product_image,
-                        stockQuantity:item?.inventory?.productQuantity
-                      };
-                      setCart([...cart, payload]);
+                      setCart([...cart, {...item,productQuantity:1}]);
                     }}
-                    className={`rounded-[2px]  border-[1px] font-semibold  px-[15px] py-[3px] ${(!item?.inventory?.productQuantity || item?.inventory?.productQuantity<1)?"bg-gray-300 opacity-[.3]":"text-[#278ea5] border-[#278ea5]"}`}
+                    className={`rounded-[2px]  border-[1px] font-semibold  px-[15px] py-[3px] ${(!item?.inventories?.stock  || item?.inventory?.inventories?.stock<1)?"bg-gray-300 opacity-[.3]":"text-[#278ea5] border-[#278ea5]"}`}
                   >
                     <i
                       style={{ fontSize: "18px" }}

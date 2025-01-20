@@ -6,19 +6,19 @@ import GbFormTextArea from '@/components/forms/GbFormTextArea';
 
 import { useGetAllDivisionQuery, useGetDistrictByIdQuery, useGetThanaByIdQuery } from '@/redux/api/divisionsApi';
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 const ReceiverInfoForm = ({formData,setSameAsBilling,setFormData,setActive}:any) => {
-    const [districtId, setDistrictId] = useState("");
-    const [divisioinId, setDivisionId] = useState("");
-    const { data: divisionData } = useGetAllDivisionQuery(undefined);
-    const { data: districtData } = useGetDistrictByIdQuery({ id: divisioinId });
-    const { data: thanaData } = useGetThanaByIdQuery({ id: districtId });
     const {watch,setValue,reset,formState:{isValid}}=useFormContext()
-
-
-    console.log(watch(),"==========================");
+    const [divisionData,setDivisionData]=useState([])
+    const [districtData,setdistrictData]=useState([])
+    const [thanaData,setThanaData]=useState([])
+    useEffect(()=>{
+      axios.get(`https://ghorerbazartech.xyz/divisions`)
+      .then(res=>setDivisionData(res?.data))
+      .catch(error=>console.log(error))
+    },[])
     return (
         <div className=''>
              {" "}
@@ -26,20 +26,13 @@ const ReceiverInfoForm = ({formData,setSameAsBilling,setFormData,setActive}:any)
             <h1 className="text-2xl    text-primary mb-3  bg-light pb-3 font-semibold">
               Receiver Information
             </h1>
-            {/* <GbFormRadioGroup
-          name="customerType"
-          disabled={true}
-          options={[
-            { label: "Deshi", value: "NON_PROBASHI" },
-            { label: "Probashi", value: "PROBASHI" },
-          ]}
-        /> */}
           </div>
           <div className="min-h-[70vh] px-[20px]">
             {watch()?.customerType === "NON_PROBASHI" && (
               <div>
                 <h1 className="flex items-center gap-2 text-[16px] mb-2">
                   <GbFormCheckbox name="sameAsBilling"  handleChange={(e:any)=>{
+                    console.log(e,"eee");
                        setSameAsBilling(e)
                        setValue('sameAsBilling',e)
                        setFormData({})
@@ -74,8 +67,10 @@ const ReceiverInfoForm = ({formData,setSameAsBilling,setFormData,setActive}:any)
                             value: db?.id,
                           };
                         })}
-                        handleChange={(data: any) => {
-                          setDivisionId(data?.value);
+                        handleChange={(option: any) => {
+                          axios.get(`https://ghorerbazartech.xyz/divisions/${option?.value}`)
+                         .then(res=>setdistrictData(res?.data?.district_info))
+                         .catch(error=>console.log(error))
                         }}
                         name="shippingAddressDivision"
                         label="Division"
@@ -90,8 +85,10 @@ const ReceiverInfoForm = ({formData,setSameAsBilling,setFormData,setActive}:any)
                             value: db?.id,
                           };
                         })}
-                        handleChange={(data: any) => {
-                          setDistrictId(data?.value);
+                        handleChange={(option: any) => {
+                          axios.get(`https://ghorerbazartech.xyz/districts/${option?.value}`)
+                         .then(res=>setThanaData(res?.data?.thana_info))
+                         .catch(error=>console.log(error))
                         }}
                         name="shippingAddressDistrict"
                         label="District"
@@ -158,8 +155,10 @@ const ReceiverInfoForm = ({formData,setSameAsBilling,setFormData,setActive}:any)
                             value: db?.id,
                           };
                         })}
-                        handleChange={(data: any) => {
-                          setDivisionId(data?.value);
+                        handleChange={(option: any) => {
+                          axios.get(`https://ghorerbazartech.xyz/divisions/${option?.value}`)
+                         .then(res=>setdistrictData(res?.data?.district_info))
+                         .catch(error=>console.log(error))
                         }}
                         name="shippingAddressDivision"
                         label="Division"
@@ -173,8 +172,10 @@ const ReceiverInfoForm = ({formData,setSameAsBilling,setFormData,setActive}:any)
                             value: db?.id,
                           };
                         })}
-                        handleChange={(data: any) => {
-                          setDistrictId(data?.value);
+                        handleChange={(option: any) => {
+                          axios.get(`https://ghorerbazartech.xyz/districts/${option?.value}`)
+                         .then(res=>setThanaData(res?.data?.thana_info))
+                         .catch(error=>console.log(error))
                         }}
                         name="shippingAddressDistrict"
                         label="district"

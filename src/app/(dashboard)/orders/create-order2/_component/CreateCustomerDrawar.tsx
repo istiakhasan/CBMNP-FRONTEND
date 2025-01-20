@@ -47,7 +47,6 @@ const CreateCustomerDrawar = () => {
         />
       </div>
       <div className=" py-[30px] absolute bottom-0 w-full right-[0px] pr-[20px] flex items-center gap-2 justify-end">
-          {/* <button className="text-[#278ea5] border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[15px] py-[4px]">Clear</button> */}
           <button type="submit" className="bg-[#278ea5] text-white border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[15px] py-[4px]">Create</button>
         </div>
     </div>
