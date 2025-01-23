@@ -5,7 +5,7 @@ const stats = [
     {
       title: "Total SKU",
       tooltip: "Total number of active and inactive SKUs",
-      color: "#47a2b3",
+      color: "#4F8A6D",
       status: "Total",
     },
     {

@@ -39,12 +39,38 @@
 /* In your global CSS file */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 
-:root {
+/* :root {
   --bglight: #fff;
   --primaryColor: #288ea5;
   --bgbase: #fafafa;
   --secondaryText: #999;
+} */
+
+/* :root {
+  --bglight: #f5f7fa; 
+  --primaryColor: #4caf50;
+  --bgbase: #e8f5e9;
+  --secondaryText: #666666; 
+} */
+:root {
+  --bglight: white; /* Deep black */
+  --primaryColor: #4F8A6D; /* Fiery crimson red */
+  --bgbase: #8FB1B7; /* Rich burgundy */
+  --secondaryText: #306178; /* Soft peach highlights */
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 .custom_overview_active_btn {
   background: rgba(0, 100, 0, 0.1);
   border: 1px solid rgba(0, 123, 0, 1);
@@ -531,3 +557,26 @@ aside.gb_sidebar {
   padding: 0 !important;
 }
 
+
+
+/* order view table */
+.responsive_order_details_view_table table{
+	width: 100%;
+  }
+.responsive_order_details_view_table table thead tr th,.responsive_order_details_view_table table tfoot tr th{
+	color: black;
+	font-weight: 600;
+	background: #FAFAFA;
+	font-size: 14px;
+	line-height: 18px;
+  }
+
+  .responsive_order_details_view_table table tr td,.responsive_order_details_view_table table tr th{
+	border: 1px solid #f0f0f0;
+	color: #0f3e49;
+	font-weight: 400;
+	opacity: .9;
+	text-align: left;
+	padding: 8px;
+  }
+  

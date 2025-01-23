@@ -9,7 +9,7 @@ const PortFolioOverview = dynamic(() => import('./_component/PortFolioOverview')
 });
 const Page = () => {
   return (
-    <div className='bg-[#F0F4FD] h-screen'>
+    <div className=' h-screen'>
       <GbHeader title='Dashboard' />
       <div className='p-[16px]'>
         <div className='flex items-start gap-2'>
@@ -30,7 +30,7 @@ const Page = () => {
           </div>
           <Row gutter={16}>
             <Col className='mb-5' span={6}>
-              <Card bordered={false}>
+              <Card >
                 <div>
                   <div style={{ fontSize: 14, color: '#8c8c8c', marginBottom: 8 }}>
                   <i className="ri-money-dollar-circle-line text-[18px]"></i> Assets Under Management
@@ -50,7 +50,7 @@ const Page = () => {
               </Card>
             </Col>
             <Col className='mb-5' span={6}>
-              <Card bordered={false}>
+              <Card >
                 <div>
                   <div style={{  marginBottom: 8,fontSize: 14, color: '#8c8c8c'}}>
                   <i className="ri-group-line text-[18px]"></i> Total Clients
@@ -70,7 +70,7 @@ const Page = () => {
               </Card>
             </Col>
             <Col className='mb-5' span={6}>
-              <Card bordered={false}>
+              <Card >
                 <div>
                   <div style={{ fontSize: 14, color: '#8c8c8c', marginBottom: 8 }}>
                   <i className="ri-line-chart-line text-[18px]"></i> Portfolio Performance
@@ -90,7 +90,7 @@ const Page = () => {
               </Card>
             </Col>
             <Col className='mb-5' span={6}>
-              <Card bordered={false}>
+              <Card>
                 <div>
                   <div style={{ fontSize: 14, color: '#8c8c8c', marginBottom: 8 }}>
                   <i className="ri-guide-line text-[18px]"></i> Active Trades
@@ -116,7 +116,7 @@ const Page = () => {
               </Card>
             </Col>
             <Col  span={11}>
-              <Card  style={{padding:"0"}} className='h-[100%] overflow-auto p-0 db_card' bordered={false}>
+              <Card  style={{padding:"0"}} className='h-[100%] overflow-auto p-0 db_card' bordered={true}>
                
               </Card>
             </Col>

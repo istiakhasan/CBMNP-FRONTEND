@@ -50,7 +50,7 @@ const Page = () => {
       key: 1,
       //@ts-ignore
       render: (text, record, index) => {
-        return <span onClick={()=>router.push(`/product/${record?.id}`)} className="text-[#278ea5] cursor-pointer">{record?.sku || "N/A"}</span>;
+        return <span onClick={()=>router.push(`/product/${record?.id}`)} className="color_primary cursor-pointer">{record?.sku || "N/A"}</span>;
       },
     },
     {
@@ -75,7 +75,7 @@ const Page = () => {
       render: (text, record, index) => {
         return (
           <>
-            <span onClick={()=>router.push(`/product/${record?.id}`)} className="block mb-2 text-[#278ea5] cursor-pointer">{record?.name}</span>
+            <span onClick={()=>router.push(`/product/${record?.id}`)} className="block mb-2 color_primary cursor-pointer">{record?.name}</span>
             <button className="bg-[#e8f0f2] px-[8px] py-[4px] text-[#000] font-semibold">
               {record?.productType}
             </button>
@@ -263,11 +263,11 @@ const Page = () => {
           <AddSimpleProuct setDrawerOpen={setDrawerOpen} />{" "}
         </GbDrawer>
         <div className="flex items-center gap-3 flex-wrap">
-          <button className="border-[#47a2b3] border text-[#47a2b3]  font-bold text-[12px]  px-[20px] py-[5px]">
+          <button className="border-[#4F8A6D] border text-[#4F8A6D]  font-bold text-[12px]  px-[20px] py-[5px]">
             Action
           </button>
           <GbDropdown items={items}>
-            <button className="bg-[#47a2b3] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]">
+            <button className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]">
               Add Product
             </button>
           </GbDropdown>

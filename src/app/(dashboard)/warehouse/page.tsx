@@ -80,7 +80,7 @@ const Page = () => {
         <div className="flex justify-end items-center py-4 px-2">
           <button
             onClick={() => setOpen(true)}
-            className="bg-[#47a2b3] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]"
+            className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]"
           >
             Create
           </button>

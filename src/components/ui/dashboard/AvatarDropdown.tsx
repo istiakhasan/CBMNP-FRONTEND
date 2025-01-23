@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 import AvatarImage from "../../../assets/images/icons/avatar.png";
 import { removeUserInfo } from "@/service/authService";
 import { authKey } from "@/constants/storageKey";
-import { toast } from "react-toastify";
 import { useGetProfileInfoQuery } from "@/redux/api/authApi";
 import { getBaseUrl } from "@/helpers/config/envConfig";
 
@@ -53,7 +52,7 @@ const AvatarDropdown = () => {
             onClick={() => {
               removeUserInfo(authKey);
               router.push("/login");
-              toast.success("Sign out successfully...");
+              message.success("Sign out successfully...");
             }}
             className="text-[12px] py-2 border-b-[1px] border-gray-100 font-bold"
           >

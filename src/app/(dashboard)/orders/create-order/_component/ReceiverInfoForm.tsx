@@ -216,7 +216,7 @@ const ReceiverInfoForm = ({formData,setSameAsBilling,setFormData,setActive}:any)
               <button 
                 type='button'
                 onClick={() => setActive(1)}
-                className="border-1 text-[#278ea5] border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[30px] py-[5px]"
+                className="border-1 color_primary border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[30px] py-[5px]"
               >
                 Back
               </button>

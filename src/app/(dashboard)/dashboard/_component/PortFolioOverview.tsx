@@ -38,7 +38,7 @@ const PortFolioOverview = () => {
           },
           fill: {
             opacity: 1,
-            colors: ['#247574', '#946FFC', '#34C759','#FE8C4C']
+            colors: ['#4F8A6D', '#946FFC', '#34C759','#FE8C4C']
           },
           tooltip: {
             y: {

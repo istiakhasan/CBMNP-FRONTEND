@@ -43,7 +43,7 @@ const CreateWarehouse = ({setOpen}:any) => {
           <GbFormTextArea name="location" label="Location" />
         </div>
         <div className="flex justify-end gap-2 mt-5 pt-5">
-          <button type="button" onClick={()=>setOpen(false)} className="text-[#47a2b3] border-[#47a2b3] border-[1px] font-bold text-[12px]  px-[20px] py-[5px]">
+          <button type="button" onClick={()=>setOpen(false)} className="text-[#4F8A6D] border-[#4F8A6D] border-[1px] font-bold text-[12px]  px-[20px] py-[5px]">
             Close
           </button>
           <button 

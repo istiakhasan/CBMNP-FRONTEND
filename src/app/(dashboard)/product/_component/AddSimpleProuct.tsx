@@ -174,7 +174,7 @@ const AddSimpleProuct = ({ setDrawerOpen }: any) => {
       </div>
 
       <div className="bg-white py-[30px] sticky bottom-0 flex items-center gap-2 justify-end">
-        {/* <button className="text-[#278ea5] border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[15px] py-[4px] w-[100px]">
+        {/* <button className="color_primary border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[15px] py-[4px] w-[100px]">
           Clear
         </button> */}
         <button 

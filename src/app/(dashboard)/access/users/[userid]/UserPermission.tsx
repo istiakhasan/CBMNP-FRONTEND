@@ -57,7 +57,7 @@ const UserPermission = () => {
         <div className="flex items-center justify-center mt-3 bg-white  py-3 sticky bottom-0">
           <button
               onClick={updatePermissionForm}
-              className="bg-[#47a2b3]  text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]"
+              className="bg-[#4F8A6D]  text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]"
             >
               Update permission
             </button>

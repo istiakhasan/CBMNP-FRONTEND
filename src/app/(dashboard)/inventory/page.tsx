@@ -198,7 +198,7 @@ const Page = () => {
       key: 1,
       //@ts-ignore
       render: (text, record, index) => {
-        return <span className="text-[#278ea5] cursor-pointer">{record?.location?.name || "Inventory"}</span>;
+        return <span className="color_primary cursor-pointer">{record?.location?.name || "Inventory"}</span>;
       },
     },
     {
@@ -216,7 +216,7 @@ const Page = () => {
       render: (text, record, index) => {
         return (
           <>
-            <span className="block mb-2 text-[#278ea5] cursor-pointer">
+            <span className="block mb-2 color_primary cursor-pointer">
               {record?.product?.name}
             </span>
           </>
@@ -276,7 +276,7 @@ const Page = () => {
       render: (text, record, index) => {
         return (
           <>
-            <span className="block mb-2 text-[#278ea5] cursor-pointer">
+            <span className="block mb-2 color_primary cursor-pointer">
               Pending
             </span>
           </>
@@ -297,7 +297,7 @@ const Page = () => {
         <div className="flex justify-between items-center py-4 px-2">
           <p className="text-[20px]">Inventory</p>
           <div className="flex items-center gap-3 flex-wrap">
-            <button className="border-[#47a2b3] border text-[#47a2b3]  font-bold text-[12px]  px-[20px] py-[5px]">
+            <button className="border-[#4F8A6D] border text-[#4F8A6D]  font-bold text-[12px]  px-[20px] py-[5px]">
               Action
             </button>
           </div>
@@ -306,7 +306,7 @@ const Page = () => {
           <Button
             style={{
               background: "#f2f8fa",
-              color: "#288ea5",
+              color: "#4F8A6D",
               boxShadow: "none",
             }}
             onClick={() => router.push("/inventory")}
@@ -319,7 +319,7 @@ const Page = () => {
           <Button
             style={{
               background: "#f2f8fa",
-              color: "#288ea5",
+              color: "#4F8A6D",
               boxShadow: "none",
             }}
             onClick={() => router.push("/inventory?tab=logs")}

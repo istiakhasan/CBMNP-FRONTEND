@@ -132,7 +132,7 @@ const GbCascaderPicker = React.memo(({ name, selectedValue, setSelectedValue }: 
                   }
                 }}
                 onChange={(e) => setNewCategory(e.target.value)}
-                style={{ borderRadius: "0px", padding: "10px", border: "1px solid #47A2B3" }}
+                style={{ borderRadius: "0px", padding: "10px", border: "1px solid #4F8A6D" }}
               />
               <button
                 type="button"

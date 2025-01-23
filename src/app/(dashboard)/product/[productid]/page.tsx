@@ -46,7 +46,7 @@ const Page = () => {
               <span className="text-[#4b5766]">{productData?.name}</span>
               <button
                 onClick={() => router.push(`/product/${productData?.id}/edit`)}
-                className="bg-[#47a2b3] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]"
+                className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]"
               >
                 Edit
               </button>
@@ -245,10 +245,10 @@ const Page = () => {
         <div className="border-[1px] border-[#ebebeb] bg-[#FAFAFA]  p-[20px]">
           <h1 className="text-[#4b5766] text-[18px]">Inventory</h1>
           <div className="flex items-center justify-end gap-2">
-            <button onClick={()=>setOpen(true)} className="bg-[#47a2b3] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]">
+            <button onClick={()=>setOpen(true)} className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]">
               Add
             </button>
-            <button className="bg-[#47a2b3] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]">
+            <button className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]">
               Update
             </button>
           </div>

@@ -3,7 +3,10 @@
 import { Avatar, MenuProps, Space } from "antd";
 import GbDropdown from "./GbDropdown";
 import Link from "next/link";
+import { removeUserInfo } from "@/service/authService";
+import { useRouter } from "next/navigation";
 const GbHeader = ({title}:{title?:string}) => {
+  const router=useRouter()
   const items: MenuProps["items"] = [
     {
       label: (
@@ -62,22 +65,25 @@ const GbHeader = ({title}:{title?:string}) => {
     },
     {
       label: (
-        <Link href="/profile">
-          <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
+        <>
+          <span onClick={()=>{
+            removeUserInfo('token')
+            router.push('/login')
+            }} className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
             <i
               style={{ fontSize: "20px" }}
               className="ri-logout-circle-r-line"
             ></i>
             <span>Logout</span>
           </span>
-        </Link>
+        </>
       ),
       key: "5",
     },
   ];
 
   return (
-    <div className="bg-light gb-header h-[65px] px-[16px] flex items-center sticky top-0 z-50">
+    <div className="bg-[#FFFFFF] gb-header h-[65px] px-[16px] flex items-center sticky top-0 z-50">
        <h1 className="text-2xl  text-primary">{title}</h1>
       <div className="ml-auto flex items-center gap-[32px]">
         <div>

@@ -100,7 +100,7 @@ const CreateCustomer = ({ setCustomer, customer }: any) => {
                   <div className=" h-full flex items-center justify-center">
                     <button
                       onClick={() => setDrawerOpen(true)}
-                      className="bg-[#47a2b3] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]"
+                      className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]"
                     >
                       Add customer
                     </button>

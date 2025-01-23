@@ -52,10 +52,10 @@ const AddUsers = ({setOpenAddUserModal}:any) => {
       </div>
 
         <div className="flex items-center justify-end  my-[20px] gap-2">
-             <button onClick={()=>setOpenAddUserModal(false)} style={{border:"1px solid #47a2b3"}}  className="  text-black font-bold text-[12px]   px-[20px] py-[5px]">
+             <button onClick={()=>setOpenAddUserModal(false)} style={{border:"1px solid #4F8A6D"}}  className="  text-black font-bold text-[12px]   px-[20px] py-[5px]">
               Cancel
             </button>
-             <button style={{border:"1px solid #47a2b3"}}  className="bg-[#47a2b3] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]">
+             <button style={{border:"1px solid #4F8A6D"}}  className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]">
               Create
             </button>
         </div>

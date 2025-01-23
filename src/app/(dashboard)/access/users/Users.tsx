@@ -42,7 +42,7 @@ const Users = () => {
         return (
           <span
             onClick={() => router.push(`/access/users/${record?.userId}`)}
-            className="text-[#278ea5] cursor-pointer"
+            className="color_primary cursor-pointer"
           >
             {record?.name}
           </span>
@@ -71,7 +71,7 @@ const Users = () => {
       //@ts-ignore
       render: (text, record, index) => {
         return (
-          <span className="text-[#278ea5] uppercase font-semibold cursor-pointer">
+          <span className="color_primary uppercase font-semibold cursor-pointer">
             {record?.role}
           </span>
         );
@@ -130,7 +130,7 @@ const Users = () => {
         return (
           <span
             onClick={() => router.push(`/product/${record?.id}`)}
-            className="text-[#278ea5] cursor-pointer"
+            className="color_primary cursor-pointer"
           >
             {formattedDate}
           </span>
@@ -162,7 +162,7 @@ const Users = () => {
           <div className="flex items-center gap-3 flex-wrap">
             <button
               onClick={() => setOpenAddUserModal(true)}
-              className="bg-[#47a2b3] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]"
+              className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]"
             >
               Add User
             </button>

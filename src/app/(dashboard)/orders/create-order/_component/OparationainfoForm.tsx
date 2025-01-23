@@ -12,10 +12,11 @@ const OparationainfoForm = ({ setActive, cart }: any) => {
     formState: { isValid },
   } = useFormContext();
 
-  const deliveryCharge:number = Number(watch()?.deliveryCharge?.value) || 0;
-const cartTotal:number = cart?.reduce((acc: number, item: any) => acc + (item.subTotal || 0), 0) || 0;
+const deliveryCharge:number = Number(watch()?.deliveryCharge?.value) || 0;
+const cartTotal:number = cart?.reduce((acc: number, item: any) => acc + (item.salePrice*item?.productQuantity || 0), 0) || 0;
 const paidAmount:number = Number(watch()?.paidAmount) || 0;
 const totalAmount:number=(cartTotal+deliveryCharge)-paidAmount
+
   return (
     <div>
       {" "}
@@ -252,7 +253,7 @@ const totalAmount:number=(cartTotal+deliveryCharge)-paidAmount
               </div>
             )}
             <div className="col-span-4 mb-4">
-              <GbFormTextArea name="orderRemark" label="Note" rows={3} />
+              <GbFormTextArea name="deliveryNote" label="Delivery Note" rows={3} />
             </div>
             <div className="col-span-4 mb-4">
               <GbFormCheckbox name="isHold" label="Hold"  />
@@ -269,9 +270,7 @@ const totalAmount:number=(cartTotal+deliveryCharge)-paidAmount
             <span>Subtotal:</span>
             <span>
               {" "}
-              {cart
-                ?.reduce((acc: any, b: any) => acc + b.subTotal, 0)
-                .toFixed(2)}
+              {cartTotal}
             </span>
           </p>
           <p className="flex justify-between text-[14px] text-[#00171d] mb-3">
@@ -297,7 +296,7 @@ const totalAmount:number=(cartTotal+deliveryCharge)-paidAmount
           <button
             type="button"
             onClick={() => setActive(2)}
-            className="border-1 text-[#278ea5] border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[30px] py-[5px]"
+            className="border-1 color_primary border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[30px] py-[5px]"
           >
             Back
           </button>

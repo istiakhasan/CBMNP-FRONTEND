@@ -8,6 +8,7 @@ import {getFormLocalStorage, setToLocalStorage } from "@/util/local-storage";
 
 
 export const storeUserInfo = ({ accessToken }: { accessToken: string }) => {
+  console.log(accessToken,"access totken");
   return setToLocalStorage(authKey, accessToken);
 };
 

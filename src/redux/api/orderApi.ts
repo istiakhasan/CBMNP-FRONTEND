@@ -29,7 +29,7 @@ export const orderApi = baseApi.injectEndpoints({
 		}),
 		getOrderById: build.query({
 			query: (arg) => ({
-				url: `/order/${arg.id}`,
+				url: `/orders/${arg.id}`,
 				method: "GET",
 			}),
 			providesTags: [tagTypes.order],

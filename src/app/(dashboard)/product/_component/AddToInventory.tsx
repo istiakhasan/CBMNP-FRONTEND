@@ -73,7 +73,7 @@ const AddToInventory = ({product,refetch}:any) => {
            <button  
              type="button"
              onClick={handleSubmit(onSubmit)}
-                className="bg-[#47a2b3] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px] mt-4"
+                className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px] mt-4"
               >
                 Update
               </button>

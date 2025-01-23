@@ -166,7 +166,7 @@ const ApprovedOrders = ({}: any) => {
           <>
             {
               <span
-                onClick={() => router.push(`/orders/${record?.orderNumber}`)}
+                onClick={() => router.push(`/orders/${record?.id}`)}
                 className=" text-white text-[10px] py-[2px] px-[10px] cursor-pointer"
               >
                 <i style={{fontSize:"18px"}} className="ri-eye-fill color_primary"></i>

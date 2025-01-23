@@ -101,7 +101,7 @@ const CopyInfo = ({ setCopyModalOpen, isGift, cartProduct,formData }: any) => {
         <button
           onClick={handleCopy}
           type="button"
-          className="cm_button bg-white border-[1px] gap-2 text-[#278EA5] border-[#278EA5] py-[5px] text-[12px] flex items-center"
+          className="cm_button bg-white border-[1px] gap-2 color_primary border-[#278EA5] py-[5px] text-[12px] flex items-center"
           disabled={copyLoading}
         >
           {copyLoading ? (

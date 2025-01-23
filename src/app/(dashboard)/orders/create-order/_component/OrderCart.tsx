@@ -1,16 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
 import { message } from "antd";
 import React, { useState } from "react";
-import { getBaseUrl } from "@/helpers/config/envConfig";
 import GbForm from "@/components/forms/GbForm";
 import OparationainfoForm from "./OparationainfoForm";
 import ReceiverInfoForm from "./ReceiverInfoForm";
-import { yupResolver } from "@hookform/resolvers/yup";
-// import { operationalSchema, receiverFormSchema } from "@/schema/schema";
 import { getUserInfo } from "@/service/authService";
 import { useCreateOrderMutation } from "@/redux/api/orderApi";
-import copyToClipboard from "@/components/ui/GbCopyToClipBoard";
-import GbModal from "@/components/ui/GbModal";
 import moment from "moment";
 
 const OrderCart = ({
@@ -32,51 +27,45 @@ const OrderCart = ({
       const finalData = { ...formData, ...stepFormData };
 
       const commonEntity: any = {
-        orderFrom: finalData?.orderFrom?.label,
-        currier: finalData?.currier?.label,
-        deliveryCharge: finalData?.deliveryCharge?.value,
-        deliveryType: finalData?.deliveryType?.label,
-        orderType: finalData?.orderType?.label,
-        employeeId: userInfo?.employeeId,
-        agentId: userInfo?.employeeId,
-        orderRemark: finalData?.orderRemark,
-        comments: finalData?.comments,
-        isAction:false,
-        // payment
-        paidAmount: finalData?.paidAmount || 0,
-        paymentStatus: finalData?.paymentStatus?.label,
-        transactionId: finalData?.transactionId || "",
-        paymentMethods: finalData["paymentMethods"]?.value,
         // customer info or sender info
-        customerName: customer?.customerName,
-        customerPhoneNumber: customer?.customerPhoneNumber,
-        customerAdditionalNumber: customer?.customerAdditionalNumber,
-        customer_Id: customer?.customer_Id,
+        customerId: customer?.customer_Id,//exist
         // receiver info
-        receiverName: finalData?.receiverName,
-        receiverPhoneNumber: finalData?.receiverPhoneNumber,
+        receiverName: finalData?.receiverName,//exist
+        receiverPhoneNumber: finalData?.receiverPhoneNumber,//exist
         receiverAdditionalPhoneNumber: finalData?.receiverAdditionalPhoneNumber,
-        shippingAddressDivision: finalData?.shippingAddressDivision?.label,
-        shippingAddressDistrict: finalData?.shippingAddressDistrict?.label,
-        shippingAddressThana: finalData?.shippingAddressThana?.label,
-        shippingAddressTextArea: finalData?.shippingAddressTextArea,
-        deliveryDate: finalData.deliveryDate,
-
+        receiverDivision: finalData?.shippingAddressDivision?.label,//exist
+        receiverDistrict: finalData?.shippingAddressDistrict?.label,//exist
+        receiverThana: finalData?.shippingAddressThana?.label,//exist
+        receiverAddress: finalData?.shippingAddressTextArea,//exist
+        deliveryDate: finalData.deliveryDate,//exist
+        //  operational information
+        orderSource: finalData?.orderFrom?.label,//exist
+        currier: finalData?.currier?.label,//exist
+        shippingCharge: finalData?.deliveryCharge?.value,//exist
+        shippingType: finalData?.deliveryType?.label,//exist
+        orderType: finalData?.orderType?.label,///exist
+        agentId: "R-000000001",//exist
+        deliveryNote: finalData?.deliveryNote,//exist
+        comments: finalData?.comments,
+        statusId:2,//exist
+        paymentMethod: finalData["paymentMethods"]?.value, //exist
         // products
-        orderDetails: cart,
+        products: cart?.map((item: any) => {
+          return {
+            productId: item?.id,
+            productQuantity: item?.productQuantity,
+          };
+        }),  //exist
       };
-      if (!!finalData?.isHold) {
-        commonEntity["orderStatusValue"] = 4;
-        commonEntity["orderStatus"] = {
-          name: "Hold",
-          value: "4",
-        };
-      } else {
-        commonEntity["orderStatusValue"] = 2;
-        commonEntity["orderStatus"] = {
-          name: "Approved",
-          value: "2",
-        };
+      if(finalData["paymentStatus"]?.value!=="Pending"){
+        commonEntity['paymentHistory']=[
+          {
+            paidAmount: finalData?.paidAmount || 0,//exist
+            paymentStatus: finalData?.paymentStatus?.label,//exist
+            transactionId: finalData?.transactionId || "",//exist
+            paymentMethod: finalData["paymentMethods"]?.value, //exist
+          }
+        ]
       }
       const res: any = await handleSubmitOrder(commonEntity).unwrap();
       if (res) {
@@ -94,7 +83,10 @@ const OrderCart = ({
   };
   if (cart?.length < 1) {
     return (
-      <div style={{ boxShadow: "-12px 0 16px -11px rgba(0, 0, 0, 0.1)" }} className="h-[85vh] flex-1 col-span-2 flex items-center justify-center">
+      <div
+        style={{ boxShadow: "-12px 0 16px -11px rgba(0, 0, 0, 0.1)" }}
+        className="h-[85vh] flex-1 col-span-2 flex items-center justify-center"
+      >
         <h1>No product in cart</h1>
       </div>
     );
@@ -193,11 +185,14 @@ const OrderCart = ({
                         Price
                       </label>
 
-                      <p>BTD {(item?.salePrice * item?.productQuantity)?.toFixed(2)}</p>
+                      <p>
+                        BTD{" "}
+                        {(item?.salePrice * item?.productQuantity)?.toFixed(2)}
+                      </p>
                     </div>
 
                     <div className="border border-[#278EA5] h-fit">
-                    <span
+                      <span
                         onClick={() => {
                           const _data = [...cart];
                           const findProduct = _data?.find(
@@ -205,9 +200,11 @@ const OrderCart = ({
                           );
                           const newQuantity = findProduct?.productQuantity - 1;
                           if (newQuantity < 1) {
-                            const filterProduct=cart?.filter((fp:any)=>item?.productId !==fp?.productId)
-                            setCart(filterProduct)
-                            return
+                            const filterProduct = cart?.filter(
+                              (fp: any) => item?.productId !== fp?.productId
+                            );
+                            setCart(filterProduct);
+                            return;
                           }
                           findProduct.productQuantity = newQuantity;
                           (findProduct.subTotal =
@@ -221,7 +218,7 @@ const OrderCart = ({
                           className="ri-subtract-fill"
                         ></i>
                       </span>
-                      
+
                       <span className="inline-block px-[20px]  cursor-pointer  border-t-[#f0f0f0]  text-[18px]  py-[4px] ">
                         {item?.productQuantity}
                       </span>
@@ -232,8 +229,8 @@ const OrderCart = ({
                             (j: any) => j.productId === item?.productId
                           );
                           const newQuantity = findProduct?.productQuantity + 1;
-                          if(item?.stockQuantity<newQuantity){
-                            return message.error('Not enough product in stock')
+                          if (item?.stockQuantity < newQuantity) {
+                            return message.error("Not enough product in stock");
                           }
                           if (newQuantity > item?.inventory?.productQuantity) {
                             return message.error(
@@ -280,7 +277,11 @@ const OrderCart = ({
               <div className="p-5 bg-[#E8F0F2] font-bold text-[16px] text-end mt-[20px] pr-[30px]">
                 Total:
                 {cart
-                  ?.reduce((acc: any, b: any) => acc + (+b.salePrice*b?.productQuantity), 0)
+                  ?.reduce(
+                    (acc: any, b: any) =>
+                      acc + +b.salePrice * b?.productQuantity,
+                    0
+                  )
                   .toFixed(2)}
               </div>
               <div className="flex justify-end my-5">
@@ -328,14 +329,14 @@ const OrderCart = ({
                 label: "Regular",
                 value: "Regular",
               },
-              paymentStatus:{
+              paymentStatus: {
                 label: "Pending",
                 value: "Pending",
               },
-              paymentMethods:{
-                      label: "COD",
-                      value: "COD",
-                    }
+              paymentMethods: {
+                label: "COD",
+                value: "COD",
+              },
             }}
             // resolver={yupResolver(operationalSchema)}
             submitHandler={handleFormSubmit}
