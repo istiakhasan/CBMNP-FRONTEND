@@ -19,10 +19,18 @@ export const customerApi = baseApi.injectEndpoints({
       }),
       providesTags: [tagTypes.customer],
     }),
+    getCustomerById: build.query({
+      query: (params) => ({
+        url: `/customers/${params.id}`,
+        method: "GET",
+      }),
+      providesTags: [tagTypes.customer],
+    }),
   }),
 });
 
 export const {
     useCreateCustomerMutation,
-    useGetAllCustomersQuery
+    useGetAllCustomersQuery,
+    useGetCustomerByIdQuery
 } = customerApi;

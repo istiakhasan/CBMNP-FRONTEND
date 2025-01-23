@@ -10,10 +10,16 @@ export const statusApi = baseApi.injectEndpoints({
       }),
       providesTags: [tagTypes.status,tagTypes.order],
     }),
- 
+    getOrdersCountById: build.query({
+      query: (data) => ({
+        url: `/customers/orders-count/${data?.id}`,
+        method: "GET"
+      }),
+      providesTags: [tagTypes.status,tagTypes.order],
+    }),
   }),
 });
-
 export const {
- useGetOrdersCountQuery
+ useGetOrdersCountQuery,
+ useGetOrdersCountByIdQuery
 } = statusApi;

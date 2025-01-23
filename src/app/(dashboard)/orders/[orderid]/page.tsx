@@ -66,19 +66,18 @@ const Page = () => {
                   ></i>
                   Copy Info{" "}
                 </p>
-                {(data?.orderStatus?.value === "1" ||
-                  data?.orderStatus?.value === "2") && (
+                {
                   <button
                     onClick={() =>
                       router.push(
-                        `/orders/gb/edit?orderId=${data?.id}&customerId=${data?.customer_Id}`
+                        `/orders/edit?orderId=${data?.id}&customerId=${data?.customerId}`
                       )
                     }
                     className="bg-[#288EAD] text-white px-[25px] py-[4px] "
                   >
                     Edit
                   </button>
-                )}
+                }
               </div>
             </div>
             <Divider style={{ padding: "0", margin: "0" }} />

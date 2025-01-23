@@ -2,25 +2,26 @@
 import { message } from "antd";
 import React, { useState } from "react";
 import GbForm from "@/components/forms/GbForm";
-import OparationainfoForm from "./OparationainfoForm";
-import ReceiverInfoForm from "./ReceiverInfoForm";
-import { getUserInfo } from "@/service/authService";
-import { useCreateOrderMutation } from "@/redux/api/orderApi";
-import moment from "moment";
 
-const OrderCart = ({
+import { getUserInfo } from "@/service/authService";
+import { useCreateOrderMutation, useUpdateOrderMutation } from "@/redux/api/orderApi";
+import moment from "moment";
+import ReceiverInfoFormEdit from "./ReceiverInfoFormEdit";
+import OparationainfoFormEdit from "./OparationainfoFormEdit";
+
+const OrderCartEdit = ({
   setCart,
   cart,
   customer,
-  setCustomer,
   setOrderSuccessResponse,
   setOrderSuccessModal,
+  orderData
 }: any) => {
   const [active, setActive] = useState(1);
   const [sameAsBilling, setSameAsBilling] = useState(true);
   const [formData, setFormData] = useState({});
   const userInfo: any = getUserInfo();
-  const [handleSubmitOrder] = useCreateOrderMutation();
+  const [handleUpdateOrder] = useUpdateOrderMutation();
   const handleFormSubmit = async (stepFormData: any, reset: any) => {
     setFormData((prev) => ({ ...prev, ...stepFormData }));
     if (active === 3) {
@@ -32,24 +33,22 @@ const OrderCart = ({
         // receiver info
         receiverName: finalData?.receiverName,//exist
         receiverPhoneNumber: finalData?.receiverPhoneNumber,//exist
-        receiverAdditionalPhoneNumber: finalData?.receiverAdditionalPhoneNumber,
+        // receiverAdditionalPhoneNumber: finalData?.receiverAdditionalPhoneNumber,
         receiverDivision: finalData?.shippingAddressDivision?.label,//exist
         receiverDistrict: finalData?.shippingAddressDistrict?.label,//exist
         receiverThana: finalData?.shippingAddressThana?.label,//exist
         receiverAddress: finalData?.shippingAddressTextArea,//exist
         deliveryDate: finalData.deliveryDate,//exist
+        totalPaidAmount: orderData.totalPaidAmount,//exist
         //  operational information
-        orderSource: finalData?.orderFrom?.label,//exist
+        orderSource: finalData?.orderSource?.label,//exist
         currier: finalData?.currier?.label,//exist
-        shippingCharge: finalData?.deliveryCharge?.value,//exist
-        shippingType: finalData?.deliveryType?.label,//exist
+        shippingCharge: finalData?.shippingCharge?.value,//exist
+        shippingType: finalData?.shippingType?.label,//exist
         orderType: finalData?.orderType?.label,///exist
         agentId: "R-000000001",//exist
         deliveryNote: finalData?.deliveryNote,//exist
         comments: finalData?.comments,
-        statusId:2,//exist
-        paymentMethod: finalData["paymentMethods"]?.value, //exist
-        paymentStatus: finalData["paymentStatus"]?.value, //exist
         // products
         products: cart?.map((item: any) => {
           return {
@@ -58,20 +57,11 @@ const OrderCart = ({
           };
         }),  //exist
       };
-      if(finalData["paymentStatus"]?.value!=="Pending"){
-        commonEntity['paymentHistory']=[
-          {
-            paidAmount: finalData?.paidAmount || 0,//exist
-            paymentStatus: finalData?.paymentStatus?.label,//exist
-            transactionId: finalData?.transactionId || "",//exist
-            paymentMethod: finalData["paymentMethods"]?.value, //exist
-          }
-        ]
-      }
-      const res: any = await handleSubmitOrder(commonEntity).unwrap();
+ 
+      const res: any = await handleUpdateOrder({data:commonEntity,id:orderData?.id}).unwrap();
       if (res) {
         setCart([]);
-        setCustomer({});
+        // setCustomer({});
         setOrderSuccessModal(true);
         setOrderSuccessResponse(res);
         setActive(1);
@@ -140,7 +130,7 @@ const OrderCart = ({
     shippingAddressThana: null,
     shippingAddressTextArea: null,
   };
-  console.log(cart,"cart");
+console.log(orderData,"order");
   return (
     <>
       <div
@@ -203,7 +193,7 @@ const OrderCart = ({
                           const newQuantity = findProduct?.productQuantity - 1;
                           if (newQuantity < 1) {
                             const filterProduct = cart?.filter(
-                              (fp: any) => item?.productId !== fp?.productId
+                              (fp: any) => item?.id !== fp?.id
                             );
                             setCart(filterProduct);
                             return;
@@ -255,8 +245,8 @@ const OrderCart = ({
 
                       <span
                         onClick={() => {
-                          const filterItem = cart.filter(
-                            (cp: any) => cp?.productId !== item?.productId
+                          const filterItem = cart?.filter(
+                            (cp: any) => cp?.id !== item?.id
                           );
                           setCart(filterItem);
                         }}
@@ -285,11 +275,11 @@ const OrderCart = ({
               <div className="flex justify-end my-5">
                 <button
                   disabled={
-                    cart.length < 1 || Object.values(customer).length < 1
+                    cart?.length < 1 || Object.values(customer).length < 1
                   }
                   type="submit"
                   className={` ${
-                    cart.length < 1 || Object.values(customer).length < 1
+                    cart?.length < 1 || Object.values(customer).length < 1
                       ? "bg-gray-400"
                       : "bg-[#278ea5]"
                   } text-white border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[30px] py-[5px]`}
@@ -306,7 +296,7 @@ const OrderCart = ({
             defaultValues={sameAsBilling ? defaultvalue : notSameAsBilling}
             submitHandler={handleFormSubmit}
           >
-            <ReceiverInfoForm
+            <ReceiverInfoFormEdit
               setActive={setActive}
               formData={formData}
               setFormData={setFormData}
@@ -318,28 +308,43 @@ const OrderCart = ({
           <GbForm
             // mode={"onChange"}
             defaultValues={{
-              deliveryDate: moment().format("YYYY-MM-DD"),
-              orderType: {
-                label: "Regular",
-                value: "Regular",
+              deliveryDate:orderData?.deliveryDate? moment(orderData?.deliveryDate).format("YYYY-MM-DD"):null,
+              orderSource:{
+                label:orderData?.orderSource,
+                value:orderData?.orderSource,
               },
-              deliveryType: {
-                label: "Regular",
-                value: "Regular",
+             ...(orderData?.orderType && { orderType:{
+                label:orderData?.orderType,
+                value:orderData?.orderType,
+              }}),
+             ...(orderData?.shippingType && { shippingType:{
+                label:orderData?.shippingType,
+                value:orderData?.shippingType,
+              }}),
+              shippingCharge:{
+                label:orderData?.shippingCharge,
+                value:orderData?.shippingCharge,
               },
-              paymentStatus: {
-                label: "Pending",
-                value: "Pending",
-              },
-              paymentMethods: {
-                label: "COD",
-                value: "COD",
-              },
+             ...(orderData?.currier && { currier:{
+                label:orderData?.currier,
+                value:orderData?.currier,
+              }}),
+             ...(orderData?.last_transaction?.totalPaidAmount && { paidAmount:orderData?.last_transaction?.totalPaidAmount}),
+              // paymentStatus:{
+              //   label:orderData?.paymentStatus,
+              //   value:orderData?.paymentStatus,
+              // },
+              // paymentMethods:{
+              //   label:orderData?.last_transaction?.paymentMethods,
+              //   value:orderData?.last_transaction?.paymentMethods
+              // },
+              orderRemark:orderData?.orderRemark
+              
             }}
             // resolver={yupResolver(operationalSchema)}
             submitHandler={handleFormSubmit}
           >
-            <OparationainfoForm setActive={setActive} cart={cart} />
+            <OparationainfoFormEdit setActive={setActive} cart={cart} />
           </GbForm>
         )}
       </div>
@@ -347,4 +352,4 @@ const OrderCart = ({
   );
 };
 
-export default OrderCart;
+export default OrderCartEdit;

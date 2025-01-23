@@ -10,15 +10,13 @@ export enum tagTypes {
       users="users",
       office="office",
       department="department",
-      slider="slider",
-      subscriber="subscriber",
-      productByVendor="productByVendor",
       requisition="requisition",
       userPermission="userPermission",
       customer="customer",
       inventory="inventory",
       warehouse="warehouse",
       status="status",
+      comment="comment",
 
   }
   
@@ -34,13 +32,11 @@ export enum tagTypes {
     tagTypes.users,
     tagTypes.office,
     tagTypes.department,
-    tagTypes.slider,
-    tagTypes.subscriber,
-    tagTypes.productByVendor,
     tagTypes.requisition,
     tagTypes.userPermission,
     tagTypes.customer,
     tagTypes.inventory,
     tagTypes.warehouse,
     tagTypes.status,
+    tagTypes.comment,
   ];
