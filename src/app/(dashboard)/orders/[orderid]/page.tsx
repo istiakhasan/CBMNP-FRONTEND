@@ -35,7 +35,7 @@ const Page = () => {
                 onClick={() => setActive(1)}
                 className={`${
                   active === 1
-                    ? "bg-[#F2F8FA]  text-[#288EAD] font-semibold "
+                    ? "bg-[#F2F8FA]  text-[#4F8A6D] font-semibold "
                     : ""
                 } px-[15px] py-[4px]`}
               >
@@ -45,7 +45,7 @@ const Page = () => {
                 onClick={() => setActive(2)}
                 className={`${
                   active === 2
-                    ? "bg-[#F2F8FA]  text-[#288EAD] font-semibold "
+                    ? "bg-[#F2F8FA]  text-[#4F8A6D] font-semibold "
                     : ""
                 } px-[15px] py-[4px]`}
               >
@@ -60,7 +60,7 @@ const Page = () => {
                           "Order information copied successfully!"
                         );
                       })
-                    } className="border-[#288EAD] border text-[#288EAD]  cursor-pointer  px-[25px] py-[4px]  mr-2">
+                    } className="border-[#4F8A6D] border text-[#4F8A6D]  cursor-pointer  px-[25px] py-[4px]  mr-2">
                   <i
                     className="ri-file-copy-2-line text-[18px]  cursor-pointer"
                   ></i>
@@ -73,7 +73,7 @@ const Page = () => {
                         `/orders/edit?orderId=${data?.id}&customerId=${data?.customerId}`
                       )
                     }
-                    className="bg-[#288EAD] text-white px-[25px] py-[4px] "
+                    className="bg-[#4F8A6D] text-white px-[25px] py-[4px] "
                   >
                     Edit
                   </button>

@@ -303,7 +303,7 @@ const totalAmount:number=(cartTotal+deliveryCharge)-paidAmount
           <button
             // onClick={() => setActive(3)}
             className={` ${
-              isValid ? "bg-[#278ea5]" : "bg-[#CACACA]"
+              isValid ? "bg-[#4F8A6D]" : "bg-[#CACACA]"
             } text-white border-[rgba(0,0,0,.2)]  font-bold px-[30px] py-[5px]`}
           >
             Proceed to Checkout

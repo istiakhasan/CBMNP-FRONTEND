@@ -26,6 +26,21 @@ export const orderApi = baseApi.injectEndpoints({
 			}),
 			providesTags: [tagTypes.order],
 		}),
+		changeOrderStatus: build.mutation({
+			query: (arg) => ({
+				url: `/orders/change-status/${arg?.id}`,
+				method: "PATCH",
+				data:arg?.data
+			}),
+			invalidatesTags: [tagTypes.order],
+		}),
+		getOrdersLogs: build.query({
+			query: (arg) => ({
+				url: `/orders/logs/${arg?.id}`,
+				method: "GET"
+			}),
+			providesTags: [tagTypes.order],
+		}),
 		getOrderById: build.query({
 			query: (arg) => ({
 				url: `/orders/${arg.id}`,
@@ -41,6 +56,14 @@ export const orderApi = baseApi.injectEndpoints({
 			}),
 			invalidatesTags: [tagTypes.order],
 		}),
+		addPayment: build.mutation({
+			query: (data) => ({
+				url: `/orders/payment/${data?.id}`,
+				method: "POST",
+				data: data?.data,
+			}),
+			invalidatesTags: [tagTypes.order],
+		}),
 	
 	}),
 });
@@ -50,5 +73,8 @@ export const {
 	useGetOrderByIdQuery,
 	useUpdateOrderMutation,
 	useGetAllOrderStatusQuery,
-	useCreateOrderMutation
+	useCreateOrderMutation,
+	useAddPaymentMutation,
+	useChangeOrderStatusMutation,
+	useGetOrdersLogsQuery
 } = orderApi;

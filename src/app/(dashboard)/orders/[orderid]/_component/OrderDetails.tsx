@@ -39,6 +39,14 @@ const OrderDetails = ({ data }: any) => {
                       className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[4px] text-[20px] color_primary"
                     ></i>
                   </p>
+                  {data?.status?.label==="Hold" &&  <p className="mt-[3px]">
+                    <strong>Hold Reason:</strong>
+                    {data?.onHoldReason}
+                  </p>}
+                  {data?.status?.label==="Cancel" &&  <p className="mt-[3px]">
+                    <strong>Hold Reason:</strong>
+                    {data?.onCancelReason}
+                  </p>}
                   <p className="mt-[3px]">
                     <strong>Source:</strong>
                     {data?.orderSource}
@@ -99,7 +107,7 @@ const OrderDetails = ({ data }: any) => {
                     </div>
                     {addNote && (
                       <div
-                        style={{ border: "1px solid #278ea5" }}
+                        style={{ border: "1px solid #4F8A6D" }}
                         className="floating-label-input "
                       >
                         <label
@@ -374,7 +382,7 @@ const OrderDetails = ({ data }: any) => {
           <h1 className="font-semibold  text-[18px] ">Payment History</h1>
          {data?.paymentStatus !=="Paid" && <button
             onClick={() => setPaymentModalOpen(true)}
-            className={`bg-[#278ea5] text-white px-[43px] font-bold py-[6px] flex items-center gap-3`}
+            className={`bg-[#4F8A6D] text-white px-[43px] font-bold py-[6px] flex items-center gap-3`}
           >
             Add Payment
           </button>}

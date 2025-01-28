@@ -579,4 +579,84 @@ aside.gb_sidebar {
 	text-align: left;
 	padding: 8px;
   }
+
+
+
+  /* warehouse table container */
+  .warehouse-table-container {
+    background-color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  
+  .warehouse-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #d1d5db;
+    border-bottom: none;
+    border-left: 0;
+    border-right: 0;
+ 
+  }
+
+  
+  .warehouse-table thead {
+    background-color: #f3f4f6;
+  }
+  
+  .warehouse-table  th,
+  .warehouse-table  td {
+    padding: 4px 16px;
+    text-align: left;
+    font-size: 12px;
+  }
+  .warehouse-table thead th,
+  .warehouse-table tbody td {
+    border-bottom: 1px solid #d1d5db;
+  }
+  .warehouse-table tbody td:first-child,.warehouse-table thead th:first-child {
+    border-left: 1px solid #d1d5db;
+  }
+  .warehouse-table tbody td:last-child,.warehouse-table thead th:last-child {
+    border-right: 1px solid #d1d5db;
+  }
+
+  .warehouse-table th {
+    font-weight: 600;
+    color: #000;
+  }
+  
+  .warehouse-table tbody tr:hover {
+    background-color: #f9fafb;
+  }
+  
+  .warehouse-table .product-name {
+    color: #2563eb;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  
+  .warehouse-table .product-name:hover {
+    text-decoration: underline;
+  }
+  .warehouse-table tfoot tr:last-child{
+    background: black;
+    color: white;
+  }
+
+  @media print {
+    @page {
+      margin: 50px 10px/* Adjust as needed (20mm = 2cm) */
+    }
+  
+    .warehouse-table  th,
+    .warehouse-table  td,
+    .warehouse-table-container h2,.robin
+     {
+      text-align: left;
+      font-size: 8px !important;
+    }
+  }
+  
   

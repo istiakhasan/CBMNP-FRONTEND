@@ -15,9 +15,7 @@ const PaymentHistory = ({ data }: any) => {
                 <th style={{background:"white"}}>Payment Method</th>
                 <th style={{background:"white"}}>TrxID</th>
                 <th style={{background:"white"}}>Paid Amount</th>
-                <th style={{background:"white"}}>Total Paid Amount</th>
-                <th style={{background:"white"}}>Due Amount</th>
-                <th style={{background:"white"}}>Total </th>
+               
             </tr>
         </thead>
         <tbody>
@@ -28,14 +26,16 @@ const PaymentHistory = ({ data }: any) => {
                 <td>{item?.paymentStatus || "N/A"}</td>
                 <td>{item?.paymentMethod || "N/A"}</td>
                 <td>{item?.transactionId || "N/A"}</td>
-                <td ><span className="font-semibold">BDT:  {item?.paidAmount || "N/A"}</span></td>
-                <td ><span className="font-semibold">BDT:  {data?.totalPaidAmount || "N/A"}</span></td>
-                <td ><span className="font-semibold">BDT:  {data?.totalReceiveAbleAmount || 0}</span></td>
-                <td><span className="font-semibold">BDT:  {data?.totalPrice  || "N/A"} </span></td>
+                <td ><span >{item?.paidAmount || "N/A"} tk</span></td>
             </tr>
             ))
         }
-            
+             <tr>
+               
+                <td style={{border:0}} colSpan={3}></td>
+                <td><strong>Total Paid</strong></td>
+                <td ><span className="">{Number(data?.totalPaidAmount).toFixed(2) || "N/A"} tk</span></td>
+            </tr>
         </tbody>
       </table>
     </div>

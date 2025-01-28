@@ -75,7 +75,7 @@ const CreateCustomerEdit = ({ setCustomer, customer }: any) => {
                     </p>
                     <span
                       onClick={() => setEditCustomerdrawar(true)}
-                      className="flex items-center font-semibold text-[#278EA5] hover:[#278EA5] cursor-pointer"
+                      className="flex items-center font-semibold text-[#4F8A6D] hover:[#4F8A6D] cursor-pointer"
                     >
                       <i className="ri-ball-pen-line mr-1"></i>Edit
                     </span>

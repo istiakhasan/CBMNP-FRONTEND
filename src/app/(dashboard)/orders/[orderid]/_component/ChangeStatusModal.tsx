@@ -2,9 +2,10 @@ import GbForm from "@/components/forms/GbForm";
 import GbFormSelect from "@/components/forms/GbFormSelect";
 
 import {
-  useApprovedOrderMutation,
-  useGetAllOrderStatusQuery,
+  useChangeOrderStatusMutation,
+  useUpdateOrderMutation,
 } from "@/redux/api/orderApi";
+import { useGetAllStatusQuery } from "@/redux/api/statusApi";
 import { getUserInfo } from "@/service/authService";
 import { message } from "antd";
 import { useRouter } from "next/navigation";
@@ -12,59 +13,26 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 
 const ChangeStatusModal = ({ setModalOpen, rowData }: any) => {
-  const [approvedOrderHandler] = useApprovedOrderMutation();
+   const [handleUpdateOrder] = useChangeOrderStatusMutation()
   const userInfo: any = getUserInfo();
   const router=useRouter()
-  let order_status_value = "";
-  if (
-    rowData?.orderStatus?.value === "6" ||
-    rowData?.orderStatus?.value === "5"
-  ) {
-    order_status_value = "Canceled";
-  } else if (rowData?.orderStatus?.value === "2") {
-    order_status_value = "Hold,Canceled";
-  } else if (rowData?.orderStatus?.value === "4") {
-    order_status_value = "Approved,Unreachable,Canceled";
-  } else if (rowData?.orderStatus?.value === "3") {
-    order_status_value = "Approved,Canceled";
-  } else {
-    order_status_value = "Approved,Unreachable,Hold,Canceled";
-  }
-  const { data: orderStatus } = useGetAllOrderStatusQuery({
-    statuses: order_status_value,
+
+ console.log(userInfo,"user info");
+  const { data: orderStatus } = useGetAllStatusQuery({
+    label:rowData?.status?.label
   });
   const { watch, handleSubmit } = useFormContext();
   const onsubmit = async (data: any) => {
     try {
-      const payload = {
-        comments: watch()?.reason?.value,
-        agentId: userInfo?.employeeId,
-        isAction: true,
-        cancelWithReason: watch()?.reason?.value,
-        orderStatusValue: watch()["orderStatus"]?.value,
-        orderStatus: {
-          name: watch()["orderStatus"]?.label,
-          value: watch()["orderStatus"]?.value,
-        },
-      };
-      const payloadForApproved = {
-        //   comments:watch()?.reason?.value,
-        isAction: true,
-        agentId: userInfo?.employeeId,
-        orderStatusValue: watch()["orderStatus"]?.value,
-        orderStatus: {
-          name: watch()["orderStatus"]?.label,
-          value: watch()["orderStatus"]?.value,
-        },
-        isApprove: true,
-      };
 
-      const res = await approvedOrderHandler({
+      const res = await handleUpdateOrder({
         id: rowData?.id,
-        data:
-          watch()["orderStatus"]?.value === "Approved"
-            ? payloadForApproved
-            : payload,
+        data:{
+          statusId:data?.orderStatus?.value,
+          agentId:userInfo.userId,
+          ...(data?.orderStatus?.label==="Hold"&&  {onHoldReason:data?.reason?.value,}),
+          ...(data?.orderStatus?.label==="Cancel"&&  {onCancelReason:data?.reason?.value,}),
+        },
       });
       if (res) {
         message.success("Order update successfully...");
@@ -76,19 +44,7 @@ const ChangeStatusModal = ({ setModalOpen, rowData }: any) => {
     }
   };
 
-  console.log(
-    "row data",
-    rowData?.deliveryDate, //
-    rowData?.deliveryType, //
-    rowData?.receiverName, //1
-    rowData?.shippingAddressDistrict, //
-    rowData?.shippingAddressDivision, //
-    rowData?.shippingAddressTextArea, //
-    rowData?.shippingAddressThana, //
-    rowData?.deliveryCharge,
-    rowData?.orderType, //
-    rowData?.currier //
-  );
+
 
   return (
     <div className="p-[15px] bg-[#FFFFFF]">
@@ -110,37 +66,10 @@ const ChangeStatusModal = ({ setModalOpen, rowData }: any) => {
           />
         </svg>
       </div>
-
-      {!rowData?.deliveryDate ||
-      !rowData?.deliveryType ||
-      !rowData?.receiverName ||
-      !rowData?.shippingAddressDistrict ||
-      !rowData?.shippingAddressDivision ||
-      !rowData?.shippingAddressTextArea ||
-      !rowData?.shippingAddressThana ||
-      !rowData?.orderType ||
-      !rowData?.currier ? (
-        <>
-          <p>Some mandatory data missing,please navigate to edit page </p>
-          <div className="flex justify-end mt-3">
-            <button 
-              onClick={()=>router.push(`/orders/gb/edit?orderId=${rowData?.id}&customerId=${rowData?.customer_Id}&isApprove=true`)}
-              className={` ${
-                true ? "bg-[#278ea5]" : "bg-[#CACACA]"
-              } text-white border-[rgba(0,0,0,.2)]  font-bold px-[30px] py-[5px]`}
-            >
-              Navigate
-            </button>
-          </div>
-        </>
-      ) : (
-        <>
           <div>
             <GbFormSelect
               name="orderStatus"
-              options={orderStatus?.map((item: any) => {
-                return { label: item?.name, value: item?.value };
-              })}
+              options={orderStatus?.data}
               label="Select Status"
             />
           </div>
@@ -201,7 +130,7 @@ const ChangeStatusModal = ({ setModalOpen, rowData }: any) => {
             <button
               onClick={() => setModalOpen(false)}
               className={` ${
-                true ? "border-[#278ea5] text-[#278ea5]" : "bg-[#CACACA]"
+                true ? "border-[#4F8A6D] text-[#4F8A6D]" : "bg-[#CACACA]"
               }  border-[rgba(0,0,0,.2)] border  font-bold px-[30px] py-[5px]`}
             >
               Cancel
@@ -209,14 +138,13 @@ const ChangeStatusModal = ({ setModalOpen, rowData }: any) => {
             <button
               onClick={handleSubmit(onsubmit)}
               className={` ${
-                true ? "bg-[#278ea5]" : "bg-[#CACACA]"
+                true ? "bg-[#4F8A6D]" : "bg-[#CACACA]"
               } text-white border-[rgba(0,0,0,.2)]  font-bold px-[30px] py-[5px]`}
             >
               Confirm
             </button>
           </div>
-        </>
-      )}
+     
     </div>
   );
 };

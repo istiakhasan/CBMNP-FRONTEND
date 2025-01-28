@@ -166,7 +166,7 @@ const AddPaymentModal = ({ setModalOpen ,rowData}: any) => {
        <button 
          onClick={()=>setModalOpen(false)}
           className={` ${
-            true ? "border-[#278ea5] text-[#278ea5]" : "bg-[#CACACA]"
+            true ? "border-[#4F8A6D] text-[#4F8A6D]" : "bg-[#CACACA]"
           }  border-[rgba(0,0,0,.2)] border  font-bold px-[30px] py-[5px]`}
         >
           Cancel
@@ -174,7 +174,7 @@ const AddPaymentModal = ({ setModalOpen ,rowData}: any) => {
        <button 
           onClick={handleSubmit(onsubmit)}
           className={` ${
-            true ? "bg-[#278ea5]" : "bg-[#CACACA]"
+            true ? "bg-[#4F8A6D]" : "bg-[#CACACA]"
           } text-white border-[rgba(0,0,0,.2)]  font-bold px-[30px] py-[5px]`}
         >
           Confirm

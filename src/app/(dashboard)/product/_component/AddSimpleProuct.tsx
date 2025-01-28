@@ -180,7 +180,7 @@ const AddSimpleProuct = ({ setDrawerOpen }: any) => {
         <button 
           disabled={submitLoading}
           type="submit"
-          className="bg-[#278ea5] w-[100px] text-white border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[15px] py-[4px]"
+          className="bg-[#4F8A6D] w-[100px] text-white border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[15px] py-[4px]"
         >
           {submitLoading ? (
             <ConfigProvider

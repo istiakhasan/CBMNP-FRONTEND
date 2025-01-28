@@ -183,7 +183,7 @@ console.log(orderData,"order");
                       </p>
                     </div>
 
-                    <div className="border border-[#278EA5] h-fit">
+                    <div className="border border-[#4F8A6D] h-fit">
                       <span
                         onClick={() => {
                           const _data = [...cart];
@@ -281,7 +281,7 @@ console.log(orderData,"order");
                   className={` ${
                     cart?.length < 1 || Object.values(customer).length < 1
                       ? "bg-gray-400"
-                      : "bg-[#278ea5]"
+                      : "bg-[#4F8A6D]"
                   } text-white border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[30px] py-[5px]`}
                 >
                   Next
@@ -330,14 +330,6 @@ console.log(orderData,"order");
                 value:orderData?.currier,
               }}),
              ...(orderData?.last_transaction?.totalPaidAmount && { paidAmount:orderData?.last_transaction?.totalPaidAmount}),
-              // paymentStatus:{
-              //   label:orderData?.paymentStatus,
-              //   value:orderData?.paymentStatus,
-              // },
-              // paymentMethods:{
-              //   label:orderData?.last_transaction?.paymentMethods,
-              //   value:orderData?.last_transaction?.paymentMethods
-              // },
               orderRemark:orderData?.orderRemark
               
             }}

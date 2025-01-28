@@ -3,6 +3,14 @@ import { baseApi } from "./baseApi";
 
 export const statusApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
+    getAllStatus: build.query({
+      query: (params) => ({
+        url: "/status",
+        method: "GET",
+        params
+      }),
+      providesTags: [tagTypes.status,tagTypes.order],
+    }),
     getOrdersCount: build.query({
       query: () => ({
         url: "/status/orders-count",
@@ -21,5 +29,6 @@ export const statusApi = baseApi.injectEndpoints({
 });
 export const {
  useGetOrdersCountQuery,
- useGetOrdersCountByIdQuery
+ useGetOrdersCountByIdQuery,
+ useGetAllStatusQuery
 } = statusApi;

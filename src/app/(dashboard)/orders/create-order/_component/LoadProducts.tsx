@@ -142,7 +142,7 @@ const LoadProducts = ({ setCart, cart }: any) => {
                       }
                       setCart([...cart, {...item,productQuantity:1}]);
                     }}
-                    className={`rounded-[2px]  border-[1px] font-semibold  px-[15px] py-[3px] ${(!item?.inventories?.stock  || item?.inventory?.inventories?.stock<1)?"bg-gray-300 opacity-[.3]":"color_primary border-[#278ea5]"}`}
+                    className={`rounded-[2px]  border-[1px] font-semibold  px-[15px] py-[3px] ${(!item?.inventories?.stock  || item?.inventory?.inventories?.stock<1)?"bg-gray-300 opacity-[.3]":"color_primary border-[#4F8A6D]"}`}
                   >
                     <i
                       style={{ fontSize: "18px" }}

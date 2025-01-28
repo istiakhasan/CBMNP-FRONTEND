@@ -223,7 +223,7 @@ const ReceiverInfoForm = ({formData,setSameAsBilling,setFormData,setActive}:any)
 
               <button
                 type='submit'
-                className={` ${isValid?"bg-[#278ea5]":"bg-[#CACACA]"} text-white border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[30px] py-[5px]`}
+                className={` ${isValid?"bg-[#4F8A6D]":"bg-[#CACACA]"} text-white border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[30px] py-[5px]`}
               >
                 Next
               </button>

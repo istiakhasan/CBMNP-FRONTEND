@@ -198,14 +198,14 @@ const ReceiverInfoFormEdit = ({formData,setSameAsBilling,setFormData,setActive}:
               <button 
                 type='button'
                 onClick={() => setActive(1)}
-                className="border-1 text-[#278ea5] border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[30px] py-[12px]"
+                className="border-1 text-[#4F8A6D] border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[30px] py-[12px]"
               >
                 Back
               </button>
 
               <button
                 type='submit'
-                className={` ${isValid?"bg-[#278ea5]":"bg-[#CACACA]"} text-white border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[30px] py-[12px]`}
+                className={` ${isValid?"bg-[#4F8A6D]":"bg-[#CACACA]"} text-white border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[30px] py-[12px]`}
               >
                 Next
               </button>

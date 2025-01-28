@@ -144,7 +144,7 @@ const OrderCartEdit = ({
                       <p>BDT {item?.subTotal?.toFixed(2)}</p>
                     </div>
 
-                    <div className="border border-[#278EA5] h-fit">
+                    <div className="border border-[#4F8A6D] h-fit">
                     <span
                         onClick={() => {
                           const _data = [...cart];
@@ -240,7 +240,7 @@ const OrderCartEdit = ({
                   className={` ${
                     cart?.length < 1 || Object.values(customer).length < 1
                       ? "bg-gray-400"
-                      : "bg-[#278ea5]"
+                      : "bg-[#4F8A6D]"
                   } text-white border-[rgba(0,0,0,.2)] border-[1px] font-bold px-[30px] py-[12px]`}
                 >
                   Next

@@ -76,7 +76,7 @@ const CreateCustomer = ({ setCustomer, customer }: any) => {
       <div className="sticky top-0  pt-[15px] bg-white">
         <div ref={containerRef} className="relative">
           <div
-            style={{ border: "1px solid #278ea5" }}
+            style={{ border: "1px solid #4F8A6D" }}
             className="floating-label-input "
           >
             <label

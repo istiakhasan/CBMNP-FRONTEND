@@ -1,42 +1,31 @@
 
+"use client"
 import GbFormInput from "@/components/forms/GbFormInput";
 import GbFormSelect from "@/components/forms/GbFormSelect";
-import { useApprovedOrderMutation, useGetAllOrderStatusQuery } from "@/redux/api/orderApi";
+import { useAddPaymentMutation } from "@/redux/api/orderApi";
+
 import { getUserInfo } from "@/service/authService";
 import { message } from "antd";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
 const AddPaymentModal = ({ setModalOpen ,rowData}: any) => {
-    const [approvedOrderHandler] = useApprovedOrderMutation();
-   const userInfo:any=getUserInfo()  
 
+   const userInfo:any=getUserInfo()  
+  const [addPaymentHandler]=useAddPaymentMutation()
   const {watch,handleSubmit,setValue}=useFormContext()
   const onsubmit=async(data:any)=>{
     try {
          const payload:any={
-            paidAmount: data?.paidAmount || 0,
+            paidAmount:data?.paymentStatus?.label==="Paid"? Number(rowData?.totalPrice)-Number(rowData?.totalPaidAmount):data?.paidAmount,
             paymentStatus: data?.paymentStatus?.label,
             transactionId: data?.transactionId || "",
-            paymentMethods: data["paymentMethods"]?.value,
-            employeeId: userInfo?.employeeId,
-            agentId: userInfo?.employeeId,
-            orderDetails: rowData?.order_info?.map((item:any)=>{
-                return {
-                        productId: item?.productId,
-                        current_prices: item?.product?.current_prices,
-                        productNameEn: item?.productNameEn,
-                        singleProductPrices: item?.product?.current_prices,
-                        productQuantity: item?.productQuantity || 1,
-                        subTotal:
-                          item?.product?.current_prices * (item.productQuantity || 1),
-                        isCancel: false,
-                        productWeight: item?.product?.pack_size,
-                }
-            }),
+            paymentMethod: data["paymentMethod"]?.value,
+            orderId: rowData?.id,
+            userId: userInfo?.userId,
          }
-       
-        const res = await approvedOrderHandler({ id: rowData?.id, data:payload });
+         console.log(payload,"payload");
+        const res = await addPaymentHandler({ id: rowData?.id, data:payload });
         if (res) {
           message.success("Payment added");
           setModalOpen(false)
@@ -90,9 +79,9 @@ const AddPaymentModal = ({ setModalOpen ,rowData}: any) => {
                   },
                 ]}
                 handleChange={(v: any) => {
-                  setValue("paymentMethods", null);
+                  setValue("paymentMethod", null);
                   if (v?.value === "Pending") {
-                    setValue("paymentMethods", {
+                    setValue("paymentMethod", {
                       label: "COD",
                       value: "COD",
                     });
@@ -111,7 +100,7 @@ const AddPaymentModal = ({ setModalOpen ,rowData}: any) => {
                 disabled={
                   watch()?.paymentStatus?.value === "Pending" ? true : false
                 }
-                name="paymentMethods"
+                name="paymentMethod"
                 options={[
                   ...(watch()?.paymentStatus?.value === "Pending"
                     ? [
@@ -166,7 +155,7 @@ const AddPaymentModal = ({ setModalOpen ,rowData}: any) => {
        <button 
          onClick={()=>setModalOpen(false)}
           className={` ${
-            true ? "border-[#278ea5] text-[#278ea5]" : "bg-[#CACACA]"
+            true ? "border-[#4F8A6D] text-[#4F8A6D]" : "bg-[#CACACA]"
           }  border-[rgba(0,0,0,.2)] border  font-bold px-[30px] py-[5px]`}
         >
           Cancel
@@ -174,7 +163,7 @@ const AddPaymentModal = ({ setModalOpen ,rowData}: any) => {
        <button 
           onClick={handleSubmit(onsubmit)}
           className={` ${
-            true ? "bg-[#278ea5]" : "bg-[#CACACA]"
+            true ? "bg-[#4F8A6D]" : "bg-[#CACACA]"
           } text-white border-[rgba(0,0,0,.2)]  font-bold px-[30px] py-[5px]`}
         >
           Confirm

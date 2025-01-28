@@ -95,7 +95,7 @@ const OrderDetails = ({ data }: any) => {
           </div>
           {addNote && (
             <div
-              style={{ border: "1px solid #278ea5" }}
+              style={{ border: "1px solid #4F8A6D" }}
               className="floating-label-input "
             >
               <label
@@ -373,7 +373,7 @@ const OrderDetails = ({ data }: any) => {
          <div className="flex justify-end">
          <button
                 onClick={() => setPaymentModalOpen(true)}
-                className={`bg-[#278ea5] text-white px-[43px] font-bold py-[6px] flex items-center gap-3`}
+                className={`bg-[#4F8A6D] text-white px-[43px] font-bold py-[6px] flex items-center gap-3`}
               >
                 Add Payment
           </button>
