@@ -2,6 +2,8 @@ import GbForm from "@/components/forms/GbForm";
 import GbFormInput from "@/components/forms/GbFormInput";
 import GbFormTextArea from "@/components/forms/GbFormTextArea";
 import { useCreateWarehouseMutation } from "@/redux/api/warehouse";
+import { createWarehouseSchema } from "@/schema/schema";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { ConfigProvider, message, Spin } from "antd";
 import React, { useState } from "react";
 
@@ -11,7 +13,7 @@ const CreateWarehouse = ({setOpen}:any) => {
   return (
     <div className="p-[20px]">
         <h1 className="text-[20px]">Add Warehouse</h1>
-      <GbForm submitHandler={async(data: any,reset:any) => {
+      <GbForm resolver={yupResolver(createWarehouseSchema)} submitHandler={async(data: any,reset:any) => {
         try {
             setSubmitLoading(true)
             const res=await createWarehouse(data).unwrap()

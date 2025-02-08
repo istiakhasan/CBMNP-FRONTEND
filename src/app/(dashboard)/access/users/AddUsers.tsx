@@ -1,7 +1,10 @@
 import GbForm from "@/components/forms/GbForm";
 import GbFormInput from "@/components/forms/GbFormInput";
+import GbFormSelect from "@/components/forms/GbFormSelect";
 import GbFormTextArea from "@/components/forms/GbFormTextArea";
 import { useCreateUserMutation } from "@/redux/api/usersApi";
+import { createUserSchema } from "@/schema/schema";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { message } from "antd";
 import axios from "axios";
 import React from "react";
@@ -10,7 +13,7 @@ const AddUsers = ({setOpenAddUserModal}:any) => {
   const [handleCreateUser]=useCreateUserMutation()
   const formSubmit=async(data:any,reset:any)=>{
     try {
-      const res=await handleCreateUser(data).unwrap()
+      const res=await handleCreateUser({...data,role:data?.role.value}).unwrap()
       if(res?.success){
         message.success(res?.message)
         setOpenAddUserModal(false)
@@ -28,26 +31,37 @@ const AddUsers = ({setOpenAddUserModal}:any) => {
         <i onClick={()=>setOpenAddUserModal(false)} style={{fontSize:"18px"}} className="ri-close-large-fill cursor-pointer"></i>
     </div>
     <div style={{background:"rgba(0,0,0,.1)"}} className="mb-4 h-[1px]"></div>
-     <GbForm submitHandler={formSubmit}>
+     <GbForm resolver={yupResolver(createUserSchema)} submitHandler={formSubmit}>
       <div className="mb-3">
-        <GbFormInput name="role" label="Role" />
+        <GbFormSelect name="role" options={[
+          {
+            label:'Admin',
+            value:'admin',
+          }
+        ]} label="Role" />
       </div>
       <div className="mb-3">
+        {/* exist */}
         <GbFormInput name="name" label="Name" />
       </div>
       <div className="mb-3">
+        {/* exist */}
         <GbFormInput name="userId" label="Internal ID" />
       </div>
       <div className="mb-3">
+        {/* exist */}
         <GbFormInput name="email" label="Email" />
       </div>
       <div className="mb-3">
+        {/* exist */}
         <GbFormInput name="phone" label="Phone Number" />
       </div>
       <div className="mb-3">
+        {/* exist */}
         <GbFormTextArea name="address" label="Address" />
       </div>
       <div className="mb-3">
+        {/* exist */}
         <GbFormInput name="password" label="Password" />
       </div>
 

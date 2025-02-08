@@ -177,3 +177,18 @@ export const createCustomerSchema = yup.object().shape({
     return schema;
   }),
 });
+export const createWarehouseSchema = yup.object().shape({
+  name: yup.string().required(),
+  contactPerson: yup.string().required(),
+  phone: yup.string().required('Phone number is required'),
+  location: yup.string().required('Phone number is required')
+});
+export const createUserSchema = yup.object().shape({
+  name: yup.string().required(),
+  userId: yup.string().required(),
+  email: yup.string().required(),
+  phone: yup.string().required('Phone number is required'),
+  address: yup.string().required('Phone number is required'),
+  password: yup.string().required('Phone number is required'),
+  role: yup.object().required('Phone number is required'),
+});
