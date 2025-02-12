@@ -39,7 +39,7 @@ const LoadProducts = ({ setCart, cart }: any) => {
               />
              <div>
              <p className="text-gray-600 text-[14px] font-[400]">
-                {item?.product_title_en}
+                {item?.name}
               </p>
               <p className={` text-[12px] font-semibold ${(!item?.inventories?.stock || item?.inventories?.stock<1)?"text-red-400":"color_primary"}`}>
                   QTY: {item?.inventories?.stock || 0}

@@ -1,5 +1,6 @@
 "use client"
 import { Tooltip } from "antd";
+import { useLocale } from "next-intl";
 import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import React, { Fragment, useEffect, useState } from "react";
@@ -61,6 +62,7 @@ const menuItems: MenuItem[] = [
 ];
 const GbSidebar = () => {
   const pathName=usePathname()
+  const local=useLocale()
   const [isActive, setIsActive] = useState(false);
   const [subMenuActive,setSubMenuActive]=useState<any>(null)
   const [loading, setLoading] = useState(false);
@@ -72,7 +74,7 @@ const GbSidebar = () => {
   const handleButtonClick = (path:any) => {
     if(pathName !==path){
       setLoading(true);
-      router.push(path);
+      router.push(`/${local}/${path}`);
     }
   };
 

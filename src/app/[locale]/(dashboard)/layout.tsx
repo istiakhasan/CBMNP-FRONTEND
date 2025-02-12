@@ -2,20 +2,22 @@
 import GbSidebar from "@/components/ui/dashboard/GbSidebar";
 import { isLoggedIn } from "@/service/authService";
 import { Row, Space, Spin } from "antd";
+import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 const App: React.FC = ({ children }: any) => {
+  const local=useLocale()
   const router=useRouter()
   const [loading,setLoading]=useState(true)
   useEffect(()=>{
     const userLoggedIn=isLoggedIn()
     if(!userLoggedIn){
-      router.push('/login')
+      router.push(`/${local}/login`)
     }else{
       setLoading(false)
     }
 
-  },[router])
+  },[router,local])
 
   if(loading){
    return (

@@ -19,6 +19,7 @@ import axios from "axios";
 import { useGetAllUsersQuery, useUpdateUserByIdMutation } from "@/redux/api/usersApi";
 import AddUsers from "./AddUsers";
 import moment from "moment";
+import { useLocale } from "next-intl";
 const Users = () => {
   //Add user modal
   const [openAddUserModal, setOpenAddUserModal] = useState(false);
@@ -33,6 +34,8 @@ const Users = () => {
   const [updateUser]=useUpdateUserByIdMutation()
   const router = useRouter();
   const [open, setOpen] = useState(false);
+
+  const local=useLocale()
   const tableColumn = [
     {
       title: "Name",
@@ -41,7 +44,7 @@ const Users = () => {
       render: (text, record, index) => {
         return (
           <span
-            onClick={() => router.push(`/access/users/${record?.userId}`)}
+            onClick={() => router.push(`/${local}/access/users/${record?.userId}`)}
             className="color_primary cursor-pointer"
           >
             {record?.name}

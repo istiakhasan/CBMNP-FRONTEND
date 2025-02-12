@@ -2,10 +2,12 @@ import GbFormCheckbox from "@/components/forms/GbCheckbox";
 import GbFormInput from "@/components/forms/GbFormInput";
 import GbFormSelect from "@/components/forms/GbFormSelect";
 import GbFormTextArea from "@/components/forms/GbFormTextArea";
+import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
 import React, { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-const OparationainfoForm = ({ setActive, cart }: any) => {
+const OperationalInfoForm = ({ setActive, cart }: any) => {
+  const {data}=useLoadAllWarehouseOptionsQuery(undefined)
   const {
     watch,
     setValue,
@@ -28,6 +30,13 @@ const totalAmount:number=(cartTotal+deliveryCharge)-paidAmount
       <div>
         <div className="px-[20px]">
           <div className="min-h-[70vh]">
+            <div className="mb-4">
+              <GbFormSelect
+                options={data?.data}
+                name="Warehouse"
+                label="Warehouse"
+              />
+            </div>
             <div className="mb-4">
               <GbFormSelect
                 options={[
@@ -314,4 +323,4 @@ const totalAmount:number=(cartTotal+deliveryCharge)-paidAmount
   );
 };
 
-export default OparationainfoForm;
+export default OperationalInfoForm;

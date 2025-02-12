@@ -52,7 +52,7 @@
 
 // export { instance };
 import { authKey } from "@/constants/storageKey";
-import { getNewAccessToken, removeUserInfo } from "@/service/authService";
+import { getNewAccessToken, getUserInfo, removeUserInfo } from "@/service/authService";
 import { getFormLocalStorage, setToLocalStorage } from "@/util/local-storage";
 import axios from "axios";
 
@@ -66,6 +66,12 @@ instance.interceptors.request.use(
     const accessToken = getFormLocalStorage(authKey);
     if (accessToken) {
       config.headers.Authorization =accessToken;
+    }
+
+    const userInfo:any=  getUserInfo()
+
+    if (userInfo?.organizationId) {
+      config.headers['x-organization-id'] = userInfo?.organizationId;
     }
     return config;
   },

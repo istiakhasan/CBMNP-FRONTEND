@@ -4,7 +4,7 @@ import { useGetUserByIdQuery } from "@/redux/api/usersApi";
 import convertNumberToShorthand from "@/util/convertNumberToShorthand";
 import { Spin } from "antd";
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import AllOrders from "./AllOrders";
 import PendingOrders from "./PendingOrders";
 import ApprovedOrders from "./ApprovedOrders";
@@ -17,13 +17,14 @@ import UnreachableOrders from "./UnreachableOrders";
 import CancelOrders from "./CancelOrders";
 import { useGetOrdersCountQuery } from "@/redux/api/statusApi";
 import { getUserInfo } from "@/service/authService";
+import { useRouter } from "next/navigation";
 
 const OrdersPage = () => {
   const [activeTab, setActiveTab] = useState<string>("1");
   const [searchTerm, setSearchTerm] = useState("");
   const userInfo: any = getUserInfo();
   const router = useRouter();
-
+  const local=useLocale()
   const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
     id: userInfo?.userId,
   });
@@ -52,10 +53,10 @@ const OrdersPage = () => {
     }));
 
   const components: { [key: string]: any } = {
-    "1": <PendingOrders searchTerm={searchTerm} />,
-    "3": <ApprovedOrders searchTerm={searchTerm} />,
+    "1": <PendingOrders countData={countData} searchTerm={searchTerm} />,
+    "3": <ApprovedOrders countData={countData} searchTerm={searchTerm} />,
     "4": <HoldOrders searchTerm={searchTerm} />,
-    "9": <AllOrders searchTerm={searchTerm} />,
+    "9": <AllOrders countData={countData} searchTerm={searchTerm} />,
     "5": <StoreOrders searchTerm={searchTerm} />,
     "6": <PackingOrders searchTerm={searchTerm} />,
     "7": <InTransitOrders searchTerm={searchTerm} />,
@@ -77,7 +78,7 @@ const OrdersPage = () => {
             {permission?.includes("CREATE_ORDERS") && (
               <div className="flex items-center justify-end gap-3 flex-wrap">
                 <button
-                  onClick={() => router.push("/orders/create-order")}
+                  onClick={() => router.push(`/${local}/orders/create-order`)}
                   className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]"
                 >
                   Create order

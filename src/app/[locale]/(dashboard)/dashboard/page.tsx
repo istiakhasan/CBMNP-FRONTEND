@@ -4,10 +4,12 @@ import GbHeader from '@/components/ui/dashboard/GbHeader';
 import { Card, Col, Row, Segmented, Statistic } from 'antd';
 import { ArrowUpOutlined } from '@ant-design/icons';
 import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
 const PortFolioOverview = dynamic(() => import('./_component/PortFolioOverview'), {
   ssr: false 
 });
 const Page = () => {
+  const t = useTranslations('Dashboard');
   return (
     <div className=' h-screen'>
       <GbHeader title='Dashboard' />
@@ -15,8 +17,8 @@ const Page = () => {
         <div className='flex items-start gap-2'>
           <i className="ri-layout-grid-fill text-[20px]"></i>
           <div className=''>
-            <p className='text-[26px]  font-bold  leading-none'>Dashboard</p>
-            <p className='text-[16px] text-gray-500  my-0 py-0'>Welcome back,Istiak!</p>
+            <p className='text-[26px]  font-bold  leading-none'>{t('title')}</p>
+            <p className='text-[16px] text-gray-500  my-0 py-0'>{t('bio')}Istiak!</p>
           </div>
         </div>
         <div>

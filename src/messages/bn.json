@@ -1,0 +1,10 @@
+{
+    "HomePage": {
+      "title": "bangla title",
+      "about": "Go to the bangla about page"
+    },
+    "Dashboard": {
+      "title": "ড্যাশবোর্ড",
+      "bio": "আবার স্বাগতম,"
+    }
+  }

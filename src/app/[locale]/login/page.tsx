@@ -9,8 +9,10 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { loginSchema } from "@/schema/schema";
 import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
+import { useLocale } from "next-intl";
 
 const Page = () => {
+  const local=useLocale()
   const [handleUserLogin] = useSignInMutation();
   const [loading,setLoading]=useState(true)
   const router = useRouter();
@@ -21,7 +23,7 @@ const Page = () => {
       if (res?.data?.accessToken) {
         const result: { role: string } = jwtDecode(res?.data?.accessToken);
         storeUserInfo({ accessToken: res?.data?.accessToken });
-        router.push("/dashboard");
+        router.push(`/${local}/dashboard"`);
       }
     } catch (error: any) {
       if (error) {
@@ -33,11 +35,11 @@ const Page = () => {
   };
   useEffect(() => {
     if (userInfo?.role) {
-      return redirect("/dashboard");
+      return redirect(`/${local}/dashboard`);
     }else{
       setLoading(false)
     }
-  }, [userInfo?.role]);
+  }, [userInfo?.role,local]);
   return (
     <section className=" h-[100vh] flex items-center justify-center bg-[#f7f7f7]  mx-auto">
      {

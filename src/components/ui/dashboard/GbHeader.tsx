@@ -5,8 +5,12 @@ import GbDropdown from "./GbDropdown";
 import Link from "next/link";
 import { removeUserInfo } from "@/service/authService";
 import { useRouter } from "next/navigation";
+import LocalSwitcher from "@/components/LocalSwitcher";
+import { useLocale } from "next-intl";
+import { useEffect } from "react";
 const GbHeader = ({title}:{title?:string}) => {
   const router=useRouter()
+  const local=useLocale()
   const items: MenuProps["items"] = [
     {
       label: (
@@ -68,7 +72,7 @@ const GbHeader = ({title}:{title?:string}) => {
         <>
           <span onClick={()=>{
             removeUserInfo('token')
-            router.push('/login')
+            router.push(`/${local}/login`)
             }} className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
             <i
               style={{ fontSize: "20px" }}
@@ -82,16 +86,21 @@ const GbHeader = ({title}:{title?:string}) => {
     },
   ];
 
+
   return (
     <div className="bg-[#FFFFFF] gb-header h-[65px] px-[16px] flex items-center sticky top-0 z-50">
        <h1 className="text-2xl  text-primary">{title}</h1>
       <div className="ml-auto flex items-center gap-[32px]">
+      <div>
+         <LocalSwitcher />
+        </div>
         <div>
           <i
             style={{ fontSize: "20px", cursor: "pointer" }}
             className="ri-notification-3-line"
           ></i>
         </div>
+        
         <div>
           <GbDropdown items={items}>
             <div className="cursor-pointer flex gap-[8px]">

@@ -2,18 +2,18 @@
 import { message } from "antd";
 import React, { useState } from "react";
 import GbForm from "@/components/forms/GbForm";
-import OparationainfoForm from "./OparationainfoForm";
+
 import ReceiverInfoForm from "./ReceiverInfoForm";
 import { getUserInfo } from "@/service/authService";
 import { useCreateOrderMutation } from "@/redux/api/orderApi";
 import moment from "moment";
+import OperationalInfoForm from "./OperationalInfoForm";
 
 const OrderCart = ({
   setCart,
   cart,
   customer,
   setCustomer,
-  setOrderSuccessResponse,
   setOrderSuccessModal,
 }: any) => {
   const [active, setActive] = useState(1);
@@ -28,43 +28,44 @@ const OrderCart = ({
 
       const commonEntity: any = {
         // customer info or sender info
-        customerId: customer?.customer_Id,//exist
+        customerId: customer?.customer_Id,
         // receiver info
-        receiverName: finalData?.receiverName,//exist
-        receiverPhoneNumber: finalData?.receiverPhoneNumber,//exist
+        receiverName: finalData?.receiverName,
+        receiverPhoneNumber: finalData?.receiverPhoneNumber,
         receiverAdditionalPhoneNumber: finalData?.receiverAdditionalPhoneNumber,
-        receiverDivision: finalData?.shippingAddressDivision?.label,//exist
-        receiverDistrict: finalData?.shippingAddressDistrict?.label,//exist
-        receiverThana: finalData?.shippingAddressThana?.label,//exist
-        receiverAddress: finalData?.shippingAddressTextArea,//exist
-        deliveryDate: finalData.deliveryDate,//exist
+        receiverDivision: finalData?.shippingAddressDivision?.label,
+        receiverDistrict: finalData?.shippingAddressDistrict?.label,
+        receiverThana: finalData?.shippingAddressThana?.label,
+        receiverAddress: finalData?.shippingAddressTextArea,
+        deliveryDate: finalData.deliveryDate,
         //  operational information
-        orderSource: finalData?.orderFrom?.label,//exist
-        currier: finalData?.currier?.label,//exist
-        shippingCharge: finalData?.deliveryCharge?.value,//exist
-        shippingType: finalData?.deliveryType?.label,//exist
-        orderType: finalData?.orderType?.label,///exist
-        agentId: "R-000000001",//exist
-        deliveryNote: finalData?.deliveryNote,//exist
+        orderSource: finalData?.orderFrom?.label,
+        currier: finalData?.currier?.label,
+        shippingCharge: finalData?.deliveryCharge?.value,
+        shippingType: finalData?.deliveryType?.label,
+        orderType: finalData?.orderType?.label,
+        agentId: "R-000000001",
+        deliveryNote: finalData?.deliveryNote,
         comments: finalData?.comments,
-        statusId:2,//exist
-        paymentMethod: finalData["paymentMethods"]?.value, //exist
-        paymentStatus: finalData["paymentStatus"]?.value, //exist
+        locationId:finalData?.Warehouse?.value,
+        statusId:2,
+        paymentMethod: finalData["paymentMethods"]?.value, 
+        paymentStatus: finalData["paymentStatus"]?.value, 
         // products
         products: cart?.map((item: any) => {
           return {
             productId: item?.id,
             productQuantity: item?.productQuantity,
           };
-        }),  //exist
+        }),  
       };
       if(finalData["paymentStatus"]?.value!=="Pending"){
         commonEntity['paymentHistory']=[
           {
-            paidAmount: finalData?.paidAmount || 0,//exist
-            paymentStatus: finalData?.paymentStatus?.label,//exist
-            transactionId: finalData?.transactionId || "",//exist
-            paymentMethod: finalData["paymentMethods"]?.value, //exist
+            paidAmount: finalData?.paidAmount || 0,
+            paymentStatus: finalData?.paymentStatus?.label,
+            transactionId: finalData?.transactionId || "",
+            paymentMethod: finalData["paymentMethods"]?.value, 
           }
         ]
       }
@@ -73,7 +74,6 @@ const OrderCart = ({
         setCart([]);
         setCustomer({});
         setOrderSuccessModal(true);
-        setOrderSuccessResponse(res);
         setActive(1);
         setFormData({});
         return message.success("Order placed successfully...");
@@ -93,7 +93,7 @@ const OrderCart = ({
     );
   }
 
-  const defaultvalue = {
+  const defaultValue = {
     receiverName:
       customer?.customerType === "NON_PROBASHI" ? customer?.customerName : "",
     customerType: customer?.customerType,
@@ -303,7 +303,7 @@ const OrderCart = ({
         {active === 2 && (
           <GbForm
             // resolver={yupResolver(receiverFormSchema)}
-            defaultValues={sameAsBilling ? defaultvalue : notSameAsBilling}
+            defaultValues={sameAsBilling ? defaultValue : notSameAsBilling}
             submitHandler={handleFormSubmit}
           >
             <ReceiverInfoForm
@@ -339,7 +339,7 @@ const OrderCart = ({
             // resolver={yupResolver(operationalSchema)}
             submitHandler={handleFormSubmit}
           >
-            <OparationainfoForm setActive={setActive} cart={cart} />
+            <OperationalInfoForm setActive={setActive} cart={cart} />
           </GbForm>
         )}
       </div>

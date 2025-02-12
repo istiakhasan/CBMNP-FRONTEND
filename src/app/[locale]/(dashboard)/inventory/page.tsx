@@ -58,7 +58,7 @@ const Page = () => {
           <div className="flex items-center gap-2">
             <span>{record?.inventoryItems?.length || "N/A"}</span>
             <Tooltip
-              overlayInnerStyle={{ background: "green", width: "900px" }}
+              overlayInnerStyle={{ background: "green", width: "1000px" }}
               autoAdjustOverflow={false}
               trigger={["click"]}
               color="white"
@@ -86,6 +86,12 @@ const Page = () => {
                             Available Quantity
                           </th>
                           <th className="border text-black font-[600] border-gray-300 px-4 py-2 text-left text-sm ">
+                          Queue Quantity
+                          </th>
+                          <th className="border text-black font-[600] border-gray-300 px-4 py-2 text-left text-sm ">
+                          Processing Quantity
+                          </th>
+                          <th className="border text-black font-[600] border-gray-300 px-4 py-2 text-left text-sm ">
                             Shortage
                           </th>
                           <th className="border text-black font-[600] border-gray-300 px-4 py-2 text-left text-sm ">
@@ -110,16 +116,22 @@ const Page = () => {
                                 {item?.location?.location}
                               </td>
                               <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
-                                {item?.quantity}
+                                {item?.quantity || 0}
+                              </td>
+                              <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
+                                {item?.orderQue || 0}
+                              </td>
+                              <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
+                                {item?.processing || 0}
                               </td>
                               <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
                                 {"pending"}
                               </td>
                               <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
-                                {item?.wastageQuantity}
+                                {item?.wastageQuantity || 0}
                               </td>
                               <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
-                                {item?.expiredQuantity}
+                                {item?.expiredQuantity || 0}
                               </td>
                             </tr>
                           )
@@ -144,6 +156,24 @@ const Page = () => {
       //@ts-ignore
       render: (text, record, index) => {
         return <span>{record?.stock}</span>;
+      },
+    },
+    {
+      title: "Queue Quantity",
+      key: 15,
+      align: "start",
+      //@ts-ignore
+      render: (text, record, index) => {
+        return <span>{record?.orderQue || 0}</span>;
+      },
+    },
+    {
+      title: "Processing Quantity",
+      key: 115,
+      align: "start",
+      //@ts-ignore
+      render: (text, record, index) => {
+        return <span>{record?.processing || 0}</span>;
       },
     },
     {
