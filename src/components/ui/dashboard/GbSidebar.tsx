@@ -50,6 +50,18 @@ const menuItems: MenuItem[] = [
     ]
   },
   {
+    href: '/requisition',
+    title: 'Requisitions', // Plural to indicate multiple requisitions
+    icon: 'ri-store-2-line',
+    children: [
+      {
+        href: "/requisition/manage",
+        title: "Manage Requisitions" // More descriptive
+      }
+    ]
+  },
+  
+  {
     href: '/warehouse',
     title: 'Warehouse',
     icon: 'ri-map-pin-fill'

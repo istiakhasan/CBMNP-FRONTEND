@@ -5,7 +5,7 @@ export const requisitionApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     createRequisition: build.mutation({
       query: (data) => ({
-        url: "/requisition/create",
+        url: "/requisition",
         method: "POST",
         data,
       }),
@@ -13,7 +13,7 @@ export const requisitionApi = baseApi.injectEndpoints({
     }),
     getAllRequisition: build.query({
       query: (data) => ({
-        url: "/requisition/get-all",
+        url: "/requisition",
         method: "GET",
       }),
       providesTags: [tagTypes.requisition],

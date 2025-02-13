@@ -1,39 +1,38 @@
 "use client";
 import GbTable from "@/components/GbTable";
+import GbDropdown from "@/components/ui/dashboard/GbDropdown";
 import { useGetAllOrdersQuery } from "@/redux/api/orderApi";
+import { useCreateRequisitionMutation } from "@/redux/api/requisitionApi";
+import { getUserInfo } from "@/service/authService";
 import StatusBadge from "@/util/StatusBadge";
 
 import {
   Checkbox,
   CheckboxOptionType,
+  MenuProps,
+  message,
   Pagination,
   Popover,
   TableProps,
 } from "antd";
 import moment from "moment";
 import { useRouter } from "next/navigation";
-import React, {  useState } from "react";
-const rowSelection: TableProps<any>['rowSelection'] = {
-  onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
-    console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-  },
-  getCheckboxProps: (record: any) => ({
-    disabled: record.name === 'Disabled User', // Column configuration not to be checked
-    name: record.name,
-  }),
-};
+import React, { useState } from "react";
 
-const ApprovedOrders = ({}: any) => {
+const ApprovedOrders = ({refetch:countRefetch}: any) => {
   // all states
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
   const [searchTerm, setSearchTerm] = useState("");
-  const { data, isLoading } = useGetAllOrdersQuery({
+  const [selectedOrders, setSelectedOrders] = useState<any>([]);
+  const { data, isLoading,refetch } = useGetAllOrdersQuery({
     page,
     limit: size,
     searchTerm,
-    statusId:"2"
+    statusId: "2",
   });
+
+  const [handleCreateRequisition]=useCreateRequisitionMutation()
 
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -98,7 +97,7 @@ const ApprovedOrders = ({}: any) => {
       align: "start",
       render: (_: any, record: any) => (
         <>
-         <StatusBadge status={record?.status} />
+          <StatusBadge status={record?.status} />
         </>
       ),
     },
@@ -179,7 +178,10 @@ const ApprovedOrders = ({}: any) => {
                 onClick={() => router.push(`/orders/${record?.id}`)}
                 className=" text-white text-[10px] py-[2px] px-[10px] cursor-pointer"
               >
-                <i style={{fontSize:"18px"}} className="ri-eye-fill color_primary"></i>
+                <i
+                  style={{ fontSize: "18px" }}
+                  className="ri-eye-fill color_primary"
+                ></i>
               </span>
             }
           </>
@@ -187,7 +189,8 @@ const ApprovedOrders = ({}: any) => {
       },
     },
   ];
-
+ const userInfo:any=getUserInfo()
+ console.log(userInfo,"userif");
   const defaultCheckedList = tableColumn.map((item: any) => item.key as string);
   const [checkedList, setCheckedList] = useState(defaultCheckedList);
   const newColumns = tableColumn.map((item: any) => ({
@@ -201,6 +204,56 @@ const ApprovedOrders = ({}: any) => {
     label: title,
     value: key,
   }));
+
+  const rowSelection: TableProps<any>["rowSelection"] = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
+      setSelectedOrders(selectedRows);
+      console.log(
+        `selectedRowKeys: ${selectedRowKeys}`,
+        "selectedRows: ",
+        selectedRows
+      );
+    },
+    getCheckboxProps: (record: any) => ({
+      disabled: record.name === "Disabled User",
+      name: record.name,
+    }),
+  };
+
+  const items: MenuProps["items"] = [
+    {
+      label: (
+        <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
+          <span onClick={async()=>{
+            try {
+              const payload=selectedOrders.map((item:any)=>item?.id)
+ 
+              const res= await handleCreateRequisition({
+                orderIds:payload,
+                userId:userInfo?.userId
+              }).unwrap()
+              refetch()
+              countRefetch()
+              message.success('Requisition create successfully..')
+            } catch (error) {
+              
+              console.log(error,"selected orders");
+            }
+          }}>Make Requisition</span>
+        </span>
+      ),
+      key: "0",
+    },
+    {
+      label: (
+        <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
+          <span>Change Status</span>
+        </span>
+      ),
+      key: "1",
+    },
+  ];
+
   return (
     <div className="gb_border">
       <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
@@ -238,19 +291,32 @@ const ApprovedOrders = ({}: any) => {
             </div>
           </Popover>
         </div>
-        <Pagination
-          pageSize={size}
-          total={data?.meta?.total}
-          onChange={(v, d) => {
-            setPage(v);
-            setSize(d);
-          }}
-          showSizeChanger={false}
-        />
+        <div className="flex gap-3">
+          <Pagination
+            pageSize={size}
+            total={data?.meta?.total}
+            onChange={(v, d) => {
+              setPage(v);
+              setSize(d);
+            }}
+            showSizeChanger={false}
+          />
+
+          <div>
+            <GbDropdown items={items}>
+              <button
+                // onClick={() => router.push(`/${local}/orders/create-order`)}
+                className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]"
+              >
+                Action
+              </button>
+            </GbDropdown>
+          </div>
+        </div>
       </div>
       <div className="max-h-[600px] overflow-scroll">
-        <GbTable 
-          rowSelection={rowSelection }
+        <GbTable
+          rowSelection={rowSelection}
           loading={isLoading}
           columns={newColumns}
           dataSource={data?.data}

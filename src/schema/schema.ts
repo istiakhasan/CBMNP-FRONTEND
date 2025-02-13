@@ -149,28 +149,25 @@ export const createCustomerSchema = yup.object().shape({
     .test('customerType-required', 'Customer type is required', (value) => !!value && !!value.label && !!value.value),
   address: yup.string().required(),
   division: yup.object().when('customerType', (customerType:any, schema) => {
-    console.log(customerType,"check");
     if (customerType[0].value === 'NON_PROBASHI') {
       return schema.required('Division is required for NON_PROBASHI customer type');
     }
     return schema;
   }),
   district: yup.object().when('customerType', (customerType:any, schema) => {
-    console.log(customerType,"check");
     if (customerType[0].value === 'NON_PROBASHI') {
       return schema.required('Division is required for NON_PROBASHI customer type');
     }
     return schema;
   }),
   thana: yup.object().when('customerType', (customerType:any, schema) => {
-    console.log(customerType,"check");
     if (customerType[0].value === 'NON_PROBASHI') {
       return schema.required('Division is required for NON_PROBASHI customer type');
     }
     return schema;
   }),
   country: yup.object().when('customerType', (customerType:any, schema) => {
-    console.log(schema,"check schema");
+
     if (customerType[0].value === 'PROBASHI') {
       return schema.required('Division is required for NON_PROBASHI customer type');
     }

@@ -28,7 +28,7 @@ const OrdersPage = () => {
   const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
     id: userInfo?.userId,
   });
-  const { data: countData, isLoading: countLoading } = useGetOrdersCountQuery(undefined);
+  const { data: countData, isLoading: countLoading,refetch } = useGetOrdersCountQuery(undefined);
   const permission = userData?.permission?.map((item: any) => item?.label);
 
   const allTabs = [
@@ -54,7 +54,7 @@ const OrdersPage = () => {
 
   const components: { [key: string]: any } = {
     "1": <PendingOrders countData={countData} searchTerm={searchTerm} />,
-    "3": <ApprovedOrders countData={countData} searchTerm={searchTerm} />,
+    "3": <ApprovedOrders refetch={refetch} countData={countData} searchTerm={searchTerm} />,
     "4": <HoldOrders searchTerm={searchTerm} />,
     "9": <AllOrders countData={countData} searchTerm={searchTerm} />,
     "5": <StoreOrders searchTerm={searchTerm} />,
