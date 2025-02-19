@@ -130,7 +130,6 @@ const OrderCartEdit = ({
     shippingAddressThana: null,
     shippingAddressTextArea: null,
   };
-console.log(orderData,"order");
   return (
     <>
       <div

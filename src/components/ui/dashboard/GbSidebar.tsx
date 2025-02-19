@@ -84,7 +84,7 @@ const GbSidebar = () => {
     setLoading(false);
   },[pathName])
   const handleButtonClick = (path:any) => {
-    if(pathName !==path){
+    if(pathName !=="/"+local+path){
       setLoading(true);
       router.push(`/${local}/${path}`);
     }

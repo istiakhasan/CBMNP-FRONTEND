@@ -28,7 +28,6 @@ const AddSimpleProuct = ({ setDrawerOpen }: any) => {
       placement: "bottomLeft",
     });
   };
-  console.log(selectedValue,"check");
   const handleSubmit = async (data: any, reset: any) => {
     try {
       setSubmitLoading(true);
@@ -61,7 +60,6 @@ const AddSimpleProuct = ({ setDrawerOpen }: any) => {
       }
     } catch (error) {
       message.error("Something went wrong ,please debug the error");
-      console.log(error, "error");
     }finally{
       setSubmitLoading(false)
     }

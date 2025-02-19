@@ -19,7 +19,6 @@ const GbCascaderPicker = React.memo(({ name, selectedValue, setSelectedValue }: 
   const [editMode, setEditMode] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingValue, setEditingValue] = useState<any>({});
- console.log(errors,"check");
   const onChange: any = (value: string[], selectedOptions: any) => {
     if(selectedOptions?.length>0){
       setValue(name, selectedOptions[0]);

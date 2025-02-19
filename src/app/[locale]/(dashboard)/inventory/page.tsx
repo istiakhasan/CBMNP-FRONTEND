@@ -25,7 +25,6 @@ const Page = () => {
   const { data:transactionData, isLoading:isTransactionLoading } = useLoadAllTransactionQuery(query);
   const [deleteBrandHandle] = useDeleteProductByIdMutation();
   const router = useRouter();
-  console.log(data, "data");
   // table column
   const tableColumn = [
     {
@@ -314,7 +313,6 @@ const Page = () => {
       },
     },
   ];
-  console.log(transactionData,"transaction data");
   const onPaginationChange = (page: number, pageSize: number) => {
     setPage(page);
     setSize(pageSize);

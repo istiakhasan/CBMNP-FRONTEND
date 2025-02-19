@@ -58,5 +58,6 @@ export const {
     useLoadTransactionByIdQuery,
     useLoadStockByProductidQuery,
     useLoadStockByProductIdAndLocationIdQuery,
+    useLazyLoadStockByProductIdAndLocationIdQuery,
     useUpdateInventoryMutation
 } = inventoryApi;

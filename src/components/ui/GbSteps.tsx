@@ -164,7 +164,6 @@ const GbSteps: React.FC = () => {
           });
   
           const uploadedImages = await Promise.all(imagePromises);
-          console.log(uploadedImages, "Uploaded Images");
           return uploadedImages;
         };
   
@@ -215,8 +214,6 @@ const GbSteps: React.FC = () => {
   
         return transformedData;
       };
-      console.log(abc,"abc");
-
       const result = await transformProductData(abc);
 
         const res = await createProduct(result).unwrap();

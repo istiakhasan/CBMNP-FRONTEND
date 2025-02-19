@@ -140,7 +140,6 @@ const OrderCart = ({
     shippingAddressThana: null,
     shippingAddressTextArea: null,
   };
-  console.log(cart,"cart");
   return (
     <>
       <div
@@ -229,14 +228,14 @@ const OrderCart = ({
                             (j: any) => j.id === item?.id
                           );
                           const newQuantity = findProduct?.productQuantity + 1;
-                          if (item?.stockQuantity < newQuantity) {
-                            return message.error("Not enough product in stock");
-                          }
-                          if (newQuantity > item?.inventories?.stock) {
-                            return message.error(
-                              "Stock is not enough for the ordered amount of products"
-                            );
-                          }
+                          // if (item?.stockQuantity < newQuantity) {
+                          //   return message.error("Not enough product in stock");
+                          // }
+                          // if (newQuantity > item?.inventories?.stock) {
+                          //   return message.error(
+                          //     "Stock is not enough for the ordered amount of products"
+                          //   );
+                          // }
                           if (newQuantity < 1) {
                             return message.error(
                               "Quantity should not be zero "

@@ -36,7 +36,6 @@ const AddToInventory = ({product,refetch}:any) => {
         refetch()
     }
   }
-  console.log(product,"product");
   return (
     <div>
       <div className="px-[20px] pt-[20px]">

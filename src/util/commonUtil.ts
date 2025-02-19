@@ -43,7 +43,6 @@ export const uploadImageToImagebb = async (formData:any) => {
     if(data?.status_code===400){
       throw new Error('Image is empty');
     }
-    console.log(data,"check data");
     return {
       url:data?.data?.display_url,
       delete_url:data?.data?.delete_url,

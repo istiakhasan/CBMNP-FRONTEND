@@ -17,7 +17,6 @@ import { useRouter } from "next/navigation";
 import React, {  useState } from "react";
 const rowSelection: TableProps<any>['rowSelection'] = {
   onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
-    console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
   },
   getCheckboxProps: (record: any) => ({
     disabled: record.name === 'Disabled User', // Column configuration not to be checked

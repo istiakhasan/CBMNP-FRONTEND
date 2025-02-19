@@ -9,8 +9,6 @@ const LocalSwitcher = () => {
     const router = useRouter();
     const pathname = usePathname(); // Get the current pathname
     const a=pathname?.split('/').splice(0,1)
-    console.log(a,"adsfsa");
-    console.log(pathname?.split('/').slice(2).join('/'),"pathname");
     const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const newLocale = event.target.value;
         router.replace(`/${newLocale}/${pathname?.split('/').slice(2).join('/')}`);

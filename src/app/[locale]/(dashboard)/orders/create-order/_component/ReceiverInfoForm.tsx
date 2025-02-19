@@ -32,7 +32,6 @@ const ReceiverInfoForm = ({formData,setSameAsBilling,setFormData,setActive}:any)
               <div>
                 <h1 className="flex items-center gap-2 text-[16px] mb-2">
                   <GbFormCheckbox name="sameAsBilling"  handleChange={(e:any)=>{
-                    console.log(e,"eee");
                        setSameAsBilling(e)
                        setValue('sameAsBilling',e)
                        setFormData({})

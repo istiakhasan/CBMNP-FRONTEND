@@ -24,7 +24,6 @@ const AddPaymentModal = ({ setModalOpen ,rowData}: any) => {
             orderId: rowData?.id,
             userId: userInfo?.userId,
          }
-         console.log(payload,"payload");
         const res = await addPaymentHandler({ id: rowData?.id, data:payload });
         if (res) {
           message.success("Payment added");

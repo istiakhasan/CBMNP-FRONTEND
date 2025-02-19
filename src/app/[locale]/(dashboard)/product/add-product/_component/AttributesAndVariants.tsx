@@ -15,7 +15,6 @@ const AttributesAndVariants = ({setSelectedValue,selectedValue}:any) => {
   const [attributes, setAttributes] = useState<any>([]);
   const [inputValue, setInputValue] = useState("");
   const { watch, control, setValue,formState:{errors} } = useFormContext();
-  console.log(errors,"errors");
   const { fields, append, remove,update } = useFieldArray({
     control,
     name: "variants",

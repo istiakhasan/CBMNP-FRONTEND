@@ -46,7 +46,6 @@ const CopyInfo = ({ setCopyModalOpen, isGift, cartProduct,formData }: any) => {
         setCopyLoading(false);
       });
   };
- console.log(formData,"form data");
   return (
     <div className="p-[20px]">
       {/* close button start */}

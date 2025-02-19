@@ -223,7 +223,6 @@ const PendingOrders = ({}: any) => {
     value: key,
   }));
 
-  console.log(rowData, "row data");
   const contentRef = useRef<HTMLDivElement | null>(null);
 
   const reactToPrintFn = useReactToPrint({
@@ -297,7 +296,7 @@ const PendingOrders = ({}: any) => {
         closeModal={() => setPrintModal(false)}
         openModal={() => setPrintModal(true)}
         isModalOpen={printModal}
-        clseTab={false}
+        // clseTab={false}
       >
         <div>
         <button onClick={() => reactToPrintFn()}>Print</button>

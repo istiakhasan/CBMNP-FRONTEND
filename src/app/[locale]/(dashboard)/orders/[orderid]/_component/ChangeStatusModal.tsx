@@ -17,7 +17,6 @@ const ChangeStatusModal = ({ setModalOpen, rowData }: any) => {
   const userInfo: any = getUserInfo();
   const router=useRouter()
 
- console.log(userInfo,"user info");
   const { data: orderStatus } = useGetAllStatusQuery({
     label:rowData?.status?.label
   });

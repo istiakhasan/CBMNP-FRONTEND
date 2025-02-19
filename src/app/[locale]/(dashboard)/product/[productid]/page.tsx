@@ -31,7 +31,6 @@ const Page = () => {
   
   const productData = data?.data?.data;
   const ids = data?.data?.ids;
-  console.log(productStock,"checkl");
   return (
     <div>
       <GbHeader title="Product" />

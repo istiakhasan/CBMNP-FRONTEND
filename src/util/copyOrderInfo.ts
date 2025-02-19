@@ -2,7 +2,6 @@ import { message } from "antd";
 import moment from "moment";
 
 export const handleCopy = (orderSuccessResponse:any,setter:any,cb:any) => {
-    console.log(orderSuccessResponse,"abcd");
     setter(true);
   
     try {
@@ -45,7 +44,6 @@ export const handleCopy = (orderSuccessResponse:any,setter:any,cb:any) => {
     }
   };
 export const handleCopyv2 = (orderSuccessResponse:any,setter:any,cb:any) => {
-    console.log(orderSuccessResponse,"abcd");
     setter(true);
   
     try {

@@ -1,8 +1,16 @@
 "use client";
+import GbForm from "@/components/forms/GbForm";
+import GbFormSelect from "@/components/forms/GbFormSelect";
 import GbTable from "@/components/GbTable";
 import GbDropdown from "@/components/ui/dashboard/GbDropdown";
-import { useGetAllOrdersQuery } from "@/redux/api/orderApi";
+import GbModal from "@/components/ui/GbModal";
+import { useLazyLoadStockByProductIdAndLocationIdQuery } from "@/redux/api/inventoryApi";
+import {
+  useGetAllOrdersQuery,
+  useLazyGetOrderByIdQuery,
+} from "@/redux/api/orderApi";
 import { useCreateRequisitionMutation } from "@/redux/api/requisitionApi";
+import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
 import { getUserInfo } from "@/service/authService";
 import StatusBadge from "@/util/StatusBadge";
 
@@ -13,27 +21,35 @@ import {
   message,
   Pagination,
   Popover,
+  Select,
   TableProps,
 } from "antd";
 import moment from "moment";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
-const ApprovedOrders = ({refetch:countRefetch}: any) => {
+const ApprovedOrders = ({ refetch: countRefetch }: any) => {
   // all states
+  const [loadOrdersById] = useLazyGetOrderByIdQuery();
+  const [loadStockByWarehouseProduct] =
+    useLazyLoadStockByProductIdAndLocationIdQuery();
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOrders, setSelectedOrders] = useState<any>([]);
-  const { data, isLoading,refetch } = useGetAllOrdersQuery({
+  const { data: warehouseOptions } = useLoadAllWarehouseOptionsQuery(undefined);
+  const [locationId, setLocationId] = useState("");
+  const [openModal, setOpenModal] = useState(false);
+  const { data, isLoading, refetch } = useGetAllOrdersQuery({
     page,
     limit: size,
     searchTerm,
     statusId: "2",
+    locationId: locationId,
   });
 
-  const [handleCreateRequisition]=useCreateRequisitionMutation()
-
+  const [handleCreateRequisition] = useCreateRequisitionMutation();
+  const [reqPreviewData, setReqPreviewData] = useState<any>([]);
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const tableColumn = [
@@ -189,8 +205,7 @@ const ApprovedOrders = ({refetch:countRefetch}: any) => {
       },
     },
   ];
- const userInfo:any=getUserInfo()
- console.log(userInfo,"userif");
+  const userInfo: any = getUserInfo();
   const defaultCheckedList = tableColumn.map((item: any) => item.key as string);
   const [checkedList, setCheckedList] = useState(defaultCheckedList);
   const newColumns = tableColumn.map((item: any) => ({
@@ -208,11 +223,6 @@ const ApprovedOrders = ({refetch:countRefetch}: any) => {
   const rowSelection: TableProps<any>["rowSelection"] = {
     onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
       setSelectedOrders(selectedRows);
-      console.log(
-        `selectedRowKeys: ${selectedRowKeys}`,
-        "selectedRows: ",
-        selectedRows
-      );
     },
     getCheckboxProps: (record: any) => ({
       disabled: record.name === "Disabled User",
@@ -224,22 +234,13 @@ const ApprovedOrders = ({refetch:countRefetch}: any) => {
     {
       label: (
         <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
-          <span onClick={async()=>{
-            try {
-              const payload=selectedOrders.map((item:any)=>item?.id)
- 
-              const res= await handleCreateRequisition({
-                orderIds:payload,
-                userId:userInfo?.userId
-              }).unwrap()
-              refetch()
-              countRefetch()
-              message.success('Requisition create successfully..')
-            } catch (error) {
-              
-              console.log(error,"selected orders");
-            }
-          }}>Make Requisition</span>
+          <span
+            onClick={async () => {
+              setOpenModal(true);
+            }}
+          >
+            Make Requisition
+          </span>
         </span>
       ),
       key: "0",
@@ -253,7 +254,6 @@ const ApprovedOrders = ({refetch:countRefetch}: any) => {
       key: "1",
     },
   ];
-
   return (
     <div className="gb_border">
       <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
@@ -290,6 +290,12 @@ const ApprovedOrders = ({refetch:countRefetch}: any) => {
               Filter Column
             </div>
           </Popover>
+          <Select
+            size={"middle"}
+            onChange={(e) => setLocationId(e)}
+            style={{ width: 200, height: "36px", borderRadius: "0px" }}
+            options={warehouseOptions?.data}
+          />
         </div>
         <div className="flex gap-3">
           <Pagination
@@ -322,6 +328,171 @@ const ApprovedOrders = ({refetch:countRefetch}: any) => {
           dataSource={data?.data}
         />
       </div>
+
+      <GbModal
+        width="1000px"
+        closeModal={() => setOpenModal(false)}
+        openModal={() => setOpenModal(true)}
+        isModalOpen={openModal}
+      >
+        <h1
+          onClick={async () => {
+            const array = [];
+            for (let i = 0; i < selectedOrders.length; i++) {
+              const element = selectedOrders[i];
+              const res = await loadOrdersById({ id: element.id }).unwrap();
+              array.push(res);
+            }
+
+            let updatedProductData: any = [];
+            array?.forEach((mitem: any) => {
+              mitem?.products?.forEach((dt: any) => {
+                updatedProductData.push({
+                  productId: dt?.productId,
+                  // productCode:dt?.product?.product_code,
+                  orderId: mitem?.orderNumber,
+                  orderQuantity: dt?.productQuantity,
+                  name: dt?.product?.name,
+                  packSize: dt?.product?.weight + " " + dt?.product?.unit,
+                });
+              });
+            });
+
+            const groupedData: any = {};
+            updatedProductData.forEach(
+              ({ productId, orderId, orderQuantity, name, packSize }: any) => {
+                if (!groupedData[productId]) {
+                  groupedData[productId] = {
+                    productId,
+                    // productCode,
+                    name,
+                    packSize,
+                    orders: [],
+                  };
+                }
+                groupedData[productId].orders.push({ orderId, orderQuantity });
+              }
+            );
+            const result = Object.values(groupedData);
+
+            const finalData = await Promise.all(
+              result.map(async (abc: any) => {
+                let res;
+                try {
+                  res = await loadStockByWarehouseProduct({
+                    productId: abc?.productId,
+                    locationId: locationId,
+                  }).unwrap();
+                } catch (error) {
+                  console.log(error);
+                }
+                return {
+                  ...abc,
+                  stock: res?.data?.quantity || 0,
+                };
+              })
+            );
+
+            setReqPreviewData(finalData);
+          }}
+        >
+          Generate Preview
+        </h1>
+
+        <div className="responsive_order_details_view_table mt-[10px]">
+          <table>
+            <thead>
+              <tr>
+                {/* <th>
+                       Product Id
+                      </th> */}
+                <th style={{ width: "230px" }} className="">
+                  Product Name
+                </th>
+                <th className="text-start">Pack Size</th>
+                <th className="text-center">Qty</th>
+                <th className="text-start">Order Number</th>
+                <th className="text-center">Total Qty</th>
+                <th className="text-center">Available Qty</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reqPreviewData?.map((product: any) => {
+                const totalQuantity = product.orders.reduce(
+                  (sum: any, order: any) => sum + order.orderQuantity,
+                  0
+                );
+                return (
+                  <React.Fragment key={product.productId}>
+                    {product.orders.map((order: any, index: any) => (
+                      <tr
+                        style={
+                          totalQuantity > product?.stock
+                            ? { background: "#F7BB81" }
+                            : {}
+                        }
+                        key={order.orderId}
+                      >
+                        {index === 0 && (
+                          <>
+                            {/* <td rowSpan={product.orders.length}>{product.productId}</td> */}
+                            <td rowSpan={product.orders.length}>
+                              {product.name}
+                            </td>
+                            <td rowSpan={product.orders.length}>
+                              {product.packSize}
+                            </td>
+                          </>
+                        )}
+                        <td align="center">{order.orderQuantity}</td>
+                        <td>{order.orderId}</td>
+                        {index === 0 && (
+                          <td
+                            className="text-center"
+                            rowSpan={product.orders.length}
+                          >
+                            {totalQuantity}
+                          </td>
+                        )}
+                        {index === 0 && (
+                          <td
+                            className="text-center"
+                            rowSpan={product.orders.length}
+                          >
+                            {product?.stock}
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+          <div className="flex justify-end  mt-3">
+            <button
+              className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]"
+              onClick={async () => {
+                try {
+                  const payload = selectedOrders.map((item: any) => item?.id);
+
+                  const res = await handleCreateRequisition({
+                    orderIds: payload,
+                    userId: userInfo?.userId,
+                  }).unwrap();
+                  refetch();
+                  countRefetch();
+                  message.success("Requisition create successfully..");
+                } catch (error) {
+                  console.log(error, "selected orders");
+                }
+              }}
+            >
+              Create
+            </button>
+          </div>
+        </div>
+      </GbModal>
     </div>
   );
 };
