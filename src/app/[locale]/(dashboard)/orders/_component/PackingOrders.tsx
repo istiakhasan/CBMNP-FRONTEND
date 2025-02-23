@@ -1,7 +1,13 @@
 "use client";
+import GbForm from "@/components/forms/GbForm";
 import GbTable from "@/components/GbTable";
+import GbDropdown from "@/components/ui/dashboard/GbDropdown";
+import GbModal from "@/components/ui/GbModal";
 import { getBaseUrl } from "@/helpers/config/envConfig";
-import { useGetAllOrdersQuery } from "@/redux/api/orderApi";
+import {
+  useGetAllOrdersQuery,
+  useGetOrderByIdQuery,
+} from "@/redux/api/orderApi";
 import { useGetAllProductQuery } from "@/redux/api/productApi";
 import { useGetUserByIdQuery } from "@/redux/api/usersApi";
 import StatusBadge from "@/util/StatusBadge";
@@ -10,28 +16,45 @@ import {
   Checkbox,
   CheckboxOptionType,
   Image,
+  MenuProps,
   Pagination,
   Popover,
+  Select,
   Spin,
   Switch,
+  TableProps,
 } from "antd";
 import axios from "axios";
 import moment from "moment";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import BulkChangeOrders from "./BulkChangeOrders";
+import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
+import { useReactToPrint } from "react-to-print";
+import copyToClipboard from "@/components/ui/GbCopyToClipBoard";
 
 const PackingOrders = ({}: any) => {
   // all states
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
   const [searchTerm, setSearchTerm] = useState("");
+  const [locationId, setLocationId] = useState("");
+  const { data: warehouseOptions } = useLoadAllWarehouseOptionsQuery(undefined);
+  const [printModal, setPrintModal] = useState(false);
+  const [rowId, setRowId] = useState<any>(null);
+
+  const { data: rowData, isLoading: rowDataLoading } = useGetOrderByIdQuery({
+    id: rowId,
+  });
   const { data, isLoading } = useGetAllOrdersQuery({
     page,
     limit: size,
     searchTerm,
-    statusId:"6"
+    statusId: 6,
+    locationId: locationId,
   });
-
+  const [selectedOrders, setSelectedOrders] = useState<any>([]);
+  const [statuschangedModal, setStatusChangeModal] = useState(false);
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const tableColumn = [
@@ -53,13 +76,21 @@ const PackingOrders = ({}: any) => {
       key: "orderId",
       render: (text: string, record: any) => (
         <>
-          <span className="color_primary font-[500] cursor-pointer">
-            {record?.orderNumber}
-          </span>
-          <i
-            // onClick={() => copyToClipboard(record?.orderNumber)}
-            className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[4px]"
-          ></i>
+          <div>
+            <i className="ri-information-2-line text-[18px]  text-primary cursor-pointer"></i>
+            <i
+              onClick={() => {
+                setPrintModal(true);
+                setRowId(record?.id);
+              }}
+              className="ri-printer-line text-[18px]  text-primary ml-[4px] cursor-pointer"
+            ></i>
+            <i
+              onClick={() => copyToClipboard(record?.orderNumber)}
+              className="ri-file-copy-line text-primary cursor-pointer ml-[4px] text-[18px] "
+            ></i>
+          </div>
+          <span className="mt-[2px] block">{record?.orderNumber}</span>
         </>
       ),
     },
@@ -95,7 +126,7 @@ const PackingOrders = ({}: any) => {
       align: "start",
       render: (_: any, record: any) => (
         <>
-         <StatusBadge status={record?.status} />
+          <StatusBadge status={record?.status} />
         </>
       ),
     },
@@ -176,7 +207,10 @@ const PackingOrders = ({}: any) => {
                 onClick={() => router.push(`/orders/${record?.id}`)}
                 className=" text-white text-[10px] py-[2px] px-[10px] cursor-pointer"
               >
-                <i style={{fontSize:"18px"}} className="ri-eye-fill color_primary"></i>
+                <i
+                  style={{ fontSize: "18px" }}
+                  className="ri-eye-fill color_primary"
+                ></i>
               </span>
             }
           </>
@@ -198,6 +232,38 @@ const PackingOrders = ({}: any) => {
     label: title,
     value: key,
   }));
+
+  // row selection
+  const rowSelection: TableProps<any>["rowSelection"] = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
+      setSelectedOrders(selectedRows);
+    },
+    getCheckboxProps: (record: any) => ({
+      disabled: record.name === "Disabled User",
+      name: record.name,
+    }),
+  };
+
+  // dropdown options
+  const items: MenuProps["items"] = [
+    {
+      label: (
+        <span
+          onClick={() => setStatusChangeModal(true)}
+          className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center"
+        >
+          <span>Change Status</span>
+        </span>
+      ),
+      key: "1",
+    },
+  ];
+
+  const contentRef = useRef<HTMLDivElement | null>(null);
+
+  const reactToPrintFn = useReactToPrint({
+    content: () => contentRef.current,
+  });
   return (
     <div className="gb_border">
       <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
@@ -234,24 +300,170 @@ const PackingOrders = ({}: any) => {
               Filter Column
             </div>
           </Popover>
+          <Select
+            size={"middle"}
+            onChange={(e) => setLocationId(e)}
+            style={{ width: 200, height: "36px", borderRadius: "0px" }}
+            options={warehouseOptions?.data}
+          />
         </div>
-        <Pagination
-          pageSize={size}
-          total={data?.meta?.total}
-          onChange={(v, d) => {
-            setPage(v);
-            setSize(d);
-          }}
-          showSizeChanger={false}
-        />
+        <div className="flex gap-3">
+          <Pagination
+            pageSize={size}
+            total={data?.meta?.total}
+            onChange={(v, d) => {
+              setPage(v);
+              setSize(d);
+            }}
+            showSizeChanger={false}
+          />
+
+          <div>
+            <GbDropdown items={items}>
+              <button
+                // onClick={() => router.push(`/${local}/orders/create-order`)}
+                className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]"
+              >
+                Action
+              </button>
+            </GbDropdown>
+          </div>
+        </div>
       </div>
       <div className="max-h-[600px] overflow-scroll">
         <GbTable
           loading={isLoading}
           columns={newColumns}
           dataSource={data?.data}
+          rowSelection={rowSelection}
         />
       </div>
+
+      <GbModal
+        width="600px"
+        clseTab={false}
+        isModalOpen={statuschangedModal}
+        openModal={() => setStatusChangeModal(true)}
+        closeModal={() => setStatusChangeModal(false)}
+      >
+        <GbForm submitHandler={(data: any) => console.log(data)}>
+          <BulkChangeOrders
+            status="Packing"
+            setModalOpen={setStatusChangeModal}
+            selectedOrders={selectedOrders}
+          />
+        </GbForm>
+      </GbModal>
+      <GbModal
+        width="900px"
+        closeModal={() => setPrintModal(false)}
+        openModal={() => setPrintModal(true)}
+        isModalOpen={printModal}
+        // clseTab={false}
+      >
+        <div>
+          <button onClick={() => reactToPrintFn()}>Print</button>
+          <div ref={contentRef}>
+            <div>
+              <h1 className="text-3xl font-semibold text-[#000] text-center">
+                Mishel Info Tech Ltd
+              </h1>
+              <div className="flex  justify-between">
+                <div className="mb-3">
+                  <h2 className="text-[#000] font-[600] mb-0 robin robin">
+                    Bill To:{" "}
+                  </h2>
+                  <h2 className="text-[#000] font-[600] mb-0 robin ">
+                    {rowData?.customer?.customerName}
+                  </h2>
+                  <h2 className="text-[#000] font-[600] mb-0 robin">
+                    {rowData?.receiverPhoneNumber}
+                  </h2>
+                  <h2 className="text-[#000] font-[600] mb-0 robin">
+                    {rowData?.receiverAddress}
+                  </h2>
+                </div>
+                <div className="mb-3">
+                  <h2 className=" mb-0 robin">
+                    Invoice No: <strong>{rowData?.invoiceNumber}</strong>{" "}
+                  </h2>
+                  <h2 className=" mb-0 robin">
+                    Date:{" "}
+                    <strong>
+                      {moment(rowData?.deliveryDate).format("DD MMMM YYYY")}
+                    </strong>{" "}
+                  </h2>
+                </div>
+              </div>
+              <table className="warehouse-table">
+                <thead>
+                  <tr>
+                    <th>SL</th>
+                    <th>Product Name</th>
+                    <th>Unit Price(Tk)</th>
+                    <th>Qty</th>
+                    <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rowData?.products?.map((item: any, index: any) => (
+                    <tr key={index}>
+                      <td>{index + 1}</td>
+                      <td>
+                        {item?.product?.name} {item?.product?.weight}{" "}
+                        {item?.product?.unit}
+                      </td>
+                      <td>{item?.productPrice}</td>
+                      <td>{item?.productQuantity}</td>
+                      <td>{item?.subtotal}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td rowSpan={3} style={{ padding: 0 }} colSpan={2}>
+                      <div className="mt-3">
+                        <h1 className="mb-0 text-[#000] flex items-center gap-3">
+                          <i className="ri-discuss-line"></i>{" "}
+                          info.mishelinfo@gmail.com
+                        </h1>
+                        <h1 className="mb-0 text-[#000] flex items-center gap-3">
+                          <i className="ri-global-line"></i> infomishelinfo.com
+                        </h1>
+                        <h1 className="mb-0 text-[#000] flex items-center gap-3">
+                          <i className="ri-phone-fill"></i> +001835437676
+                        </h1>
+                        <h1 className="mb-0 text-[#000] flex items-center gap-3">
+                          <i className="ri-map-pin-line"></i>
+                          House-2,Road-16,Block-B,Nikunjo Dhaka-1230
+                        </h1>
+                      </div>
+                    </td>
+                    <td colSpan={2} style={{ background: "#F7F7F7" }}>
+                      Sub Total
+                    </td>
+                    <td style={{ background: "#F7F7F7" }}>
+                      {Number(rowData?.productValue)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colSpan={2} style={{ background: "#EBEBEB" }}>
+                      Grand Total
+                    </td>
+                    <td style={{ background: "#EBEBEB" }}>
+                      {rowData?.totalPrice}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colSpan={2}>Due Total</td>
+                    <td>{rowData?.totalReceiveAbleAmount}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+      </GbModal>
     </div>
   );
 };

@@ -51,10 +51,10 @@ const LoadProducts = ({ setCart, cart }: any) => {
             <div className="flex justify-between">
               <div>
                 <p className=" font-semibold text-[14px] ">
-                  BDT: {item?.current_prices?.toFixed(2)}
+                  BDT: {(+item?.salePrice || 0)?.toFixed(2)}
                 </p>
                 <span className="text-[14px] gb_border bg-[white] px-[15px] py-[2px] my-3 inline-block">
-                  Pack Size: {item?.pack_size}
+                  Pack Size: {item?.weight +" " +  item?.unit}
                 </span>
               </div>
               <div>

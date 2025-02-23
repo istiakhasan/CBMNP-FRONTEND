@@ -12,20 +12,20 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-const ChangeStatusModal = ({ setModalOpen, rowData }: any) => {
+const BulkChangeOrders = ({ setModalOpen, selectedOrders,status }: any) => {
    const [handleUpdateOrder] = useChangeOrderStatusMutation()
   const userInfo: any = getUserInfo();
   const router=useRouter()
 
   const { data: orderStatus } = useGetAllStatusQuery({
-    label:rowData?.status?.label
+    label:status
   });
   const { watch, handleSubmit } = useFormContext();
   const onsubmit = async (data: any) => {
     try {
 
       const res = await handleUpdateOrder({
-          orderIds: [rowData?.id], 
+          orderIds: selectedOrders.map((item:any)=>item?.id), 
           statusId:data?.orderStatus?.value,
           agentId:userInfo.userId,
           ...(data?.orderStatus?.label==="Hold"&&  {onHoldReason:data?.reason?.value,}),
@@ -44,7 +44,7 @@ const ChangeStatusModal = ({ setModalOpen, rowData }: any) => {
 
 
   return (
-    <div className="p-[15px] bg-[#FFFFFF]">
+    <div className=" bg-[#FFFFFF]">
       <div className="flex justify-between mb-6">
         <h1 className="font-[600] text-[#242529] text-[16px]">Change Status</h1>
         <svg
@@ -70,7 +70,7 @@ const ChangeStatusModal = ({ setModalOpen, rowData }: any) => {
               label="Select Status"
             />
           </div>
-          {watch()?.orderStatus?.label !== "Approved" &&
+          {(watch()?.orderStatus?.label === "Hold" || watch()?.orderStatus?.label === "Cancel") &&
             !!watch()?.orderStatus?.label && (
               <div className="mt-3">
                 <GbFormSelect
@@ -146,4 +146,4 @@ const ChangeStatusModal = ({ setModalOpen, rowData }: any) => {
   );
 };
 
-export default ChangeStatusModal;
+export default BulkChangeOrders;

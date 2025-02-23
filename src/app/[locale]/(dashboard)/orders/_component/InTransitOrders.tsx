@@ -1,6 +1,8 @@
 "use client";
 import GbTable from "@/components/GbTable";
-import { useGetAllOrdersQuery } from "@/redux/api/orderApi";
+import copyToClipboard from "@/components/ui/GbCopyToClipBoard";
+import GbModal from "@/components/ui/GbModal";
+import { useGetAllOrdersQuery, useGetOrderByIdQuery } from "@/redux/api/orderApi";
 import StatusBadge from "@/util/StatusBadge";
 
 import {
@@ -11,20 +13,25 @@ import {
 } from "antd";
 import moment from "moment";
 import { useRouter } from "next/navigation";
-import React, {  useState } from "react";
+import React, {  useRef, useState } from "react";
+import { useReactToPrint } from "react-to-print";
 
 const InTransitOrders = ({}: any) => {
   // all states
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
   const [searchTerm, setSearchTerm] = useState("");
+  const [rowId, setRowId] = useState<any>(null);
   const { data, isLoading } = useGetAllOrdersQuery({
     page,
     limit: size,
     searchTerm,
     statusId:"7"
   });
-
+  const { data: rowData, isLoading: rowDataLoading } = useGetOrderByIdQuery({
+    id: rowId,
+  });
+  const [printModal, setPrintModal] = useState(false);
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const tableColumn = [
@@ -46,13 +53,21 @@ const InTransitOrders = ({}: any) => {
       key: "orderId",
       render: (text: string, record: any) => (
         <>
-          <span className="color_primary font-[500] cursor-pointer">
-            {record?.orderNumber}
-          </span>
-          <i
-            // onClick={() => copyToClipboard(record?.orderNumber)}
-            className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[4px]"
-          ></i>
+          <div>
+            <i className="ri-information-2-line text-[18px]  text-primary cursor-pointer"></i>
+            <i
+              onClick={() => {
+                setPrintModal(true);
+                setRowId(record?.id);
+              }}
+              className="ri-printer-line text-[18px]  text-primary ml-[4px] cursor-pointer"
+            ></i>
+            <i
+              onClick={() => copyToClipboard(record?.orderNumber)}
+              className="ri-file-copy-line text-primary cursor-pointer ml-[4px] text-[18px] "
+            ></i>
+          </div>
+          <span className="mt-[2px] block">{record?.orderNumber}</span>
         </>
       ),
     },
@@ -191,6 +206,12 @@ const InTransitOrders = ({}: any) => {
     label: title,
     value: key,
   }));
+
+  const contentRef = useRef<HTMLDivElement | null>(null);
+
+  const reactToPrintFn = useReactToPrint({
+    content: () => contentRef.current,
+  });
   return (
     <div className="gb_border">
       <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
@@ -245,6 +266,89 @@ const InTransitOrders = ({}: any) => {
           dataSource={data?.data}
         />
       </div>
+      <GbModal
+        width="900px"
+        closeModal={() => setPrintModal(false)}
+        openModal={() => setPrintModal(true)}
+        isModalOpen={printModal}
+        // clseTab={false}
+      >
+        <div>
+        <button onClick={() => reactToPrintFn()}>Print</button>
+        <div  ref={contentRef}>
+          <div>
+            <h1 className="text-3xl font-semibold text-[#000] text-center">Mishel Info Tech Ltd</h1>
+            <div className="flex  justify-between">
+              <div className="mb-3">
+                <h2 className="text-[#000] font-[600] mb-0 robin robin">Bill To: </h2>
+                <h2 className="text-[#000] font-[600] mb-0 robin ">
+                  {rowData?.customer?.customerName}
+                </h2>
+                <h2 className="text-[#000] font-[600] mb-0 robin">
+                  {rowData?.receiverPhoneNumber}
+                </h2>
+                <h2 className="text-[#000] font-[600] mb-0 robin">
+                  {rowData?.receiverAddress}
+                </h2>
+              </div>
+              <div className="mb-3">
+                <h2 className=" mb-0 robin">
+                  Invoice No: <strong>{rowData?.invoiceNumber}</strong>{" "}
+                </h2>
+                <h2 className=" mb-0 robin">
+                  Date: <strong>{moment(rowData?.deliveryDate).format('DD MMMM YYYY')}</strong>{" "}
+                </h2>
+              </div>
+            </div>
+            <table className="warehouse-table">
+              <thead>
+                <tr>
+                  <th>SL</th>
+                  <th>Product Name</th>
+                  <th>Unit Price(Tk)</th>
+                  <th>Qty</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rowData?.products?.map((item: any, index: any) => (
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{item?.product?.name} {item?.product?.weight} {item?.product?.unit}</td>
+                    <td>{item?.productPrice}</td>
+                    <td>{item?.productQuantity}</td>
+                    <td>{item?.subtotal}</td>
+                  </tr>
+                ))}
+                
+              </tbody>
+              <tfoot>
+              <tr>
+                  <td rowSpan={3} style={{padding:0}} colSpan={2}>
+                    <div className="mt-3">
+                    <h1 className="mb-0 text-[#000] flex items-center gap-3"><i className="ri-discuss-line"></i> info.mishelinfo@gmail.com</h1>
+                    <h1 className="mb-0 text-[#000] flex items-center gap-3"><i className="ri-global-line"></i> infomishelinfo.com</h1>
+                    <h1 className="mb-0 text-[#000] flex items-center gap-3"><i className="ri-phone-fill"></i> +001835437676</h1>
+                    <h1 className="mb-0 text-[#000] flex items-center gap-3"><i className="ri-map-pin-line"></i>House-2,Road-16,Block-B,Nikunjo Dhaka-1230</h1>
+                    </div>
+                  </td>
+                  <td colSpan={2} style={{background:"#F7F7F7"}}>Sub Total</td>
+                  <td style={{background:"#F7F7F7"}}>{Number(rowData?.productValue)}</td>
+                </tr>
+                <tr>
+                  <td colSpan={2} style={{background:"#EBEBEB"}}>Grand Total</td>
+                  <td style={{background:"#EBEBEB"}}>{rowData?.totalPrice}</td>
+                </tr>
+                <tr>
+                  <td colSpan={2}>Due Total</td>
+                  <td>{rowData?.totalReceiveAbleAmount}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+        </div>
+      </GbModal>
     </div>
   );
 };

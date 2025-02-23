@@ -24,7 +24,9 @@ import AddSimpleProuct from "./_component/AddSimpleProuct";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
 import { customError } from "@/constants/variableConstant";
 import StatsContainer from "./_component/StatusContainer";
+import { useLocale } from "next-intl";
 const Page = () => {
+  const local=useLocale()
   const [updateProduct] = useUpdateProductMutation();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const query: Record<string, any> = {};
@@ -50,7 +52,7 @@ const Page = () => {
       key: 1,
       //@ts-ignore
       render: (text, record, index) => {
-        return <span onClick={()=>router.push(`/product/${record?.id}`)} className="color_primary cursor-pointer">{record?.sku || "N/A"}</span>;
+        return <span onClick={()=>router.push(`/${local}/product/${record?.id}`)} className="color_primary cursor-pointer">{record?.sku || "N/A"}</span>;
       },
     },
     {

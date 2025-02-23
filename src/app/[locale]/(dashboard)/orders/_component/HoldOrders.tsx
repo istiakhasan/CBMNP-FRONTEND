@@ -1,23 +1,31 @@
 "use client";
+import GbForm from "@/components/forms/GbForm";
 import GbTable from "@/components/GbTable";
+import GbModal from "@/components/ui/GbModal";
 import { useGetAllOrdersQuery } from "@/redux/api/orderApi";
 import StatusBadge from "@/util/StatusBadge";
 
 import {
   Checkbox,
   CheckboxOptionType,
+  MenuProps,
   Pagination,
   Popover,
+  TableProps,
 } from "antd";
 import moment from "moment";
 import { useRouter } from "next/navigation";
 import React, {  useState } from "react";
+import BulkChangeOrders from "./BulkChangeOrders";
+import GbDropdown from "@/components/ui/dashboard/GbDropdown";
 
 const HoldOrders = ({}: any) => {
   // all states
+   const [statuschangedModal,setStatusChangeModal]=useState(false)
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
   const [searchTerm, setSearchTerm] = useState("");
+   const [selectedOrders, setSelectedOrders] = useState<any>([]);
   const { data, isLoading } = useGetAllOrdersQuery({
     page,
     limit: size,
@@ -191,6 +199,29 @@ const HoldOrders = ({}: any) => {
     label: title,
     value: key,
   }));
+
+    const rowSelection: TableProps<any>["rowSelection"] = {
+      onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
+        setSelectedOrders(selectedRows);
+      },
+      getCheckboxProps: (record: any) => ({
+        disabled: record.name === "Disabled User",
+        name: record.name,
+      }),
+    };
+
+
+      // dropdown options
+         const items: MenuProps["items"] = [
+            {
+              label: (
+                <span onClick={()=>setStatusChangeModal(true)} className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
+                  <span>Change Status</span>
+                </span>
+              ),
+              key: "1",
+            },
+          ];
   return (
     <div className="gb_border">
       <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
@@ -228,23 +259,42 @@ const HoldOrders = ({}: any) => {
             </div>
           </Popover>
         </div>
-        <Pagination
-          pageSize={size}
-          total={data?.meta?.total}
-          onChange={(v, d) => {
-            setPage(v);
-            setSize(d);
-          }}
-          showSizeChanger={false}
-        />
+        <div className="flex gap-3">
+          <Pagination
+            pageSize={size}
+            total={data?.meta?.total}
+            onChange={(v, d) => {
+              setPage(v);
+              setSize(d);
+            }}
+            showSizeChanger={false}
+          />
+
+          <div>
+            <GbDropdown items={items}>
+              <button
+                // onClick={() => router.push(`/${local}/orders/create-order`)}
+                className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]"
+              >
+                Action
+              </button>
+            </GbDropdown>
+          </div>
+        </div>
       </div>
       <div className="max-h-[600px] overflow-scroll">
         <GbTable
           loading={isLoading}
           columns={newColumns}
           dataSource={data?.data}
+          rowSelection={rowSelection}
         />
       </div>
+      <GbModal width="600px" clseTab={false} isModalOpen={statuschangedModal} openModal={()=>setStatusChangeModal(true)} closeModal={()=>setStatusChangeModal(false)}>
+        <GbForm submitHandler={(data:any)=>console.log(data)}>
+        <BulkChangeOrders status="Hold" setModalOpen={setStatusChangeModal} selectedOrders={selectedOrders}/>
+        </GbForm>
+      </GbModal>
     </div>
   );
 };
