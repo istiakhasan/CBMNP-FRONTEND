@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import React, {  useState } from "react";
 import BulkChangeOrders from "./BulkChangeOrders";
 import GbDropdown from "@/components/ui/dashboard/GbDropdown";
+import { useLocale } from "next-intl";
 
 const HoldOrders = ({}: any) => {
   // all states
@@ -32,7 +33,7 @@ const HoldOrders = ({}: any) => {
     searchTerm,
     statusId:"3"
   });
-
+  const local=useLocale()
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const tableColumn = [
@@ -174,7 +175,7 @@ const HoldOrders = ({}: any) => {
           <>
             {
               <span
-                onClick={() => router.push(`/orders/${record?.id}`)}
+                onClick={() => router.push(`/${local}/orders/${record?.id}`)}
                 className=" text-white text-[10px] py-[2px] px-[10px] cursor-pointer"
               >
                 <i style={{fontSize:"18px"}} className="ri-eye-fill color_primary"></i>

@@ -10,6 +10,7 @@ import {
   Popover,
 } from "antd";
 import moment from "moment";
+import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import React, {  useState } from "react";
 
@@ -24,7 +25,7 @@ const Delivered = ({}: any) => {
     searchTerm,
     statusId:"8"
   });
-
+  const local=useLocale()
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const tableColumn = [
@@ -166,7 +167,7 @@ const Delivered = ({}: any) => {
           <>
             {
               <span
-                onClick={() => router.push(`/orders/${record?.id}`)}
+                onClick={() => router.push(`/${local}/orders/${record?.id}`)}
                 className=" text-white text-[10px] py-[2px] px-[10px] cursor-pointer"
               >
                 <i style={{fontSize:"18px"}} className="ri-eye-fill color_primary"></i>

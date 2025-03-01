@@ -18,6 +18,7 @@ import CancelOrders from "./CancelOrders";
 import { useGetOrdersCountQuery } from "@/redux/api/statusApi";
 import { getUserInfo } from "@/service/authService";
 import { useRouter } from "next/navigation";
+import OrderSearch from "@/components/OrderSearch";
 
 const OrdersPage = () => {
   const [activeTab, setActiveTab] = useState<string>("1");
@@ -28,7 +29,9 @@ const OrdersPage = () => {
   const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
     id: userInfo?.userId,
   });
-  const { data: countData, isLoading: countLoading,refetch } = useGetOrdersCountQuery(undefined);
+  const { data: countData, isLoading: countLoading,refetch } = useGetOrdersCountQuery({
+    searchTerm
+  });
   const permission = userData?.permission?.map((item: any) => item?.label);
 
   const allTabs = [
@@ -45,7 +48,7 @@ const OrdersPage = () => {
   ];
 
   const tabs = allTabs
-    .filter((tab) => permission?.includes(tab.permission))
+    // .filter((tab) => permission?.includes(tab.permission))
     .map((item) => ({
       ...item,
       //@ts-ignore
@@ -64,7 +67,6 @@ const OrdersPage = () => {
     "10": <UnreachableOrders searchTerm={searchTerm} />,
     "11": <CancelOrders searchTerm={searchTerm} />,
   };
-
   return (
     <div>
       <GbHeader title="Orders" />
@@ -76,7 +78,8 @@ const OrdersPage = () => {
         ) : (
           <>
             {permission?.includes("CREATE_ORDERS") && (
-              <div className="flex items-center justify-end gap-3 flex-wrap">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+               <OrderSearch setSearchTerm={setSearchTerm} searchTerm={searchTerm}  />
                 <button
                   onClick={() => router.push(`/${local}/orders/create-order`)}
                   className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]"
