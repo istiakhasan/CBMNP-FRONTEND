@@ -2,7 +2,7 @@ import { Input } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { useState } from "react";
 
-const OrderSearch = ({ setSearchTerm,searchTerm }:any) => {
+const OrderSearch = ({ setSearchTerm,searchTerm ,placeholder="Search by Order ID, Customer Name, Phone Number" }:any) => {
   const handleSearch = (e:any) => {
     const value = e.target.value;
     setSearchTerm(value)
@@ -11,7 +11,7 @@ const OrderSearch = ({ setSearchTerm,searchTerm }:any) => {
 
   return (
     <Input
-      placeholder="Search by Order ID, Customer Name, Phone Number"
+      placeholder={placeholder}
       prefix={<SearchOutlined />}
       value={searchTerm}
       onChange={handleSearch}

@@ -29,15 +29,15 @@ const App: React.FC = ({ children }: any) => {
     }}
   >
     <Space>
-      <Spin tip="Loading" size="small"></Spin>
+      <Spin  size="small" spinning={loading}></Spin>
     </Space>
   </Row>
    )
   }
   return (
-    <div style={{ height: "100vh" }}>
+    <div style={{ height: "100vh",display:"flex" }}>
       <GbSidebar />
-      <div style={{ width: "calc(100% - 75px)", marginLeft: "auto" }}>
+      <div style={{ width: "calc(100% - 75px)",flex:"1", marginLeft: "auto" }}>
         {children}
       </div>
     </div>

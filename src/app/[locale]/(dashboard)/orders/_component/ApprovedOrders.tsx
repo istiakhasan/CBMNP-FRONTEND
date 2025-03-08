@@ -32,6 +32,7 @@ import { useRouter } from "next/navigation";
 import React, { useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import Invoice from "./Invoice";
+import GeneratePreviewButton from "./GeneratePreviewButton";
 
 const ApprovedOrders = ({ refetch: countRefetch,searchTerm }: any) => {
   // all states
@@ -359,69 +360,14 @@ const ApprovedOrders = ({ refetch: countRefetch,searchTerm }: any) => {
         openModal={() => setOpenModal(true)}
         isModalOpen={openModal}
       >
-        <h1
-          onClick={async () => {
-            const array = [];
-            for (let i = 0; i < selectedOrders.length; i++) {
-              const element = selectedOrders[i];
-              const res = await loadOrdersById({ id: element.id }).unwrap();
-              array.push(res);
-            }
+        <GeneratePreviewButton
+        selectedOrders={selectedOrders}
+        loadOrdersById={loadOrdersById}
+        loadStockByWarehouseProduct={loadStockByWarehouseProduct}
+        locationId={locationId}
+        setReqPreviewData={setReqPreviewData}
+      />
 
-            let updatedProductData: any = [];
-            array?.forEach((mitem: any) => {
-              mitem?.products?.forEach((dt: any) => {
-                updatedProductData.push({
-                  productId: dt?.productId,
-                  // productCode:dt?.product?.product_code,
-                  orderId: mitem?.orderNumber,
-                  orderQuantity: dt?.productQuantity,
-                  name: dt?.product?.name,
-                  packSize: dt?.product?.weight + " " + dt?.product?.unit,
-                });
-              });
-            });
-
-            const groupedData: any = {};
-            updatedProductData.forEach(
-              ({ productId, orderId, orderQuantity, name, packSize }: any) => {
-                if (!groupedData[productId]) {
-                  groupedData[productId] = {
-                    productId,
-                    // productCode,
-                    name,
-                    packSize,
-                    orders: [],
-                  };
-                }
-                groupedData[productId].orders.push({ orderId, orderQuantity });
-              }
-            );
-            const result = Object.values(groupedData);
-
-            const finalData = await Promise.all(
-              result.map(async (abc: any) => {
-                let res;
-                try {
-                  res = await loadStockByWarehouseProduct({
-                    productId: abc?.productId,
-                    locationId: locationId,
-                  }).unwrap();
-                } catch (error) {
-                  console.log(error);
-                }
-                return {
-                  ...abc,
-                  stock: res?.data?.quantity || 0,
-                };
-              })
-            );
-
-            setReqPreviewData(finalData);
-          }}
-        >
-          Generate Preview
-        </h1>
 
         <div className="responsive_order_details_view_table mt-[10px]">
           <table>

@@ -37,7 +37,7 @@ const menuItems: MenuItem[] = [
   {
     href: '/access',
     title: 'Access',
-    icon: 'ri-git-repository-private-fill',
+    icon: 'ri-git-repository-private-line',
     children:[
              {
               href:"/access/users",
@@ -64,18 +64,40 @@ const menuItems: MenuItem[] = [
   {
     href: '/warehouse',
     title: 'Warehouse',
-    icon: 'ri-map-pin-fill'
+    icon: 'ri-map-pin-line '
   },
   {
     href: '/delivery-partner',
     title: 'Delivery Partner',
     icon: 'ri-truck-line'
   },
+   {
+    href: '/Procurement',
+    title: 'Procurement',
+    icon: 'ri-luggage-cart-line',
+    children: [
+      {
+        href: "/procurement/purchase-order",
+        title: "PO"
+      },
+      {
+        href: "/procurement/purchase-approved",
+        title: "Purchase Approved"
+      },
+      {
+        href: "/procurement/purchase-receive",
+        title: "Purchase Receive"
+      }
+    ]
+  },
+
+  
 ];
 const GbSidebar = () => {
   const pathName=usePathname()
   const local=useLocale()
-  const [isActive, setIsActive] = useState(false);
+  const [isActive, setIsActive] = useState(true);
+  // const [isActive, setIsActive] = useState(false); active that for neuport menu also enable css for gb_sidebar and  modify layout 
   const [subMenuActive,setSubMenuActive]=useState<any>(null)
   const [loading, setLoading] = useState(false);
   const router=useRouter()

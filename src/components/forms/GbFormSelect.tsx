@@ -62,7 +62,7 @@ const GbFormSelect = ({
 					disabled={disabled}
 					className={`${errorMessage && "custom_select"} custom_select`}
 					
-					onChange={(selectedValue, selectedOption) => {
+					onChange={(selectedValue, selectedOption:any) => {
 						onChange(selectedOption);
 						handleSelectChange(selectedOption);
 					}}

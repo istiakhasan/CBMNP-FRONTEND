@@ -133,7 +133,7 @@ aside.gb_sidebar {
   z-index: 1000;
 	width: 75px;
 	height: 100vh;
-	position: fixed;
+	/* position: fixed; */
 	background: var(--bglight);
 	box-shadow: 1px 0 32px rgba(0, 0, 0, 0.12);
 	transition: width 0.3s ease-in-out;
@@ -313,7 +313,7 @@ aside.gb_sidebar {
     font-size: 13px !important;
     font-weight: 400 !important;
     line-height: 16px !important;
-    padding: 11.5px 16px !important;
+    padding: 5px !important;
     color: #0f3e49 !important;
 }
   .ant-table .ant-table-container th.ant-table-cell {

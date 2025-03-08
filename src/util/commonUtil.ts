@@ -81,5 +81,51 @@ export const mapImagesForUpload = async (images: any) => {
 };
 
 
+export const customStyles:any = {
+  control: (provided:any, state:any) => ({
+    ...provided,
+    minHeight: "30px",
+    height: "auto",
+    borderRadius: "4px",
+  }),
+
+  valueContainer: (provided:any, state:any) => ({
+    ...provided,
+    height: "auto",
+    padding: "0 6px",
+  }),
+
+  input: (provided:any, state:any) => ({
+    ...provided,
+    margin: "0px",
+    fontSize: "14px",
+  }),
+  indicatorSeparator: (state:any) => ({
+    display: "none",
+  }),
+  indicatorsContainer: (provided:any, state:any) => ({
+    ...provided,
+    height: "28px",
+  }),
+  option: (provided:any, state:any) => ({
+    ...provided,
+    padding: 1,
+    fontSize: 14,
+    paddingLeft: 7,
+    zIndex: 99999999
+  }),
+  menuPortal: (base:any) => ({ ...base, zIndex: 99999999 }),
+  placeholder: (provided:any, state:any) => ({
+    ...provided,
+    fontSize: 14,
+  }),
+  // Add: 23/03/22
+  menu: (provided:any) => ({ ...provided, zIndex: 9999999, marginTop: "0" }),
+};
+
+
+
+
+
 
 
