@@ -238,6 +238,7 @@ const CreatePurchaseOrder = () => {
               const result = await handleCreateProcurement(transformedData).unwrap() 
               if(result?.success){
                 message.success(result.message)
+                setRowDto([])
               }
             } catch (error) {
               if (error) {

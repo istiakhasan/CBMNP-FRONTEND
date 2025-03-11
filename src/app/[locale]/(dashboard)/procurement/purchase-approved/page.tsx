@@ -1,11 +1,13 @@
 "use client";
 import GbTable from "@/components/GbTable";
 import OrderSearch from "@/components/OrderSearch";
+import GbDropdown from "@/components/ui/dashboard/GbDropdown";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
 import { useGetProcurementQuery } from "@/redux/api/procurementApi";
 import {
   Checkbox,
   CheckboxOptionType,
+  MenuProps,
   Pagination,
   Popover,
   TableProps,
@@ -114,6 +116,20 @@ const Page = () => {
       name: record.name,
     }),
   };
+
+    // dropdown options
+           const items: MenuProps["items"] = [
+              {
+                label: (
+                  <span
+                  //  onClick={()=>setStatusChangeModal(true)}
+                   className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
+                    <span>Change Status</span>
+                  </span>
+                ),
+                key: "1",
+              },
+            ];
   return (
     <div>
       <GbHeader title="Purchase Approved" />
@@ -162,9 +178,12 @@ const Page = () => {
                   ></i>{" "}
                   Filter Column
                 </div>
+                
               </Popover>
+           
             </div>
             <div className="flex gap-3">
+           
               <Pagination
                 pageSize={size}
                 total={data?.meta?.total}
@@ -174,6 +193,15 @@ const Page = () => {
                 }}
                 showSizeChanger={false}
               />
+
+<GbDropdown items={items}>
+                              <button
+                                // onClick={() => router.push(`/${local}/orders/create-order`)}
+                                className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]"
+                              >
+                                Action
+                              </button>
+                            </GbDropdown>
             </div>
           </div>
           <div className="max-h-[600px] overflow-scroll">

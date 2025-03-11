@@ -72,7 +72,7 @@ const menuItems: MenuItem[] = [
     icon: 'ri-truck-line'
   },
    {
-    href: '/Procurement',
+    href: '/procurement',
     title: 'Procurement',
     icon: 'ri-luggage-cart-line',
     children: [
@@ -120,52 +120,60 @@ const GbSidebar = () => {
         <i onClick={() => setIsActive(!isActive)} className="ri-menu-fill"></i>
       </div>
       <div className="menu_list_wraper">
-        {menuItems?.map((item, index) => (
-          <Fragment key={index}>
-          {item?.children?<>
-            <div key={index} className={`${(index===subMenuActive && isActive)&&"border"} duration-300 relative`}>
-            <Tooltip placement="right" title={isActive ? '' : item.title}>
-              <div onClick={()=>{
-                if(index===subMenuActive){
-                  setSubMenuActive(null)
-                }else{
-                  setSubMenuActive(index)
+        {menuItems?.map((item, index) =>{
+          return (
+            (
+          
+              <Fragment key={index}>
+              {item?.children?<>
+                <div key={index} className={`${((index===subMenuActive && isActive) || pathName?.split('/').includes(item?.href?.slice(1,item?.href?.length)))&&"border"} duration-300 relative`}>
+                <Tooltip placement="right" title={isActive ? '' : item.title}>
+                  <div onClick={()=>{
+                    if(index===subMenuActive){
+                      setSubMenuActive(null)
+                    }else{
+                      setSubMenuActive(index)
+                    }
+                  }} className={`cursor-pointer menu_list ${pathName?.split('/').includes(item?.href?.slice(1,item?.href?.length))   ? 'active' : ''}`}>
+                    <i className={item.icon}></i>{" "}
+                    <p className="ml-[10px]">{item.title}</p>
+                  </div>
+                </Tooltip>
+                
+                 {isActive && <div className={`sub_menu ${(subMenuActive===index || pathName?.split('/').includes(item?.href?.split('/')[1]))?'active':''}`}>
+                 {
+                  item?.children?.map((child:any,count:any)=>{
+                    return (
+                      // work here
+                      <div className={`${pathName?.split('/').includes(child?.href?.split('/')[2])?"font-bold":""}`} key={count} onClick={()=>handleButtonClick(child?.href)}>
+                      <li  className={`${pathName===child?.href&&"sum_link_active"}`}>{child?.title}</li>
+                      </div>
+                    )
+                  })
                 }
-              }} className={`cursor-pointer menu_list ${pathName?.split('/').includes(item?.href?.slice(1,item?.href?.length))   ? 'active' : ''}`}>
-                <i className={item.icon}></i>{" "}
-                <p className="ml-[10px]">{item.title}</p>
+                 </div>}
+                 {!isActive && <div className={`sub_menu_collaps ${subMenuActive===index?'active':''}`}>
+                 {
+                   item?.children?.map((child:any,count:any)=>(
+                     <div className={`${pathName?.split('/').includes(child?.href?.split('/')[2])?"font-bold":""} whitespace-nowrap`} onClick={()=>handleButtonClick(child?.href)} key={count}>
+                    <li  className={`${pathName===child?.href&&"sum_link_active"}`}>{child?.title}</li>
+                    </div>
+                  ))
+                }
+                 </div>}
               </div>
-            </Tooltip>
-            
-             {isActive && <div className={`sub_menu ${subMenuActive===index?'active':''}`}>
-             {
-              item?.children?.map((child:any,count:any)=>(
-                <div key={count} onClick={()=>handleButtonClick(child?.href)}>
-                <li  className={`${pathName===child?.href&&"sum_link_active"}`}>{child?.title}</li>
-                </div>
-              ))
-            }
-             </div>}
-             {!isActive && <div className={`sub_menu_collaps ${subMenuActive===index?'active':''}`}>
-             {
-               item?.children?.map((child:any,count:any)=>(
-                 <div onClick={()=>handleButtonClick(child?.href)} key={count}>
-                <li  className={`${pathName===child?.href&&"sum_link_active"}`}>{child?.title}</li>
-                </div>
-              ))
-            }
-             </div>}
-          </div>
-          </>:<div onClick={()=>handleButtonClick(item?.href)} key={index} >
-            <Tooltip placement="right" title={isActive ? '' : item.title}>
-              <div className={`menu_list ${pathName?.split('/').includes(item?.href?.slice(1,item?.href?.length))   ? 'active' : ''}`}>
-                <i className={item.icon}></i>{" "}
-                <p className="ml-[10px]">{item.title}</p>
-              </div>
-            </Tooltip>
-          </div>}
-          </Fragment>
-        ))}
+              </>:<div onClick={()=>handleButtonClick(item?.href)} key={index} >
+                <Tooltip placement="right" title={isActive ? '' : item.title}>
+                  <div className={`menu_list ${pathName?.split('/').includes(item?.href?.slice(1,item?.href?.length))   ? 'active' : ''}`}>
+                    <i className={item.icon}></i>{" "}
+                    <p className="ml-[10px]">{item.title}</p>
+                  </div>
+                </Tooltip>
+              </div>}
+              </Fragment>
+            )
+          )
+        })}
       </div>
     </aside>
         </>
