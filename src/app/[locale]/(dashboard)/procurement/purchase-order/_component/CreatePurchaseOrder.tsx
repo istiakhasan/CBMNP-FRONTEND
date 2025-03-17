@@ -9,11 +9,14 @@ import { Input, message } from "antd";
 import { customStyles } from "@/util/commonUtil";
 import { useGetAllSupplierQuery } from "@/redux/api/supplierApi";
 import { useCreateProcurementMutation } from "@/redux/api/procurementApi";
+import GbModal from "@/components/ui/GbModal";
+import SupplierForm from "./SupplierForm";
 
 const CreatePurchaseOrder = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [handleCreateProcurement] = useCreateProcurementMutation();
   const [rowDto, setRowDto] = useState<any>([]);
+  const [supplierModal,setSupplierModal]=useState(false)
   const [selectSupplier, setSelectSupplier] = useState<any>({});
   const { data, isLoading } = useGetAllProductQuery({
     searchProducts: searchTerm,
@@ -29,14 +32,11 @@ const CreatePurchaseOrder = () => {
     };
   });
 
-
   const productOptions = data?.data?.map((item: any) => ({
     label: item?.name,
     value: item?.id,
     ...item,
   }));
-
-
 
   const total = rowDto?.reduce((pre: any, next: any) => {
     const itemTotal =
@@ -49,6 +49,12 @@ const CreatePurchaseOrder = () => {
       <div className="flex-1">
         <div className="grid grid-cols-2 w-full gap-3">
           <div>
+           <div className="flex items-end justify-end mb-1">
+           <button onClick={()=>setSupplierModal(true)} className="flex items-center gap-2 bg-primary text-white font-bold py-[2px] px-4">
+              <span className="text-md">+</span> Add
+            </button>
+           </div>
+
             <Select
               styles={customStyles}
               options={supplierList}
@@ -60,6 +66,11 @@ const CreatePurchaseOrder = () => {
             />
           </div>
           <div>
+          <div className="flex items-end justify-end mb-1">
+           <button className="flex items-center gap-2 bg-primary text-white font-bold py-[2px] px-4">
+              <span className="text-md">+</span> Add Products
+            </button>
+           </div>
             <Select
               styles={customStyles}
               options={productOptions}
@@ -235,13 +246,29 @@ const CreatePurchaseOrder = () => {
                 billGenerated: true,
                 billAmount: total,
               };
-              const result = await handleCreateProcurement(transformedData).unwrap() 
-              if(result?.success){
-                message.success(result.message)
-                setRowDto([])
+
+              const hasZeroQuantity = await transformedData.items.some(
+                (item: any) => {
+                  if (item.orderedQuantity < 1 || !item.orderedQuantity) {
+                    message.error("Quantity should not be zero");
+                    return true;
+                  }
+                  return false;
+                }
+              );
+
+              if (hasZeroQuantity) return;
+
+              const result = await handleCreateProcurement(
+                transformedData
+              ).unwrap();
+              if (result?.success) {
+                message.success(result.message);
+                setRowDto([]);
               }
             } catch (error) {
               if (error) {
+                console.log(error);
                 message.error("Something went wrong");
               }
             }
@@ -250,6 +277,9 @@ const CreatePurchaseOrder = () => {
           Checkout
         </button>
       </div>
+      <GbModal width="500px" openModal={()=>setSupplierModal(true)} closeModal={()=>setSupplierModal(false)} isModalOpen={supplierModal}>
+        <SupplierForm setSupplierModal={setSupplierModal} />
+      </GbModal>
     </div>
   );
 };

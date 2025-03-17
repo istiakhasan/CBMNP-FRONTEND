@@ -1,6 +1,6 @@
 import { Checkbox } from "antd";
 import { useFormContext, Controller } from "react-hook-form";
-import { CheckboxValueType } from 'antd/es/checkbox/Group';
+
 
 type checkboxFieldProps = {
   name: string;
@@ -9,7 +9,7 @@ type checkboxFieldProps = {
   label?: string;
   defaultValue?: boolean;
   handleChange?: () => void;
-  options: { label: string; value: CheckboxValueType }[];
+  options: { label: string; value: any }[];
 };
 
 const GbCheckboxGroup = ({

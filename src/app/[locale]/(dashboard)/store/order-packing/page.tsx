@@ -3,7 +3,6 @@ import GbHeader from "@/components/ui/dashboard/GbHeader";
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import GbTable from "@/components/GbTable";
-import { useGetAllVendorsQuery } from "@/redux/api/vendorApi";
 import { useRouter } from "next/navigation";
 import GbForm from "@/components/forms/GbForm";
 import GbFormInput from "@/components/forms/GbFormInput";

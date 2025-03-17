@@ -1,36 +1,33 @@
 "use client";
-import GbForm from "@/components/forms/GbForm";
 import GbTable from "@/components/GbTable";
 import OrderSearch from "@/components/OrderSearch";
-import GbDropdown from "@/components/ui/dashboard/GbDropdown";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
 import GbModal from "@/components/ui/GbModal";
 import { useGetProcurementQuery } from "@/redux/api/procurementApi";
 import {
   Checkbox,
   CheckboxOptionType,
-  MenuProps,
   Pagination,
   Popover,
-  TableProps,
 } from "antd";
 import moment from "moment";
 import React, { useState } from "react";
-import PurchaseOrderStatusChange from "./PurchaseOrderStatusChange";
 import StatusBadge from "@/util/StatusBadge";
+import PurchaseOrderReceive from "./_component/PurchaseOrderReceive";
+import GbForm from "@/components/forms/GbForm";
 
 const Page = () => {
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
-  const [selectedOrders, setSelectedOrders] = useState<any>([]);
-  const [actionModal, setActionModal] = useState(false);
+  const [receiveModal,setReceiveModal]=useState(false)
+  const [rowData,setRowData]=useState(false)
   const { data, isLoading } = useGetProcurementQuery({
     page,
     size,
     searchTerm,
-    status:"Pending"
+    status:"Approved"
   });
 
   const tableColumns = [
@@ -63,13 +60,6 @@ const Page = () => {
         return <span>{record?.supplier?.contactPerson}</span>;
       },
     },
-    // {
-    //     title:"Order By",
-    //     key:"4",
-    //     render:(a:any,b:any,i:any)=>{
-    //         return <span>{i+1}</span>
-    //     }
-    // },
     {
       title: "Amount",
       key: "5",
@@ -86,24 +76,22 @@ const Page = () => {
       },
     },
     {
-      title: "Action",
-      key: "action",
-      width: "60px",
-      render: (text: string, record: any) => {
-        return (
-          <>
-            {
-              <span className=" text-white text-[10px] py-[2px] px-[10px] cursor-pointer">
-                <i
-                  style={{ fontSize: "18px" }}
-                  className="ri-eye-fill color_primary"
-                ></i>
-              </span>
-            }
-          </>
-        );
-      },
-    },
+        title: "Action",
+        key: "action",
+        width: "80px",
+        render: (text: string, record: any) => {
+          return (
+            <button onClick={()=>{
+              setReceiveModal(true)
+              setRowData(record)
+              }} className="bg-[#8A6D4F]  text-white text-xs font-medium py-1 px-4 rounded-md shadow-md transition duration-200">
+              Receive
+            </button>
+          );
+        },
+      }
+      
+      
   ];
 
   const defaultCheckedList = tableColumns.map(
@@ -121,30 +109,7 @@ const Page = () => {
     label: title,
     value: key,
   }));
-  const rowSelection: TableProps<any>["rowSelection"] = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
-      setSelectedOrders(selectedRows);
-    },
-    getCheckboxProps: (record: any) => ({
-      disabled: record.name === "Disabled User",
-      name: record.name,
-    }),
-  };
 
-  // dropdown options
-  const items: MenuProps["items"] = [
-    {
-      label: (
-        <span
-          onClick={() => setActionModal(true)}
-          className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center"
-        >
-          <span>Change Status</span>
-        </span>
-      ),
-      key: "1",
-    },
-  ];
   return (
     <div>
       <GbHeader title="Purchase Approved" />
@@ -210,33 +175,26 @@ const Page = () => {
                 showSizeChanger={false}
               />
 
-              <GbDropdown items={items}>
-                <button
-                  // onClick={() => router.push(`/${local}/orders/create-order`)}
-                  className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]"
-                >
-                  Action
-                </button>
-              </GbDropdown>
+
             </div>
           </div>
-          <div className="max-h-[600px] overflow-scroll">
+          <div className="h-[500px] overflow-scroll">
             <GbTable
               loading={isLoading}
               columns={newColumns}
               dataSource={data?.data}
-              rowSelection={rowSelection}
             />
           </div>
           <GbModal
-            width="600px"
-            clseTab={false}
-            isModalOpen={actionModal}
-            openModal={() => setActionModal(true)}
-            closeModal={() => setActionModal(false)}
+            width="1300px"
+            // clseTab={false}
+            isModalOpen={receiveModal}
+            openModal={() => setReceiveModal(true)}
+            closeModal={() => setReceiveModal(false)}
           >
-            <GbForm submitHandler={(data: any) => console.log(data)}>
-              <PurchaseOrderStatusChange setModalOpen={setActionModal} selectedOrders={selectedOrders} />
+            <GbForm submitHandler={(data:any)=>console.log(data)}>
+
+           <PurchaseOrderReceive rowData={rowData} setReceiveModal={setReceiveModal} setRowData={setRowData} />
             </GbForm>
           </GbModal>
         </div>

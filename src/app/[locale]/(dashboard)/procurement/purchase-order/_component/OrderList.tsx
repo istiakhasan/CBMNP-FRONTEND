@@ -2,6 +2,7 @@ import GbTable from "@/components/GbTable";
 import GlobalInvoice from "@/components/GlobalInvoice";
 import GbModal from "@/components/ui/GbModal";
 import { useGetProcurementQuery } from "@/redux/api/procurementApi";
+import StatusBadge from "@/util/StatusBadge";
 import {
   Checkbox,
   CheckboxOptionType,
@@ -64,6 +65,14 @@ const OrderList = () => {
         return <span>{b?.billAmount}</span>;
       },
     },
+     {
+          title: "Status",
+          key: "15",
+          render: (a: any, b: any, i: any) => {
+            console.log(b.status);
+            return <StatusBadge status={{ label: b?.status }} />;
+          },
+        },
     {
       title: "Action",
       key: "action",

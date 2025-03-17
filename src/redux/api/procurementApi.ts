@@ -19,10 +19,28 @@ export const procurementApi = baseApi.injectEndpoints({
       }),
       providesTags: [tagTypes.procurements],
     }),
+    bulkUpdatePOStatus: build.mutation({
+      query: (data) => ({
+        url: "/procurements/bulk-update",
+        method: "PATCH",
+        data
+      }),
+      invalidatesTags: [tagTypes.procurements],
+    }),
+    receivePurchaseOrder: build.mutation({
+      query: (data) => ({
+        url: "/procurements/receive-order",
+        method: "PATCH",
+        data
+      }),
+      invalidatesTags: [tagTypes.procurements],
+    }),
   }),
 });
 
 export const {
  useCreateProcurementMutation,
- useGetProcurementQuery
+ useGetProcurementQuery,
+ useBulkUpdatePOStatusMutation,
+ useReceivePurchaseOrderMutation
 } = procurementApi;

@@ -12,6 +12,7 @@ import { createCustomerSchema } from "@/schema/schema";
 import GbDrawer from "@/components/ui/GbDrawer";
 import moment from "moment";
 import axios from "axios";
+import { getBaseUrl } from "@/helpers/config/envConfig";
 
 const CreateCustomer = ({ setCustomer, customer }: any) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -112,7 +113,7 @@ const CreateCustomer = ({ setCustomer, customer }: any) => {
                   {customerData?.data?.map((item: any) => (
                     <div
                       onClick={async() => {
-                        const res=await axios.get(`http://localhost:8080/api/v1/customers/orders-count/${item?.customer_Id}`)
+                        const res=await axios.get(`${getBaseUrl()}/customers/orders-count/${item?.customer_Id}`)
                         setOrderCount(res?.data?.data)
                         setCustomer(item);
                         setIsFocus(false);

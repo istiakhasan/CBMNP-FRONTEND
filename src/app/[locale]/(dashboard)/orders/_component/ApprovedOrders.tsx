@@ -345,7 +345,7 @@ const ApprovedOrders = ({ refetch: countRefetch,searchTerm }: any) => {
           </div>
         </div>
       </div>
-      <div className="max-h-[600px] overflow-scroll">
+      <div className="h-[600px] overflow-scroll">
         <GbTable
           rowSelection={rowSelection}
           loading={isLoading}

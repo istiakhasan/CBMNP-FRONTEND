@@ -1,5 +1,4 @@
 "use client"
-import ProductInfoTable from "@/app/(dashboard)/order/order-submission/_subComponent/ProductInfoTable";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
 import { Col, Row } from "antd";
 

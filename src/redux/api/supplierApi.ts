@@ -11,10 +11,18 @@ export const supplierApi = baseApi.injectEndpoints({
       }),
       providesTags: [tagTypes.supplier],
     }),
+    createSupplier: build.mutation({
+      query: (data) => ({
+        url: "/supplier",
+        method: "POST",
+        data
+      }),
+      invalidatesTags: [tagTypes.supplier]
+    }),
   }),
 });
 
 export const {
- useGetAllSupplierQuery
-
+ useGetAllSupplierQuery,
+useCreateSupplierMutation
 } = supplierApi;

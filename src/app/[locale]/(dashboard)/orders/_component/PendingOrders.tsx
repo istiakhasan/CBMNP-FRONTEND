@@ -284,7 +284,7 @@ const PendingOrders = ({searchTerm}: any) => {
                 </button>
       </div>
       </div>
-      <div className="max-h-[600px] overflow-scroll">
+      <div className="h-[600px] overflow-scroll">
         <GbTable
           loading={isLoading}
           columns={newColumns}

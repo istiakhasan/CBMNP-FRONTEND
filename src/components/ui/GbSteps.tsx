@@ -5,13 +5,13 @@ import GbFormInput from "../forms/GbFormInput";
 import GbFileUpload from "../forms/GbFileUpload";
 import GbFormTextArea from "../forms/GbFormTextArea";
 import GbCascaderPicker from "../forms/GbCascaderPicker";
-import CubicMeters from "@/app/(dashboard)/product/_component/CubicMeters";
 import GbBTDInput from "../forms/GbBTDInput";
-import AttributesAndVariants from "@/app/(dashboard)/product/add-product/_component/AttributesAndVariants";
 import {  useCreateVariantProductMutation } from "@/redux/api/productApi";
 import { uploadImageToImagebb } from "@/util/commonUtil";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { createVariantProductSchema } from "@/schema/IepSchema";
+import CubicMeters from "@/app/[locale]/(dashboard)/product/_component/CubicMeters";
+import AttributesAndVariants from "@/app/[locale]/(dashboard)/product/add-product/_component/AttributesAndVariants";
 
 
 
