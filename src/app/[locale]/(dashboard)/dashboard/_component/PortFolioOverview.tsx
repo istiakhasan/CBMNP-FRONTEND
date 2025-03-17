@@ -2,7 +2,7 @@
 import React from 'react';
 import ReactApexChart from 'react-apexcharts';
 
-const PortFolioOverview = () => {
+const PortFolioOverview = () =>
     const data:any = {
         series: [{
           name: 'Total',
