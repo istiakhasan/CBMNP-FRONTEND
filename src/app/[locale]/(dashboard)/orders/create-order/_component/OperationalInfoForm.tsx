@@ -2,6 +2,7 @@ import GbFormCheckbox from "@/components/forms/GbCheckbox";
 import GbFormInput from "@/components/forms/GbFormInput";
 import GbFormSelect from "@/components/forms/GbFormSelect";
 import GbFormTextArea from "@/components/forms/GbFormTextArea";
+import { useGetDeliveryPartnerOptionsQuery } from "@/redux/api/partnerApi";
 import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
 import React, { useState } from "react";
 import { useFormContext } from "react-hook-form";
@@ -13,12 +14,12 @@ const OperationalInfoForm = ({ setActive, cart }: any) => {
     setValue,
     formState: { isValid },
   } = useFormContext();
-
+const {data:deliveryPartner}=useGetDeliveryPartnerOptionsQuery(undefined)
 const deliveryCharge:number = Number(watch()?.deliveryCharge?.value) || 0;
 const cartTotal:number = cart?.reduce((acc: number, item: any) => acc + (item.salePrice*item?.productQuantity || 0), 0) || 0;
 const paidAmount:number = Number(watch()?.paidAmount) || 0;
 const totalAmount:number=(cartTotal+deliveryCharge)-paidAmount
-
+console.log(deliveryPartner,"delivery partner");
   return (
     <div>
       {" "}
@@ -161,16 +162,7 @@ const totalAmount:number=(cartTotal+deliveryCharge)-paidAmount
               <GbFormSelect
                 name="currier"
                 label="Shipping Method"
-                options={[
-                  {
-                    label: "SteadFast",
-                    value: "SteadFast",
-                  },
-                  {
-                    label: "eCurior",
-                    value: "eCurior",
-                  },
-                ]}
+                options={deliveryPartner?.data}
               />
             </div>
             <div className="mb-4">

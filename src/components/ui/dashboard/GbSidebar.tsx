@@ -87,7 +87,11 @@ const menuItems: MenuItem[] = [
       {
         href: "/procurement/purchase-receive",
         title: "Purchase Receive"
-      }
+      },
+      {
+        href: "/procurement/purchase-report",
+        title: "Purchase Report"
+      },
     ]
   },
 

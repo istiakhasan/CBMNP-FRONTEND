@@ -19,6 +19,14 @@ export const procurementApi = baseApi.injectEndpoints({
       }),
       providesTags: [tagTypes.procurements],
     }),
+    getProcurementReports: build.query({
+      query: (params) => ({
+        url: "/procurements/reports",
+        method: "GET",
+        params
+      }),
+      providesTags: [tagTypes.procurements],
+    }),
     bulkUpdatePOStatus: build.mutation({
       query: (data) => ({
         url: "/procurements/bulk-update",
@@ -42,5 +50,7 @@ export const {
  useCreateProcurementMutation,
  useGetProcurementQuery,
  useBulkUpdatePOStatusMutation,
- useReceivePurchaseOrderMutation
+ useReceivePurchaseOrderMutation,
+ useGetProcurementReportsQuery,
+ useLazyGetProcurementReportsQuery
 } = procurementApi;

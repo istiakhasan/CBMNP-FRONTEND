@@ -40,7 +40,7 @@ const OrderCart = ({
         deliveryDate: finalData.deliveryDate,
         //  operational information
         orderSource: finalData?.orderFrom?.label,
-        currier: finalData?.currier?.label,
+        currier: finalData?.currier?.value,
         shippingCharge: finalData?.deliveryCharge?.value,
         shippingType: finalData?.deliveryType?.label,
         orderType: finalData?.orderType?.label,
