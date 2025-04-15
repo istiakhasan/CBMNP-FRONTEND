@@ -2,6 +2,7 @@ import GbForm from "@/components/forms/GbForm";
 import GbFormSelect from "@/components/forms/GbFormSelect";
 
 import {
+  useChangeHoldOrderStatusMutation,
   useChangeOrderStatusMutation,
   useUpdateOrderMutation,
 } from "@/redux/api/orderApi";
@@ -16,7 +17,7 @@ const ChangeStatusModal = ({ setModalOpen, rowData }: any) => {
    const [handleUpdateOrder] = useChangeOrderStatusMutation()
   const userInfo: any = getUserInfo();
   const router=useRouter()
-
+const [handleHoldUpdateOrderStatus] = useChangeHoldOrderStatusMutation();
   const { data: orderStatus } = useGetAllStatusQuery({
     label:rowData?.status?.label
   });
@@ -24,13 +25,24 @@ const ChangeStatusModal = ({ setModalOpen, rowData }: any) => {
   const onsubmit = async (data: any) => {
     try {
 
-      const res = await handleUpdateOrder({
-          orderIds: [rowData?.id], 
-          statusId:data?.orderStatus?.value,
-          agentId:userInfo.userId,
-          ...(data?.orderStatus?.label==="Hold"&&  {onHoldReason:data?.reason?.value,}),
-          ...(data?.orderStatus?.label==="Cancel"&&  {onCancelReason:data?.reason?.value,}),
-        });
+        let res: any = null;
+        if (rowData?.status?.label === "Hold") {
+          res = await handleHoldUpdateOrderStatus({
+            orderIds: [rowData?.id], 
+            statusId:data?.orderStatus?.value,
+            agentId:userInfo.userId,
+            ...(data?.orderStatus?.label==="Hold"&&  {onHoldReason:data?.reason?.value,}),
+            currentStatus:rowData?.statusId
+          });
+        } else {
+          res = await handleUpdateOrder({
+            orderIds: [rowData?.id], 
+            statusId:data?.orderStatus?.value,
+            agentId:userInfo.userId,
+            ...(data?.orderStatus?.label==="Cancel"&&  {onCancelReason:data?.reason?.value,}),
+            currentStatus:rowData?.statusId
+          });
+        }
       if (res) {
         message.success("Order update successfully...");
         setModalOpen(false);

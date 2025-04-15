@@ -25,3 +25,16 @@ export const createVariantProductSchema = yup.object().shape({
   purchasePrice: yup.string().required(),
   product_image: yup.mixed().required("Image is required"),
 });
+
+
+export const createOrderSchema = yup.object().shape({
+  Warehouse: yup.object().required("Product Status is required"),
+  orderFrom: yup.object().required("Product Status is required"),
+  orderType: yup.object().required("Product Status is required"),
+  deliveryType: yup.object().required("Product Status is required"),
+  deliveryCharge: yup.object().required("Product Status is required"),
+  deliveryDate: yup.string().required("Product Status is required"),
+  currier: yup.object().required("Product Status is required"),
+  paymentStatus: yup.object().required("Product Status is required"),
+  paymentMethods: yup.object().required("Product Status is required"),
+});

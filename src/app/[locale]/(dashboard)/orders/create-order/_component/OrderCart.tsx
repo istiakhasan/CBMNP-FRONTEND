@@ -8,6 +8,8 @@ import { getUserInfo } from "@/service/authService";
 import { useCreateOrderMutation } from "@/redux/api/orderApi";
 import moment from "moment";
 import OperationalInfoForm from "./OperationalInfoForm";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { createOrderSchema } from "@/schema/IepSchema";
 
 const OrderCart = ({
   setCart,
@@ -335,7 +337,7 @@ const OrderCart = ({
                 value: "COD",
               },
             }}
-            // resolver={yupResolver(operationalSchema)}
+            resolver={yupResolver(createOrderSchema)}
             submitHandler={handleFormSubmit}
           >
             <OperationalInfoForm setActive={setActive} cart={cart} />
