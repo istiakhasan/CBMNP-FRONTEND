@@ -1,5 +1,6 @@
 "use client";
 import GbSidebar from "@/components/ui/dashboard/GbSidebar";
+import ProtectedRoute from "@/components/ui/ProtectedRoute";
 import { isLoggedIn } from "@/service/authService";
 import { Row, Space, Spin } from "antd";
 import { useLocale } from "next-intl";
@@ -38,7 +39,9 @@ const App: React.FC = ({ children }: any) => {
     <div style={{ height: "100vh",display:"flex" }}>
       <GbSidebar />
       <div style={{ width: "calc(100% - 75px)",flex:"1", marginLeft: "auto" }}>
+        <ProtectedRoute>
         {children}
+        </ProtectedRoute>
       </div>
     </div>
   );

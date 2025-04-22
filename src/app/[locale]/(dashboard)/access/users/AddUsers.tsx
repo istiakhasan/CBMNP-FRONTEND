@@ -37,7 +37,15 @@ const AddUsers = ({setOpenAddUserModal}:any) => {
           {
             label:'Admin',
             value:'admin',
-          }
+          },
+          {
+            label:'Owner',
+            value:'owner',
+          },
+          {
+            label:'User',
+            value:'user',
+          },
         ]} label="Role" />
       </div>
       <div className="mb-3">

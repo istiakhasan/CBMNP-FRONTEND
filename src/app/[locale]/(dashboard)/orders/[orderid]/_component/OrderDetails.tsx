@@ -10,7 +10,7 @@ import AddPaymentModal from "./AddPaymentModal";
 import PaymentHistory from "./PaymentHistory";
 import { useSubmitCommentMutation } from "@/redux/api/commentApi";
 
-const OrderDetails = ({ data }: any) => {
+const OrderDetails = ({ data,permission }: any) => {
   const [addNote, setAddNote] = useState(false);
   const [seeMore, setSeeMore] = useState(false);
   const [openModal, setModalOpen] = useState(false);
@@ -179,7 +179,8 @@ const OrderDetails = ({ data }: any) => {
                       {data?.receiverAddress}
                     </p>
                     <Tooltip>
-                      <button
+                      <button 
+                        disabled={!permission?.includes("UPDATE_ORDERS")}
                         onClick={() => setModalOpen(true)}
                         className={`bg-[#00171D] ${
                           data?.status?.label === "Cancel" && "bg-[#FF5959]"
@@ -380,7 +381,7 @@ const OrderDetails = ({ data }: any) => {
       <div className="mt-6">
         <div className="flex justify-between items-center">
           <h1 className="font-semibold  text-[18px] ">Payment History</h1>
-         {data?.paymentStatus !=="Paid" && <button
+         {(data?.paymentStatus !=="Paid" && permission?.includes("UPDATE_ORDERS")) && <button
             onClick={() => setPaymentModalOpen(true)}
             className={`bg-[#4F8A6D] text-white px-[43px] font-bold py-[6px] flex items-center gap-3`}
           >

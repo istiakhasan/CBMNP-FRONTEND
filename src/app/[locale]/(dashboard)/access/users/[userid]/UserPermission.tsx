@@ -1,4 +1,5 @@
 "use client";
+import CustomTree from "@/components/ui/CustomTree";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
 import GbTree from "@/components/ui/GbTree";
 import { useGetAllPermissionLabelQuery } from "@/redux/api/permission.Api";
@@ -41,29 +42,33 @@ const UserPermission = () => {
   return (
     <div>
       <GbHeader title={"Permissions"} />
+      <div className="p-[16px]" style={{height:"calc(100vh - 65px)",overflow:"scroll"}}>
+
       {isLoading || getUserLoading ? (
         <div className="flex items-center justify-center h-screen">
           <Spin size="large" />
         </div>
       ) : (
         <>
-        <div className="p-[16px]">
-          <h1 className="text-2xl mb-[40px] text-primary"></h1>
+        <div>
+          {/* <h1 className="text-2xl mb-[40px] text-primary"></h1> */}
           <div className="flex justify-center">
-            <GbTree defaultKey={userData?.permission} checkedKeys={checkedKeys} setCheckedKeys={setCheckedKeys} treeData={data?.data} />
+            {/* <GbTree defaultKey={userData?.permission} checkedKeys={checkedKeys} setCheckedKeys={setCheckedKeys} treeData={data?.data} /> */}
+            <CustomTree treeData={data?.data}  defaultKey={userData?.permission}  checkedKeys={checkedKeys} setCheckedKeys={setCheckedKeys} />
           </div>
          
         </div>
-        <div className="flex items-center justify-center mt-3 bg-white  py-3 sticky bottom-0">
+        <div className="flex items-center justify-end mt-3 bg-white  py-3 sticky bottom-0">
           <button
               onClick={updatePermissionForm}
               className="bg-[#4F8A6D]  text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]"
-            >
+              >
               Update permission
             </button>
           </div>
         </>
       )}
+      </div>
     </div>
   );
 };

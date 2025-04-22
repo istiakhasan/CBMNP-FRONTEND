@@ -8,6 +8,8 @@ import OrderDetails from "./_component/OrderDetails";
 import OrderLog from "./_component/OrderLog";
 import { useGetOrderByIdQuery } from "@/redux/api/orderApi";
 import { handleCopy } from "@/util/copyOrderInfo";
+import { getUserInfo } from "@/service/authService";
+import { useGetUserByIdQuery } from "@/redux/api/usersApi";
 
 
 const Page = () => {
@@ -17,8 +19,13 @@ const Page = () => {
   const { data, isLoading } = useGetOrderByIdQuery({
     id: orderid,
   });
+  const userInfo: any = getUserInfo();
+  const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
+    id: userInfo?.userId,
+  });
+  const permission = userData?.permission?.map((item: any) => item?.label);
   const component: any = {
-    1: <OrderDetails data={data} />,
+    1: <OrderDetails data={data} permission={permission} />,
     2: <OrderLog data={data} />,
   };
   const [copyLoading, setCopyLoading] = useState(false);
@@ -66,7 +73,7 @@ const Page = () => {
                   ></i>
                   Copy Info{" "}
                 </p>
-                {
+                { permission?.includes("UPDATE_ORDERS") &&
                   <button
                     onClick={() =>
                       router.push(

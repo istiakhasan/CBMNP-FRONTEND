@@ -10,6 +10,7 @@ import {
 } from "@/redux/api/productApi";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
 import { useLoadAllInventoryQuery, useLoadAllTransactionQuery } from "@/redux/api/inventoryApi";
+import { useLocale } from "next-intl";
 
 const Page = () => {
   const search = useSearchParams();
@@ -332,7 +333,7 @@ const Page = () => {
     setPage(page);
     setSize(pageSize);
   };
-
+const local=useLocale()
   return (
     <>
       <GbHeader />
@@ -352,7 +353,7 @@ const Page = () => {
               color: "#4F8A6D",
               boxShadow: "none",
             }}
-            onClick={() => router.push("/inventory")}
+            onClick={() => router.push(`/${local}/inventory`)}
             type="primary"
             size="small"
             className="mr-2"
@@ -365,7 +366,7 @@ const Page = () => {
               color: "#4F8A6D",
               boxShadow: "none",
             }}
-            onClick={() => router.push("/inventory?tab=logs")}
+            onClick={() => router.push(`/${local}/inventory?tab=logs`)}
             type="primary"
             size="small"
             className="mr-2"

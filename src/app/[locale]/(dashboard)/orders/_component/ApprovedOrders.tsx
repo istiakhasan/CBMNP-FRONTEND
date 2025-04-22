@@ -334,14 +334,13 @@ const ApprovedOrders = ({ refetch: countRefetch,searchTerm }: any) => {
           />
 
           <div>
-            <GbDropdown items={items}>
+            {<GbDropdown state={locationId}  items={items}>
               <button
-                // onClick={() => router.push(`/${local}/orders/create-order`)}
                 className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]"
               >
                 Action
               </button>
-            </GbDropdown>
+            </GbDropdown>}
           </div>
         </div>
       </div>
@@ -453,6 +452,7 @@ const ApprovedOrders = ({ refetch: countRefetch,searchTerm }: any) => {
                   refetch();
                   countRefetch();
                   message.success("Requisition create successfully..");
+                  setOpenModal(false)
                 } catch (error) {
                   console.log(error, "selected orders");
                 }

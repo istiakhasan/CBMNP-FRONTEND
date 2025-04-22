@@ -48,7 +48,7 @@ const OrdersPage = () => {
   ];
 
   const tabs = allTabs
-    // .filter((tab) => permission?.includes(tab.permission))
+    .filter((tab) => permission?.includes(tab.permission))
     .map((item) => ({
       ...item,
       //@ts-ignore

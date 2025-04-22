@@ -15,6 +15,8 @@ import { Image, message, Spin, Switch } from "antd";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import AddToInventory from "../_component/AddToInventory";
+import { useGetUserByIdQuery } from "@/redux/api/usersApi";
+import { getUserInfo } from "@/service/authService";
 
 const Page = () => {
   const router = useRouter();
@@ -31,6 +33,11 @@ const Page = () => {
   
   const productData = data?.data?.data;
   const ids = data?.data?.ids;
+  const userInfo: any = getUserInfo();
+  const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
+    id: userInfo?.userId,
+  });
+  const permission = userData?.permission?.map((item: any) => item?.label);
   return (
     <div>
       <GbHeader title="Product" />
@@ -43,12 +50,12 @@ const Page = () => {
           <>
             <p className="text-[20px] mb-5 flex justify-between">
               <span className="text-[#4b5766]">{productData?.name}</span>
-              <button
+            {permission?.includes("Edit Products") &&  <button
                 onClick={() => router.push(`/product/${productData?.id}/edit`)}
                 className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]"
               >
                 Edit
-              </button>
+              </button>}
             </p>
             {ids?.length > 0 && (
               <div className="border-b-[1px] mb-[20px] border-b-[#ebebeb] flex items-center gap-10">
@@ -243,14 +250,14 @@ const Page = () => {
 
         <div className="border-[1px] border-[#ebebeb] bg-[#FAFAFA]  p-[20px]">
           <h1 className="text-[#4b5766] text-[18px]">Inventory</h1>
-          <div className="flex items-center justify-end gap-2">
+          {/* <div className="flex items-center justify-end gap-2">
             <button onClick={()=>setOpen(true)} className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]">
               Add
             </button>
             <button className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]">
               Update
             </button>
-          </div>
+          </div> */}
 
           <table className="table-auto w-full border-collapse border border-gray-300 mt-3">
                       <thead>

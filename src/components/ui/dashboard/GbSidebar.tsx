@@ -1,4 +1,6 @@
 "use client"
+import { useGetUserByIdQuery } from "@/redux/api/usersApi";
+import { getUserInfo } from "@/service/authService";
 import { Tooltip } from "antd";
 import { useLocale } from "next-intl";
 import Link from "next/link";
@@ -13,91 +15,99 @@ interface MenuItem {
   children?:any
 }
 
-const menuItems: MenuItem[] = [
-  {
-    href: '/dashboard',
-    title: 'Dashboard',
-    icon: 'ri-bar-chart-box-line',
-  },
-  {
-    href: '/orders',
-    title: 'Orders',
-    icon: 'ri-shopping-bag-3-line',
-  },
-  {
-    href: '/inventory',
-    title: 'Inventory',
-    icon: 'ri-ancient-gate-line',
-  },
-  {
-    href: '/product',
-    title: 'Products',
-    icon: 'ri-box-3-line',
-  },
-  {
-    href: '/access',
-    title: 'Access',
-    icon: 'ri-git-repository-private-line',
-    children:[
-             {
-              href:"/access/users",
-              title:"Users"
-             },
-             {
-              href:"/access/group-permission",
-              title:"Group Permission"
-             }
-    ]
-  },
-  {
-    href: '/requisition',
-    title: 'Requisitions', // Plural to indicate multiple requisitions
-    icon: 'ri-store-2-line',
-    children: [
-      {
-        href: "/requisition/manage",
-        title: "Manage Requisitions" // More descriptive
-      }
-    ]
-  },
-  
-  {
-    href: '/warehouse',
-    title: 'Warehouse',
-    icon: 'ri-map-pin-line '
-  },
-  {
-    href: '/delivery-partner',
-    title: 'Delivery Partner',
-    icon: 'ri-truck-line'
-  },
-   {
-    href: '/procurement',
-    title: 'Procurement',
-    icon: 'ri-luggage-cart-line',
-    children: [
-      {
-        href: "/procurement/purchase-order",
-        title: "PO"
-      },
-      {
-        href: "/procurement/purchase-approved",
-        title: "Purchase Approved"
-      },
-      {
-        href: "/procurement/purchase-receive",
-        title: "Purchase Receive"
-      },
-      {
-        href: "/procurement/purchase-report",
-        title: "Purchase Report"
-      },
-    ]
-  },
 
-  
-];
+// .filter((pd:any)=>pd.href==='/warehouse')
 const GbSidebar = () => {
+
+const userInfo: any = getUserInfo();
+console.log(userInfo,"asdfsa");
+const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
+  id: userInfo?.userId,
+}); 
+  const permission = userData?.permission?.map((item: any) => item?.label);
+  const menuItems: MenuItem[] = [
+    {
+      href: '/dashboard',
+      title: 'Dashboard',
+      icon: 'ri-bar-chart-box-line',
+    },
+    {
+      href: '/orders',
+      title: 'Orders',
+      icon: 'ri-shopping-bag-3-line',
+    },
+    {
+      href: '/inventory',
+      title: 'Inventory',
+      icon: 'ri-ancient-gate-line',
+    },
+    {
+      href: '/product',
+      title: 'Products',
+      icon: 'ri-box-3-line',
+    },
+    {
+      href: '/access',
+      title: 'Access',
+      icon: 'ri-git-repository-private-line',
+      children:[
+               {
+                href:"/access/users",
+                title:"Users"
+               },
+               {
+                href:"/access/group-permission",
+                title:"Group Permission"
+               }
+      ]
+    },
+    {
+      href: '/requisition',
+      title: 'Requisitions', 
+      icon: 'ri-store-2-line',
+      children: [
+        {
+          href: "/requisition/manage",
+          title: "Manage Requisitions" 
+        }
+      ]
+    },
+    
+    {
+      href: '/warehouse',
+      title: 'Warehouse',
+      icon: 'ri-map-pin-line '
+    },
+    {
+      href: '/delivery-partner',
+      title: 'Delivery Partner',
+      icon: 'ri-truck-line'
+    },
+     {
+      href: '/procurement',
+      title: 'Procurement',
+      icon: 'ri-luggage-cart-line',
+      children: [
+        {
+          href: "/procurement/purchase-order",
+          title: "PO"
+        },
+        {
+          href: "/procurement/purchase-approved",
+          title: "Purchase Approved"
+        },
+        {
+          href: "/procurement/purchase-receive",
+          title: "Purchase Receive"
+        },
+        {
+          href: "/procurement/purchase-report",
+          title: "Purchase Report"
+        },
+      ]
+    }
+  ]
+  .filter((mi:any)=>permission?.includes(mi.title) ||  userInfo?.role ==="admin" )
   const pathName=usePathname()
   const local=useLocale()
   const [isActive, setIsActive] = useState(true);

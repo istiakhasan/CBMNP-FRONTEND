@@ -1,8 +1,12 @@
 "use client";
 import GbTable from "@/components/GbTable";
+import GbDropdown from "@/components/ui/dashboard/GbDropdown";
 import copyToClipboard from "@/components/ui/GbCopyToClipBoard";
 import GbModal from "@/components/ui/GbModal";
-import { useGetAllOrdersQuery, useGetOrderByIdQuery } from "@/redux/api/orderApi";
+import {
+  useGetAllOrdersQuery,
+  useGetOrderByIdQuery,
+} from "@/redux/api/orderApi";
 import StatusBadge from "@/util/StatusBadge";
 
 import {
@@ -10,25 +14,27 @@ import {
   CheckboxOptionType,
   Pagination,
   Popover,
+  TableProps,
 } from "antd";
 import moment from "moment";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
-import React, {  useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 
 const InTransitOrders = ({}: any) => {
   // all states
+   const [openModal, setOpenModal] = useState(false);
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [rowId, setRowId] = useState<any>(null);
-  const local=useLocale()
+  const local = useLocale();
   const { data, isLoading } = useGetAllOrdersQuery({
     page,
     limit: size,
     searchTerm,
-    statusId:"7"
+    statusId: "7",
   });
   const { data: rowData, isLoading: rowDataLoading } = useGetOrderByIdQuery({
     id: rowId,
@@ -105,7 +111,7 @@ const InTransitOrders = ({}: any) => {
       align: "start",
       render: (_: any, record: any) => (
         <>
-       <StatusBadge status={record?.status} />
+          <StatusBadge status={record?.status} />
         </>
       ),
     },
@@ -186,7 +192,10 @@ const InTransitOrders = ({}: any) => {
                 onClick={() => router.push(`/${local}/orders/${record?.id}`)}
                 className=" text-white text-[10px] py-[2px] px-[10px] cursor-pointer"
               >
-                <i style={{fontSize:"18px"}} className="ri-eye-fill color_primary"></i>
+                <i
+                  style={{ fontSize: "18px" }}
+                  className="ri-eye-fill color_primary"
+                ></i>
               </span>
             }
           </>
@@ -214,6 +223,17 @@ const InTransitOrders = ({}: any) => {
   const reactToPrintFn = useReactToPrint({
     content: () => contentRef.current,
   });
+  const [selectedOrders, setSelectedOrders] = useState<any>([]);
+  // table row selection
+  const rowSelection: TableProps<any>["rowSelection"] = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
+      setSelectedOrders(selectedRows);
+    },
+    getCheckboxProps: (record: any) => ({
+      disabled: record.name === "Disabled User",
+      name: record.name,
+    }),
+  };
   return (
     <div className="gb_border">
       <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
@@ -246,26 +266,62 @@ const InTransitOrders = ({}: any) => {
               <i
                 style={{ fontSize: "24px" }}
                 className="ri-equalizer-line text-gray-600"
-              ></i>{" "}
+              ></i>
               Filter Column
             </div>
           </Popover>
         </div>
-        <Pagination
-          pageSize={size}
-          total={data?.meta?.total}
-          onChange={(v, d) => {
-            setPage(v);
-            setSize(d);
-          }}
-          showSizeChanger={false}
-        />
+
+        <div className="flex gap-3">
+        <div>
+            {<GbDropdown   items={ [
+                {
+                  label: (
+                    <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
+                      <span
+                        onClick={async () => {
+                          setOpenModal(true);
+                        }}
+                      >
+                        Shipped
+                      </span>
+                    </span>
+                  ),
+                  key: "0",
+                },
+                {
+                  label: (
+                    <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
+                      <span>Change Status</span>
+                    </span>
+                  ),
+                  key: "1",
+                },
+              ]}>
+              <button
+                className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]"
+              >
+                Action
+              </button>
+            </GbDropdown>}
+          </div>
+          <Pagination
+            pageSize={size}
+            total={data?.meta?.total}
+            onChange={(v, d) => {
+              setPage(v);
+              setSize(d);
+            }}
+            showSizeChanger={false}
+          />
+        </div>
       </div>
       <div className="max-h-[600px] overflow-scroll">
         <GbTable
           loading={isLoading}
           columns={newColumns}
           dataSource={data?.data}
+          rowSelection={rowSelection}
         />
       </div>
       <GbModal
@@ -276,80 +332,116 @@ const InTransitOrders = ({}: any) => {
         // clseTab={false}
       >
         <div>
-        <button onClick={() => reactToPrintFn()}>Print</button>
-        <div  ref={contentRef}>
-          <div>
-            <h1 className="text-3xl font-semibold text-[#000] text-center">Mishel Info Tech Ltd</h1>
-            <div className="flex  justify-between">
-              <div className="mb-3">
-                <h2 className="text-[#000] font-[600] mb-0 robin robin">Bill To: </h2>
-                <h2 className="text-[#000] font-[600] mb-0 robin ">
-                  {rowData?.customer?.customerName}
-                </h2>
-                <h2 className="text-[#000] font-[600] mb-0 robin">
-                  {rowData?.receiverPhoneNumber}
-                </h2>
-                <h2 className="text-[#000] font-[600] mb-0 robin">
-                  {rowData?.receiverAddress}
-                </h2>
+          <button onClick={() => reactToPrintFn()}>Print</button>
+          <div ref={contentRef}>
+            <div>
+              <h1 className="text-3xl font-semibold text-[#000] text-center">
+                Mishel Info Tech Ltd
+              </h1>
+              <div className="flex  justify-between">
+                <div className="mb-3">
+                  <h2 className="text-[#000] font-[600] mb-0 robin robin">
+                    Bill To:{" "}
+                  </h2>
+                  <h2 className="text-[#000] font-[600] mb-0 robin ">
+                    {rowData?.customer?.customerName}
+                  </h2>
+                  <h2 className="text-[#000] font-[600] mb-0 robin">
+                    {rowData?.receiverPhoneNumber}
+                  </h2>
+                  <h2 className="text-[#000] font-[600] mb-0 robin">
+                    {rowData?.receiverAddress}
+                  </h2>
+                </div>
+                <div className="mb-3">
+                  <h2 className=" mb-0 robin">
+                    Invoice No: <strong>{rowData?.invoiceNumber}</strong>{" "}
+                  </h2>
+                  <h2 className=" mb-0 robin">
+                    Date:{" "}
+                    <strong>
+                      {moment(rowData?.deliveryDate).format("DD MMMM YYYY")}
+                    </strong>{" "}
+                  </h2>
+                </div>
               </div>
-              <div className="mb-3">
-                <h2 className=" mb-0 robin">
-                  Invoice No: <strong>{rowData?.invoiceNumber}</strong>{" "}
-                </h2>
-                <h2 className=" mb-0 robin">
-                  Date: <strong>{moment(rowData?.deliveryDate).format('DD MMMM YYYY')}</strong>{" "}
-                </h2>
-              </div>
-            </div>
-            <table className="warehouse-table">
-              <thead>
-                <tr>
-                  <th>SL</th>
-                  <th>Product Name</th>
-                  <th>Unit Price(Tk)</th>
-                  <th>Qty</th>
-                  <th>Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rowData?.products?.map((item: any, index: any) => (
-                  <tr key={index}>
-                    <td>{index + 1}</td>
-                    <td>{item?.product?.name} {item?.product?.weight} {item?.product?.unit}</td>
-                    <td>{item?.productPrice}</td>
-                    <td>{item?.productQuantity}</td>
-                    <td>{item?.subtotal}</td>
+              <table className="warehouse-table">
+                <thead>
+                  <tr>
+                    <th>SL</th>
+                    <th>Product Name</th>
+                    <th>Unit Price(Tk)</th>
+                    <th>Qty</th>
+                    <th>Amount</th>
                   </tr>
-                ))}
-                
-              </tbody>
-              <tfoot>
-              <tr>
-                  <td rowSpan={3} style={{padding:0}} colSpan={2}>
-                    <div className="mt-3">
-                    <h1 className="mb-0 text-[#000] flex items-center gap-3"><i className="ri-discuss-line"></i> info.mishelinfo@gmail.com</h1>
-                    <h1 className="mb-0 text-[#000] flex items-center gap-3"><i className="ri-global-line"></i> infomishelinfo.com</h1>
-                    <h1 className="mb-0 text-[#000] flex items-center gap-3"><i className="ri-phone-fill"></i> +001835437676</h1>
-                    <h1 className="mb-0 text-[#000] flex items-center gap-3"><i className="ri-map-pin-line"></i>House-2,Road-16,Block-B,Nikunjo Dhaka-1230</h1>
-                    </div>
-                  </td>
-                  <td colSpan={2} style={{background:"#F7F7F7"}}>Sub Total</td>
-                  <td style={{background:"#F7F7F7"}}>{Number(rowData?.productValue)}</td>
-                </tr>
-                <tr>
-                  <td colSpan={2} style={{background:"#EBEBEB"}}>Grand Total</td>
-                  <td style={{background:"#EBEBEB"}}>{rowData?.totalPrice}</td>
-                </tr>
-                <tr>
-                  <td colSpan={2}>Due Total</td>
-                  <td>{rowData?.totalReceiveAbleAmount}</td>
-                </tr>
-              </tfoot>
-            </table>
+                </thead>
+                <tbody>
+                  {rowData?.products?.map((item: any, index: any) => (
+                    <tr key={index}>
+                      <td>{index + 1}</td>
+                      <td>
+                        {item?.product?.name} {item?.product?.weight}{" "}
+                        {item?.product?.unit}
+                      </td>
+                      <td>{item?.productPrice}</td>
+                      <td>{item?.productQuantity}</td>
+                      <td>{item?.subtotal}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td rowSpan={3} style={{ padding: 0 }} colSpan={2}>
+                      <div className="mt-3">
+                        <h1 className="mb-0 text-[#000] flex items-center gap-3">
+                          <i className="ri-discuss-line"></i>{" "}
+                          info.mishelinfo@gmail.com
+                        </h1>
+                        <h1 className="mb-0 text-[#000] flex items-center gap-3">
+                          <i className="ri-global-line"></i> infomishelinfo.com
+                        </h1>
+                        <h1 className="mb-0 text-[#000] flex items-center gap-3">
+                          <i className="ri-phone-fill"></i> +001835437676
+                        </h1>
+                        <h1 className="mb-0 text-[#000] flex items-center gap-3">
+                          <i className="ri-map-pin-line"></i>
+                          House-2,Road-16,Block-B,Nikunjo Dhaka-1230
+                        </h1>
+                      </div>
+                    </td>
+                    <td colSpan={2} style={{ background: "#F7F7F7" }}>
+                      Sub Total
+                    </td>
+                    <td style={{ background: "#F7F7F7" }}>
+                      {Number(rowData?.productValue)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colSpan={2} style={{ background: "#EBEBEB" }}>
+                      Grand Total
+                    </td>
+                    <td style={{ background: "#EBEBEB" }}>
+                      {rowData?.totalPrice}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colSpan={2}>Due Total</td>
+                    <td>{rowData?.totalReceiveAbleAmount}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
           </div>
         </div>
-        </div>
+      </GbModal>
+      <GbModal
+        width="900px"
+        closeModal={() => setOpenModal(false)}
+        openModal={() => setOpenModal(true)}
+        isModalOpen={openModal}
+        // clseTab={false}
+      >
+       <h1>Shipping report</h1>
       </GbModal>
     </div>
   );

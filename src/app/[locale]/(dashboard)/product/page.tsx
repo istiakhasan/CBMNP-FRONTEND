@@ -25,6 +25,8 @@ import GbHeader from "@/components/ui/dashboard/GbHeader";
 import { customError } from "@/constants/variableConstant";
 import StatsContainer from "./_component/StatusContainer";
 import { useLocale } from "next-intl";
+import { useGetUserByIdQuery } from "@/redux/api/usersApi";
+import { getUserInfo } from "@/service/authService";
 const Page = () => {
   const local=useLocale()
   const [updateProduct] = useUpdateProductMutation();
@@ -45,6 +47,11 @@ const Page = () => {
   const [deleteBrandHandle] = useDeleteProductByIdMutation();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const userInfo: any = getUserInfo();
+  const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
+    id: userInfo?.userId,
+  });
+  const permission = userData?.permission?.map((item: any) => item?.label);
   // table column
   const tableColumn = [
     {
@@ -265,14 +272,14 @@ const Page = () => {
           <AddSimpleProuct setDrawerOpen={setDrawerOpen} />{" "}
         </GbDrawer>
         <div className="flex items-center gap-3 flex-wrap">
-          <button className="border-[#4F8A6D] border text-[#4F8A6D]  font-bold text-[12px]  px-[20px] py-[5px]">
+          {/* <button className="border-[#4F8A6D] border text-[#4F8A6D]  font-bold text-[12px]  px-[20px] py-[5px]">
             Action
-          </button>
-          <GbDropdown items={items}>
+          </button> */}
+      {permission?.includes("Add Products") &&    <GbDropdown items={items}>
             <button className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]">
               Add Product
             </button>
-          </GbDropdown>
+          </GbDropdown>}
         </div>
       </div>
       <div className="gb_border">

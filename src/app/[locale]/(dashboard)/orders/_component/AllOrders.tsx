@@ -4,6 +4,7 @@ import { getBaseUrl } from "@/helpers/config/envConfig";
 import { useGetAllOrdersQuery } from "@/redux/api/orderApi";
 import { useGetAllProductQuery } from "@/redux/api/productApi";
 import { useGetUserByIdQuery } from "@/redux/api/usersApi";
+import { getUserInfo } from "@/service/authService";
 import StatusBadge from "@/util/StatusBadge";
 import {
   Button,
@@ -34,6 +35,11 @@ const AllOrders = ({}: any) => {
   const local=useLocale()
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const userInfo: any = getUserInfo();
+    const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
+      id: userInfo?.userId,
+    });
+  const permission = userData?.permission?.map((item: any) => item?.label);
   const tableColumn = [
     {
       title: "SL",
@@ -171,13 +177,13 @@ const AllOrders = ({}: any) => {
       render: (text: string, record: any) => {
         return (
           <>
-            {
-              <span
+            {permission?.includes("READ_ORDERS") ?
+              (<span
                 onClick={() => router.push(`/${local}/orders/${record?.id}`)}
                 className=" text-white text-[10px] py-[2px] px-[10px] cursor-pointer"
               >
                 <i style={{fontSize:"18px"}} className="ri-eye-fill color_primary"></i>
-              </span>
+              </span>) :"N/A"
             }
           </>
         );

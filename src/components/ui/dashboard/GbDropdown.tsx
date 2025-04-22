@@ -1,5 +1,5 @@
 import React from "react";
-import { Dropdown } from "antd";
+import { Dropdown, message } from "antd";
 import type { MenuProps } from "antd";
 
 // Define the props interface
@@ -8,11 +8,17 @@ interface GbDropdownProps {
   children: React.ReactNode;
 }
 
-const GbDropdown: React.FC<GbDropdownProps> = ({ items, children }) => (
+const GbDropdown= ({ items, children,state=true }:any) => (
   <Dropdown
     overlayClassName="gb_dropdown_menu"
     menu={{ items }}
     trigger={["click"]}
+    onOpenChange={(visible) => {
+      if (visible && !state) {
+        message.error("Please select a warehouse");
+      }
+    }}
+    open={!!state ? undefined : false}
   >
     <a onClick={(e) => e.preventDefault()}>
       {children}
