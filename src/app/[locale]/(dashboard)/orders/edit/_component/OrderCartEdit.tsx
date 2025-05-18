@@ -42,11 +42,11 @@ const OrderCartEdit = ({
         totalPaidAmount: orderData.totalPaidAmount,//exist
         //  operational information
         orderSource: finalData?.orderSource?.label,//exist
-        currier: finalData?.currier?.label,//exist
+        currier: finalData?.currier?.value,//exist
         shippingCharge: finalData?.shippingCharge?.value,//exist
         shippingType: finalData?.shippingType?.label,//exist
         orderType: finalData?.orderType?.label,///exist
-        agentId: "R-000000001",//exist
+        agentId: userInfo?.userId,//exist
         deliveryNote: finalData?.deliveryNote,//exist
         comments: finalData?.comments,
         // products
@@ -325,8 +325,8 @@ const OrderCartEdit = ({
                 value:orderData?.shippingCharge,
               },
              ...(orderData?.currier && { currier:{
-                label:orderData?.currier,
-                value:orderData?.currier,
+                label:orderData?.partner?.partnerName,
+                value:orderData?.partner?.id,
               }}),
              ...(orderData?.last_transaction?.totalPaidAmount && { paidAmount:orderData?.last_transaction?.totalPaidAmount}),
               orderRemark:orderData?.orderRemark

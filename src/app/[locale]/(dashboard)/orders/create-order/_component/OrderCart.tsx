@@ -22,6 +22,7 @@ const OrderCart = ({
   const [sameAsBilling, setSameAsBilling] = useState(true);
   const [formData, setFormData] = useState({});
   const userInfo: any = getUserInfo();
+  console.log(userInfo,"user info");
   const [handleSubmitOrder] = useCreateOrderMutation();
   const handleFormSubmit = async (stepFormData: any, reset: any) => {
     setFormData((prev) => ({ ...prev, ...stepFormData }));
@@ -46,7 +47,7 @@ const OrderCart = ({
         shippingCharge: finalData?.deliveryCharge?.value,
         shippingType: finalData?.deliveryType?.label,
         orderType: finalData?.orderType?.label,
-        agentId: "R-000000001",
+        agentId: userInfo?.userId,
         deliveryNote: finalData?.deliveryNote,
         comments: finalData?.comments,
         locationId:finalData?.Warehouse?.value,

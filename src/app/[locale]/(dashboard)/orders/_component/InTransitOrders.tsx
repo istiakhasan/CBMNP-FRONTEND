@@ -12,29 +12,45 @@ import StatusBadge from "@/util/StatusBadge";
 import {
   Checkbox,
   CheckboxOptionType,
+  Divider,
   Pagination,
   Popover,
+  Select,
   TableProps,
+  Tooltip,
 } from "antd";
 import moment from "moment";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import React, { useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
-
-const InTransitOrders = ({}: any) => {
-  // all states
-   const [openModal, setOpenModal] = useState(false);
+import { DatePicker, Space } from "antd";
+import dayjs from "dayjs";
+import ShipmentTable from "./ShipmentTable";
+import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
+import { useGetDeliveryPartnerOptionsQuery } from "@/redux/api/partnerApi";
+const { RangePicker } = DatePicker;
+const InTransitOrders = ({searchTerm}: any) => {
+  const [openModal, setOpenModal] = useState(false);
+  const [location, setLocationId] = useState<any>([]);
+  const [selecteddeliveryPartner, setSelectedDeliveryPartner] =
+    useState<any>([]);
+  const { data: warehouseOptions } = useLoadAllWarehouseOptionsQuery(undefined);
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
-  const [searchTerm, setSearchTerm] = useState("");
   const [rowId, setRowId] = useState<any>(null);
   const local = useLocale();
+  const [rangeValue, setRangeValue] = useState<any>(null);
+  const { data: deliveryPartnerOptions, isLoading: deliveryPartnerLoading } =
+    useGetDeliveryPartnerOptionsQuery(undefined);
   const { data, isLoading } = useGetAllOrdersQuery({
     page,
     limit: size,
     searchTerm,
     statusId: "7",
+    locationId: location,
+    currier: selecteddeliveryPartner,
+    ...rangeValue,
   });
   const { data: rowData, isLoading: rowDataLoading } = useGetOrderByIdQuery({
     id: rowId,
@@ -155,7 +171,7 @@ const InTransitOrders = ({}: any) => {
       align: "start",
       render: (text: string, record: any) => (
         <span className="text-[#7D7D7D] font-[500] px-0">
-          {record?.currier ? record?.currier : "-"}
+          {record?.partner?.partnerName ? record?.partner?.partnerName : "-"}
         </span>
       ),
     },
@@ -177,6 +193,14 @@ const InTransitOrders = ({}: any) => {
       render: (text: string, record: any) => (
         <span className="text-[#7D7D7D]  color_primary font-[500]">
           {moment(record?.createdAt).fromNow()}
+        </span>
+      ),
+    },
+    {
+      title: "In-transit Time",
+      render: (text: string, record: any) => (
+        <span className="text-[#7D7D7D]  color_primary font-[500]">
+          {moment(record?.intransitTime).format("hh:m A DD-MM-YYYY")}
         </span>
       ),
     },
@@ -234,6 +258,7 @@ const InTransitOrders = ({}: any) => {
       name: record.name,
     }),
   };
+  console.log(selecteddeliveryPartner, "selected delivery partner  ");
   return (
     <div className="gb_border">
       <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
@@ -270,40 +295,162 @@ const InTransitOrders = ({}: any) => {
               Filter Column
             </div>
           </Popover>
+          <Tooltip
+            styles={{
+              body: {
+                background: "white",
+                width: "500px",
+                padding: "20px",
+              },
+            }}
+            trigger={["click"]}
+            placement="rightBottom"
+            title={
+              <div>
+                <h1>Filter by warehouse</h1>
+                <div className="flex gap-2 flex-wrap">
+                  {warehouseOptions?.data?.map((item: any, i: any) => (
+                    <span
+                      className="text-black flex items-center gap-2"
+                      key={i}
+                    >
+                      <input type="checkbox" value={item?.value} onChange={(e) => {
+                          if (e.target.checked) {
+                            // Add item
+                            setLocationId((prev: any[]) => [
+                              ...prev,
+                             item.value 
+                            ]);
+                          } else {
+                            // Remove item
+                            setLocationId((prev: any[]) =>
+                              prev.filter(
+                                (entry) => entry !== item?.value
+                              )
+                            );
+                          }
+                        }}
+                      name={item.label} />
+                      {item?.label}
+                    </span>
+                  ))}
+                </div>
+                <Divider />
+                <h1>Delivery Partner</h1>
+                <div className="flex gap-2 flex-wrap">
+                  {deliveryPartnerOptions?.data?.map((item: any) => (
+                    <span
+                      className="text-black flex items-center gap-2"
+                      key={item.value} // use a unique value if possible
+                    >
+                      <input
+                        type="checkbox"
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            // Add item
+                            setSelectedDeliveryPartner((prev: any[]) => [
+                              ...prev,
+                             item.value 
+                            ]);
+                          } else {
+                            // Remove item
+                            setSelectedDeliveryPartner((prev: any[]) =>
+                              prev.filter(
+                                (entry) => entry !== item?.value
+                              )
+                            );
+                          }
+                        }}
+                        name={item.label}
+                        value={item.value}
+                      />
+                      {item.label}
+                    </span>
+                  ))}
+                </div>
+                <Divider />
+                <h1>In-transit Date Range</h1>
+                <div className="flex gap-2 flex-wrap">
+                  <RangePicker
+                    style={{
+                      width: "100%",
+                      height: "36px",
+                      borderRadius: "0px",
+                    }}
+                    format="YYYY-MM-DD HH:mm:ss"
+                    showTime
+                    onChange={(dates) => {
+                      if (dates) {
+                        const [start, end] = dates;
+                        const formattedStart = dayjs(start).format(
+                          "YYYY-MM-DD HH:mm:ss"
+                        );
+                        const formattedEnd = dayjs(end).format(
+                          "YYYY-MM-DD HH:mm:ss"
+                        );
+                        setRangeValue({
+                          startDate: formattedStart,
+                          endDate: formattedEnd,
+                        });
+                      } else {
+                        setRangeValue(null);
+                      }
+                    }}
+                  />
+                </div>
+{/* 
+                <div className="flex justify-end">
+                  <button className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px] mt-3">
+                    Apply
+                  </button>
+                </div> */}
+              </div>
+            }
+          >
+            <div className="border p-2 h-[35px] flex items-center gap-2 cursor-pointer">
+              <i
+                style={{ fontSize: "24px" }}
+                className="ri-equalizer-line text-gray-600"
+              ></i>{" "}
+              Filter Orders
+            </div>
+          </Tooltip>
         </div>
 
         <div className="flex gap-3">
-        <div>
-            {<GbDropdown   items={ [
-                {
-                  label: (
-                    <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
-                      <span
-                        onClick={async () => {
-                          setOpenModal(true);
-                        }}
-                      >
-                        Shipped
+          <div>
+            {
+              <GbDropdown
+                items={[
+                  {
+                    label: (
+                      <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
+                        <span
+                          onClick={async () => {
+                            setOpenModal(true);
+                          }}
+                        >
+                          Shipped
+                        </span>
                       </span>
-                    </span>
-                  ),
-                  key: "0",
-                },
-                {
-                  label: (
-                    <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
-                      <span>Change Status</span>
-                    </span>
-                  ),
-                  key: "1",
-                },
-              ]}>
-              <button
-                className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]"
+                    ),
+                    key: "0",
+                  },
+                  {
+                    label: (
+                      <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
+                        <span>Change Status</span>
+                      </span>
+                    ),
+                    key: "1",
+                  },
+                ]}
               >
-                Action
-              </button>
-            </GbDropdown>}
+                <button className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]">
+                  Action
+                </button>
+              </GbDropdown>
+            }
           </div>
           <Pagination
             pageSize={size}
@@ -439,9 +586,9 @@ const InTransitOrders = ({}: any) => {
         closeModal={() => setOpenModal(false)}
         openModal={() => setOpenModal(true)}
         isModalOpen={openModal}
-        // clseTab={false}
+        cls="custom_ant_modal"
       >
-       <h1>Shipping report</h1>
+        <ShipmentTable selectedOrders={selectedOrders} location={location} />
       </GbModal>
     </div>
   );

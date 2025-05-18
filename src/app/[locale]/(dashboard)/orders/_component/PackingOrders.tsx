@@ -172,7 +172,7 @@ const PackingOrders = ({}: any) => {
       align: "start",
       render: (text: string, record: any) => (
         <span className="text-[#7D7D7D] font-[500] px-0">
-          {record?.currier ? record?.currier : "-"}
+           {record?.partner?.partnerName ? record?.partner?.partnerName : "-"}
         </span>
       ),
     },
