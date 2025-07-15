@@ -52,7 +52,7 @@ const Page = () => {
       dataIndex: "phone",
     },
     {
-      title: "Phone",
+      title: "Action",
       key: 7,
       align: "end",
       render: () => {

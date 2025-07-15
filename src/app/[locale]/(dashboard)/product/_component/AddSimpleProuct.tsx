@@ -1,4 +1,4 @@
-import GbBTDInput from "@/components/forms/GbBTDInput";
+
 import GbCascaderPicker from "@/components/forms/GbCascaderPicker";
 import GbFileUpload from "@/components/forms/GbFileUpload";
 import GbForm from "@/components/forms/GbForm";
@@ -15,6 +15,7 @@ import { LoadingOutlined } from "@ant-design/icons";
 import GbNotification from "@/components/ui/GbNotification";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { createSimpleProductSchema } from "@/schema/IepSchema";
+import GbBDTInput from "@/components/forms/GbBTDInput";
 const AddSimpleProuct = ({ setDrawerOpen }: any) => {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [selectedValue, setSelectedValue] = useState<any>([]);
@@ -105,8 +106,8 @@ const AddSimpleProuct = ({ setDrawerOpen }: any) => {
       <p className="text-[rgba(0,0,0,.85)] text-[15px]   mb-4 mt-4">Prices</p>
 
       <div className="mb-4">
-        <GbBTDInput
-          addon={"BTD"}
+        <GbBDTInput
+          addon={"BDT"}
           placeholder="0.00"
           name="regularPrice"
           size="small"
@@ -114,8 +115,8 @@ const AddSimpleProuct = ({ setDrawerOpen }: any) => {
         />
       </div>
       <div className="mb-4">
-        <GbBTDInput
-          addon={"BTD"}
+        <GbBDTInput
+          addon={"BDT"}
           placeholder="0.00"
           name="salePrice"
           size="small"
@@ -123,8 +124,8 @@ const AddSimpleProuct = ({ setDrawerOpen }: any) => {
         />
       </div>
       <div className="mb-4">
-        <GbBTDInput
-          addon={"BTD"}
+        <GbBDTInput
+          addon={"BDT"}
           placeholder="0.00"
           name="retailPrice"
           size="small"
@@ -132,8 +133,8 @@ const AddSimpleProuct = ({ setDrawerOpen }: any) => {
         />
       </div>
       <div className="mb-4">
-        <GbBTDInput
-          addon={"BTD"}
+        <GbBDTInput
+          addon={"BDT"}
           placeholder="0.00"
           name="distributionPrice"
           size="small"
@@ -141,8 +142,8 @@ const AddSimpleProuct = ({ setDrawerOpen }: any) => {
         />
       </div>
       <div className="mb-4">
-        <GbBTDInput
-          addon={"BTD"}
+        <GbBDTInput
+          addon={"BDT"}
           placeholder="0.00"
           name="purchasePrice"
           size="small"
@@ -153,8 +154,8 @@ const AddSimpleProuct = ({ setDrawerOpen }: any) => {
         Additional Information
       </p>
       <div className="mb-4">
-        <GbBTDInput
-          addon={"BTD"}
+        <GbBDTInput
+          addon={"BDT"}
           placeholder="0.00"
           name="sku"
           size="small"
@@ -162,8 +163,8 @@ const AddSimpleProuct = ({ setDrawerOpen }: any) => {
         />
       </div>
       <div className="mb-4">
-        <GbBTDInput
-          addon={"BTD"}
+        <GbBDTInput
+          addon={"BDT"}
           placeholder="0.00"
           name="internalId"
           size="small"

@@ -142,9 +142,9 @@ const Page = () => {
         return (
           <>
             <del className="mb-[5px] block">
-              BTD {record?.regularPrice || "0.00"}
+              BDT {record?.regularPrice || "0.00"}
             </del>
-            <h1>BTD {record?.salePrice || "0.00"}</h1>
+            <h1>BDT {record?.salePrice || "0.00"}</h1>
           </>
         );
       },
@@ -157,7 +157,7 @@ const Page = () => {
       render: (text, record, index) => {
         return (
           <>
-            <h1>BTD {record?.distributionPrice || "0.00"}</h1>
+            <h1>BDT {record?.distributionPrice || "0.00"}</h1>
           </>
         );
       },
@@ -170,7 +170,7 @@ const Page = () => {
       render: (text, record, index) => {
         return (
           <>
-            <h1>BTD {record?.retailPrice || "0.00"}</h1>
+            <h1>BDT {record?.retailPrice || "0.00"}</h1>
           </>
         );
       },
@@ -183,7 +183,7 @@ const Page = () => {
       render: (text, record, index) => {
         return (
           <>
-            <h1>BTD {record?.purchasePrice || "0.00"}</h1>
+            <h1>BDT {record?.purchasePrice || "0.00"}</h1>
           </>
         );
       },
@@ -257,7 +257,7 @@ const Page = () => {
       key: "0",
     },
     {
-      label: <button onClick={()=>router.push('/product/add-product')}>Add Variant Product</button>,
+      label: <button onClick={()=>router.push(`/${local}/product/add-product`)}>Add Variant Product</button>,
       key: "1",
     },
   ];
@@ -275,7 +275,7 @@ const Page = () => {
           {/* <button className="border-[#4F8A6D] border text-[#4F8A6D]  font-bold text-[12px]  px-[20px] py-[5px]">
             Action
           </button> */}
-      {permission?.includes("Add Products") &&    <GbDropdown items={items}>
+           {permission?.includes("Add Products") &&    <GbDropdown items={items}>
             <button className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]">
               Add Product
             </button>

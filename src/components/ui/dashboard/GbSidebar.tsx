@@ -3,8 +3,7 @@ import { useGetUserByIdQuery } from "@/redux/api/usersApi";
 import { getUserInfo } from "@/service/authService";
 import { Tooltip } from "antd";
 import { useLocale } from "next-intl";
-import Link from "next/link";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import {  usePathname, useRouter } from "next/navigation";
 import React, { Fragment, useEffect, useState } from "react";
 
 // Define the type for menu items
@@ -20,12 +19,11 @@ interface MenuItem {
 const GbSidebar = () => {
 
 const userInfo: any = getUserInfo();
-console.log(userInfo,"asdfsa");
 const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
   id: userInfo?.userId,
 }); 
   const permission = userData?.permission?.map((item: any) => item?.label);
-  const menuItems: MenuItem[] = [
+  const menuItems: any[] = [
     {
       href: '/dashboard',
       title: 'Dashboard',
@@ -55,10 +53,10 @@ const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
                 href:"/access/users",
                 title:"Users"
                },
-               {
-                href:"/access/group-permission",
-                title:"Group Permission"
-               }
+              //  {
+              //   href:"/access/group-permission",
+              //   title:"Group Permission"
+              //  }
       ]
     },
     {
@@ -84,7 +82,6 @@ const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
       icon: 'ri-truck-line'
     },
      {
-      href: '/procurement',
       title: 'Procurement',
       icon: 'ri-luggage-cart-line',
       children: [
@@ -129,7 +126,7 @@ const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
   return (
     <>
      {loading && <Loader />} {/* Show Loader when loading */}
-    <aside className={`gb_sidebar ${isActive ? "show" : "hide"}`}>
+    <aside className={`gb_sidebar h-[100vh]  overflow-y-scroll ${isActive ? "show" : "hide"}`}>
       <div className="toggle_btn">
         <i onClick={() => setIsActive(!isActive)} className="ri-menu-fill"></i>
       </div>

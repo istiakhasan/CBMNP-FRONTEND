@@ -132,7 +132,6 @@ body {
 aside.gb_sidebar {
   z-index: 1000;
 	width: 75px;
-	height: 100vh;
 	/* position: fixed; */
 	background: var(--bglight);
 	box-shadow: 1px 0 32px rgba(0, 0, 0, 0.12);
@@ -711,4 +710,7 @@ aside.gb_sidebar {
     background-color: #0c78d2;
   }
   
+  .custom_selector .ant-select-selector{
+    box-shadow: none !important;
+  }
   

@@ -36,9 +36,9 @@ const App: React.FC = ({ children }: any) => {
    )
   }
   return (
-    <div style={{ height: "100vh",display:"flex" }}>
+    <div style={{ height: "100vh",display:"flex"}}>
       <GbSidebar />
-      <div style={{ width: "calc(100% - 75px)",flex:"1", marginLeft: "auto" }}>
+      <div style={{ width: "calc(100% - 75px)",flex:"1", marginLeft: "auto",overflow:"scroll" }}>
         <ProtectedRoute>
         {children}
         </ProtectedRoute>

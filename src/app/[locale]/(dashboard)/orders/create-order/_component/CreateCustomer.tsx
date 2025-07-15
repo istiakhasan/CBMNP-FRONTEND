@@ -259,7 +259,7 @@ const CreateCustomer = ({ setCustomer, customer }: any) => {
                 </div>
                 <div className="flex justify-between">
                   <p className="font-[600] text-[#242529] text-[12px]">
-                    BTD:{" "}
+                    BDT:{" "}
                     {abc?.order_info
                       ?.reduce((a: any, b: any) => a + b.subTotal, 0)
                       .toFixed(2)}

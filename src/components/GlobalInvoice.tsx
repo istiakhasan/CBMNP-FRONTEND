@@ -37,14 +37,14 @@ const GlobalInvoice = ({rowDto}:any) => {
         <div className="flex justify-between">
           <div>
             <p><span className="font-bold">Po No: </span>{rowDto?.invoiceNumber}</p>
-            <p><span className="font-bold">Supplier Name: </span>{rowDto?.supplier?.contactPerson}</p>
+            <p><span className="font-bold">Contact Person: </span>{rowDto?.supplier?.contactPerson}</p>
             <p><span className="font-bold">Mobile: </span>{rowDto?.supplier?.phone}</p>
           </div>
           <div>
             <p><span className="font-bold">Date: </span>{moment(rowDto?.createdAt).format('YYYY-MM-DD')}</p>
             <p><span className="font-bold">Time: </span>{moment(rowDto?.createdAt).format('hh:mm A')}</p>
             {/* <p><span className="font-bold">Office Name: </span>Jim Power Ltd</p> */}
-            <p><span className="font-bold">Invoice by: </span>{"N/A"}</p>
+            <p><span className="font-bold">User Name: </span>{rowDto?.createdBy?.name}</p>
           </div>
         </div>
         
@@ -80,7 +80,7 @@ const GlobalInvoice = ({rowDto}:any) => {
         
         {/* Summary Section */}
         <div className="flex justify-between mt-4">
-          <p><strong>Amount In Taka:</strong> {numberToWords(rowDto?.billAmount)}</p>
+          <p><strong>Amount In Words:</strong> {numberToWords(rowDto?.billAmount)}</p>
           <table className="w-2/5">
             <tbody>
               <tr>

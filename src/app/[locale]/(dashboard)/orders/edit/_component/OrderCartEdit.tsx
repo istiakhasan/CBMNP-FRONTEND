@@ -156,7 +156,7 @@ const OrderCartEdit = ({
                         {item?.productNameEn}{" "}
                       </p>
                       <p className=" font-semibold text-[14px]">
-                        BTD: {(+item?.salePrice || 0)?.toFixed(2)}
+                        BDT: {(+item?.salePrice || 0)?.toFixed(2)}
                       </p>
                       <span className="text-[12px] gb_border bg-[white] px-[15px] py-[4px]  inline-block">
                         Pack Size: {item?.weight} {item?.unit}
@@ -177,7 +177,7 @@ const OrderCartEdit = ({
                       </label>
 
                       <p>
-                        BTD{" "}
+                        BDT{" "}
                         {(item?.salePrice * item?.productQuantity)?.toFixed(2)}
                       </p>
                     </div>

@@ -3,8 +3,8 @@ import { Collapse, theme } from "antd";
 import GbFileUpload from "@/components/forms/GbFileUpload";
 import GbFormInput from "@/components/forms/GbFormInput";
 import GbFormSelect from "@/components/forms/GbFormSelect";
-import GbBTDInput from "@/components/forms/GbBTDInput";
 import GbRegularselect from "@/components/forms/GbRegularselect";
+import GbBDTInput from "@/components/forms/GbBTDInput";
 
 const VariantsCollaps = ({ remove, fields, attributes }: any) => {
   const { token } = theme.useToken();
@@ -137,8 +137,8 @@ const VariantsCollaps = ({ remove, fields, attributes }: any) => {
             <p className="text-[rgba(0,0,0,.85)] text-[15px]    mt-2">Prices</p>
             <div className="grid grid-cols-2 gap-2">
               <div className="mb-2">
-                <GbBTDInput
-                  addon={"BTD"}
+                <GbBDTInput
+                  addon={"BDT"}
                   placeholder="0.00"
                   name={`variants[${i}].regularPrice`}
                   size="small"
@@ -146,8 +146,8 @@ const VariantsCollaps = ({ remove, fields, attributes }: any) => {
                 />
               </div>
               <div className="mb-2">
-                <GbBTDInput
-                  addon={"BTD"}
+                <GbBDTInput
+                  addon={"BDT"}
                   placeholder="0.00"
                   name={`variants[${i}].salePrice`}
                   size="small"
@@ -155,8 +155,8 @@ const VariantsCollaps = ({ remove, fields, attributes }: any) => {
                 />
               </div>
               <div className="mb-2">
-                <GbBTDInput
-                  addon={"BTD"}
+                <GbBDTInput
+                  addon={"BDT"}
                   placeholder="0.00"
                   name={`variants[${i}].retailPrice`}
                   size="small"
@@ -164,8 +164,8 @@ const VariantsCollaps = ({ remove, fields, attributes }: any) => {
                 />
               </div>
               <div className="mb-2">
-                <GbBTDInput
-                  addon={"BTD"}
+                <GbBDTInput
+                  addon={"BDT"}
                   placeholder="0.00"
                   name={`variants[${i}].distributionPrice`}
                   size="small"
@@ -173,8 +173,8 @@ const VariantsCollaps = ({ remove, fields, attributes }: any) => {
                 />
               </div>
               <div className="mb-2">
-                <GbBTDInput
-                  addon={"BTD"}
+                <GbBDTInput
+                  addon={"BDT"}
                   placeholder="0.00"
                   name={`variants[${i}].purchasePrice`}
                   size="small"
@@ -188,8 +188,8 @@ const VariantsCollaps = ({ remove, fields, attributes }: any) => {
             </p>
             <div className="grid grid-cols-2 gap-2">
               <div className="mb-2">
-                <GbBTDInput
-                  addon={"BTD"}
+                <GbBDTInput
+                  addon={"BDT"}
                   placeholder="0.00"
                   name={`variants[${i}].variantSku`}
                   size="small"
@@ -197,8 +197,8 @@ const VariantsCollaps = ({ remove, fields, attributes }: any) => {
                 />
               </div>
               <div className="mb-2">
-                <GbBTDInput
-                  addon={"BTD"}
+                <GbBDTInput
+                  addon={"BDT"}
                   placeholder="0.00"
                   name={`variants[${i}].internalId`}
                   size="small"

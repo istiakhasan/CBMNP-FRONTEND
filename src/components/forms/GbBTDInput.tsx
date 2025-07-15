@@ -29,7 +29,7 @@ const currencyParser = (value: string) => {
   return value.replace(/\$\s?|(,*)/g, "");
 };
 
-const GbBTDInput = ({
+const GbBDTInput = ({
   name,
   type,
   size = "large",
@@ -105,4 +105,4 @@ const GbBTDInput = ({
   );
 };
 
-export default GbBTDInput;
+export default GbBDTInput;

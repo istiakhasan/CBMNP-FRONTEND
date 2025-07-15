@@ -66,18 +66,27 @@ const GbCascaderPicker = React.memo(({ name, selectedValue, setSelectedValue }: 
   }, [data]);
   return (
     <div className="custom_selector" style={{ width: "100%" }}>
+      <div  style={{
+          borderRadius: "0px",
+          width: "100%",
+          background: "#F6F6F6",
+        }}>
+
+      <span  className="px-3 mx-[5px] pt-[15px] inline-block text-[#999] text-[12px]">Category</span>
+      
       <Cascader
         value={watch()?.category?.label}
         style={{
           borderRadius: "0px",
           width: "100%",
-          height: "55px",
           background: "#F6F6F6",
+          outline:"none",
+          boxShadow:"none"
         }}
         fieldNames={{ label: "name", value: "id", children: "items" }}
         options={categoryOptions}
         onChange={onChange}
-        placeholder="Product Category"
+        // placeholder="Product Category"
         dropdownRender={(menu) => (
           <div>
             <div className="h-[200px] overflow-auto">
@@ -165,6 +174,7 @@ const GbCascaderPicker = React.memo(({ name, selectedValue, setSelectedValue }: 
           </div>
         )}
       />
+       </div>
     </div>
   );
 });

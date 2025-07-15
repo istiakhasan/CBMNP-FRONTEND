@@ -1,14 +1,12 @@
 "use client";
 import CustomTree from "@/components/ui/CustomTree";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
-import GbTree from "@/components/ui/GbTree";
 import { useGetAllPermissionLabelQuery } from "@/redux/api/permission.Api";
 import { useCreateUserPermissionMutation } from "@/redux/api/userPermission";
 import { useGetUserByIdQuery } from "@/redux/api/usersApi";
 import { message, Spin } from "antd";
-import axios from "axios";
 import { useParams } from "next/navigation";
-import React, {  useState } from "react";
+import React, {  useEffect, useState } from "react";
 
 const UserPermission = () => {
   const params=useParams()
@@ -39,6 +37,11 @@ const UserPermission = () => {
       console.log(error);
     }
   }
+  useEffect(()=>{
+    if(userData?.permission){
+      setCheckedKeys(userData?.permission?.map((item:any)=>item?.permissinId))
+    }
+  },[userData])
   return (
     <div>
       <GbHeader title={"Permissions"} />

@@ -61,6 +61,14 @@ const Users = () => {
       },
     },
     {
+      title: "User Id",
+      key: 22,
+      //@ts-ignore
+      render: (text, record, index) => {
+        return <span className=" cursor-pointer">{record?.userId}</span>;
+      },
+    },
+    {
       title: "Phone Number",
       key: 3,
       //@ts-ignore
@@ -132,8 +140,7 @@ const Users = () => {
 
         return (
           <span
-            onClick={() => router.push(`/product/${record?.id}`)}
-            className="color_primary cursor-pointer"
+            className="color_primary"
           >
             {formattedDate}
           </span>

@@ -7,7 +7,7 @@ const Page = () => {
   return (
     <div>
       <GbHeader />
-      <div className='p-[16px]'>
+      <div  className='p-[16px]'>
         <GbSteps />
       </div>
     </div>

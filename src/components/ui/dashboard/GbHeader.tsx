@@ -88,18 +88,18 @@ const GbHeader = ({title}:{title?:string}) => {
 
 
   return (
-    <div className="bg-[#FFFFFF] gb-header h-[65px] px-[16px] flex items-center sticky top-0 z-50">
+    <div style={{zIndex:"1000"}} className="bg-[#FFFFFF] gb-header h-[65px] px-[16px] flex items-center sticky top-0 z-50">
        <h1 className="text-2xl  text-primary">{title}</h1>
       <div className="ml-auto flex items-center gap-[32px]">
       <div>
-         <LocalSwitcher />
+         {/* <LocalSwitcher /> */}
         </div>
-        <div>
+        {/* <div>
           <i
             style={{ fontSize: "20px", cursor: "pointer" }}
             className="ri-notification-3-line"
           ></i>
-        </div>
+        </div> */}
         
         <div>
           <GbDropdown items={items}>
