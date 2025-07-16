@@ -121,12 +121,6 @@ const Page = () => {
             placeholder={"Search by invoice number"}
             searchTerm={searchTerm}
           />
-          <button
-            //   onClick={() => router.push(`/${local}/orders/create-order`)}
-            className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]"
-          >
-            Create Purchase
-          </button>
         </div>
         <div className="gb_border my-2">
           <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">

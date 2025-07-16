@@ -74,7 +74,7 @@ const OrderList = () => {
           },
         },
     {
-      title: "Action",
+      title: "View",
       key: "action",
       width: "60px",
       render: (text: string, record: any) => {
@@ -84,7 +84,6 @@ const OrderList = () => {
               <span onClick={()=>{
                 setOpenViewModal(true);
                 setRowDto(record)
-                console.log(record);
                 }} className=" text-white text-[10px] py-[2px] px-[10px] cursor-pointer">
                 <i
                   style={{ fontSize: "18px" }}
@@ -177,7 +176,7 @@ const OrderList = () => {
             loading={isLoading}
             columns={newColumns}
             dataSource={data?.data}
-            rowSelection={rowSelection}
+            // rowSelection={rowSelection}
           />
         </div>
         <GbModal

@@ -16,7 +16,6 @@ import { useFormContext } from "react-hook-form";
 const PurchaseOrderStatusChange = ({ setModalOpen, selectedOrders }: any) => {
    const [handleUpdateOrderStatus] = useBulkUpdatePOStatusMutation()
    const userInfo: any = getUserInfo();
-   console.log(selectedOrders,"abcd");
 
   const {  handleSubmit } = useFormContext();
   const onsubmit = async (data: any) => {
@@ -64,19 +63,16 @@ const PurchaseOrderStatusChange = ({ setModalOpen, selectedOrders }: any) => {
             <GbFormSelect
               name="status"
               options={[
-                {
-                    label:"Processing",
-                    value:"Processing"
-                },
+                // {
+                //     label:"Processing",
+                //     value:"Processing"
+                // },
                 {
                     label:"Approved",
                     value:"Approved"
                 },
-                {
-                    label:"Completed",
-                    value:"Completed"
-                },
-                {
+              
+               {
                     label:"Cancelled",
                     value:"Cancelled"
                 },

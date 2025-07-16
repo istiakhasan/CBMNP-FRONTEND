@@ -16,14 +16,9 @@ import {
 } from "antd";
 import moment from "moment";
 import React, { useState } from "react";
-import PurchaseOrderStatusChange from "./PurchaseOrderStatusChange";
 import StatusBadge from "@/util/StatusBadge";
-import GlobalInvoice from "@/components/GlobalInvoice";
 
 const Page = () => {
-  const [rowDto,setRowDto]=useState<any>(null)
-    // modal
-  const [openViewModal, setOpenViewModal] = useState(false);
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
   const [searchTerm, setSearchTerm] = useState("");
@@ -34,7 +29,7 @@ const Page = () => {
     page,
     size,
     searchTerm,
-    status:"Pending"
+    status:"Cancelled"
   });
 
   const tableColumns = [
@@ -90,19 +85,14 @@ const Page = () => {
       },
     },
     {
-      title: "View",
+      title: "Action",
       key: "action",
       width: "60px",
       render: (text: string, record: any) => {
         return (
           <>
             {
-              <span 
-               onClick={()=>{
-                setOpenViewModal(true);
-                setRowDto(record)
-                }}
-              className=" text-white text-[10px] py-[2px] px-[10px] cursor-pointer">
+              <span className=" text-white text-[10px] py-[2px] px-[10px] cursor-pointer">
                 <i
                   style={{ fontSize: "18px" }}
                   className="ri-eye-fill color_primary"
@@ -165,6 +155,12 @@ const Page = () => {
             placeholder={"Search by invoice number"}
             searchTerm={searchTerm}
           />
+          {/* <button
+            //   onClick={() => router.push(`/${local}/orders/create-order`)}
+            className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]"
+          >
+            Create Purchase
+          </button> */}
         </div>
         <div className="gb_border my-2">
           <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
@@ -213,14 +209,14 @@ const Page = () => {
                 showSizeChanger={false}
               />
 
-              <GbDropdown items={items}>
+              {/* <GbDropdown items={items}>
                 <button
                   // onClick={() => router.push(`/${local}/orders/create-order`)}
                   className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]"
                 >
                   Action
                 </button>
-              </GbDropdown>
+              </GbDropdown> */}
             </div>
           </div>
           <div className="max-h-[600px] overflow-scroll">
@@ -231,31 +227,8 @@ const Page = () => {
               rowSelection={rowSelection}
             />
           </div>
-          <GbModal
-            width="600px"
-            clseTab={false}
-            isModalOpen={actionModal}
-            openModal={() => setActionModal(true)}
-            closeModal={() => setActionModal(false)}
-          >
-            <GbForm submitHandler={(data: any) => console.log(data)}>
-              <PurchaseOrderStatusChange setModalOpen={setActionModal} selectedOrders={selectedOrders} />
-            </GbForm>
-          </GbModal>
-
-
-          <GbModal
-                    width="1300px"
-                    // clseTab={false}
-                    isModalOpen={openViewModal}
-                    openModal={() => setOpenViewModal(true)}
-                    closeModal={() => setOpenViewModal(false)}
-                  >
-                    <GlobalInvoice rowDto={rowDto} />
-                  </GbModal>
         </div>
       </div>
-
     </div>
   );
 };

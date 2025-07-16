@@ -82,6 +82,7 @@ const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
       icon: 'ri-truck-line'
     },
      {
+      href: '/procurement',
       title: 'Procurement',
       icon: 'ri-luggage-cart-line',
       children: [
@@ -96,6 +97,10 @@ const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
         {
           href: "/procurement/purchase-receive",
           title: "Purchase Receive"
+        },
+        {
+          href: "/procurement/purchase-cancel",
+          title: "Purchase Canceled"
         },
         {
           href: "/procurement/purchase-report",
@@ -134,7 +139,6 @@ const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
         {menuItems?.map((item, index) =>{
           return (
             (
-          
               <Fragment key={index}>
               {item?.children?<>
                 <div key={index} className={`${((index===subMenuActive && isActive) || pathName?.split('/').includes(item?.href?.slice(1,item?.href?.length)))&&"border"} duration-300 relative`}>
