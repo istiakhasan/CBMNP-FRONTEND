@@ -11,8 +11,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { createVariantProductSchema } from "@/schema/IepSchema";
 import CubicMeters from "@/app/[locale]/(dashboard)/product/_component/CubicMeters";
 import AttributesAndVariants from "@/app/[locale]/(dashboard)/product/add-product/_component/AttributesAndVariants";
-import GbBDTInput from "../forms/GbBTDInput";
 import { useFormContext } from "react-hook-form";
+import GbBDTInput from "../forms/GbBTDInput";
 
 const GbSteps: React.FC = () => {
   const [selectedValue, setSelectedValue] = useState<any>([]);
@@ -65,7 +65,9 @@ const GbSteps: React.FC = () => {
                 addon={"BDT"}
                 placeholder="0.00"
                 name="regularPrice"
+                type="number"
                 size="small"
+                trigger={()=>{}}
                 label="Regular"
               />
             </div>
@@ -74,6 +76,7 @@ const GbSteps: React.FC = () => {
                 addon={"BDT"}
                 placeholder="0.00"
                 name="salePrice"
+                type="number"
                 size="small"
                 label="Sale"
               />
@@ -83,6 +86,7 @@ const GbSteps: React.FC = () => {
                 addon={"BDT"}
                 placeholder="0.00"
                 name="retailPrice"
+                type="number"
                 size="small"
                 label="Retail Price"
               />
@@ -92,6 +96,7 @@ const GbSteps: React.FC = () => {
                 addon={"BDT"}
                 placeholder="0.00"
                 name="distributionPrice"
+                type="number"
                 size="small"
                 label="Distributor Price"
               />
@@ -101,6 +106,7 @@ const GbSteps: React.FC = () => {
                 addon={"BDT"}
                 placeholder="0.00"
                 name="purchasePrice"
+                type="number"
                 size="small"
                 label="Purchase Price"
               />
@@ -118,9 +124,8 @@ const GbSteps: React.FC = () => {
               />
             </div>
             <div className="mb-4">
-              <GbBDTInput
-                addon={"BDT"}
-                placeholder="0.00"
+              <GbFormInput
+                placeholder="Write Id"
                 name="internalId"
                 size="small"
                 label="Internal ID"

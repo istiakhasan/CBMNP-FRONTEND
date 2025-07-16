@@ -14,6 +14,7 @@ const AddUsers = ({setOpenAddUserModal}:any) => {
   const formSubmit=async(data:any,reset:any)=>{
     try {
       const res=await handleCreateUser({...data,role:data?.role.value}).unwrap()
+      console.log(res);
       if(res?.success){
         message.success(res?.message)
         setOpenAddUserModal(false)
@@ -78,7 +79,7 @@ const AddUsers = ({setOpenAddUserModal}:any) => {
              <button onClick={()=>setOpenAddUserModal(false)} style={{border:"1px solid #4F8A6D"}}  className="  text-black font-bold text-[12px]   px-[20px] py-[5px]">
               Cancel
             </button>
-             <button style={{border:"1px solid #4F8A6D"}} type="button" onClick={()=>setOpenAddUserModal(false)}  className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]">
+             <button style={{border:"1px solid #4F8A6D"}}   className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]">
               Create
             </button>
         </div>

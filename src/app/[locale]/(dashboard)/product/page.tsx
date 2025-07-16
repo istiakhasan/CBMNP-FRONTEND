@@ -84,7 +84,7 @@ const Page = () => {
       render: (text, record, index) => {
         return (
           <>
-            <span onClick={()=>router.push(`/product/${record?.id}`)} className="block mb-2 color_primary cursor-pointer">{record?.name}</span>
+            <span onClick={()=>router.push(`/${local}/product/${record?.id}`)} className="block mb-2 color_primary cursor-pointer">{record?.name}</span>
             <button className="bg-[#e8f0f2] px-[8px] py-[4px] text-[#000] font-semibold">
               {record?.productType}
             </button>
@@ -339,7 +339,7 @@ const Page = () => {
             // totalPages={data?.meta?.total}
             onPaginationChange={onPaginationChange}
             // showPagination={true}
-            rowSelection={rowSelection}
+            // rowSelection={rowSelection}
           />
         </div>
       </div>

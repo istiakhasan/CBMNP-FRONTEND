@@ -9,7 +9,7 @@ const CubicMeters = () => {
     <>
       <div className="grid grid-cols-2 gap-2">
         <div className="mb-4">
-          <GbFormInput name="weight" size="small" label="Weight" />
+          <GbFormInput name="weight" type="number" size="small" label="Weight" />
         </div>
         <div className="mb-4">
           <GbFormSelect

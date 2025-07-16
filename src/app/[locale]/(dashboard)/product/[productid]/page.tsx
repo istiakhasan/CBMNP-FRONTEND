@@ -5,27 +5,28 @@ import GbHeader from "@/components/ui/dashboard/GbHeader";
 import GbModal from "@/components/ui/GbModal";
 import { customError } from "@/constants/variableConstant";
 import { getBaseUrl } from "@/helpers/config/envConfig";
-import { useLoadStockByProductidQuery, useLoadTransactionByIdQuery } from "@/redux/api/inventoryApi";
+import { useLoadStockByProductidQuery } from "@/redux/api/inventoryApi";
 import {
   useGetProductByIdQuery,
   useUpdateProductMutation,
 } from "@/redux/api/productApi";
-import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
 import { Image, message, Spin, Switch } from "antd";
 import { useParams, useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import AddToInventory from "../_component/AddToInventory";
 import { useGetUserByIdQuery } from "@/redux/api/usersApi";
 import { getUserInfo } from "@/service/authService";
+import { useLocale } from "next-intl";
 
 const Page = () => {
   const router = useRouter();
+  const local=useLocale()
   const [updateProduct] = useUpdateProductMutation();
   const [open,setOpen]=useState(false)
   const [activeImage, setActiveImage] = useState<any>(null);
   const params = useParams();
   const { data, isLoading } = useGetProductByIdQuery({
-    id: params?.productid,
+    id: params?.productid, 
   });
   const { data:productStock, isLoading:transactionLoading,refetch } = useLoadStockByProductidQuery({
     id: params?.productid,
@@ -51,7 +52,7 @@ const Page = () => {
             <p className="text-[20px] mb-5 flex justify-between">
               <span className="text-[#4b5766]">{productData?.name}</span>
             {permission?.includes("Edit Products") &&  <button
-                onClick={() => router.push(`/product/${productData?.id}/edit`)}
+                onClick={() => router.push(`/${local}/product/${productData?.id}/edit`)}
                 className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]"
               >
                 Edit

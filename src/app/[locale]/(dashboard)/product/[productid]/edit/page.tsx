@@ -7,7 +7,6 @@ import GbFormTextArea from "@/components/forms/GbFormTextArea";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
 import React, { useEffect, useState } from "react";
 import CubicMeters from "../../_component/CubicMeters";
-import GbBTDInput from "@/components/forms/GbBTDInput";
 import { Button, message } from "antd";
 import { useParams } from "next/navigation";
 import {
@@ -15,6 +14,7 @@ import {
   useUpdateProductMutation,
 } from "@/redux/api/productApi";
 import { deleteImageFromImagebb, mapImagesForUpload } from "@/util/commonUtil";
+import GbBDTInput from "@/components/forms/GbBTDInput";
 
 const Page = () => {
   const { productid } = useParams();
@@ -115,62 +115,64 @@ const Page = () => {
               </p>
               <CubicMeters />
               <p className="text-[rgba(0,0,0,.85)] text-[15px]   mb-4 mt-4">
-                Prices
-              </p>
-              <p className="text-[rgba(0,0,0,.85)] text-[15px]   mb-4 mt-4">
                 MRP
               </p>
               <div className="mb-4">
-                <GbBTDInput
-                  addon={"BTD"}
+                <GbBDTInput
+                  addon={"BDT"}
                   placeholder="0.00"
                   name="regularPrice"
                   size="small"
+                  type="Number"
                   label="Regular"
                 />
               </div>
               <div className="mb-4">
-                <GbBTDInput
-                  addon={"BTD"}
+                <GbBDTInput
+                  addon={"BDT"}
                   placeholder="0.00"
                   name="salePrice"
                   size="small"
                   label="Sale"
+                  type="Number"
                 />
               </div>
               <div className="mb-4">
-                <GbBTDInput
-                  addon={"BTD"}
+                <GbBDTInput
+                  addon={"BDT"}
                   placeholder="0.00"
                   name="retailPrice"
                   size="small"
                   label="Retail Price"
+                  type="Number"
                 />
               </div>
               <div className="mb-4">
-                <GbBTDInput
-                  addon={"BTD"}
+                <GbBDTInput
+                  addon={"BDT"}
                   placeholder="0.00"
                   name="distributionPrice"
                   size="small"
                   label="Distributor Price"
+                  type="Number"
                 />
               </div>
               <div className="mb-4">
-                <GbBTDInput
-                  addon={"BTD"}
+                <GbBDTInput
+                  addon={"BDT"}
                   placeholder="0.00"
                   name="purchasePrice"
                   size="small"
                   label="Purchase Price"
+                  type="Number"
                 />
               </div>
               <p className="text-[rgba(0,0,0,.85)] text-[15px]   mb-4 mt-4">
                 Additional Information
               </p>
               <div className="mb-4">
-                <GbBTDInput
-                  addon={"BTD"}
+                <GbBDTInput
+                  addon={"BDT"}
                   placeholder="0.00"
                   name="sku"
                   size="small"
@@ -178,23 +180,22 @@ const Page = () => {
                 />
               </div>
               <div className="mb-4">
-                <GbBTDInput
-                  addon={"BTD"}
-                  placeholder="0.00"
+                <GbFormInput
+                  placeholder="Write Id"
                   name="internalId"
                   size="small"
                   label="Internal ID"
                 />
               </div>
               <div className="flex gap-3 justify-end sticky bottom-0 bg-white py-5">
-                <Button
+                {/* <Button
                   type="primary"
                   style={{ borderRadius: "0px" }}
                   ghost
                   onClick={() => message.success("Processing complete!")}
                 >
                   Clear
-                </Button>
+                </Button> */}
                 <Button
                   type="primary"
                   htmlType="submit"
