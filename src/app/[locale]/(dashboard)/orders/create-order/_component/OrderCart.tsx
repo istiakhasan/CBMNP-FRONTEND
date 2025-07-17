@@ -22,7 +22,6 @@ const OrderCart = ({
   const [sameAsBilling, setSameAsBilling] = useState(true);
   const [formData, setFormData] = useState({});
   const userInfo: any = getUserInfo();
-  console.log(userInfo,"user info");
   const [handleSubmitOrder] = useCreateOrderMutation();
   const handleFormSubmit = async (stepFormData: any, reset: any) => {
     setFormData((prev) => ({ ...prev, ...stepFormData }));
@@ -205,7 +204,7 @@ const OrderCart = ({
                           const newQuantity = findProduct?.productQuantity - 1;
                           if (newQuantity < 1) {
                             const filterProduct = cart?.filter(
-                              (fp: any) => item?.productId !== fp?.productId
+                              (fp: any) => item?.id !== fp?.id
                             );
                             setCart(filterProduct);
                             return;
@@ -258,7 +257,7 @@ const OrderCart = ({
                       <span
                         onClick={() => {
                           const filterItem = cart.filter(
-                            (cp: any) => cp?.productId !== item?.productId
+                            (cp: any) => cp?.id !== item?.id
                           );
                           setCart(filterItem);
                         }}

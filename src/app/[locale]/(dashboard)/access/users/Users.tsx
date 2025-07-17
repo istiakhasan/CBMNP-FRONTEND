@@ -20,6 +20,7 @@ import { useGetAllUsersQuery, useUpdateUserByIdMutation } from "@/redux/api/user
 import AddUsers from "./AddUsers";
 import moment from "moment";
 import { useLocale } from "next-intl";
+import EditUser from "./_component/EditUser";
 const Users = () => {
   //Add user modal
   const [openAddUserModal, setOpenAddUserModal] = useState(false);
@@ -34,7 +35,8 @@ const Users = () => {
   const [updateUser]=useUpdateUserByIdMutation()
   const router = useRouter();
   const [open, setOpen] = useState(false);
-
+  const [rowData,setRowData]=useState<any>(null)
+  const [editUser, setEditUser] = useState(false);
   const local=useLocale()
   const tableColumn = [
     {
@@ -65,7 +67,7 @@ const Users = () => {
       key: 22,
       //@ts-ignore
       render: (text, record, index) => {
-        return <span className=" cursor-pointer">{record?.userId}</span>;
+        return <span className=" cursor-pointer whitespace-nowrap">{record?.userId}</span>;
       },
     },
     {
@@ -89,16 +91,9 @@ const Users = () => {
       },
     },
     {
-      title: "Permission Group",
-      key: 5,
-      //@ts-ignore
-      render: (text, record, index) => {
-        return <span className=" cursor-pointer">N/A</span>;
-      },
-    },
-    {
       title: "Locations",
       key: 6,
+      width:"220px",
       //@ts-ignore
       render: (text, record, index) => {
         return <span className=" cursor-pointer">{record?.address}</span>;
@@ -135,7 +130,7 @@ const Users = () => {
       //@ts-ignore
       render: (text, record, index) => {
         const formattedDate = moment(record?.createdAt).format(
-          "MMMM D, YYYY h:mm A"
+          "MMM D, YYYY"
         );
 
         return (
@@ -145,6 +140,17 @@ const Users = () => {
             {formattedDate}
           </span>
         );
+      },
+    },
+     {
+      title: "Action",
+      key: 17,
+      align: "end",
+      render: (_:any,record:any) => {
+        return <i onClick={()=>{
+          setEditUser(true)
+          setRowData(record)
+        }} className="ri-edit-2-fill text-[18px] color_primary cursor-pointer"></i>;
       },
     },
   ];
@@ -234,7 +240,7 @@ const Users = () => {
           </div>
         </div>
       </div>
-      {/* modals  */}
+      {/*Add user modals  */}
       <GbModal
         isModalOpen={openAddUserModal}
         openModal={() => setOpenAddUserModal(true)}
@@ -244,6 +250,17 @@ const Users = () => {
         cls="custom_ant_modal"
       >
         <AddUsers setOpenAddUserModal={setOpenAddUserModal} />
+      </GbModal>
+      {/*Edit user modals  */}
+      <GbModal
+        isModalOpen={editUser}
+        openModal={() => setEditUser(true)}
+        closeModal={() => setEditUser(false)}
+        clseTab={false}
+        width="500px"
+        cls="custom_ant_modal"
+      >
+        <EditUser rowData={rowData} setOpenAddUserModal={setEditUser} />
       </GbModal>
     </>
   );

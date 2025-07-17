@@ -2,14 +2,26 @@
 import { getBaseUrl } from "@/helpers/config/envConfig";
 import { useGetAllProductQuery } from "@/redux/api/productApi";
 import { Divider, message } from "antd";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const LoadProducts = ({ setCart, cart }: any) => {
   const [searchTerm, setSearchTerm] = useState("");
+   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+     // Debounce logic (300ms)
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
   const { data, isLoading } = useGetAllProductQuery({
-    searchProducts: searchTerm,
+    searchTerm: debouncedSearchTerm,
     limit: "200",
   });
+  if(isLoading){
+    return 
+  }
   return (
     <div className="flex-1   h-[85vh] overflow-scroll  custom_scroll  px-[10px] mt-[15px] ">
       <div className="px-4 pt-[15px]">
@@ -120,11 +132,11 @@ const LoadProducts = ({ setCart, cart }: any) => {
                       <span
                         onClick={() => {
                           const filterItem = cart.filter(
-                            (cp: any) => cp?.productId !== item?.id
+                            (cp: any) => cp?.id !== item?.id
                           );
                           setCart(filterItem);
                         }}
-                        className="px-3 py-[4px] bg-[#FFF5F5] inline-block ml-3 cursor-pointer"
+                        className="px-3 py-[4px] bg-[#FFF5F5] inline-block cursor-pointer"
                       >
                         <i className="ri-delete-bin-5-line text-[#F44336] text-[18px]"></i>
                       </span>

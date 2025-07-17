@@ -20,7 +20,6 @@ const Dashboard = () => {
   if(isLoading){
     return 
   }
-  console.log(data,'userinfo');
   return (
     <div className='h-screen overflow-auto'>
       <GbHeader title='Dashboard' />
@@ -34,14 +33,14 @@ const Dashboard = () => {
         </div>
         <div>
           <div className='my-4'>
-            <Segmented<string>
+            {/* <Segmented<string>
               style={{ background: "#E2E6EF" }}
               options={['Overview', 'Reports', 'Notification', 'Calendar']}
               onChange={(value) => {
               }}
-            />
+            /> */}
           </div>
-          <Row gutter={16}>
+          <Row gutter={16} className='pb-4'>
             <Col className='mb-5' span={6}>
               <Card >
                 <div>

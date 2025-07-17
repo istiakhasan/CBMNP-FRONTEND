@@ -11,6 +11,14 @@ export const warehouseApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [tagTypes.warehouse],
     }),
+    updateWarehouse: build.mutation({
+      query: (data) => ({
+        url: `/warehouse/${data?.id}`,
+        method: "PATCH",
+        data:data?.data
+      }),
+      invalidatesTags: [tagTypes.warehouse],
+    }),
     loadAllWarehouse: build.query({
       query: (arg) => ({
         url: "/warehouse",
@@ -33,5 +41,6 @@ export const warehouseApi = baseApi.injectEndpoints({
 export const {
     useLoadAllWarehouseQuery,
     useCreateWarehouseMutation,
-    useLoadAllWarehouseOptionsQuery
+    useLoadAllWarehouseOptionsQuery,
+    useUpdateWarehouseMutation
 } = warehouseApi;

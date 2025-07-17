@@ -8,13 +8,16 @@ import GbHeader from "@/components/ui/dashboard/GbHeader";
 import { useLoadAllWarehouseQuery } from "@/redux/api/warehouse";
 import GbModal from "@/components/ui/GbModal";
 import CreateWarehouse from "./_component/CreateWarehouse";
+import EditWarehouse from "./_component/EditWarehouse";
 const Page = () => {
   const search = useSearchParams();
   const query: Record<string, any> = {};
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
+  const [rowData,setRowData]=useState<any>(null)
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
+  const [editWarehouse, setEditWarehouse] = useState(false);
   query["page"] = page;
   query["limit"] = size;
   query["searchProducts"] = searchTerm;
@@ -55,8 +58,11 @@ const Page = () => {
       title: "Action",
       key: 7,
       align: "end",
-      render: () => {
-        return <i className="ri-edit-2-fill text-[18px] color_primary"></i>;
+      render: (_:any,record:any) => {
+        return <i onClick={()=>{
+          setEditWarehouse(true)
+          setRowData(record)
+        }} className="ri-edit-2-fill text-[18px] color_primary cursor-pointer"></i>;
       },
     },
   ];
@@ -122,7 +128,7 @@ const Page = () => {
         </div>
       </div>
 
-      {/* modals */}
+      {/*Create Warehouse modals */}
       <GbModal
         isModalOpen={open}
         openModal={() => setOpen(true)}
@@ -132,6 +138,18 @@ const Page = () => {
         cls="custom_ant_modal"
       >
         <CreateWarehouse setOpen={setOpen} />
+      </GbModal>
+
+      {/*Edit Warehouse modals */}
+      <GbModal
+        isModalOpen={editWarehouse}
+        openModal={() => setEditWarehouse(true)}
+        closeModal={() => setEditWarehouse(false)}
+        clseTab={false}
+        width="500px"
+        cls="custom_ant_modal"
+      >
+        <EditWarehouse setOpen={setEditWarehouse} rowData={rowData} />
       </GbModal>
     </>
   );

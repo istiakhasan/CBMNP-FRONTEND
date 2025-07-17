@@ -1,12 +1,16 @@
 "use client"
-import React from 'react';
+import { useGetMonthlySalesReportQuery } from '@/redux/api/dashboardApi';
+import React, { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 
 const PortFolioOverview = () => {
-    const data:any = {
+const [seriesData, setSeriesData] = useState<number[]>([]);
+  const {data:queryData,isLoading}=useGetMonthlySalesReportQuery(undefined)
+
+ const data:any = {
         series: [{
           name: 'Total',
-          data: [30,44, 30, 60, 56, 40, 65,60, 25, 70,30, 80]
+          data: seriesData
         }
        
     ],
@@ -43,7 +47,7 @@ const PortFolioOverview = () => {
           tooltip: {
             y: {
               formatter: function (val:any) {
-                return "$ " + val + " thousands"
+                return "৳" + val 
               }
             }
           },
@@ -54,9 +58,21 @@ const PortFolioOverview = () => {
           }
         },
       };
+
+  useEffect(() => {
+   if(!!queryData){
+    console.log(queryData);
+   setSeriesData(queryData?.series[0]?.data);
+   }
+  }, [queryData]);
+   
+      if(isLoading){
+        return
+      }
+      console.log(seriesData,"series data");
     return (
         <div>
-             <ReactApexChart options={data.options} series={data.series} type="bar" height={450} />
+             <ReactApexChart options={data.options} series={data?.series} type="bar" height={350} />
         </div>
     );
 };

@@ -20,6 +20,7 @@ export enum tagTypes {
       supplier="supplier",
       procurements="procurements",
       deliveryPartner="deliveryPartner",
+      dashboard="dashboard",
 
   }
   
@@ -45,4 +46,5 @@ export enum tagTypes {
     tagTypes.supplier,
     tagTypes.procurements,
     tagTypes.deliveryPartner,
+    tagTypes.dashboard,
   ];

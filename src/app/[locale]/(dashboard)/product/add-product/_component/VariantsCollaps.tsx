@@ -61,7 +61,7 @@ const VariantsCollaps = ({ remove, fields, attributes }: any) => {
             <GbFileUpload name={`variants[${i}].product_image`} />
             <p className="text-[#999] text-[12px]">
               Please upload maximum 6 images. (.jpeg, .jpg or .png. Max size
-              1MB/file.)
+              3MB/file.)
             </p>
 
             <p className="text-[rgba(0,0,0,.85)] text-[15px]   mb-2 mt-4">

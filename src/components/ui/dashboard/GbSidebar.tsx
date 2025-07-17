@@ -107,6 +107,17 @@ const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
           title: "Purchase Report"
         },
       ]
+    },
+     {
+      href: '/configuration',
+      title: 'Configuration',
+      icon: 'ri-settings-2-line',
+      children: [
+        {
+          href: "/configuration/category",
+          title: "Category"
+        },
+      ]
     }
   ]
   .filter((mi:any)=>permission?.includes(mi.title) ||  userInfo?.role ==="admin" )
@@ -127,11 +138,13 @@ const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
       router.push(`/${local}/${path}`);
     }
   };
+//  console.log(pathName?.split('/').includes("/en/procurement/purchase-approved"),"==========");
 
+ console.log(pathName?.split('/'));
   return (
     <>
      {loading && <Loader />} {/* Show Loader when loading */}
-    <aside className={`gb_sidebar h-[100vh]  overflow-y-scroll ${isActive ? "show" : "hide"}`}>
+    <aside className={`gb_sidebar h-[100vh]    ${isActive ? "show overflow-y-scroll" : "hide "}`}>
       <div className="toggle_btn">
         <i onClick={() => setIsActive(!isActive)} className="ri-menu-fill"></i>
       </div>
@@ -144,9 +157,14 @@ const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
                 <div key={index} className={`${((index===subMenuActive && isActive) || pathName?.split('/').includes(item?.href?.slice(1,item?.href?.length)))&&"border"} duration-300 relative`}>
                 <Tooltip placement="right" title={isActive ? '' : item.title}>
                   <div onClick={()=>{
+                    console.log("click");
                     if(index===subMenuActive){
+                      console.log("1");
+                    
                       setSubMenuActive(null)
                     }else{
+                      console.log("2");
+                    
                       setSubMenuActive(index)
                     }
                   }} className={`cursor-pointer menu_list ${pathName?.split('/').includes(item?.href?.slice(1,item?.href?.length))   ? 'active' : ''}`}>
@@ -154,7 +172,7 @@ const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
                     <p className="ml-[10px]">{item.title}</p>
                   </div>
                 </Tooltip>
-                
+                 
                  {isActive && <div className={`sub_menu ${(subMenuActive===index || pathName?.split('/').includes(item?.href?.split('/')[1]))?'active':''}`}>
                  {
                   item?.children?.map((child:any,count:any)=>{

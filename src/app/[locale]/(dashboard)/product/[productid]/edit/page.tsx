@@ -86,7 +86,7 @@ const Page = () => {
               <GbFileUpload name="images" defaultValue={productData?.images} />
               <p className="text-[#999] text-[12px]">
                 Please upload maximum 6 images. (.jpeg, .jpg or .png. Max size
-                1MB/file.)
+                3MB/file.)
               </p>
               <p className="text-[rgba(0,0,0,.85)] text-[15px]   mb-4 mt-4">
                 Product Details
