@@ -9,6 +9,7 @@ const LoadProductsEdit = ({ setCart, cart }: any) => {
   const { data, isLoading } = useGetAllProductQuery({
     searchProducts: searchTerm,
     limit: "200",
+    active:true
   });
   return (
     <div className="flex-1   h-[85vh] overflow-scroll  custom_scroll  px-[10px] mt-[15px] ">

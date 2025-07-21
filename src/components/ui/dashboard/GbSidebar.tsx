@@ -103,10 +103,19 @@ const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
           title: "Purchase Canceled"
         },
         {
+          href: "/procurement/purchase-completed",
+          title: "Purchase Completed"
+        },
+        {
           href: "/procurement/purchase-report",
           title: "Purchase Report"
         },
       ]
+    },
+     {
+      href: '/customers',
+      title: 'Customers',
+      icon: 'ri-group-line'
     },
      {
       href: '/configuration',

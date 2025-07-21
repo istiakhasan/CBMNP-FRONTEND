@@ -175,10 +175,10 @@ const PurchaseOrderReceive = ({
                       +item?.receivedQuantity + +item?.quantityToReceive,
                   };
                 });
-
               const result = await receivePurchaseOrder({
                 stock: modifiedData,
                 poIds,
+                procurementId:rowData?.id
               }).unwrap();
               if (result) {
                 message.success("Product receive successfully...");

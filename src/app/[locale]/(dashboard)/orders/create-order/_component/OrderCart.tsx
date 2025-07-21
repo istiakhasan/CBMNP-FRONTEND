@@ -165,7 +165,7 @@ const OrderCart = ({
                     />
                     <div>
                       <p className=" text-gray-600 text-[14px]">
-                        {item?.productNameEn}{" "}
+                        {item?.name}{" "}
                       </p>
                       <p className=" font-semibold text-[14px]">
                         BDT: {(+item?.salePrice || 0)?.toFixed(2)}

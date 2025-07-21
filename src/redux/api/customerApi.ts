@@ -11,6 +11,14 @@ export const customerApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [tagTypes.customer],
     }),
+    editCustomer: build.mutation({
+      query: (data) => ({
+        url: `/customers/${data?.id}`,
+        method: "PATCH",
+        data:data?.data,
+      }),
+      invalidatesTags: [tagTypes.customer],
+    }),
     getAllCustomers: build.query({
       query: (params) => ({
         url: "/customers",
@@ -32,5 +40,6 @@ export const customerApi = baseApi.injectEndpoints({
 export const {
     useCreateCustomerMutation,
     useGetAllCustomersQuery,
-    useGetCustomerByIdQuery
+    useGetCustomerByIdQuery,
+    useEditCustomerMutation
 } = customerApi;

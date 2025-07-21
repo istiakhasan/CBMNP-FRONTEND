@@ -68,6 +68,7 @@ const Page = () => {
               unit: unit?.value,
               images:addToDataBase
             };
+            delete modiedData['internalId']
             const res = await updateProduct({
               id: productData?.id,
               data: modiedData,

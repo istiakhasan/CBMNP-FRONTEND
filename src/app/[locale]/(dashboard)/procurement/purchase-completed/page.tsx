@@ -20,7 +20,7 @@ import StatusBadge from "@/util/StatusBadge";
 import GlobalInvoice from "@/components/GlobalInvoice";
 
 const Page = () => {
-  const [rowDto,setRowDto]=useState<any>(null) 
+  const [rowDto, setRowDto] = useState<any>(null);
   const [openViewModal, setOpenViewModal] = useState(false);
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
@@ -32,7 +32,7 @@ const Page = () => {
     page,
     size,
     searchTerm,
-    status:"Cancelled"
+    status: "Completed",
   });
 
   const tableColumns = [
@@ -87,7 +87,7 @@ const Page = () => {
         return <StatusBadge status={{ label: b?.status }} />;
       },
     },
-     {
+    {
       title: "View",
       key: "action",
       width: "60px",
@@ -95,12 +95,13 @@ const Page = () => {
         return (
           <>
             {
-              <span 
-               onClick={()=>{
-                setOpenViewModal(true);
-                setRowDto(record)
+              <span
+                onClick={() => {
+                  setOpenViewModal(true);
+                  setRowDto(record);
                 }}
-              className=" text-white text-[10px] py-[2px] px-[10px] cursor-pointer">
+                className=" text-white text-[10px] py-[2px] px-[10px] cursor-pointer"
+              >
                 <i
                   style={{ fontSize: "18px" }}
                   className="ri-eye-fill color_primary"
@@ -154,7 +155,7 @@ const Page = () => {
   ];
   return (
     <div>
-      <GbHeader title="Purchase Canceled" />
+      <GbHeader title="Purchase Completed" />
 
       <div className="p-[16px]">
         <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -232,21 +233,21 @@ const Page = () => {
               loading={isLoading}
               columns={newColumns}
               dataSource={data?.data}
-              rowSelection={rowSelection}
+              //   rowSelection={rowSelection}
             />
           </div>
         </div>
       </div>
 
-            <GbModal
-                          width="1300px"
-                          // clseTab={false}
-                          isModalOpen={openViewModal}
-                          openModal={() => setOpenViewModal(true)}
-                          closeModal={() => setOpenViewModal(false)}
-                        >
-                          <GlobalInvoice rowDto={rowDto} />
-                        </GbModal>
+      <GbModal
+        width="1300px"
+        // clseTab={false}
+        isModalOpen={openViewModal}
+        openModal={() => setOpenViewModal(true)}
+        closeModal={() => setOpenViewModal(false)}
+      >
+        <GlobalInvoice rowDto={rowDto} />
+      </GbModal>
     </div>
   );
 };

@@ -32,6 +32,7 @@ const UserPermission = () => {
       const res=await createUserPermission(transFormed).unwrap()
       if(res?.success){
         message.success(res?.message)
+        window.location.reload()
       }
     } catch (error) {
       console.log(error);

@@ -173,11 +173,17 @@ const Page = () => {
                   <div className="flex justify-between mb-5">
                     <p className="text-[16px] font-semibold">Amount</p>
                   </div>
-                  <div className="grid grid-cols-4">
+                  <div className="grid grid-cols-5">
                     <div>
                       <p className="text-[#656565]">Regular Price</p>
                       <p className="text-[#00171d] font-semibold">
                         {productData?.regularPrice || "N/A"}Tk
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[#656565]">Sale Price</p>
+                      <p className="text-[#00171d] font-semibold">
+                        {productData?.salePrice || "N/A"}Tk
                       </p>
                     </div>
                     <div>
