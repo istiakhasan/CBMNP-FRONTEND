@@ -1,20 +1,30 @@
 import GbForm from "@/components/forms/GbForm";
 import GbFormInput from "@/components/forms/GbFormInput";
 import GbFormSelect from "@/components/forms/GbFormSelect";
-import { useCreatePartnerMutation } from "@/redux/api/partnerApi";
+import { useCreatePartnerMutation, useUpdatePartnerMutation } from "@/redux/api/partnerApi";
 import { createPartnerSchema } from "@/schema/schema";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { message } from "antd";
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
-const CreatePartner = ({setPartnerCreateModal}:{setPartnerCreateModal:any}) => {
-  const [createPartner] = useCreatePartnerMutation();
+const EditPartner = ({setPartnerCreateModal,rowData}:{setPartnerCreateModal:any,rowData:any}) => {
+  const [updatePartner] = useUpdatePartnerMutation();
   return (
     <div>
-      <h1 className="text-[20px]">Create Delivery Partner</h1>
+      <h1 className="text-[20px]">Edit Delivery Partner</h1>
       <GbForm 
         resolver={yupResolver(createPartnerSchema)}
+        defaultValues={{
+            partnerName:{
+                label:rowData?.partnerName,
+                value:rowData?.partnerName,
+            },
+            phone:rowData?.phone,
+            api_key:rowData?.api_key,
+            secret_key:rowData?.secret_key,
+            contactPerson:rowData?.contactPerson
+        }}
         submitHandler={async (data: any,reset:any) => {
           try {
             const { partnerName, ...rest } = data;
@@ -28,13 +38,12 @@ const CreatePartner = ({setPartnerCreateModal}:{setPartnerCreateModal:any}) => {
               delete payload["api_key"];
             }
 
-            const res = await createPartner(payload).unwrap();
+            const res = await updatePartner({data:payload,id:rowData?.id}).unwrap();
             if(res?.message){
                 message.success(res?.message)
                 setPartnerCreateModal(false)
                 reset()
             }
-            console.log(res);
           } catch (error:any) {
             if(error?.data?.errorMessages){
                  error?.data?.errorMessages?.forEach((item:any)=>{
@@ -54,7 +63,7 @@ const CreatePartner = ({setPartnerCreateModal}:{setPartnerCreateModal:any}) => {
   );
 };
 
-export default CreatePartner;
+export default EditPartner;
 
 const FormBody = () => {
   const { watch } = useFormContext();
@@ -63,6 +72,7 @@ const FormBody = () => {
       <div className="mb-2">
         <GbFormSelect
           label="Partner"
+          disabled={true}
           name="partnerName"
           options={[
             {
@@ -101,7 +111,7 @@ const FormBody = () => {
           //   onClick={() => setPartnerCreateModal(true)}
           className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px] uppercase"
         >
-          Create
+          Update
         </button>
       </div>
     </>

@@ -13,9 +13,10 @@ export const partnerApi = baseApi.injectEndpoints({
     }),
 
     getDeliveryPartners: build.query({
-      query: () => ({
+      query: (params) => ({
         url: "/delivery-partner",
-        method: "GET"
+        method: "GET",
+        params
       }),
       providesTags: [tagTypes.deliveryPartner],
     }),

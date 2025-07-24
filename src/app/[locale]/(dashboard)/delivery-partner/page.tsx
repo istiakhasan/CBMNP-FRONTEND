@@ -3,7 +3,6 @@ import GbTable from "@/components/GbTable";
 import OrderSearch from "@/components/OrderSearch";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
 import GbModal from "@/components/ui/GbModal";
-import { useGetProcurementQuery } from "@/redux/api/procurementApi";
 import {
   Checkbox,
   CheckboxOptionType,
@@ -13,10 +12,9 @@ import {
 } from "antd";
 import moment from "moment";
 import React, { useState } from "react";
-import StatusBadge from "@/util/StatusBadge";
-import GbForm from "@/components/forms/GbForm";
 import { useGetDeliveryPartnersQuery, useUpdatePartnerMutation } from "@/redux/api/partnerApi";
 import CreatePartner from "./_component/CreatePartner";
+import EditPartner from "./_component/EditPartner";
 
 const Page = () => {
   const [page, setPage] = useState<number>(1);
@@ -24,6 +22,7 @@ const Page = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
   const [partnerCreateModal, setPartnerCreateModal] = useState(false);
+  const [editModal,setEditModal]=useState(false)
   const [rowData,setRowData]=useState(false)
   const { data, isLoading } = useGetDeliveryPartnersQuery({
     page,
@@ -74,7 +73,7 @@ const Page = () => {
     {
       title: "Status",
       key: "15",
-      align:"end",
+      align:"start",
       render: (a: any, b: any, i: any) => {
         console.log(b.status);
         return    <div className="flex justify-start gap-[10px] text-[14px] font-[500]">
@@ -94,7 +93,18 @@ const Page = () => {
         />
       </div>;
       },
-    }
+    },
+     {
+      title: "Action",
+      key: 7,
+      align: "end",
+      render: (_:any,record:any) => {
+        return <i onClick={()=>{
+          setEditModal(true)
+          setRowData(record)
+        }} className="ri-edit-2-fill text-[18px] color_primary cursor-pointer"></i>;
+      },
+    },
   ];
 
   const defaultCheckedList = tableColumns.map(
@@ -189,8 +199,14 @@ const Page = () => {
             />
           </div>
         </div>
+
+        {/* create modal */}
         <GbModal openModal={()=>setPartnerCreateModal(true)} width="500px" closeModal={()=>setPartnerCreateModal(false)} isModalOpen={partnerCreateModal}>
-          <CreatePartner />
+          <CreatePartner setPartnerCreateModal={setPartnerCreateModal} />
+        </GbModal>
+        {/* Edit modal */}
+        <GbModal openModal={()=>setEditModal(true)} width="500px" closeModal={()=>setEditModal(false)} isModalOpen={editModal}>
+          <EditPartner setPartnerCreateModal={setEditModal} rowData={rowData} />
         </GbModal>
       </div>
     </div>

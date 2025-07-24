@@ -89,7 +89,7 @@ const GbBDTInput = ({
               }
               placeholder={placeholder}
               {...field}
-              value={value ? currencyFormatter(value as string) : currencyFormatter(field.value)}
+              value={value ? value  : field.value}
               onChange={(e) => {
                 const formattedValue = currencyParser(e.target.value);
                 field.onChange(formattedValue); // Update the field value

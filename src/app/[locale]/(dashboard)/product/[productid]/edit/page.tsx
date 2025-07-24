@@ -17,6 +17,7 @@ import { deleteImageFromImagebb, mapImagesForUpload } from "@/util/commonUtil";
 import GbBDTInput from "@/components/forms/GbBTDInput";
 
 const Page = () => {
+  const [buttonLoading,setButtonLoading]=useState(false)
   const { productid } = useParams();
   const [updateProduct] = useUpdateProductMutation();
   const { data, isLoading } = useGetProductByIdQuery({
@@ -50,6 +51,7 @@ const Page = () => {
         <GbForm
           defaultValues={{ ...defaultValue }}
           submitHandler={async (payload: any) => {
+            setButtonLoading(true)
             const { category, images, unit, ...rest } = payload;
             const alreadyInList = productData?.images?.filter((item: any) =>
               images?.some((ii: any) => ii.url === item?.url)
@@ -76,6 +78,8 @@ const Page = () => {
             if (res?.success) {
               message.success(`Product update successfully`);
             }
+
+            setButtonLoading(false)
           }}
         >
           <div className="w-[427px]   mx-auto">
@@ -200,9 +204,11 @@ const Page = () => {
                   type="primary"
                   htmlType="submit"
                   style={{ borderRadius: "0px" }}
+                  className={`${buttonLoading?'bg-gray-400':''}`}
+                  disabled={buttonLoading}
                   // onClick={(data:any) =>console.log(data,"form data") }
                 >
-                  Update
+                  {buttonLoading?'Loading':'Update'}
                 </Button>
               </div>
             </div>

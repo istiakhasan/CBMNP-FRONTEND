@@ -209,3 +209,26 @@ export const receiverFormSchema = yup.object().shape({
   shippingAddressDistrict: yup.object().required('Payment method  is required'),
   shippingAddressThana: yup.object().required('Payment method  is required'),
 });
+
+
+
+export const createPartnerSchema = yup.object().shape({
+  partnerName: yup.object().required(),
+  phone: yup.string().required('Phone number is required'),
+  contactPerson: yup.string().required('Phone number is required'),
+
+  api_key: yup.string().when('partnerName', (customerType:any, schema) => {
+    if (customerType[0].value === 'SteadFast') {
+      return schema.required('Division is required for NON_PROBASHI customer type');
+    }
+    return schema;
+  }),
+  secret_key: yup.string().when('partnerName', (customerType:any, schema) => {
+    if (customerType[0].value === 'SteadFast') {
+      return schema.required('Division is required for NON_PROBASHI customer type');
+    }
+    return schema;
+  }),
+
+ 
+});
