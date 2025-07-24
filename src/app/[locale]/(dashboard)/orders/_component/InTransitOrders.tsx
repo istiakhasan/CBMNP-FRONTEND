@@ -30,7 +30,7 @@ import ShipmentTable from "./ShipmentTable";
 import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
 import { useGetDeliveryPartnerOptionsQuery } from "@/redux/api/partnerApi";
 const { RangePicker } = DatePicker;
-const InTransitOrders = ({searchTerm}: any) => {
+const InTransitOrders = ({searchTerm,warehosueIds,currierIds,rangeValue,productIds}: any) => {
   const [openModal, setOpenModal] = useState(false);
   const [location, setLocationId] = useState<any>([]);
   const [selecteddeliveryPartner, setSelectedDeliveryPartner] =
@@ -40,7 +40,7 @@ const InTransitOrders = ({searchTerm}: any) => {
   const [size, setSize] = useState<number>(10);
   const [rowId, setRowId] = useState<any>(null);
   const local = useLocale();
-  const [rangeValue, setRangeValue] = useState<any>(null);
+  // const [rangeValue, setRangeValue] = useState<any>(null);
   const { data: deliveryPartnerOptions, isLoading: deliveryPartnerLoading } =
     useGetDeliveryPartnerOptionsQuery(undefined);
   const { data, isLoading } = useGetAllOrdersQuery({
@@ -48,9 +48,10 @@ const InTransitOrders = ({searchTerm}: any) => {
     limit: size,
     searchTerm,
     statusId: "7",
-    locationId: location,
-    currier: selecteddeliveryPartner,
+    locationId: warehosueIds,
+    currier: currierIds,
     ...rangeValue,
+    productId:productIds
   });
   const { data: rowData, isLoading: rowDataLoading } = useGetOrderByIdQuery({
     id: rowId,
@@ -61,7 +62,7 @@ const InTransitOrders = ({searchTerm}: any) => {
   const tableColumn = [
     {
       title: "SL",
-      dataIndex: "sl",
+      key: "sl",
       render: (text: string, record: any, i: any) => {
         const slNumber = page * size + (i + 1) - size;
         // 1*10+(0+1)-10
@@ -108,14 +109,14 @@ const InTransitOrders = ({searchTerm}: any) => {
     },
     {
       title: "Phone Number",
-      dataIndex: "phone_number",
+      key: "phone_number",
       render: (text: string, record: any) => (
         <>
           <span className="color_primary font-[500]">
             {record?.receiverPhoneNumber}
           </span>
           <i
-            //  onClick={() => copyToClipboard(record?.customerPhoneNumber)}
+             onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
             className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[4px]"
           ></i>
         </>
@@ -177,7 +178,7 @@ const InTransitOrders = ({searchTerm}: any) => {
     },
     {
       title: "Order date",
-      dataIndex: "Order date",
+      key: "Order date",
       align: "start",
       render: (text: string, record: any, i: any) => {
         return (
@@ -189,7 +190,7 @@ const InTransitOrders = ({searchTerm}: any) => {
     },
     {
       title: "Order Age",
-      dataIndex: "orderAge",
+      key: "orderAge",
       render: (text: string, record: any) => (
         <span className="text-[#7D7D7D]  color_primary font-[500]">
           {moment(record?.createdAt).fromNow()}
@@ -198,6 +199,7 @@ const InTransitOrders = ({searchTerm}: any) => {
     },
     {
       title: "In-transit Time",
+      key: "In-transit Time",
       render: (text: string, record: any) => (
         <span className="text-[#7D7D7D]  color_primary font-[500]">
           {moment(record?.intransitTime).format("hh:m A DD-MM-YYYY")}
@@ -379,23 +381,23 @@ const InTransitOrders = ({searchTerm}: any) => {
                     }}
                     format="YYYY-MM-DD HH:mm:ss"
                     showTime
-                    onChange={(dates) => {
-                      if (dates) {
-                        const [start, end] = dates;
-                        const formattedStart = dayjs(start).format(
-                          "YYYY-MM-DD HH:mm:ss"
-                        );
-                        const formattedEnd = dayjs(end).format(
-                          "YYYY-MM-DD HH:mm:ss"
-                        );
-                        setRangeValue({
-                          startDate: formattedStart,
-                          endDate: formattedEnd,
-                        });
-                      } else {
-                        setRangeValue(null);
-                      }
-                    }}
+                    // onChange={(dates) => {
+                    //   if (dates) {
+                    //     const [start, end] = dates;
+                    //     const formattedStart = dayjs(start).format(
+                    //       "YYYY-MM-DD HH:mm:ss"
+                    //     );
+                    //     const formattedEnd = dayjs(end).format(
+                    //       "YYYY-MM-DD HH:mm:ss"
+                    //     );
+                    //     setRangeValue({
+                    //       startDate: formattedStart,
+                    //       endDate: formattedEnd,
+                    //     });
+                    //   } else {
+                    //     setRangeValue(null);
+                    //   }
+                    // }}
                   />
                 </div>
 {/* 

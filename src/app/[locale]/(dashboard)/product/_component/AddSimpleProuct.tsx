@@ -52,6 +52,7 @@ const AddSimpleProuct = ({ setDrawerOpen }: any) => {
       payload["isBaseProduct"] = false;
 
       const res = await createProduct(payload).unwrap();
+  
       if (!!res?.success) {
         showNotification(res?.data?.name);
         // message.success(res?.message);
@@ -59,8 +60,14 @@ const AddSimpleProuct = ({ setDrawerOpen }: any) => {
         setSelectedValue([]);
         reset();
       }
-    } catch (error) {
-      message.error("Something went wrong ,please debug the error");
+    } catch (error:any) {
+      if(error?.data?.errorMessages){
+        error?.data?.errorMessages?.forEach((item:any)=>{
+          message.error(item?.message);
+        })
+      }else{
+        message.error("Something went wrong ,please debug the error");
+      }
     }finally{
       setSubmitLoading(false)
     }
@@ -154,18 +161,15 @@ const AddSimpleProuct = ({ setDrawerOpen }: any) => {
         Additional Information
       </p>
       <div className="mb-4">
-        <GbBDTInput
-          addon={"BDT"}
-          placeholder="0.00"
+        <GbFormInput
           name="sku"
           size="small"
           label="SKU"
         />
       </div>
       <div className="mb-4">
-        <GbBDTInput
-          addon={"BDT"}
-          placeholder="0.00"
+        <GbFormInput
+          placeholder=""
           name="internalId"
           size="small"
           label="Internal ID"

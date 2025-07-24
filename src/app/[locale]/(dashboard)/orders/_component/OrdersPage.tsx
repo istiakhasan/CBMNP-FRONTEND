@@ -25,9 +25,14 @@ import OrderSearch from "@/components/OrderSearch";
 import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
 import { useGetDeliveryPartnerOptionsQuery } from "@/redux/api/partnerApi";
 import dayjs from "dayjs";
+import {  useGetAllProductQuery } from "@/redux/api/productApi";
 const { RangePicker } = DatePicker;
 const OrdersPage = () => {
   const [rangeValue, setRangeValue] = useState<any>(null);
+  const [orderStatus, setOrderStatus] = useState<any>([]);
+  const [warehosueIds, setWarehouseIds] = useState<any>([]);
+  const [productIds, setProductsIds] = useState<any>([]);
+  const [partnerIds, setPartnerIds] = useState<any>([]);
   const [activeTab, setActiveTab] = useState<string>("1");
   const [searchTerm, setSearchTerm] = useState("");
   const userInfo: any = getUserInfo();
@@ -36,6 +41,9 @@ const OrdersPage = () => {
   const { data: statusOptions, isLoading } = useGetAllStatusQuery({
     label: "all",
   });
+  const {data:productsData}=useGetAllProductQuery({
+    limit:200,
+  })
   const { data: warehouseOptions, isLoading: warehosueLoading } =
     useLoadAllWarehouseOptionsQuery(undefined);
   const { data: deliveryPartnerOptions, isLoading: deliveryPartnerLoading } =
@@ -49,6 +57,10 @@ const OrdersPage = () => {
     refetch,
   } = useGetOrdersCountQuery({
     searchTerm,
+    statusId: orderStatus,
+    locationId: warehosueIds,
+    currier: partnerIds,
+    ...rangeValue
   });
   const permission = userData?.permission?.map((item: any) => item?.label);
 
@@ -127,23 +139,95 @@ const OrdersPage = () => {
     }));
 
   const components: { [key: string]: any } = {
-    "1": <PendingOrders countData={countData} searchTerm={searchTerm} />,
+    "1": (
+      <PendingOrders
+        countData={countData}
+        searchTerm={searchTerm}
+        warehosueIds={warehosueIds}
+        currierIds={partnerIds}
+        rangeValue={rangeValue}
+      />
+    ),
     "3": (
       <ApprovedOrders
         refetch={refetch}
         countData={countData}
         searchTerm={searchTerm}
+        warehosueIds={warehosueIds}
+        currierIds={partnerIds}
+        rangeValue={rangeValue}
       />
     ),
-    "4": <HoldOrders searchTerm={searchTerm} />,
-    "9": <AllOrders countData={countData} searchTerm={searchTerm} />,
-    "5": <StoreOrders searchTerm={searchTerm} />,
-    "6": <PackingOrders searchTerm={searchTerm} />,
-    "7": <InTransitOrders searchTerm={searchTerm} />,
-    "8": <Delivered searchTerm={searchTerm} />,
-    "10": <UnreachableOrders searchTerm={searchTerm} />,
-    "11": <CancelOrders searchTerm={searchTerm} />,
+    "4": (
+      <HoldOrders
+        searchTerm={searchTerm}
+        warehosueIds={warehosueIds}
+        currierIds={partnerIds}
+        rangeValue={rangeValue}
+      />
+    ),
+    "9": (
+      <AllOrders
+        countData={countData}
+        searchTerm={searchTerm}
+        warehosueIds={warehosueIds}
+        currierIds={partnerIds}
+        rangeValue={rangeValue}
+      />
+    ),
+    "5": (
+      <StoreOrders
+        searchTerm={searchTerm}
+        warehosueIds={warehosueIds}
+        currierIds={partnerIds}
+        rangeValue={rangeValue}
+      />
+    ),
+    "6": (
+      <PackingOrders
+        rangeValue={rangeValue}
+        searchTerm={searchTerm}
+        warehosueIds={warehosueIds}
+        currierIds={partnerIds}
+      />
+    ),
+    "7": (
+      <InTransitOrders
+        searchTerm={searchTerm}
+        warehosueIds={warehosueIds}
+        currierIds={partnerIds}
+        rangeValue={rangeValue}
+        productIds={productIds}
+      />
+    ),
+    "8": (
+      <Delivered
+        searchTerm={searchTerm}
+        warehosueIds={warehosueIds}
+        currierIds={partnerIds}
+        rangeValue={rangeValue}
+      />
+    ),
+    "10": (
+      <UnreachableOrders
+        searchTerm={searchTerm}
+        warehosueIds={warehosueIds}
+        currierIds={partnerIds}
+        rangeValue={rangeValue}
+      />
+    ),
+    "11": (
+      <CancelOrders
+        searchTerm={searchTerm}
+        warehosueIds={warehosueIds}
+        currierIds={partnerIds}
+        rangeValue={rangeValue}
+      />
+    ),
   };
+
+
+  console.log(productsData,"product data");
   return (
     <div>
       <GbHeader title="Orders" />
@@ -181,7 +265,24 @@ const OrdersPage = () => {
                               className="text-black flex items-center gap-2"
                               key={i}
                             >
-                              <input type="checkbox" value={item?.value} />
+                              <input
+                                type="checkbox"
+                                value={item?.value}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setOrderStatus([
+                                      ...orderStatus,
+                                      item?.value,
+                                    ]);
+                                  } else {
+                                    setOrderStatus(
+                                      orderStatus?.filter(
+                                        (ab: any) => ab !== item?.value
+                                      )
+                                    );
+                                  }
+                                }}
+                              />
                               {item?.label}
                             </span>
                           ))}
@@ -194,8 +295,56 @@ const OrdersPage = () => {
                               className="text-black flex items-center gap-2"
                               key={i}
                             >
-                              <input type="checkbox" value={item?.value} />
+                              <input
+                                type="checkbox"
+                                value={item?.value}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setWarehouseIds([
+                                      ...warehosueIds,
+                                      item?.value,
+                                    ]);
+                                  } else {
+                                    setWarehouseIds(
+                                      warehosueIds?.filter(
+                                        (ab: any) => ab !== item?.value
+                                      )
+                                    );
+                                  }
+                                }}
+                              />
                               {item?.label}
+                            </span>
+                          ))}
+                        </div>
+                        <Divider />
+                        {/* Filter by products Id */}
+                        <h1>Filter by products</h1>
+                        <div className="flex gap-2 flex-wrap">
+                          {productsData?.data?.map((item: any, i: any) => (
+                            <span
+                              className="text-black flex items-center gap-2"
+                              key={i}
+                            >
+                              <input
+                                type="checkbox"
+                                value={item?.id}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setProductsIds([
+                                      ...productIds,
+                                      item?.id,
+                                    ]);
+                                  } else {
+                                    setProductsIds(
+                                      productIds?.filter(
+                                        (ab: any) => ab !== item?.id
+                                      )
+                                    );
+                                  }
+                                }}
+                              />
+                              {item?.name}
                             </span>
                           ))}
                         </div>
@@ -208,14 +357,31 @@ const OrdersPage = () => {
                                 className="text-black flex items-center gap-2"
                                 key={i}
                               >
-                                <input type="checkbox" value={item?.value} />
+                                <input
+                                  type="checkbox"
+                                  value={item?.value}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setPartnerIds([
+                                        ...partnerIds,
+                                        item?.value,
+                                      ]);
+                                    } else {
+                                      setPartnerIds(
+                                        partnerIds?.filter(
+                                          (ab: any) => ab !== item?.value
+                                        )
+                                      );
+                                    }
+                                  }}
+                                />
                                 {item?.label}
                               </span>
                             )
                           )}
                         </div>
                         <Divider />
-                        <h1>Date Range</h1>
+                        <h1>In-Transit Date Range</h1>
                         <div className="flex gap-2 flex-wrap">
                           <RangePicker
                             style={{
@@ -246,9 +412,7 @@ const OrdersPage = () => {
                         </div>
 
                         <div className="flex justify-end">
-                          <button
-                            className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px] mt-3"
-                          >
+                          <button className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px] mt-3">
                             Apply
                           </button>
                         </div>

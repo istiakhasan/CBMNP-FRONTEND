@@ -3,6 +3,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { countryData } from "./countryCode";
+import { getBaseUrl } from "@/helpers/config/envConfig";
 
 const CustomerType = () => {
   const { watch } = useFormContext();
@@ -10,7 +11,7 @@ const CustomerType = () => {
   const [districtData,setdistrictData]=useState([])
   const [thanaData,setThanaData]=useState([])
   useEffect(()=>{
-    axios.get(`https://ghorerbazartech.xyz/divisions`)
+    axios.get(`${getBaseUrl()}/divisions`)
     .then(res=>setDivisionData(res?.data))
     .catch(error=>console.log(error))
   },[])
@@ -28,7 +29,7 @@ const CustomerType = () => {
                 };
               })}
               handleChange={(option: any) => {
-                axios.get(`https://ghorerbazartech.xyz/divisions/${option?.value}`)
+                axios.get(`${getBaseUrl()}/divisions/${option?.value}`)
                .then(res=>setdistrictData(res?.data?.district_info))
                .catch(error=>console.log(error))
               }}
@@ -46,7 +47,7 @@ const CustomerType = () => {
                 };
               })}
               handleChange={(option: any) => {
-                axios.get(`https://ghorerbazartech.xyz/districts/${option?.value}`)
+                axios.get(`${getBaseUrl()}/districts/${option?.value}`)
                .then(res=>setThanaData(res?.data?.thana_info))
                .catch(error=>console.log(error))
               }}

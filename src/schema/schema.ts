@@ -182,7 +182,7 @@ export const createWarehouseSchema = yup.object().shape({
 });
 export const createUserSchema = yup.object().shape({
   name: yup.string().required(),
-  userId: yup.string().required(),
+  internalId: yup.string().required(),
   email: yup.string().required(),
   phone: yup.string().required('Phone number is required'),
   address: yup.string().required('Phone number is required'),
@@ -191,7 +191,7 @@ export const createUserSchema = yup.object().shape({
 });
 export const updateUserSchema = yup.object().shape({
   name: yup.string().required(),
-  userId: yup.string().required(),
+  internalId: yup.string().required(),
   email: yup.string().required(),
   phone: yup.string().required('Phone number is required'),
   address: yup.string().required('Phone number is required'),
@@ -199,4 +199,13 @@ export const updateUserSchema = yup.object().shape({
 });
 export const createCategorySchema = yup.object().shape({
   label: yup.string().required(),
+});
+
+export const receiverFormSchema = yup.object().shape({
+  receiverName: yup.string().required('Order source is required'),
+  receiverPhoneNumber: yup.string().required('Order type is required'),
+  shippingAddressTextArea: yup.string().required('Payment method  is required'),
+  shippingAddressDivision: yup.object().required('Payment method  is required'),
+  shippingAddressDistrict: yup.object().required('Payment method  is required'),
+  shippingAddressThana: yup.object().required('Payment method  is required'),
 });

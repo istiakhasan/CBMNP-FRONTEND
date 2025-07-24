@@ -713,4 +713,14 @@ aside.gb_sidebar {
   .custom_selector .ant-select-selector{
     box-shadow: none !important;
   }
+
+
+  .dashboard_table table{
+    width: 100%;
+    font-size: 12px;
+  }
+  .dashboard_table table th{
+    color:#374151 ;
+    text-align: start;
+  }
   

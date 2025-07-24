@@ -13,10 +13,11 @@ import GbModal from "@/components/ui/GbModal";
 import SupplierForm from "./SupplierForm";
 
 const CreatePurchaseOrder = () => {
+  const [submitLoading,setSubmitLoading]=useState(false)
   const [searchTerm, setSearchTerm] = useState("");
   const [handleCreateProcurement] = useCreateProcurementMutation();
   const [rowDto, setRowDto] = useState<any>([]);
-  const [supplierModal,setSupplierModal]=useState(false)
+  const [supplierModal, setSupplierModal] = useState(false);
   const [selectSupplier, setSelectSupplier] = useState<any>({});
   const { data, isLoading } = useGetAllProductQuery({
     searchProducts: searchTerm,
@@ -49,11 +50,14 @@ const CreatePurchaseOrder = () => {
       <div className="flex-1">
         <div className="grid grid-cols-2 w-full gap-3">
           <div>
-           <div className="flex items-end justify-end mb-1">
-           <button onClick={()=>setSupplierModal(true)} className="flex items-center gap-2 bg-primary text-white font-bold py-[2px] px-4">
-              <span className="text-md">+</span> Add
-            </button>
-           </div>
+            <div className="flex items-end justify-end mb-1">
+              <button
+                onClick={() => setSupplierModal(true)}
+                className="flex items-center gap-2 bg-primary text-white font-bold py-[2px] px-4"
+              >
+                <span className="text-md">+</span> Add
+              </button>
+            </div>
 
             <Select
               styles={customStyles}
@@ -66,11 +70,11 @@ const CreatePurchaseOrder = () => {
             />
           </div>
           <div>
-          <div className="flex items-end justify-end mb-1">
-           <button className="flex items-center gap-2 bg-primary text-white font-bold py-[2px] px-4">
-              <span className="text-md">+</span> Add Products
-            </button>
-           </div>
+            <div className="flex items-end justify-end mb-1">
+              <button className="flex items-center gap-2 bg-primary text-white font-bold py-[2px] px-4">
+                <span className="text-md">+</span> Add Products
+              </button>
+            </div>
             <Select
               styles={customStyles}
               options={productOptions}
@@ -230,10 +234,17 @@ const CreatePurchaseOrder = () => {
           </p>
         </div>
         <button
-          className="mt-4 bg-primary w-full uppercase text-white py-2 px-4 rounded-md"
+          disabled={rowDto?.length < 1}
+          className={`mt-4 ${
+            rowDto?.length < 1 ? "bg-gray-400" : "bg-primary"
+          }  w-full uppercase text-white py-2 px-4 rounded-md`}
           type="button"
           onClick={async () => {
             try {
+               setSubmitLoading(true)
+              if (rowDto?.length < 1) {
+                return message.error("Please select at least one product");
+              }
               const transformedData = {
                 supplierId: rowDto[0]?.supplier.id,
                 items: rowDto.map((item: any) => ({
@@ -271,13 +282,21 @@ const CreatePurchaseOrder = () => {
                 console.log(error);
                 message.error("Something went wrong");
               }
+            }finally{
+              setSubmitLoading(false)
             }
           }}
         >
-          Checkout
+          {submitLoading?"Loading...":"Checkout"}
+          
         </button>
       </div>
-      <GbModal width="500px" openModal={()=>setSupplierModal(true)} closeModal={()=>setSupplierModal(false)} isModalOpen={supplierModal}>
+      <GbModal
+        width="500px"
+        openModal={() => setSupplierModal(true)}
+        closeModal={() => setSupplierModal(false)}
+        isModalOpen={supplierModal}
+      >
         <SupplierForm setSupplierModal={setSupplierModal} />
       </GbModal>
     </div>

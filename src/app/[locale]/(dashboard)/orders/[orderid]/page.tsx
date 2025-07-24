@@ -10,12 +10,14 @@ import { useGetOrderByIdQuery } from "@/redux/api/orderApi";
 import { handleCopy } from "@/util/copyOrderInfo";
 import { getUserInfo } from "@/service/authService";
 import { useGetUserByIdQuery } from "@/redux/api/usersApi";
+import { useLocale } from "next-intl";
 
 
 const Page = () => {
   const [active, setActive] = useState(1);
   const { orderid } = useParams();
   const router = useRouter();
+  const local=useLocale()
   const { data, isLoading } = useGetOrderByIdQuery({
     id: orderid,
   });
@@ -77,7 +79,7 @@ const Page = () => {
                   <button
                     onClick={() =>
                       router.push(
-                        `/orders/edit?orderId=${data?.id}&customerId=${data?.customerId}`
+                        `/${local}/orders/edit?orderId=${data?.id}&customerId=${data?.customerId}`
                       )
                     }
                     className="bg-[#4F8A6D] text-white px-[25px] py-[4px] "

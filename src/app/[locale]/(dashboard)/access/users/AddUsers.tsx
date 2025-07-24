@@ -56,7 +56,7 @@ const AddUsers = ({setOpenAddUserModal}:any) => {
       </div>
       <div className="mb-3">
         {/* exist */}
-        <GbFormInput name="userId" label="Internal ID" />
+        <GbFormInput name="internalId" label="Internal ID" />
       </div>
       <div className="mb-3">
         {/* exist */}

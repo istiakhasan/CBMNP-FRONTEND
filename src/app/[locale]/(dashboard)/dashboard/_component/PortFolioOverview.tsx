@@ -65,11 +65,9 @@ const [seriesData, setSeriesData] = useState<number[]>([]);
    setSeriesData(queryData?.series[0]?.data);
    }
   }, [queryData]);
-   
       if(isLoading){
         return
       }
-      console.log(seriesData,"series data");
     return (
         <div>
              <ReactApexChart options={data.options} series={data?.series} type="bar" height={350} />

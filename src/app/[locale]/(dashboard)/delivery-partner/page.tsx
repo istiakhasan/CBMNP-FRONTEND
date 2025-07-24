@@ -16,13 +16,14 @@ import React, { useState } from "react";
 import StatusBadge from "@/util/StatusBadge";
 import GbForm from "@/components/forms/GbForm";
 import { useGetDeliveryPartnersQuery, useUpdatePartnerMutation } from "@/redux/api/partnerApi";
+import CreatePartner from "./_component/CreatePartner";
 
 const Page = () => {
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
-  const [receiveModal,setReceiveModal]=useState(false)
+  const [partnerCreateModal, setPartnerCreateModal] = useState(false);
   const [rowData,setRowData]=useState(false)
   const { data, isLoading } = useGetDeliveryPartnersQuery({
     page,
@@ -124,10 +125,10 @@ const Page = () => {
             searchTerm={searchTerm}
           />
           <button
-            //   onClick={() => router.push(`/${local}/orders/create-order`)}
+              onClick={() => setPartnerCreateModal(true)}
             className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]"
           >
-            Create Purchase
+            Create Partner
           </button>
         </div>
         <div className="gb_border my-2">
@@ -188,6 +189,9 @@ const Page = () => {
             />
           </div>
         </div>
+        <GbModal openModal={()=>setPartnerCreateModal(true)} width="500px" closeModal={()=>setPartnerCreateModal(false)} isModalOpen={partnerCreateModal}>
+          <CreatePartner />
+        </GbModal>
       </div>
     </div>
   );

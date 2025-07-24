@@ -73,7 +73,7 @@ const LoadProducts = ({ setCart, cart }: any) => {
               <div>
                 {cart?.some((exist: any) => exist?.id === item?.id) ? (
                   <>
-                    <div className="border">
+                    <div className="border whitespace-nowrap">
                     <span
                         onClick={() => {
                           const _data = [...cart];

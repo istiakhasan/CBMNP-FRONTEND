@@ -55,7 +55,7 @@ const EditUser = ({ setOpenAddUserModal, rowData }: any) => {
             value: rowData?.role,
           },
           name: rowData?.name,
-          userId: rowData?.userId,
+          internalId: rowData?.internalId,
           email: rowData?.email,
           phone: rowData?.phone,
           address: rowData?.address,
@@ -88,7 +88,7 @@ const EditUser = ({ setOpenAddUserModal, rowData }: any) => {
         </div>
         <div className="mb-3">
           {/* exist */}
-          <GbFormInput name="userId" label="Internal ID" />
+          <GbFormInput name="internalId" label="Internal ID" />
         </div>
         <div className="mb-3">
           {/* exist */}

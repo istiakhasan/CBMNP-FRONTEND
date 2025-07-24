@@ -12,9 +12,10 @@ export const statusApi = baseApi.injectEndpoints({
       providesTags: [tagTypes.status,tagTypes.order],
     }),
     getOrdersCount: build.query({
-      query: () => ({
+      query: (params) => ({
         url: "/status/orders-count",
-        method: "GET"
+        method: "GET",
+        params
       }),
       providesTags: [tagTypes.status,tagTypes.order],
     }),

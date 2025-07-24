@@ -41,6 +41,7 @@ const Page = () => {
     sku: productData?.sku,
     images: productData?.images,
     category: productData?.category,
+    internalId: productData?.internalId,
   };
   return (
     <div>
@@ -68,7 +69,6 @@ const Page = () => {
               unit: unit?.value,
               images:addToDataBase
             };
-            delete modiedData['internalId']
             const res = await updateProduct({
               id: productData?.id,
               data: modiedData,
@@ -172,9 +172,8 @@ const Page = () => {
                 Additional Information
               </p>
               <div className="mb-4">
-                <GbBDTInput
-                  addon={"BDT"}
-                  placeholder="0.00"
+                <GbFormInput
+                  placeholder="sku"
                   name="sku"
                   size="small"
                   label="SKU"
@@ -182,7 +181,7 @@ const Page = () => {
               </div>
               <div className="mb-4">
                 <GbFormInput
-                  placeholder="Write Id"
+                  placeholder="Enter Id"
                   name="internalId"
                   size="small"
                   label="Internal ID"

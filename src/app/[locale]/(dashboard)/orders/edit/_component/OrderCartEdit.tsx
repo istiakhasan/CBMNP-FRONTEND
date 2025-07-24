@@ -8,6 +8,8 @@ import { useCreateOrderMutation, useUpdateOrderMutation } from "@/redux/api/orde
 import moment from "moment";
 import ReceiverInfoFormEdit from "./ReceiverInfoFormEdit";
 import OparationainfoFormEdit from "./OparationainfoFormEdit";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { receiverFormSchema } from "@/schema/schema";
 
 const OrderCartEdit = ({
   setCart,
@@ -18,10 +20,11 @@ const OrderCartEdit = ({
   orderData
 }: any) => {
   const [active, setActive] = useState(1);
-  const [sameAsBilling, setSameAsBilling] = useState(true);
+  const [sameAsBilling, setSameAsBilling] = useState(false);
   const [formData, setFormData] = useState({});
   const userInfo: any = getUserInfo();
   const [handleUpdateOrder] = useUpdateOrderMutation();
+
   const handleFormSubmit = async (stepFormData: any, reset: any) => {
     setFormData((prev) => ({ ...prev, ...stepFormData }));
     if (active === 3) {
@@ -122,14 +125,24 @@ const OrderCartEdit = ({
   const notSameAsBilling = {
     customerType: customer?.customerType,
     sameAsBilling: sameAsBilling,
-    receiverName: null,
-    receiverPhoneNumber: null,
-    receiverAdditionalPhoneNumber: null,
-    shippingAddressDivision: null,
-    shippingAddressDistrict: null,
-    shippingAddressThana: null,
-    shippingAddressTextArea: null,
+    receiverName: orderData?.receiverName,
+    receiverPhoneNumber: orderData?.receiverPhoneNumber,
+    receiverAdditionalPhoneNumber: orderData?.receiverAdditionalPhoneNumber,
+    shippingAddressDivision: {
+      label:orderData?.receiverDivision,
+      value:orderData?.receiverDivision,
+    },
+    shippingAddressDistrict: {
+      label:orderData?.receiverDistrict,
+      value:orderData?.receiverDistrict,
+    },
+    shippingAddressThana: {
+      label:orderData?.receiverThana,
+      value:orderData?.receiverThana,
+    },
+    shippingAddressTextArea: orderData?.receiverAddress,
   };
+console.log(orderData,"order data");
   return (
     <>
       <div
@@ -291,7 +304,7 @@ const OrderCartEdit = ({
         )}
         {active === 2 && (
           <GbForm
-            // resolver={yupResolver(receiverFormSchema)}
+            resolver={yupResolver(receiverFormSchema)}
             defaultValues={sameAsBilling ? defaultvalue : notSameAsBilling}
             submitHandler={handleFormSubmit}
           >

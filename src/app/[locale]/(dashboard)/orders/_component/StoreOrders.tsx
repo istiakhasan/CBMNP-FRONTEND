@@ -28,14 +28,12 @@ import copyToClipboard from "@/components/ui/GbCopyToClipBoard";
 import { useLocale } from "next-intl";
 import Invoice from "./Invoice";
 
-const StoreOrders = ({}: any) => {
+const StoreOrders = ({warehosueIds,currierIds,searchTerm,rangeValue}: any) => {
   // all states
   const [page, setPage] = useState<number>(1);
-  const [locationId, setLocationId] = useState("");
   const [size, setSize] = useState<number>(10);
   const [selectedOrders, setSelectedOrders] = useState<any>([]);
   const [statuschangedModal, setStatusChangeModal] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
   const [printModal, setPrintModal] = useState(false);
   const [rowId, setRowId] = useState<any>(null);
   const { data: rowData, isLoading: rowDataLoading } = useGetOrderByIdQuery({
@@ -47,7 +45,9 @@ const StoreOrders = ({}: any) => {
     limit: size,
     searchTerm,
     statusId: "5",
-    locationId: locationId,
+    locationId:warehosueIds,
+    currier:currierIds,
+    ...rangeValue,
   });
 
   const { data: warehouseOptions } = useLoadAllWarehouseOptionsQuery(undefined);
@@ -57,7 +57,7 @@ const StoreOrders = ({}: any) => {
   const tableColumn = [
     {
       title: "SL",
-      dataIndex: "sl",
+      key: "sl",
       render: (text: string, record: any, i: any) => {
         const slNumber = page * size + (i + 1) - size;
         // 1*10+(0+1)-10
@@ -104,14 +104,14 @@ const StoreOrders = ({}: any) => {
     },
     {
       title: "Phone Number",
-      dataIndex: "phone_number",
+      key: "phone_number",
       render: (text: string, record: any) => (
         <>
           <span className="color_primary font-[500]">
             {record?.receiverPhoneNumber}
           </span>
           <i
-            //  onClick={() => copyToClipboard(record?.customerPhoneNumber)}
+             onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
             className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[4px]"
           ></i>
         </>
@@ -173,7 +173,7 @@ const StoreOrders = ({}: any) => {
     },
     {
       title: "Order date",
-      dataIndex: "Order date",
+      key: "Order date",
       align: "start",
       render: (text: string, record: any, i: any) => {
         return (
@@ -185,7 +185,7 @@ const StoreOrders = ({}: any) => {
     },
     {
       title: "Order Age",
-      dataIndex: "orderAge",
+      key: "orderAge",
       render: (text: string, record: any) => (
         <span className="text-[#7D7D7D]  color_primary font-[500]">
           {moment(record?.createdAt).fromNow()}
@@ -297,12 +297,12 @@ const StoreOrders = ({}: any) => {
               Filter Column
             </div>
           </Popover>
-          <Select
+          {/* <Select
             size={"middle"}
             onChange={(e) => setLocationId(e)}
             style={{ width: 200, height: "36px", borderRadius: "0px" }}
             options={warehouseOptions?.data}
-          />
+          /> */}
         </div>
         <div className="flex gap-3">
           <Pagination

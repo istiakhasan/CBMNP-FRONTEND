@@ -35,11 +35,10 @@ import copyToClipboard from "@/components/ui/GbCopyToClipBoard";
 import { useLocale } from "next-intl";
 import Invoice from "./Invoice";
 
-const PackingOrders = ({}: any) => {
+const PackingOrders = ({rangeValue,warehosueIds,searchTerm,currierIds}: any) => {
   // all states
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
-  const [searchTerm, setSearchTerm] = useState("");
   const [locationId, setLocationId] = useState("");
   const { data: warehouseOptions } = useLoadAllWarehouseOptionsQuery(undefined);
   const [printModal, setPrintModal] = useState(false);
@@ -53,7 +52,10 @@ const PackingOrders = ({}: any) => {
     limit: size,
     searchTerm,
     statusId: 6,
-    locationId: locationId,
+    locationId: warehosueIds,
+    ...rangeValue,
+    currier:currierIds
+
   });
   const [selectedOrders, setSelectedOrders] = useState<any>([]);
   const [statuschangedModal, setStatusChangeModal] = useState(false);
@@ -62,7 +64,7 @@ const PackingOrders = ({}: any) => {
   const tableColumn = [
     {
       title: "SL",
-      dataIndex: "sl",
+      key: "sl",
       render: (text: string, record: any, i: any) => {
         const slNumber = page * size + (i + 1) - size;
         // 1*10+(0+1)-10
@@ -109,14 +111,14 @@ const PackingOrders = ({}: any) => {
     },
     {
       title: "Phone Number",
-      dataIndex: "phone_number",
+      key: "phone_number",
       render: (text: string, record: any) => (
         <>
           <span className="color_primary font-[500]">
             {record?.receiverPhoneNumber}
           </span>
           <i
-            //  onClick={() => copyToClipboard(record?.customerPhoneNumber)}
+             onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
             className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[4px]"
           ></i>
         </>
@@ -178,7 +180,7 @@ const PackingOrders = ({}: any) => {
     },
     {
       title: "Order date",
-      dataIndex: "Order date",
+      key: "Order date",
       align: "start",
       render: (text: string, record: any, i: any) => {
         return (
@@ -190,7 +192,7 @@ const PackingOrders = ({}: any) => {
     },
     {
       title: "Order Age",
-      dataIndex: "orderAge",
+      key: "orderAge",
       render: (text: string, record: any) => (
         <span className="text-[#7D7D7D]  color_primary font-[500]">
           {moment(record?.createdAt).fromNow()}

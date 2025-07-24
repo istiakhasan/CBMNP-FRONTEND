@@ -3,6 +3,7 @@ import GbFormInput from '@/components/forms/GbFormInput';
 import GbFormSelect from '@/components/forms/GbFormSelect';
 
 import GbFormTextArea from '@/components/forms/GbFormTextArea';
+import { getBaseUrl } from '@/helpers/config/envConfig';
 
 import { useGetAllDivisionQuery, useGetDistrictByIdQuery, useGetThanaByIdQuery } from '@/redux/api/divisionsApi';
 import axios from 'axios';
@@ -15,7 +16,7 @@ const ReceiverInfoFormEdit = ({formData,setSameAsBilling,setFormData,setActive}:
     const [districtData,setdistrictData]=useState([])
     const [thanaData,setThanaData]=useState([])
     useEffect(()=>{
-      axios.get(`https://ghorerbazartech.xyz/divisions`)
+      axios.get(`${getBaseUrl()}/divisions`)
       .then(res=>setDivisionData(res?.data))
       .catch(error=>console.log(error))
     },[])
@@ -67,7 +68,7 @@ const ReceiverInfoFormEdit = ({formData,setSameAsBilling,setFormData,setActive}:
                           };
                         })}
                         handleChange={(option: any) => {
-                          axios.get(`https://ghorerbazartech.xyz/divisions/${option?.value}`)
+                          axios.get(`${getBaseUrl()}/divisions/${option?.value}`)
                          .then(res=>setdistrictData(res?.data?.district_info))
                          .catch(error=>console.log(error))
                         }}
@@ -85,7 +86,7 @@ const ReceiverInfoFormEdit = ({formData,setSameAsBilling,setFormData,setActive}:
                           };
                         })}
                         handleChange={(option: any) => {
-                          axios.get(`https://ghorerbazartech.xyz/districts/${option?.value}`)
+                          axios.get(`${getBaseUrl()}/districts/${option?.value}`)
                          .then(res=>setThanaData(res?.data?.thana_info))
                          .catch(error=>console.log(error))
                         }}
@@ -106,7 +107,7 @@ const ReceiverInfoFormEdit = ({formData,setSameAsBilling,setFormData,setActive}:
                         label="Thana"
                         handleChange={async (option: any) => {
                           const response = await axios.get(
-                            `https://ghorerbazartech.xyz/delivary-charge/${option?.value}`
+                            `${getBaseUrl()}/delivary-charge/${option?.value}`
                           );
                           setValue("newDeliveryCharge", response?.data?.prices);
                         }}
@@ -155,7 +156,7 @@ const ReceiverInfoFormEdit = ({formData,setSameAsBilling,setFormData,setActive}:
                           };
                         })}
                         handleChange={(option: any) => {
-                          axios.get(`https://ghorerbazartech.xyz/divisions/${option?.value}`)
+                          axios.get(`${getBaseUrl()}/divisions/${option?.value}`)
                          .then(res=>setdistrictData(res?.data?.district_info))
                          .catch(error=>console.log(error))
                         }}
@@ -172,7 +173,7 @@ const ReceiverInfoFormEdit = ({formData,setSameAsBilling,setFormData,setActive}:
                           };
                         })}
                         handleChange={(option: any) => {
-                          axios.get(`https://ghorerbazartech.xyz/districts/${option?.value}`)
+                          axios.get(`${getBaseUrl()}/districts/${option?.value}`)
                          .then(res=>setThanaData(res?.data?.thana_info))
                          .catch(error=>console.log(error))
                         }}
@@ -192,7 +193,7 @@ const ReceiverInfoFormEdit = ({formData,setSameAsBilling,setFormData,setActive}:
                         label="Thana"
                         handleChange={async (option: any) => {
                           const response = await axios.get(
-                            `https://ghorerbazartech.xyz/delivary-charge/${option?.value}`
+                            `${getBaseUrl()}/delivary-charge/${option?.value}`
                           );
                           setValue("newDeliveryCharge", response?.data?.prices);
                         }}

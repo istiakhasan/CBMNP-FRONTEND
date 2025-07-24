@@ -10,6 +10,7 @@ import moment from "moment";
 import OperationalInfoForm from "./OperationalInfoForm";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { createOrderSchema } from "@/schema/IepSchema";
+import { receiverFormSchema } from "@/schema/schema";
 
 const OrderCart = ({
   setCart,
@@ -131,6 +132,7 @@ const OrderCart = ({
         customer?.customerType === "NON_PROBASHI" ? customer?.address : "",
     }),
   };
+  console.log(defaultValue,"default value");
   const notSameAsBilling = {
     customerType: customer?.customerType,
     sameAsBilling: sameAsBilling,
@@ -303,7 +305,7 @@ const OrderCart = ({
         )}
         {active === 2 && (
           <GbForm
-            // resolver={yupResolver(receiverFormSchema)}
+            resolver={yupResolver(receiverFormSchema)}
             defaultValues={sameAsBilling ? defaultValue : notSameAsBilling}
             submitHandler={handleFormSubmit}
           >

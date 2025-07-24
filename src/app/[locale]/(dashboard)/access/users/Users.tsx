@@ -71,6 +71,14 @@ const Users = () => {
       },
     },
     {
+      title: "Internal Id",
+      key: 22,
+      //@ts-ignore
+      render: (text, record, index) => {
+        return <span className=" cursor-pointer whitespace-nowrap">{record?.internalId}</span>;
+      },
+    },
+    {
       title: "Phone Number",
       key: 3,
       //@ts-ignore

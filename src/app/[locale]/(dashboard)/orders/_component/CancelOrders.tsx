@@ -1,5 +1,6 @@
 "use client";
 import GbTable from "@/components/GbTable";
+import copyToClipboard from "@/components/ui/GbCopyToClipBoard";
 import { getBaseUrl } from "@/helpers/config/envConfig";
 import { useGetAllOrdersQuery } from "@/redux/api/orderApi";
 import { useGetAllProductQuery } from "@/redux/api/productApi";
@@ -21,16 +22,18 @@ import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-const CancelOrders = ({}: any) => {
+const CancelOrders = ({searchTerm,warehosueIds,currierIds,rangeValue}: any) => {
   // all states
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
-  const [searchTerm, setSearchTerm] = useState("");
   const { data, isLoading } = useGetAllOrdersQuery({
     page,
     limit: size,
     searchTerm,
-    statusId:"4"
+    statusId:"4",
+    locationId:warehosueIds,
+    currier:currierIds,
+    ...rangeValue,
   });
   const local=useLocale()
   const router = useRouter();
@@ -38,7 +41,7 @@ const CancelOrders = ({}: any) => {
   const tableColumn = [
     {
       title: "SL",
-      dataIndex: "sl",
+      key: "sl",
       render: (text: string, record: any, i: any) => {
         const slNumber = page * size + (i + 1) - size;
         // 1*10+(0+1)-10
@@ -58,7 +61,7 @@ const CancelOrders = ({}: any) => {
             {record?.orderNumber}
           </span>
           <i
-            // onClick={() => copyToClipboard(record?.orderNumber)}
+            onClick={() => copyToClipboard(record?.orderNumber)}
             className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[4px]"
           ></i>
         </>
@@ -77,14 +80,14 @@ const CancelOrders = ({}: any) => {
     },
     {
       title: "Phone Number",
-      dataIndex: "phone_number",
+      key: "phone_number",
       render: (text: string, record: any) => (
         <>
           <span className="color_primary font-[500]">
             {record?.receiverPhoneNumber}
           </span>
           <i
-            //  onClick={() => copyToClipboard(record?.customerPhoneNumber)}
+             onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
             className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[4px]"
           ></i>
         </>
@@ -146,7 +149,7 @@ const CancelOrders = ({}: any) => {
     },
     {
       title: "Order date",
-      dataIndex: "Order date",
+      key: "Order date",
       align: "start",
       render: (text: string, record: any, i: any) => {
         return (
@@ -158,7 +161,7 @@ const CancelOrders = ({}: any) => {
     },
     {
       title: "Order Age",
-      dataIndex: "orderAge",
+      key: "orderAge",
       render: (text: string, record: any) => (
         <span className="text-[#7D7D7D]  color_primary font-[500]">
           {moment(record?.createdAt).fromNow()}

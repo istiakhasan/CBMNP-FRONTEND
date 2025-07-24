@@ -1,5 +1,6 @@
 import { useGetOrganizationByIdQuery } from "@/redux/api/organizationApi";
 import { numberToWords } from "@/util/commonUtil";
+import StatusBadge from "@/util/StatusBadge";
 import moment from "moment";
 
 /* eslint-disable @next/next/no-img-element */
@@ -36,6 +37,7 @@ const GlobalInvoice = ({rowDto}:any) => {
         {/* Buyer & Invoice Details */}
         <div className="flex justify-between">
           <div>
+            <p className="flex items-center gap-2"><span className="font-bold">Status: </span><StatusBadge status={{label:rowDto?.status}} /></p>
             <p><span className="font-bold">Po No: </span>{rowDto?.invoiceNumber}</p>
             <p><span className="font-bold">Contact Person: </span>{rowDto?.supplier?.contactPerson}</p>
             <p><span className="font-bold">Mobile: </span>{rowDto?.supplier?.phone}</p>

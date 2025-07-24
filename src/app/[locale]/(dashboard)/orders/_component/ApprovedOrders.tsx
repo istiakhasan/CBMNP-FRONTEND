@@ -34,7 +34,7 @@ import { useReactToPrint } from "react-to-print";
 import Invoice from "./Invoice";
 import GeneratePreviewButton from "./GeneratePreviewButton";
 
-const ApprovedOrders = ({ refetch: countRefetch,searchTerm }: any) => {
+const ApprovedOrders = ({ refetch: countRefetch,searchTerm,warehosueIds,currierIds,rangeValue }: any) => {
   // all states
   const [loadOrdersById] = useLazyGetOrderByIdQuery();
   const [loadStockByWarehouseProduct] =
@@ -56,7 +56,9 @@ const ApprovedOrders = ({ refetch: countRefetch,searchTerm }: any) => {
     limit: size,
     searchTerm,
     statusId: "2",
-    locationId: locationId,
+    locationId: warehosueIds,
+    currier:currierIds,
+    ...rangeValue,
   });
 
   const [handleCreateRequisition] = useCreateRequisitionMutation();
@@ -66,6 +68,7 @@ const ApprovedOrders = ({ refetch: countRefetch,searchTerm }: any) => {
   const tableColumn = [
     {
       title: "SL",
+      key: "SL",
       dataIndex: "sl",
       render: (text: string, record: any, i: any) => {
         const slNumber = page * size + (i + 1) - size;
@@ -113,14 +116,14 @@ const ApprovedOrders = ({ refetch: countRefetch,searchTerm }: any) => {
     },
     {
       title: "Phone Number",
-      dataIndex: "phone_number",
+      key: "phone_number",
       render: (text: string, record: any) => (
         <>
           <span className="color_primary font-[500]">
             {record?.receiverPhoneNumber}
           </span>
           <i
-            //  onClick={() => copyToClipboard(record?.customerPhoneNumber)}
+             onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
             className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[4px]"
           ></i>
         </>
@@ -182,7 +185,7 @@ const ApprovedOrders = ({ refetch: countRefetch,searchTerm }: any) => {
     },
     {
       title: "Order date",
-      dataIndex: "Order date",
+      key: "Order date",
       align: "start",
       render: (text: string, record: any, i: any) => {
         return (
@@ -194,7 +197,7 @@ const ApprovedOrders = ({ refetch: countRefetch,searchTerm }: any) => {
     },
     {
       title: "Order Age",
-      dataIndex: "orderAge",
+      key: "orderAge",
       render: (text: string, record: any) => (
         <span className="text-[#7D7D7D]  color_primary font-[500]">
           {moment(record?.createdAt).fromNow()}

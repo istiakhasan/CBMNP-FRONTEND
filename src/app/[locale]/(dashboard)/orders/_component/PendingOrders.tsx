@@ -28,7 +28,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import Invoice from "./Invoice";
 
-const PendingOrders = ({searchTerm}: any) => {
+const PendingOrders = ({searchTerm,warehosueIds,currierIds,rangeValue}: any) => {
   // all states
   const [printModal, setPrintModal] = useState(false);
   const [page, setPage] = useState<number>(1);
@@ -42,6 +42,9 @@ const PendingOrders = ({searchTerm}: any) => {
     limit: size,
     searchTerm,
     statusId: "1",
+    locationId:warehosueIds,
+    currier:currierIds,
+    ...rangeValue,
   });
   const local=useLocale()
   const router = useRouter();
@@ -103,7 +106,7 @@ const PendingOrders = ({searchTerm}: any) => {
         <>
           <span className="">{record?.receiverPhoneNumber}</span>
           <i
-            //  onClick={() => copyToClipboard(record?.customerPhoneNumber)}
+             onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
             className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[4px]"
           ></i>
         </>

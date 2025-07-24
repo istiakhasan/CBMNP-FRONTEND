@@ -112,7 +112,7 @@ const Page = () => {
 
   return (
     <div>
-      <GbHeader title="Purchase Approved" />
+      <GbHeader title="Purchase Receive" />
 
       <div className="p-[16px]">
         <div className="flex items-center justify-between gap-3 flex-wrap">

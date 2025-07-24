@@ -20,6 +20,8 @@ const getStatusStyle = (label:string) => {
         return { bgColor: "#00BCD4", textColor: "white" };
       case "Unreachable":
         return { bgColor: "#795548", textColor: "white" };
+      case "Completed":
+        return { bgColor: "#28a745", textColor: "white" };
       default:
         return { bgColor: "white", textColor: "black", isBordered: true };
     }
