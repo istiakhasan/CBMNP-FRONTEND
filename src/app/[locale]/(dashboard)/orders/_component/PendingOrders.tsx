@@ -15,10 +15,12 @@ import {
   Checkbox,
   CheckboxOptionType,
   Image,
+  MenuProps,
   Pagination,
   Popover,
   Spin,
   Switch,
+  TableProps,
 } from "antd";
 import axios from "axios";
 import moment from "moment";
@@ -27,13 +29,23 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import Invoice from "./Invoice";
+import GbDropdown from "@/components/ui/dashboard/GbDropdown";
+import GbForm from "@/components/forms/GbForm";
+import BulkChangeOrders from "./BulkChangeOrders";
 
-const PendingOrders = ({searchTerm,warehosueIds,currierIds,rangeValue}: any) => {
+const PendingOrders = ({
+  searchTerm,
+  warehosueIds,
+  currierIds,
+  rangeValue,
+}: any) => {
   // all states
+  const [selectedOrders, setSelectedOrders] = useState<any>([]);
   const [printModal, setPrintModal] = useState(false);
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
   const [rowId, setRowId] = useState<any>(null);
+  const [statuschangedModal, setStatusChangeModal] = useState(false);
   const { data: rowData, isLoading: rowDataLoading } = useGetOrderByIdQuery({
     id: rowId,
   });
@@ -42,11 +54,11 @@ const PendingOrders = ({searchTerm,warehosueIds,currierIds,rangeValue}: any) => 
     limit: size,
     searchTerm,
     statusId: "1",
-    locationId:warehosueIds,
-    currier:currierIds,
+    locationId: warehosueIds,
+    currier: currierIds,
     ...rangeValue,
   });
-  const local=useLocale()
+  const local = useLocale();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const tableColumn = [
@@ -106,7 +118,7 @@ const PendingOrders = ({searchTerm,warehosueIds,currierIds,rangeValue}: any) => 
         <>
           <span className="">{record?.receiverPhoneNumber}</span>
           <i
-             onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
+            onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
             className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[4px]"
           ></i>
         </>
@@ -162,7 +174,7 @@ const PendingOrders = ({searchTerm,warehosueIds,currierIds,rangeValue}: any) => 
       align: "start",
       render: (text: string, record: any) => (
         <span className="text-[#7D7D7D] font-[500] px-0">
-           {record?.partner?.partnerName ? record?.partner?.partnerName : "-"}
+          {record?.partner?.partnerName ? record?.partner?.partnerName : "-"}
         </span>
       ),
     },
@@ -232,6 +244,30 @@ const PendingOrders = ({searchTerm,warehosueIds,currierIds,rangeValue}: any) => 
   const reactToPrintFn = useReactToPrint({
     content: () => contentRef.current,
   });
+
+  const rowSelection: TableProps<any>["rowSelection"] = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
+      setSelectedOrders(selectedRows);
+    },
+    getCheckboxProps: (record: any) => ({
+      disabled: record.name === "Disabled User",
+      name: record.name,
+    }),
+  };
+
+  const items: MenuProps["items"] = [
+    {
+      label: (
+        <span
+          onClick={() => setStatusChangeModal(true)}
+          className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center"
+        >
+          <span>Change Status</span>
+        </span>
+      ),
+      key: "1",
+    },
+  ];
   return (
     <div className="gb_border">
       <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
@@ -269,26 +305,30 @@ const PendingOrders = ({searchTerm,warehosueIds,currierIds,rangeValue}: any) => 
             </div>
           </Popover>
         </div>
-      <div className="flex gap-3">
-        <Pagination
-          pageSize={size}
-          total={data?.meta?.total}
-          onChange={(v, d) => {
-            setPage(v);
-            setSize(d);
-          }}
-          showSizeChanger={false}
-        />
-            <button
-                  // onClick={() => router.push(`/${local}/orders/create-order`)}
-                  className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]"
-             >
+        <div className="flex gap-3">
+          <Pagination
+            pageSize={size}
+            total={data?.meta?.total}
+            onChange={(v, d) => {
+              setPage(v);
+              setSize(d);
+            }}
+            showSizeChanger={false}
+          />
+          <div>
+            {
+              <GbDropdown items={items}>
+                <button className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]">
                   Action
                 </button>
-      </div>
+              </GbDropdown>
+            }
+          </div>
+        </div>
       </div>
       <div className="h-[600px] overflow-scroll">
         <GbTable
+          rowSelection={rowSelection}
           loading={isLoading}
           columns={newColumns}
           dataSource={data?.data}
@@ -302,7 +342,24 @@ const PendingOrders = ({searchTerm,warehosueIds,currierIds,rangeValue}: any) => 
         isModalOpen={printModal}
         // clseTab={false}
       >
-       <Invoice rowData={rowData}/>
+        <Invoice rowData={rowData} />
+      </GbModal>
+
+      {/* change status modal */}
+      <GbModal
+        width="600px"
+        clseTab={false}
+        isModalOpen={statuschangedModal}
+        openModal={() => setStatusChangeModal(true)}
+        closeModal={() => setStatusChangeModal(false)}
+      >
+        <GbForm submitHandler={(data: any) => console.log(data)}>
+          <BulkChangeOrders
+            status="Pending"
+            setModalOpen={setStatusChangeModal}
+            selectedOrders={selectedOrders}
+          />
+        </GbForm>
       </GbModal>
     </div>
   );

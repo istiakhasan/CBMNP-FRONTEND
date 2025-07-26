@@ -10,7 +10,7 @@ import AddPaymentModal from "./AddPaymentModal";
 import PaymentHistory from "./PaymentHistory";
 import { useSubmitCommentMutation } from "@/redux/api/commentApi";
 
-const OrderDetails = ({ data,permission }: any) => {
+const OrderDetails = ({ data, permission }: any) => {
   const [addNote, setAddNote] = useState(false);
   const [seeMore, setSeeMore] = useState(false);
   const [openModal, setModalOpen] = useState(false);
@@ -30,7 +30,11 @@ const OrderDetails = ({ data,permission }: any) => {
         <table>
           <thead>
             <tr>
-              <td style={{verticalAlign:"baseline",border:"0"}} colSpan={6} rowSpan={5}>
+              <td
+                style={{ verticalAlign: "baseline", border: "0" }}
+                colSpan={6}
+                rowSpan={5}
+              >
                 <div>
                   <p className=" py-[4px] w-fit color_primary">
                     {data?.orderNumber}{" "}
@@ -39,14 +43,18 @@ const OrderDetails = ({ data,permission }: any) => {
                       className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[4px] text-[20px] color_primary"
                     ></i>
                   </p>
-                  {data?.status?.label==="Hold" &&  <p className="mt-[3px]">
-                    <strong>Hold Reason:</strong>
-                    {data?.onHoldReason}
-                  </p>}
-                  {data?.status?.label==="Cancel" &&  <p className="mt-[3px]">
-                    <strong>Hold Reason:</strong>
-                    {data?.onCancelReason}
-                  </p>}
+                  {data?.status?.label === "Hold" && (
+                    <p className="mt-[3px]">
+                      <strong>Hold Reason:</strong>
+                      {data?.onHoldReason}
+                    </p>
+                  )}
+                  {data?.status?.label === "Cancel" && (
+                    <p className="mt-[3px]">
+                      <strong>Hold Reason:</strong>
+                      {data?.onCancelReason}
+                    </p>
+                  )}
                   <p className="mt-[3px]">
                     <strong>Source:</strong>
                     {data?.orderSource}
@@ -160,7 +168,7 @@ const OrderDetails = ({ data,permission }: any) => {
                 </div>
               </td>
               <td style={{ border: "0px" }}></td>
-              <td style={{ color: "#4b5766", fontSize: "12px",border:"0" }}>
+              <td style={{ color: "#4b5766", fontSize: "12px", border: "0" }}>
                 <div className="">
                   <div className="flex flex-col items-end">
                     <p className="text-[#00171d] text-[24px] font-[700]">
@@ -179,8 +187,11 @@ const OrderDetails = ({ data,permission }: any) => {
                       {data?.receiverAddress}
                     </p>
                     <Tooltip>
-                      <button 
-                        disabled={!permission?.includes("UPDATE_ORDERS")}
+                      <button
+                        disabled={
+                          !permission?.includes("UPDATE_ORDERS") ||
+                          data?.status?.label === "Cancel"
+                        }
                         onClick={() => setModalOpen(true)}
                         className={`bg-[#00171D] ${
                           data?.status?.label === "Cancel" && "bg-[#FF5959]"
@@ -260,7 +271,7 @@ const OrderDetails = ({ data,permission }: any) => {
               <th>Price</th>
               <th>Discount</th>
               <th>Request Qty</th>
-              <th style={{width:"150px"}}>Total Amount</th>
+              <th style={{ width: "150px" }}>Total Amount</th>
             </tr>
           </thead>
           <tbody>
@@ -371,7 +382,7 @@ const OrderDetails = ({ data,permission }: any) => {
               >
                 Total Receivable
               </th>
-              <th  style={{ color: "#4b5766", fontSize: "12px" }}>
+              <th style={{ color: "#4b5766", fontSize: "12px" }}>
                 BDT {data?.totalReceiveAbleAmount}
               </th>
             </tr>
@@ -381,12 +392,15 @@ const OrderDetails = ({ data,permission }: any) => {
       <div className="mt-6">
         <div className="flex justify-between items-center">
           <h1 className="font-semibold  text-[18px] ">Payment History</h1>
-         {(data?.paymentStatus !=="Paid" && permission?.includes("UPDATE_ORDERS")) && <button
-            onClick={() => setPaymentModalOpen(true)}
-            className={`bg-[#4F8A6D] text-white px-[43px] font-bold py-[6px] flex items-center gap-3`}
-          >
-            Add Payment
-          </button>}
+          {data?.paymentStatus !== "Paid" &&
+            permission?.includes("UPDATE_ORDERS") && (
+              <button
+                onClick={() => setPaymentModalOpen(true)}
+                className={`bg-[#4F8A6D] text-white px-[43px] font-bold py-[6px] flex items-center gap-3`}
+              >
+                Add Payment
+              </button>
+            )}
         </div>
         <PaymentHistory data={data} />
       </div>

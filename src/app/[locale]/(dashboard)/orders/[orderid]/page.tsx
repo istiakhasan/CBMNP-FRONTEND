@@ -75,7 +75,7 @@ const Page = () => {
                   ></i>
                   Copy Info{" "}
                 </p>
-                { permission?.includes("UPDATE_ORDERS") &&
+                { permission?.includes("UPDATE_ORDERS") && 
                   <button
                     onClick={() =>
                       router.push(

@@ -4,6 +4,7 @@ import GbFormSelect from "@/components/forms/GbFormSelect";
 import {
   useChangeHoldOrderStatusMutation,
   useChangeOrderStatusMutation,
+  useReturnOrdersMutation,
   useUpdateOrderMutation,
 } from "@/redux/api/orderApi";
 import { useGetAllStatusQuery } from "@/redux/api/statusApi";
@@ -18,6 +19,7 @@ const ChangeStatusModal = ({ setModalOpen, rowData }: any) => {
   const userInfo: any = getUserInfo();
   const router=useRouter()
 const [handleHoldUpdateOrderStatus] = useChangeHoldOrderStatusMutation();
+const [returnBulkOrders] = useReturnOrdersMutation();
   const { data: orderStatus } = useGetAllStatusQuery({
     label:rowData?.status?.label
   });
@@ -33,6 +35,11 @@ const [handleHoldUpdateOrderStatus] = useChangeHoldOrderStatusMutation();
             agentId:userInfo.userId,
             ...(data?.orderStatus?.label==="Hold"&&  {onHoldReason:data?.reason?.value,}),
             currentStatus:rowData?.statusId
+          });
+        }else if(rowData?.status?.label === "Returned"){
+            res = await returnBulkOrders({
+            orderIds: [rowData?.id], 
+            agentId:userInfo.userId
           });
         } else {
           res = await handleUpdateOrder({
@@ -82,7 +89,7 @@ const [handleHoldUpdateOrderStatus] = useChangeHoldOrderStatusMutation();
               label="Select Status"
             />
           </div>
-          {watch()?.orderStatus?.label !== "Approved" &&
+          {watch()?.orderStatus?.label !== "Approved" && watch()?.orderStatus?.label !== "Delivered" && watch()?.orderStatus?.label !== "Returned"  &&
             !!watch()?.orderStatus?.label && (
               <div className="mt-3">
                 <GbFormSelect

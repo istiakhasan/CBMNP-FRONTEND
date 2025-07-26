@@ -94,9 +94,9 @@ const Page = () => {
                           <th className="border text-black font-[600] border-gray-300 px-4 py-2 text-left text-sm ">
                           Hold Quantity
                           </th>
-                          <th className="border text-black font-[600] border-gray-300 px-4 py-2 text-left text-sm ">
+                          {/* <th className="border text-black font-[600] border-gray-300 px-4 py-2 text-left text-sm ">
                             Shortage
-                          </th>
+                          </th> */}
                           <th className="border text-black font-[600] border-gray-300 px-4 py-2 text-left text-sm ">
                             Wastage
                           </th>
@@ -130,9 +130,9 @@ const Page = () => {
                               <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
                                 {item?.hoildQue || 0}
                               </td>
-                              <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
+                              {/* <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
                                 {"pending"}
-                              </td>
+                              </td> */}
                               <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
                                 {item?.wastageQuantity || 0}
                               </td>
@@ -156,7 +156,7 @@ const Page = () => {
       },
     },
     {
-      title: "Total Available Quantity",
+      title: "Total Available Qty",
       key: 5,
       align: "start",
       //@ts-ignore
@@ -165,7 +165,7 @@ const Page = () => {
       },
     },
     {
-      title: "Queue Quantity",
+      title: "Queue Qty",
       key: 15,
       align: "start",
       //@ts-ignore
@@ -183,7 +183,7 @@ const Page = () => {
       },
     },
     {
-      title: "Hold Quantity",
+      title: "Hold Qty",
       key: 115,
       align: "start",
       //@ts-ignore
@@ -209,15 +209,15 @@ const Page = () => {
         return <span>{record?.stock * record?.product?.purchasePrice}</span>;
       },
     },
-    {
-      title: "Total Shortage Quantity",
-      key: 7,
-      align: "start",
-      //@ts-ignore
-      render: (text, record, index) => {
-        return <span>{"pending"}</span>;
-      },
-    },
+    // {
+    //   title: "Total Shortage Quantity",
+    //   key: 7,
+    //   align: "start",
+    //   //@ts-ignore
+    //   render: (text, record, index) => {
+    //     return <span>{"pending"}</span>;
+    //   },
+    // },
     {
       title: "Total Wastage",
       key: 7,

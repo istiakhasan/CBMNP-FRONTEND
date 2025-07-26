@@ -51,7 +51,7 @@ const OrderCart = ({
         deliveryNote: finalData?.deliveryNote,
         comments: finalData?.comments,
         locationId:finalData?.Warehouse?.value,
-        statusId:2,
+        statusId:finalData?.isHold ? 3 : 2,
         paymentMethod: finalData["paymentMethods"]?.value, 
         paymentStatus: finalData["paymentStatus"]?.value, 
         // products
@@ -132,7 +132,6 @@ const OrderCart = ({
         customer?.customerType === "NON_PROBASHI" ? customer?.address : "",
     }),
   };
-  console.log(defaultValue,"default value");
   const notSameAsBilling = {
     customerType: customer?.customerType,
     sameAsBilling: sameAsBilling,

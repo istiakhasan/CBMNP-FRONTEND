@@ -15,8 +15,12 @@ import React, { useState } from "react";
 import StatusBadge from "@/util/StatusBadge";
 import PurchaseOrderReceive from "./_component/PurchaseOrderReceive";
 import GbForm from "@/components/forms/GbForm";
+import GlobalInvoice from "@/components/GlobalInvoice";
 
 const Page = () => {
+    const [rowDto, setRowDto] = useState<any>(null);
+    // modal
+    const [openViewModal, setOpenViewModal] = useState(false);
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
   const [searchTerm, setSearchTerm] = useState("");
@@ -72,21 +76,35 @@ const Page = () => {
       key: "15",
       render: (a: any, b: any, i: any) => {
         console.log(b.status);
-        return <StatusBadge status={{ label: b?.status }} />;
+        return <span className="text-primary font-bold uppercase text-[12px]">{b?.status}</span>;
       },
     },
+    
     {
         title: "Action",
         key: "action",
+        align:"end",
         width: "80px",
         render: (text: string, record: any) => {
           return (
+            <div className="flex gap-2">
             <button onClick={()=>{
               setReceiveModal(true)
               setRowData(record)
               }} className="bg-[#8A6D4F]  text-white text-xs font-medium py-1 px-4 rounded-md shadow-md transition duration-200">
               Receive
             </button>
+
+             <span
+                onClick={() => {
+                  setOpenViewModal(true);
+                  setRowDto(record);
+                }}
+                className="bg-primary cursor-pointer  text-white text-xs font-medium py-1 px-4 rounded-md shadow-md transition duration-200"
+              >
+                View
+              </span>
+              </div>
           );
         },
       }
@@ -191,6 +209,16 @@ const Page = () => {
            <PurchaseOrderReceive rowData={rowData} setReceiveModal={setReceiveModal} setRowData={setRowData} />
             </GbForm>
           </GbModal>
+
+            <GbModal
+                      width="1300px"
+                      // clseTab={false}
+                      isModalOpen={openViewModal}
+                      openModal={() => setOpenViewModal(true)}
+                      closeModal={() => setOpenViewModal(false)}
+                    >
+                      <GlobalInvoice rowDto={rowDto} />
+                    </GbModal>
         </div>
       </div>
     </div>

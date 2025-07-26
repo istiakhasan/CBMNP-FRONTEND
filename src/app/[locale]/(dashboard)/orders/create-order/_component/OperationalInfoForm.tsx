@@ -19,7 +19,6 @@ const deliveryCharge:number = Number(watch()?.deliveryCharge?.value) || 0;
 const cartTotal:number = cart?.reduce((acc: number, item: any) => acc + (item.salePrice*item?.productQuantity || 0), 0) || 0;
 const paidAmount:number = Number(watch()?.paidAmount) || 0;
 const totalAmount:number=(cartTotal+deliveryCharge)-paidAmount
-console.log(deliveryPartner,"delivery partner");
   return (
     <div>
       {" "}
@@ -260,7 +259,7 @@ console.log(deliveryPartner,"delivery partner");
               <GbFormCheckbox name="isHold" label="Hold"  />
             </div>
             {watch()?.isHold && <div className="col-span-4 mb-4">
-              <GbFormInput name="comments" label="Hold Issue"  />
+              <GbFormInput name="onHoldReason" label="Hold Issue"  />
             </div>}
           </div>
         </div>

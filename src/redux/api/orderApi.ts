@@ -42,6 +42,14 @@ export const orderApi = baseApi.injectEndpoints({
 			}),
 			invalidatesTags: [tagTypes.order],
 		}),
+		returnOrders: build.mutation({
+			query: (arg) => ({
+				url: `/orders/return`,
+				method: "PATCH",
+				data:arg
+			}),
+			invalidatesTags: [tagTypes.order],
+		}),
 		getOrdersLogs: build.query({
 			query: (arg) => ({
 				url: `/orders/logs/${arg?.id}`,
@@ -86,5 +94,6 @@ export const {
 	useAddPaymentMutation,
 	useChangeOrderStatusMutation,
 	useGetOrdersLogsQuery,
-	useChangeHoldOrderStatusMutation
+	useChangeHoldOrderStatusMutation,
+	useReturnOrdersMutation
 } = orderApi;

@@ -33,9 +33,17 @@ import React, { useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import Invoice from "./Invoice";
 import GeneratePreviewButton from "./GeneratePreviewButton";
+import BulkChangeOrders from "./BulkChangeOrders";
 
-const ApprovedOrders = ({ refetch: countRefetch,searchTerm,warehosueIds,currierIds,rangeValue }: any) => {
+const ApprovedOrders = ({
+  refetch: countRefetch,
+  searchTerm,
+  warehosueIds,
+  currierIds,
+  rangeValue,
+}: any) => {
   // all states
+  const [statuschangedModal, setStatusChangeModal] = useState(false);
   const [loadOrdersById] = useLazyGetOrderByIdQuery();
   const [loadStockByWarehouseProduct] =
     useLazyLoadStockByProductIdAndLocationIdQuery();
@@ -44,10 +52,10 @@ const ApprovedOrders = ({ refetch: countRefetch,searchTerm,warehosueIds,currierI
   const [printModal, setPrintModal] = useState(false);
   const [selectedOrders, setSelectedOrders] = useState<any>([]);
   const [rowId, setRowId] = useState<any>(null);
-   const { data: rowData, isLoading: rowDataLoading } = useGetOrderByIdQuery({
-      id: rowId,
-    });
-  const local=useLocale()
+  const { data: rowData, isLoading: rowDataLoading } = useGetOrderByIdQuery({
+    id: rowId,
+  });
+  const local = useLocale();
   const { data: warehouseOptions } = useLoadAllWarehouseOptionsQuery(undefined);
   const [locationId, setLocationId] = useState("");
   const [openModal, setOpenModal] = useState(false);
@@ -57,7 +65,7 @@ const ApprovedOrders = ({ refetch: countRefetch,searchTerm,warehosueIds,currierI
     searchTerm,
     statusId: "2",
     locationId: warehosueIds,
-    currier:currierIds,
+    currier: currierIds,
     ...rangeValue,
   });
 
@@ -123,7 +131,7 @@ const ApprovedOrders = ({ refetch: countRefetch,searchTerm,warehosueIds,currierI
             {record?.receiverPhoneNumber}
           </span>
           <i
-             onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
+            onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
             className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[4px]"
           ></i>
         </>
@@ -269,7 +277,10 @@ const ApprovedOrders = ({ refetch: countRefetch,searchTerm,warehosueIds,currierI
     },
     {
       label: (
-        <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
+        <span
+          onClick={() => setStatusChangeModal(true)}
+          className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center"
+        >
           <span>Change Status</span>
         </span>
       ),
@@ -277,11 +288,11 @@ const ApprovedOrders = ({ refetch: countRefetch,searchTerm,warehosueIds,currierI
     },
   ];
 
-   const contentRef = useRef<HTMLDivElement | null>(null);
-  
-    const reactToPrintFn = useReactToPrint({
-      content: () => contentRef.current,
-    });
+  const contentRef = useRef<HTMLDivElement | null>(null);
+
+  const reactToPrintFn = useReactToPrint({
+    content: () => contentRef.current,
+  });
   return (
     <div className="gb_border">
       <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
@@ -337,13 +348,13 @@ const ApprovedOrders = ({ refetch: countRefetch,searchTerm,warehosueIds,currierI
           />
 
           <div>
-            {<GbDropdown state={locationId}  items={items}>
-              <button
-                className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]"
-              >
-                Action
-              </button>
-            </GbDropdown>}
+            {
+              <GbDropdown state={locationId} items={items}>
+                <button className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]">
+                  Action
+                </button>
+              </GbDropdown>
+            }
           </div>
         </div>
       </div>
@@ -363,13 +374,12 @@ const ApprovedOrders = ({ refetch: countRefetch,searchTerm,warehosueIds,currierI
         isModalOpen={openModal}
       >
         <GeneratePreviewButton
-        selectedOrders={selectedOrders}
-        loadOrdersById={loadOrdersById}
-        loadStockByWarehouseProduct={loadStockByWarehouseProduct}
-        locationId={locationId}
-        setReqPreviewData={setReqPreviewData}
-      />
-
+          selectedOrders={selectedOrders}
+          loadOrdersById={loadOrdersById}
+          loadStockByWarehouseProduct={loadStockByWarehouseProduct}
+          locationId={locationId}
+          setReqPreviewData={setReqPreviewData}
+        />
 
         <div className="responsive_order_details_view_table mt-[10px]">
           <table>
@@ -455,7 +465,7 @@ const ApprovedOrders = ({ refetch: countRefetch,searchTerm,warehosueIds,currierI
                   refetch();
                   countRefetch();
                   message.success("Requisition create successfully..");
-                  setOpenModal(false)
+                  setOpenModal(false);
                 } catch (error) {
                   console.log(error, "selected orders");
                 }
@@ -474,9 +484,24 @@ const ApprovedOrders = ({ refetch: countRefetch,searchTerm,warehosueIds,currierI
         isModalOpen={printModal}
         // clseTab={false}
       >
-       <Invoice rowData={rowData}/>
+        <Invoice rowData={rowData} />
       </GbModal>
 
+      <GbModal
+        width="600px"
+        clseTab={false}
+        isModalOpen={statuschangedModal}
+        openModal={() => setStatusChangeModal(true)}
+        closeModal={() => setStatusChangeModal(false)}
+      >
+        <GbForm submitHandler={(data: any) => console.log(data)}>
+          <BulkChangeOrders
+            status="Approved"
+            setModalOpen={setStatusChangeModal}
+            selectedOrders={selectedOrders}
+          />
+        </GbForm>
+      </GbModal>
     </div>
   );
 };
