@@ -118,6 +118,12 @@ const OrdersPage = () => {
       color: "bg-[#795548]",
     },
     {
+      id: "120",
+      name: "Partial-Return",
+      permission: "VIEW_PARTIAL_RETURN_ORDERS",
+      color: "bg-[#795548]",
+    },
+    {
       id: "10",
       name: "Returned",
       permission: "VIEW_RETURN_ORDERS",
@@ -254,6 +260,17 @@ const OrdersPage = () => {
         rangeValue={rangeValue}
         orderStatus={orderStatus}
         status={10}
+      />
+    ),
+    // Return
+    "101": (
+      <ReturnOrders
+        searchTerm={searchTerm}
+        warehosueIds={warehosueIds}
+        currierIds={partnerIds}
+        rangeValue={rangeValue}
+        orderStatus={orderStatus}
+        status={12}
       />
     ),
     "11": (
