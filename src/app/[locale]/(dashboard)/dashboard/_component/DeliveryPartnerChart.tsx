@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import ReactApexChart from "react-apexcharts";
+// import ReactApexChart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
-import { usePartnerDistributionQuery, useStatusDistributionQuery } from "@/redux/api/dashboardApi";
-
+import { usePartnerDistributionQuery } from "@/redux/api/dashboardApi";
+import dynamic from "next/dynamic";
+const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 interface OrderDataItem {
   label: string;
   count: string;

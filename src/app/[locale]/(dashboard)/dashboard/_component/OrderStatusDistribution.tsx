@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import ReactApexChart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 import { useStatusDistributionQuery } from "@/redux/api/dashboardApi";
-
+import dynamic from "next/dynamic";
+const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 interface OrderDataItem {
   label: string;
   count: string;
@@ -13,9 +13,9 @@ interface OrderDataItem {
 const DonutChart: React.FC = () => {
   const { data: statusDistribution, isLoading } =
     useStatusDistributionQuery(undefined);
-  const [series, setSeries] = useState<number[]>([]);
-  const [labels, setLabels] = useState<string[]>([]);
-  const [options, setOptions] = useState<ApexOptions>({
+    const [series, setSeries] = useState<number[]>([]);
+    const [labels, setLabels] = useState<string[]>([]);
+    const [options, setOptions] = useState<ApexOptions>({
     chart: {
       type: "donut",
     },
