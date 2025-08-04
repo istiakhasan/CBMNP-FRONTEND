@@ -21,20 +21,20 @@ import GbDropdown from "@/components/ui/dashboard/GbDropdown";
 import { useLocale } from "next-intl";
 import copyToClipboard from "@/components/ui/GbCopyToClipBoard";
 
-const HoldOrders = ({warehosueIds,currierIds,searchTerm,rangeValue}: any) => {
+const HoldOrders = ({warehosueIds,currierIds,searchTerm,rangeValue,orderStatus}: any) => {
   // all states
  const [statuschangedModal,setStatusChangeModal]=useState(false)
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
    const [selectedOrders, setSelectedOrders] = useState<any>([]);
   const { data, isLoading } = useGetAllOrdersQuery({
-    page,
+     page:searchTerm?1:page,
     limit: size,
     searchTerm,
-    statusId:"3",
     locationId:warehosueIds,
     currier:currierIds,
     ...rangeValue,
+    statusId:orderStatus?.length>0  ?( orderStatus?.includes(3) ? 3 : "112") : '3',
   });
   const local=useLocale()
   const router = useRouter();

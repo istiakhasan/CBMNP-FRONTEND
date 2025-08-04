@@ -389,6 +389,50 @@ const OrderDetails = ({ data, permission }: any) => {
           </tfoot>
         </table>
       </div>
+      <div className="mt-6 responsive_order_details_view_table return">
+        <div className="flex justify-between items-center"> 
+          <h1 className="font-semibold  text-[18px] ">Return Products</h1>
+        </div>
+
+        <table>
+          <thead>
+              <tr>
+              <th>Product Code</th>
+              <th>Product Name</th>
+              <th>Price</th>
+              <th>Return Qty</th>
+              <th>Damage Qty</th>
+              <th style={{ width: "150px" }}>Total Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              data?.productReturns?.map((rp:any,j:any)=>(
+                  <tr key={j}>
+                <td>{rp?.productId}</td>
+                {/* <td>
+                  <Image
+                    height={44}
+                    width={44}
+                    className="border"
+                    src={rp?.product?.images[0]?.url}
+                    alt=""
+                  />
+                </td> */}
+                <td>{rp?.product?.name} (  {rp?.product?.weight} {rp?.product?.unit} )</td>
+                <td>
+                  <p> {rp?.product?.salePrice}</p>
+                </td>
+                <td style={{ fontWeight: "bold" }}>{rp?.returnQuantity}</td>
+                <td style={{ fontWeight: "bold" }}>{rp?.damageQuantity}</td>
+                <td> {rp?.returnQuantity * rp?.product?.salePrice}</td>
+              </tr>
+              ))
+            }
+          </tbody>
+        </table>
+   
+      </div>
       <div className="mt-6">
         <div className="flex justify-between items-center">
           <h1 className="font-semibold  text-[18px] ">Payment History</h1>
@@ -406,7 +450,7 @@ const OrderDetails = ({ data, permission }: any) => {
       </div>
       {/* status change modal */}
       <GbModal
-        width="450px"
+        // width="450px"
         isModalOpen={openModal}
         openModal={() => setModalOpen(true)}
         closeModal={() => setModalOpen(false)}

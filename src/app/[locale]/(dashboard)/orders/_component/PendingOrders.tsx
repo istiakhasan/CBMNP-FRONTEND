@@ -38,6 +38,8 @@ const PendingOrders = ({
   warehosueIds,
   currierIds,
   rangeValue,
+  orderStatus
+
 }: any) => {
   // all states
   const [selectedOrders, setSelectedOrders] = useState<any>([]);
@@ -50,10 +52,10 @@ const PendingOrders = ({
     id: rowId,
   });
   const { data, isLoading } = useGetAllOrdersQuery({
-    page,
+     page:searchTerm?1:page,
     limit: size,
     searchTerm,
-    statusId: "1",
+    statusId:orderStatus?.length>0  ?( orderStatus?.includes(1) ? 1 : "112") : '1',
     locationId: warehosueIds,
     currier: currierIds,
     ...rangeValue,

@@ -41,6 +41,7 @@ const ApprovedOrders = ({
   warehosueIds,
   currierIds,
   rangeValue,
+  orderStatus
 }: any) => {
   // all states
   const [statuschangedModal, setStatusChangeModal] = useState(false);
@@ -60,13 +61,13 @@ const ApprovedOrders = ({
   const [locationId, setLocationId] = useState("");
   const [openModal, setOpenModal] = useState(false);
   const { data, isLoading, refetch } = useGetAllOrdersQuery({
-    page,
+    page:searchTerm?1:page,
     limit: size,
     searchTerm,
-    statusId: "2",
     locationId: warehosueIds,
     currier: currierIds,
     ...rangeValue,
+    statusId:orderStatus?.length>0  ?( orderStatus?.includes(2) ? 2 : "112") : '2',
   });
 
   const [handleCreateRequisition] = useCreateRequisitionMutation();

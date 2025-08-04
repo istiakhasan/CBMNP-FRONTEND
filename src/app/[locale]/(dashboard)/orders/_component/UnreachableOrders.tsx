@@ -15,15 +15,15 @@ import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import React, {  useState } from "react";
 
-const ReturnOrders = ({warehosueIds,searchTerm,currierIds,rangeValue}: any) => {
+const ReturnOrders = ({warehosueIds,searchTerm,currierIds,rangeValue,status,orderStatus}: any) => {
   // all states
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
   const { data, isLoading } = useGetAllOrdersQuery({
-    page,
+     page:searchTerm?1:page,
     limit: size,
     searchTerm,
-    statusId:"10",
+    statusId:orderStatus?.length>0  ?( orderStatus?.includes(status) ? status : "112") : status,
     locationId:warehosueIds,
     currier:currierIds,
     ...rangeValue,

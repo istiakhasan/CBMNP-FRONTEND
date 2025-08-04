@@ -6,7 +6,6 @@ import { useCreateUserMutation } from "@/redux/api/usersApi";
 import { createUserSchema } from "@/schema/schema";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { message } from "antd";
-import axios from "axios";
 import React from "react";
 
 const AddUsers = ({setOpenAddUserModal}:any) => {

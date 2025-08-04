@@ -30,7 +30,7 @@ import ShipmentTable from "./ShipmentTable";
 import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
 import { useGetDeliveryPartnerOptionsQuery } from "@/redux/api/partnerApi";
 const { RangePicker } = DatePicker;
-const InTransitOrders = ({searchTerm,warehosueIds,currierIds,rangeValue,productIds}: any) => {
+const InTransitOrders = ({searchTerm,warehosueIds,currierIds,rangeValue,productIds,orderStatus}: any) => {
   const [openModal, setOpenModal] = useState(false);
   const [location, setLocationId] = useState<any>([]);
   const [selecteddeliveryPartner, setSelectedDeliveryPartner] =
@@ -44,10 +44,10 @@ const InTransitOrders = ({searchTerm,warehosueIds,currierIds,rangeValue,productI
   const { data: deliveryPartnerOptions, isLoading: deliveryPartnerLoading } =
     useGetDeliveryPartnerOptionsQuery(undefined);
   const { data, isLoading } = useGetAllOrdersQuery({
-    page,
+     page:searchTerm?1:page,
     limit: size,
     searchTerm,
-    statusId: "7",
+    statusId:orderStatus?.length>0  ?( orderStatus?.includes(7) ? 7 : "112") : '7',
     locationId: warehosueIds,
     currier: currierIds,
     ...rangeValue,

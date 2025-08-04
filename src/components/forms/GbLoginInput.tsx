@@ -1,91 +1,76 @@
 "use client";
 
-import { getErrorMessageByPropertyName } from "@/util/schema-validator";
-import { Input } from "antd";
+import { useState } from "react";
 import { useFormContext, Controller } from "react-hook-form";
+import { getErrorMessageByPropertyName } from "@/util/schema-validator";
 
-interface IInput {
+interface CustomLoginInputProps {
   name: string;
-  type?: string;
-  size?: "large" | "small";
-  value?: string | string[] | undefined;
-  id?: string;
+  label: string;
   placeholder?: string;
-  validation?: object;
-  label?: string;
+  type?: "text" | "password";
   required?: boolean;
 }
 
-const GbLoginInput = ({
+const CustomLoginInput = ({
   name,
-  type,
-  size = "large",
-  value,
-  id,
-  placeholder,
-  validation,
   label,
-  required,
-}: IInput) => {
+  placeholder = "",
+  type = "text",
+  required = false,
+}: CustomLoginInputProps) => {
   const {
     control,
     formState: { errors },
   } = useFormContext();
+  const [showPassword, setShowPassword] = useState(false);
 
   const errorMessage = getErrorMessageByPropertyName(errors, name);
-  const modifyPlaceholder=errorMessage?errorMessage:placeholder
+  const inputType = type === "password" && showPassword ? "text" : type;
+
   return (
-    <>
-      {required ? (
-        <span
-          style={{
-            color: "red",
-          }}
-        >
-          *
-        </span>
-      ) : null}
-      <div className="flex justify-between">
-        {label ? <span className="mb-2">{label}</span> : null}
-        {errorMessage ? <span className="text-[#EB2B2B] text-[12px]">{errorMessage}</span> : null}
-      </div>
-      <Controller
-        control={control}
-        name={name}
-        render={({ field }) =>
-          type === "password" ? (
-            <Input.Password
-              type={type}
-              size={size}
-              className="login_input"
-              style={
-                errorMessage?{ borderRadius: "4px", padding: "18px",background: "#FADADA",fontSize:"16px"}:
-                { borderRadius: "4px", padding: "18px",fontSize:"16px",background:"#f6f6f6",border:"none" }
-              }
-              placeholder={modifyPlaceholder}
+    <div className="mb-6">
+      <label htmlFor={name} className="block mb-1 text-sm font-medium text-gray-700">
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
+      </label>
+
+      <div className="relative">
+        <Controller
+          name={name}
+          control={control}
+          render={({ field }) => (
+            <input
               {...field}
-              value={value ? value : field.value}
-              autoComplete="off" 
-            />
-          ) : (
-            <Input
-            className="login_input"
+              id={name}
+              type={inputType}
               autoComplete="off"
-              type={type}
-              size={size}
-              style={
-                errorMessage?{ borderRadius: "4px", padding: "18px",background: "#FADADA",fontSize:"16px" }:
-                { borderRadius: "4px", padding: "18px",fontSize:"16px",background:"#f6f6f6",border:"none" }
-              }
-              placeholder={modifyPlaceholder}
-              {...field}
-              value={value ? value : field.value}
+              placeholder={placeholder}
+              className={`w-full px-4 py-3  rounded-md border transition duration-200 focus:outline-none focus:ring-2 ${
+                errorMessage
+                  ? "border-red-500 bg-red-50 focus:ring-red-400"
+                  : "border-gray-300 bg-gray-50 focus:ring-[#248095]"
+              }`}
             />
-          )
-        }
-      />
-    </>
+          )}
+        />
+
+        {type === "password" && (
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 focus:outline-none"
+          >
+            {showPassword ? "Hide" : "Show"}
+          </button>
+        )}
+      </div>
+
+      {errorMessage && (
+        <p className="text-xs text-red-600 mt-1">{errorMessage}</p>
+      )}
+    </div>
   );
 };
 
-export default GbLoginInput;
+export default CustomLoginInput;

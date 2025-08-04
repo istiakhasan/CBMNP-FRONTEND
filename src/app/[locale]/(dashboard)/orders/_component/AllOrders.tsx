@@ -16,17 +16,18 @@ import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import React, {  useState } from "react";
 
-const AllOrders = ({searchTerm,warehosueIds,currierIds,rangeValue}: any) => {
+const AllOrders = ({searchTerm,warehosueIds,currierIds,rangeValue,orderStatus}: any) => {
   // all states
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
   const { data, isLoading } = useGetAllOrdersQuery({
-    page,
+    page:searchTerm?1:page,
     limit: size,
     searchTerm,
     locationId:warehosueIds,
     currier:currierIds,
     ...rangeValue,
+    statusId:orderStatus,
   });
   const local=useLocale()
   const router = useRouter();

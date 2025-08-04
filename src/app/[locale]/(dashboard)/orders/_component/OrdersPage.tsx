@@ -25,7 +25,7 @@ import OrderSearch from "@/components/OrderSearch";
 import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
 import { useGetDeliveryPartnerOptionsQuery } from "@/redux/api/partnerApi";
 import dayjs from "dayjs";
-import {  useGetAllProductQuery } from "@/redux/api/productApi";
+import { useGetAllProductQuery } from "@/redux/api/productApi";
 import ReturnOrders from "./UnreachableOrders";
 const { RangePicker } = DatePicker;
 const OrdersPage = () => {
@@ -42,9 +42,9 @@ const OrdersPage = () => {
   const { data: statusOptions, isLoading } = useGetAllStatusQuery({
     label: "all",
   });
-  const {data:productsData}=useGetAllProductQuery({
-    limit:200,
-  })
+  const { data: productsData } = useGetAllProductQuery({
+    limit: 200,
+  });
   const { data: warehouseOptions, isLoading: warehosueLoading } =
     useLoadAllWarehouseOptionsQuery(undefined);
   const { data: deliveryPartnerOptions, isLoading: deliveryPartnerLoading } =
@@ -61,11 +61,13 @@ const OrdersPage = () => {
     statusId: orderStatus,
     locationId: warehosueIds,
     currier: partnerIds,
-    ...rangeValue
+    ...rangeValue,
   });
+
+
   const permission = userData?.permission?.map((item: any) => item?.label);
 
-  const allTabs = [
+  const allTabs:any = [
     {
       id: "1",
       name: "Pending",
@@ -108,7 +110,13 @@ const OrdersPage = () => {
       permission: "VIEW_DELIVERED_ORDERS",
       color: "bg-[#009688]",
     },
-    // it't permission title should be changed 
+    // it't permission title should be changed
+    {
+      id: "110",
+      name: "Pending-Return",
+      permission: "VIEW_PENDING_RETURN_ORDERS",
+      color: "bg-[#795548]",
+    },
     {
       id: "10",
       name: "Returned",
@@ -130,16 +138,24 @@ const OrdersPage = () => {
   ];
 
   const tabs = allTabs
-    .filter((tab) => permission?.includes(tab.permission))
-    .map((item) => ({
+    .filter((tab:any) => permission?.includes(tab.permission))
+  
+    .map((item:any) => ({
       ...item,
       //@ts-ignore
       count:
         countData?.data?.find(
           (od: any) => od?.label?.toLowerCase() === item?.name?.toLowerCase()
         )?.count || "0",
-    }));
+      statusId:
+        countData?.data?.find(
+          (od: any) => od?.label?.toLowerCase() === item?.name?.toLowerCase()
+        )?.id || "0",
+    }))
 
+
+   
+  console.log(orderStatus,tabs);
   const components: { [key: string]: any } = {
     "1": (
       <PendingOrders
@@ -148,6 +164,7 @@ const OrdersPage = () => {
         warehosueIds={warehosueIds}
         currierIds={partnerIds}
         rangeValue={rangeValue}
+        orderStatus={orderStatus}
       />
     ),
     "3": (
@@ -158,6 +175,7 @@ const OrdersPage = () => {
         warehosueIds={warehosueIds}
         currierIds={partnerIds}
         rangeValue={rangeValue}
+        orderStatus={orderStatus}
       />
     ),
     "4": (
@@ -166,6 +184,7 @@ const OrdersPage = () => {
         warehosueIds={warehosueIds}
         currierIds={partnerIds}
         rangeValue={rangeValue}
+        orderStatus={orderStatus}
       />
     ),
     "9": (
@@ -175,6 +194,7 @@ const OrdersPage = () => {
         warehosueIds={warehosueIds}
         currierIds={partnerIds}
         rangeValue={rangeValue}
+        orderStatus={orderStatus}
       />
     ),
     "5": (
@@ -183,6 +203,7 @@ const OrdersPage = () => {
         warehosueIds={warehosueIds}
         currierIds={partnerIds}
         rangeValue={rangeValue}
+        orderStatus={orderStatus}
       />
     ),
     "6": (
@@ -191,6 +212,7 @@ const OrdersPage = () => {
         searchTerm={searchTerm}
         warehosueIds={warehosueIds}
         currierIds={partnerIds}
+        orderStatus={orderStatus}
       />
     ),
     "7": (
@@ -200,6 +222,7 @@ const OrdersPage = () => {
         currierIds={partnerIds}
         rangeValue={rangeValue}
         productIds={productIds}
+        orderStatus={orderStatus}
       />
     ),
     "8": (
@@ -208,14 +231,29 @@ const OrdersPage = () => {
         warehosueIds={warehosueIds}
         currierIds={partnerIds}
         rangeValue={rangeValue}
+        orderStatus={orderStatus}
       />
     ),
+    // pending return
+    "110": (
+      <ReturnOrders
+        searchTerm={searchTerm}
+        warehosueIds={warehosueIds}
+        currierIds={partnerIds}
+        rangeValue={rangeValue}
+        orderStatus={orderStatus}
+        status={11}
+      />
+    ),
+    // Return
     "10": (
       <ReturnOrders
         searchTerm={searchTerm}
         warehosueIds={warehosueIds}
         currierIds={partnerIds}
         rangeValue={rangeValue}
+        orderStatus={orderStatus}
+        status={10}
       />
     ),
     "11": (
@@ -224,12 +262,12 @@ const OrdersPage = () => {
         warehosueIds={warehosueIds}
         currierIds={partnerIds}
         rangeValue={rangeValue}
+        orderStatus={orderStatus}
       />
     ),
   };
 
 
-  console.log(productsData,"product data");
   return (
     <div>
       <GbHeader title="Orders" />
@@ -333,10 +371,7 @@ const OrdersPage = () => {
                                 value={item?.id}
                                 onChange={(e) => {
                                   if (e.target.checked) {
-                                    setProductsIds([
-                                      ...productIds,
-                                      item?.id,
-                                    ]);
+                                    setProductsIds([...productIds, item?.id]);
                                   } else {
                                     setProductsIds(
                                       productIds?.filter(
@@ -439,7 +474,7 @@ const OrdersPage = () => {
               </div>
             )}
             <div className="flex gap-[20px] bg-white my-2">
-              {tabs.map((tab) => (
+              {tabs.map((tab:any) => (
                 <p
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}

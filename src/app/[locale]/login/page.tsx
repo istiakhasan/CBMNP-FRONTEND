@@ -53,7 +53,7 @@ const Page = () => {
           resolver={yupResolver(loginSchema)}
         >
           <h1 className="text-[24px] mb-[30px] text-center  uppercase font-serif font-bold">
-            ERP
+            GB-SME
           </h1>
           <div className="mb-[20px]">
             <GbLoginInput
