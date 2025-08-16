@@ -22,7 +22,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
       const pathSegments = pathname.split("/").filter(Boolean);
       const currentSegment = pathSegments[1]; // For example: /en/orders => "orders"
-
       if (userRole !== "admin" && !permissions.includes(capitalize(currentSegment))) {
         router.replace(`/${local}/not-authorized`);
       }

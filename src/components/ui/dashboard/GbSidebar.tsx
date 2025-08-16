@@ -134,7 +134,7 @@ const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
     },
      {
       href: '/pos',
-      title: 'POS',
+      title: 'Pos',
       icon: 'ri-settings-2-line',
     },
   ]
