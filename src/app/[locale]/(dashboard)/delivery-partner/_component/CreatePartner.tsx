@@ -27,6 +27,10 @@ const CreatePartner = ({setPartnerCreateModal}:{setPartnerCreateModal:any}) => {
               delete payload["secret_key"];
               delete payload["api_key"];
             }
+            if (partnerName?.value === "Other") {
+              payload["partnerName"]=rest?.other_partnerName
+              delete payload["other_partnerName"];
+            }
 
             const res = await createPartner(payload).unwrap();
             if(res?.message){
@@ -34,7 +38,6 @@ const CreatePartner = ({setPartnerCreateModal}:{setPartnerCreateModal:any}) => {
                 setPartnerCreateModal(false)
                 reset()
             }
-            console.log(res);
           } catch (error:any) {
             if(error?.data?.errorMessages){
                  error?.data?.errorMessages?.forEach((item:any)=>{
@@ -61,7 +64,7 @@ const FormBody = () => {
   return (
     <>
       <div className="mb-2">
-        <GbFormSelect
+        <GbFormSelect 
           label="Partner"
           name="partnerName"
           options={[
@@ -77,9 +80,20 @@ const FormBody = () => {
               label: "Express",
               value: "Express",
             },
+            {
+              label: "Other",
+              value: "Other",
+            },
           ]}
         />
       </div>
+          {watch()?.partnerName?.value === "Other" && (
+        <>
+          <div className="mb-2">
+            <GbFormInput name="other_partnerName" label="Name" />
+          </div>
+        </>
+      )}
       <div className="mb-2">
         <GbFormInput name="phone" label="phone" />
       </div>

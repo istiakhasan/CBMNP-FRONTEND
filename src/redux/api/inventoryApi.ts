@@ -19,6 +19,14 @@ export const inventoryApi = baseApi.injectEndpoints({
       }),
       providesTags: [tagTypes.inventory],
     }),
+    warehouseWiseProductStock: build.query({
+      query: (arg) => ({
+        url: "/inventory/warehouse-wise-stock",
+        method: "GET",
+        params: arg
+      }),
+      providesTags: [tagTypes.inventory],
+    }),
     loadStockByProductIdAndLocationId: build.query({
       query: (arg) => ({
         url: "/inventory/getbywarehouseproduct",
@@ -59,5 +67,6 @@ export const {
     useLoadStockByProductidQuery,
     useLoadStockByProductIdAndLocationIdQuery,
     useLazyLoadStockByProductIdAndLocationIdQuery,
-    useUpdateInventoryMutation
+    useUpdateInventoryMutation,
+    useWarehouseWiseProductStockQuery
 } = inventoryApi;

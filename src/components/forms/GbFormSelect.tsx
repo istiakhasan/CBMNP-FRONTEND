@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { getErrorMessageByPropertyName } from "@/util/schema-validator";
 import { ConfigProvider, Select } from "antd";
 import { useFormContext, Controller } from "react-hook-form";
@@ -17,9 +17,9 @@ type SelectFieldProps = {
   label?: string;
   defaultValue?: SelectOptions;
   handleChange?: (option: SelectOptions | SelectOptions[] | undefined) => void;
-  multiple?:any,
-  disabled?:any
-  cl?:any
+  multiple?: any;
+  disabled?: any;
+  cl?: any;
 };
 
 const GbFormSelect = ({
@@ -33,51 +33,56 @@ const GbFormSelect = ({
   defaultValue,
   handleChange,
   multiple,
-  cl
+  cl,
 }: SelectFieldProps) => {
-  const { control ,formState:{errors}} = useFormContext();
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext();
 
-	const handleSelectChange = (
-		selectedOption: SelectOptions | SelectOptions[]
-	) => {
-		if (handleChange) {
-			handleChange(selectedOption);
-		}
-	};
-	const errorMessage = getErrorMessageByPropertyName(errors, name);
-	return (
-		<>
-			<Controller
-				control={control}
-				name={name}
-				render={({ field: { onChange, value } }) => (
-					// <div>
-					<div style={{padding:"5px 0"}} className={`floating-label-input px-0 ${errorMessage?'err':''}`}>
-						 <label className="text-[#999] px-[15px] text-[12px]">{label}</label>
-					<Select 
-					 dropdownStyle={{
-						borderRadius:"0px"
-					 }}
-					// showSearch
-					disabled={disabled}
-					className={`${errorMessage && "custom_select"} custom_select`}
-					
-					onChange={(selectedValue, selectedOption:any) => {
-						onChange(selectedOption);
-						handleSelectChange(selectedOption);
-					}}
-					mode={multiple && "multiple"}
-					size={size}
-					options={options}
-					value={value}
-					style={{ width: "100%"}}
-					placeholder={placeholder}
-					/>
-					</div>
-				)}
-			/>
-		</>
-	);
+  const handleSelectChange = (
+    selectedOption: SelectOptions | SelectOptions[]
+  ) => {
+    if (handleChange) {
+      handleChange(selectedOption);
+    }
+  };
+  const errorMessage = getErrorMessageByPropertyName(errors, name);
+  return (
+    <>
+      <Controller
+        control={control}
+        name={name}
+        render={({ field: { onChange, value } }) => (
+          // <div>
+          <div
+            style={{ padding: "5px 0" }}
+            className={`floating-label-input px-0 ${errorMessage ? "err" : ""}`}
+          >
+            <label className="text-[#555] px-[15px] text-[12px]">{label}</label>
+            <Select
+              dropdownStyle={{
+                borderRadius: "0px",
+              }}
+              showSearch
+              disabled={disabled}
+              className={`${errorMessage && "custom_select"} custom_select`}
+              onChange={(selectedValue, selectedOption: any) => {
+                onChange(selectedOption);
+                handleSelectChange(selectedOption);
+              }}
+              mode={multiple && "multiple"}
+              size={size}
+              options={options}
+              value={value}
+              style={{ width: "100%" }}
+              placeholder={placeholder}
+            />
+          </div>
+        )}
+      />
+    </>
+  );
 };
 
 export default GbFormSelect;

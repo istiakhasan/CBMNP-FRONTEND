@@ -7,7 +7,7 @@ import { useGetAllProductQuery } from "@/redux/api/productApi";
 import Select from "react-select";
 import { Input, message } from "antd";
 import { customStyles } from "@/util/commonUtil";
-import { useGetAllSupplierQuery } from "@/redux/api/supplierApi";
+import { useGetAllSupplierOptionsQuery } from "@/redux/api/supplierApi";
 import { useCreateProcurementMutation } from "@/redux/api/procurementApi";
 import GbModal from "@/components/ui/GbModal";
 import SupplierForm from "./SupplierForm";
@@ -24,7 +24,7 @@ const CreatePurchaseOrder = () => {
     limit: "200",
   });
   const { data: supplier, isLoading: supplierLoading } =
-    useGetAllSupplierQuery(undefined);
+    useGetAllSupplierOptionsQuery(undefined);
   const supplierList = supplier?.data?.map((item: any) => {
     return {
       label: item?.company,

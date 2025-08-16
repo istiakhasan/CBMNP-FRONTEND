@@ -3,9 +3,17 @@ import { baseApi } from "./baseApi";
 
 export const supplierApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    getAllSupplier: build.query({
+    getAllSupplierOptions: build.query({
       query: (arg) => ({
         url: "/supplier/options",
+        method: "GET",
+        params:arg
+      }),
+      providesTags: [tagTypes.supplier],
+    }),
+    getAllSupplier: build.query({
+      query: (arg) => ({
+        url: "/supplier/get-all",
         method: "GET",
         params:arg
       }),
@@ -19,10 +27,20 @@ export const supplierApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [tagTypes.supplier]
     }),
+    updateSupplier: build.mutation({
+      query: (data) => ({
+        url: `/supplier/${data?.id}`,
+        method: "PATCH",
+        data:data?.data
+      }),
+      invalidatesTags: [tagTypes.supplier]
+    }),
   }),
 });
 
 export const {
- useGetAllSupplierQuery,
-useCreateSupplierMutation
+ useGetAllSupplierOptionsQuery,
+useCreateSupplierMutation,
+useUpdateSupplierMutation,
+useGetAllSupplierQuery
 } = supplierApi;

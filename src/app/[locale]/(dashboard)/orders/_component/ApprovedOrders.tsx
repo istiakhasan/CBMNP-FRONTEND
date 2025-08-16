@@ -64,7 +64,7 @@ const ApprovedOrders = ({
     page:searchTerm?1:page,
     limit: size,
     searchTerm,
-    locationId: warehosueIds,
+    locationId:locationId || warehosueIds,
     currier: currierIds,
     ...rangeValue,
     statusId:orderStatus?.length>0  ?( orderStatus?.includes(2) ? 2 : "112") : '2',
@@ -289,11 +289,6 @@ const ApprovedOrders = ({
     },
   ];
 
-  const contentRef = useRef<HTMLDivElement | null>(null);
-
-  const reactToPrintFn = useReactToPrint({
-    content: () => contentRef.current,
-  });
   return (
     <div className="gb_border">
       <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
@@ -332,6 +327,7 @@ const ApprovedOrders = ({
           </Popover>
           <Select
             size={"middle"}
+            placeholder='Select Warehouse'
             onChange={(e) => setLocationId(e)}
             style={{ width: 200, height: "36px", borderRadius: "0px" }}
             options={warehouseOptions?.data}

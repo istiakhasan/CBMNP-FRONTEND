@@ -101,75 +101,89 @@ export const loginSchema = yup.object().shape({
 });
 
 export const userCreateSchema = yup.object().shape({
-  employee: yup.object().shape({
-    employeeId: yup.string().required("Employee Id is required"),
-    name: yup.string().required("Employee Name is required"),
-    firstName: yup.string().required("FirstName Name is required"),
-    lastName: yup.string().required("Last Name is required")
-  }).required('employee required'),
+  employee: yup
+    .object()
+    .shape({
+      employeeId: yup.string().required("Employee Id is required"),
+      name: yup.string().required("Employee Name is required"),
+      firstName: yup.string().required("FirstName Name is required"),
+      lastName: yup.string().required("Last Name is required"),
+    })
+    .required("employee required"),
   department: yup.object().required("Department is required"),
 });
 export const createSubscriberSchema = yup.object().shape({
-  name: yup.string()
-    .required('Name is required')
-    .matches(/^[A-Za-z\s]+$/, 'Name should contain only letters'),
-  phoneNumber: yup.string().required('Phone number is required')
-  .matches(/^[0-9]+$/, 'Phone number must contain only digits')
-  .test('len', 'Number must be exactly 11 digits', val => val ? val.length === 11 : false)
-  ,
-  division: yup.object().required('Division is required'),
-  district: yup.object().required('District is required'),
-  thana: yup.object().required('Thana is required'),
-  profession: yup.object().required('Profession is required'),
-  maritalStetus: yup.object().required('Marital Status is required'),
-  familyMember: yup.object().required('Family Member is required'),
-  buildingAddress: yup.string().required('Building Address is required'),
-  shopingCalendar: yup.string().required('Shoping Calendar Is Required'),
-  email: yup.string()
-    .email('Must be a valid email address')
-    .notRequired(),
+  name: yup
+    .string()
+    .required("Name is required")
+    .matches(/^[A-Za-z\s]+$/, "Name should contain only letters"),
+  phoneNumber: yup
+    .string()
+    .required("Phone number is required")
+    .matches(/^[0-9]+$/, "Phone number must contain only digits")
+    .test("len", "Number must be exactly 11 digits", (val) =>
+      val ? val.length === 11 : false
+    ),
+  division: yup.object().required("Division is required"),
+  district: yup.object().required("District is required"),
+  thana: yup.object().required("Thana is required"),
+  profession: yup.object().required("Profession is required"),
+  maritalStetus: yup.object().required("Marital Status is required"),
+  familyMember: yup.object().required("Family Member is required"),
+  buildingAddress: yup.string().required("Building Address is required"),
+  shopingCalendar: yup.string().required("Shoping Calendar Is Required"),
+  email: yup.string().email("Must be a valid email address").notRequired(),
 });
 
 export const subscriberOrderSubmittionSchema = yup.object().shape({
-  orderNumber: yup.string().required('Order Number  is required'),
-  orderDate: yup.string().required('Order date  is required'),
+  orderNumber: yup.string().required("Order Number  is required"),
+  orderDate: yup.string().required("Order date  is required"),
 });
-
-
 
 export const createCustomerSchema = yup.object().shape({
   customerName: yup.string().required(),
-  customerPhoneNumber: yup.string().required('Phone number is required'),
+  customerPhoneNumber: yup.string().required("Phone number is required"),
   customerType: yup
     .object()
     .shape({
-      label: yup.string().required('Customer type label is required'),
-      value: yup.string().required('Customer type value is required'),
+      label: yup.string().required("Customer type label is required"),
+      value: yup.string().required("Customer type value is required"),
     })
-    .test('customerType-required', 'Customer type is required', (value) => !!value && !!value.label && !!value.value),
+    .test(
+      "customerType-required",
+      "Customer type is required",
+      (value) => !!value && !!value.label && !!value.value
+    ),
   address: yup.string().required(),
-  division: yup.object().when('customerType', (customerType:any, schema) => {
-    if (customerType[0].value === 'NON_PROBASHI') {
-      return schema.required('Division is required for NON_PROBASHI customer type');
+  division: yup.object().when("customerType", (customerType: any, schema) => {
+    if (customerType[0].value === "NON_PROBASHI") {
+      return schema.required(
+        "Division is required for NON_PROBASHI customer type"
+      );
     }
     return schema;
   }),
-  district: yup.object().when('customerType', (customerType:any, schema) => {
-    if (customerType[0].value === 'NON_PROBASHI') {
-      return schema.required('Division is required for NON_PROBASHI customer type');
+  district: yup.object().when("customerType", (customerType: any, schema) => {
+    if (customerType[0].value === "NON_PROBASHI") {
+      return schema.required(
+        "Division is required for NON_PROBASHI customer type"
+      );
     }
     return schema;
   }),
-  thana: yup.object().when('customerType', (customerType:any, schema) => {
-    if (customerType[0].value === 'NON_PROBASHI') {
-      return schema.required('Division is required for NON_PROBASHI customer type');
+  thana: yup.object().when("customerType", (customerType: any, schema) => {
+    if (customerType[0].value === "NON_PROBASHI") {
+      return schema.required(
+        "Division is required for NON_PROBASHI customer type"
+      );
     }
     return schema;
   }),
-  country: yup.object().when('customerType', (customerType:any, schema) => {
-
-    if (customerType[0].value === 'PROBASHI') {
-      return schema.required('Division is required for NON_PROBASHI customer type');
+  country: yup.object().when("customerType", (customerType: any, schema) => {
+    if (customerType[0].value === "PROBASHI") {
+      return schema.required(
+        "Division is required for NON_PROBASHI customer type"
+      );
     }
     return schema;
   }),
@@ -177,58 +191,118 @@ export const createCustomerSchema = yup.object().shape({
 export const createWarehouseSchema = yup.object().shape({
   name: yup.string().required(),
   contactPerson: yup.string().required(),
-  phone: yup.string().required('Phone number is required'),
-  location: yup.string().required('Phone number is required')
+  phone: yup.string().required("Phone number is required"),
+  location: yup.string().required("Phone number is required"),
 });
 export const createUserSchema = yup.object().shape({
   name: yup.string().required(),
   internalId: yup.string().required(),
   email: yup.string().required(),
-  phone: yup.string().required('Phone number is required'),
-  address: yup.string().required('Phone number is required'),
-  password: yup.string().required('Phone number is required'),
-  role: yup.object().required('Phone number is required'),
+  phone: yup.string().required("Phone number is required"),
+  address: yup.string().required("Phone number is required"),
+  password: yup.string().required("Phone number is required"),
+  role: yup.object().required("Phone number is required"),
 });
 export const updateUserSchema = yup.object().shape({
   name: yup.string().required(),
   internalId: yup.string().required(),
   email: yup.string().required(),
-  phone: yup.string().required('Phone number is required'),
-  address: yup.string().required('Phone number is required'),
-  role: yup.object().required('Phone number is required'),
+  phone: yup.string().required("Phone number is required"),
+  address: yup.string().required("Phone number is required"),
+  role: yup.object().required("Phone number is required"),
 });
 export const createCategorySchema = yup.object().shape({
   label: yup.string().required(),
 });
 
 export const receiverFormSchema = yup.object().shape({
-  receiverName: yup.string().required('Order source is required'),
-  receiverPhoneNumber: yup.string().required('Order type is required'),
-  shippingAddressTextArea: yup.string().required('Payment method  is required'),
-  shippingAddressDivision: yup.object().required('Payment method  is required'),
-  shippingAddressDistrict: yup.object().required('Payment method  is required'),
-  shippingAddressThana: yup.object().required('Payment method  is required'),
+  receiverName: yup.string().required("Order source is required"),
+  receiverPhoneNumber: yup.string().required("Order type is required"),
+  shippingAddressTextArea: yup.string().required("Payment method  is required"),
+  shippingAddressDivision: yup.object().required("Payment method  is required"),
+  shippingAddressDistrict: yup.object().required("Payment method  is required"),
+  shippingAddressThana: yup.object().required("Payment method  is required"),
 });
-
-
 
 export const createPartnerSchema = yup.object().shape({
   partnerName: yup.object().required(),
-  phone: yup.string().required('Phone number is required'),
-  contactPerson: yup.string().required('Phone number is required'),
+  phone: yup.string().required("Phone number is required"),
+  contactPerson: yup.string().required("Phone number is required"),
 
-  api_key: yup.string().when('partnerName', (customerType:any, schema) => {
-    if (customerType[0].value === 'SteadFast') {
-      return schema.required('Division is required for NON_PROBASHI customer type');
+  api_key: yup.string().when("partnerName", (customerType: any, schema) => {
+    if (customerType[0]?.value === "SteadFast") {
+      return schema.required(
+        "Division is required for NON_PROBASHI customer type"
+      );
     }
     return schema;
   }),
-  secret_key: yup.string().when('partnerName', (customerType:any, schema) => {
-    if (customerType[0].value === 'SteadFast') {
-      return schema.required('Division is required for NON_PROBASHI customer type');
+  secret_key: yup.string().when("partnerName", (customerType: any, schema) => {
+    if (customerType[0]?.value === "SteadFast") {
+      return schema.required(
+        "Division is required for NON_PROBASHI customer type"
+      );
     }
     return schema;
   }),
+  other_partnerName: yup
+    .string()
+    .when("partnerName", (customerType: any, schema) => {
+      if (customerType[0]?.value === "Other") {
+        return schema.required(
+          "Division is required for NON_PROBASHI customer type"
+        );
+      }
+      return schema;
+    }),
+});
 
- 
+export const supplierValidationSchema = yup.object().shape({
+  company: yup
+    .string()
+    .required("Company name is required")
+    .max(150, "Company name is too long"),
+
+  contactPerson: yup
+    .string()
+    .required("Contact person is required")
+    .max(100, "Contact person name is too long"),
+
+  phone: yup
+    .string()
+    .required("Phone number is required")
+    .matches(
+      /^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]*$/,
+      "Phone number is not valid"
+    ),
+
+  email: yup
+    .string()
+    .required("Email is required")
+    .email("Invalid email address"),
+
+  address: yup.string().max(255, "Address is too long").nullable(),
+
+  city: yup.string().max(100, "City name is too long").nullable(),
+
+  country: yup.string().max(100, "Country name is too long").nullable(),
+
+  postalCode: yup.string().max(20, "Postal code is too long").nullable(),
+
+  website: yup.string().url("Website must be a valid URL").nullable(),
+
+  taxId: yup.string().max(50, "Tax ID is too long").nullable(),
+
+  bankName: yup.string().max(100, "Bank name is too long").nullable(),
+
+  bankAccountNumber: yup
+    .string()
+    .max(50, "Bank account number is too long")
+    .nullable(),
+
+  paymentTerms: yup.string().max(100, "Payment terms is too long").nullable(),
+
+  organizationId: yup.string().nullable(),
+
+  isActive: yup.boolean().nullable(),
 });

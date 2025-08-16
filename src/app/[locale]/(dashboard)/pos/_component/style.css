@@ -1,0 +1,155 @@
+aside.product-order-list .order-head {
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+.pos-five aside .card {
+  margin-bottom: 20px;
+}
+
+.pos-five aside .order-head {
+  border-bottom: 1px dashed #e6eaed;
+  border-radius: 0;
+  padding: 0 0 20px;
+}
+
+aside.product-order-list .order-head {
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+
+.select2-container .select2-selection--single .select2-selection__rendered {
+  display: block;
+  padding-left: 8px;
+  padding-right: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn.btn-teal {
+  background-color: #0e9384 !important;
+  border: 1px solid #0e9384 !important;
+  color: #ffffff;
+  box-shadow: 0 4px 20px rgba(14, 147, 132, 0.15);
+}
+
+.btn-icon {
+  width: 2.313rem;
+  height: 2.313rem;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.clear-icon {
+  background: #ffede9;
+  padding: 5px 8px;
+  border-radius: 8px;
+  color: #ff0000;
+}
+
+.text-gray-9 {
+  color: #212b36 !important;
+}
+
+.fs-12 {
+  font-size: 0.75rem;
+}
+
+.badge {
+  padding: 0.35rem 0.45rem;
+  text-transform: capitalize;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  border-radius: 5px;
+}
+
+.product-wrap .product-list {
+  border: 1px solid #e6eaed;
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pos_table table {
+  width: 100%;
+}
+.pos_table table th {
+  text-align: start;
+  font-size: 12px;
+}
+.pos_table table td {
+  color: #646b72 !important;
+  font-size: 12px;
+  padding: 5px 0;
+}
+.pos_table table {
+}
+
+aside.product-order-list .payment-method .methods .payment-item {
+  -webkit-transition: all 0.5s ease;
+  -ms-transition: all 0.5s ease;
+  transition: all 0.5s ease;
+  padding: 10px 15px;
+  text-align: center;
+  display: block;
+  font-size: 15px;
+  color: #092c4c;
+  border-radius: 10px;
+  border: 1px solid #e6eaed;
+}
+
+.pos-body .info h6 {
+  margin: 10px 0;
+  font-weight: 700;
+}
+.pos-body  p {
+ font-size: 12px;
+}
+.invoice-user-name{
+    font-size: 12px;
+}
+
+.pos-body h6 {
+  font-size: 16px;
+}
+.pos-body {
+  padding: 30px;
+  color: #646b72;
+}
+
+.pos-body table tbody tr:first-child td {
+  padding-top: 10px;
+}
+.pos-body table tbody  td {
+  font-size: 12px;
+}
+
+.pos-body table thead th {
+  color: #212b36;
+  font-weight: 700;
+  width: auto;
+  min-width: auto;
+  padding: 10px 5px;
+  border-top: 1px dashed #e6eaed;
+  border-bottom: 1px dashed #e6eaed;
+  text-align: start;
+}
+.pos-body table {
+  width: 100%;
+}
+
+.pos-body table tbody tr table tr:last-child td {
+  font-weight: 700;
+  font-size: 18px;
+  color: #092c4c;
+}
+
+.pos-body .tax-invoice h6 {
+  margin: 10px 0;
+  font-weight: 700;
+  position: relative;
+}

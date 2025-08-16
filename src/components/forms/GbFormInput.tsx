@@ -44,7 +44,7 @@ const GbFormInput = ({
     <>
       <div className={`floating-label-input ${errorMessage?'err':''}`}>
         {label && (
-          <label htmlFor={name} className="text-[#999] text-[12px]">
+          <label htmlFor={name} className="text-[#555] text-[12px]">
             {required && (
               <span
                 style={{

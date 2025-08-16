@@ -87,9 +87,20 @@ const FormBody = () => {
               label: "Express",
               value: "Express",
             },
+            {
+              label: "Other",
+              value: "Other",
+            },
           ]}
         />
       </div>
+           {watch()?.partnerName?.value === "Other" && (
+        <>
+          <div className="mb-2">
+            <GbFormInput name="other_partnerName" label="Name" />
+          </div>
+        </>
+      )}
       <div className="mb-2">
         <GbFormInput name="phone" label="phone" />
       </div>

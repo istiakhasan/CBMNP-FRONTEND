@@ -9,8 +9,8 @@ import { useCreateVariantProductMutation } from "@/redux/api/productApi";
 import { uploadImageToImagebb } from "@/util/commonUtil";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { createVariantProductSchema } from "@/schema/IepSchema";
-import CubicMeters from "@/app/[locale]/(dashboard)/product/_component/CubicMeters";
-import AttributesAndVariants from "@/app/[locale]/(dashboard)/product/add-product/_component/AttributesAndVariants";
+import CubicMeters from "@/app/[locale]/(dashboard)/products/_component/CubicMeters";
+import AttributesAndVariants from "@/app/[locale]/(dashboard)/products/add-product/_component/AttributesAndVariants";
 import { useFormContext } from "react-hook-form";
 import GbBDTInput from "../forms/GbBTDInput";
 

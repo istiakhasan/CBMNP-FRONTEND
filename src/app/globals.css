@@ -348,9 +348,10 @@ aside.gb_sidebar {
 /* cusom input */
 
 .floating-label-input{
-  padding: 5px 15px;
+  padding: 2px 10px;
   padding-right: 0;
   background: #F6F6F6;
+  border: 1px solid rgba(0, 0, 0, 0.03);
  }
 .floating-label-input.err{
   border: 1px solid #F44336;
@@ -368,10 +369,15 @@ aside.gb_sidebar {
   color:var(--primaryColor);
 
  }
+.floating-label-input input::placeholder{
+  font-size: 10px !important;
+
+ }
  .ant-input{
   box-shadow: none !important;
   background: #F6F6F6 !important;
  }
+
  .custom_selector .ant-select-selector{
   background: #F6F6F6 !important;
   border-radius: 0px !important;
@@ -462,6 +468,8 @@ aside.gb_sidebar {
   border: none !important;
   background: none !important;
   padding: 0 !important;
+  border-radius: 0px; 
+  font-size: 12px;
 }
 
 .ant-drawer-body{

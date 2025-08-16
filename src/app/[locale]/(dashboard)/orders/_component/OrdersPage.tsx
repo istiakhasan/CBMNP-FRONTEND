@@ -491,11 +491,11 @@ const OrdersPage = () => {
               </div>
             )}
             <div className="flex gap-[20px] bg-white my-2">
-              {tabs.map((tab:any) => (
+              {tabs?.map((tab:any) => (
                 <p
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`text-[12px] font-[400] py-[5px] px-[15px] relative hover:text-[#000000] ${
+                  className={`text-[10px]  py-[5px] px-[10px] font-semibold relative hover:text-[#000000] whitespace-nowrap ${
                     activeTab === tab.id
                       ? " color_primary  bg-[#F2F8FA]"
                       : "text-[#7D7D7D]"
@@ -504,7 +504,7 @@ const OrdersPage = () => {
                 >
                   {tab.name}{" "}
                   <span
-                    className={` ${tab?.color} text-white text-[10px] px-[4px]  top-[5px]`}
+                    className={` ${tab?.color} text-white text-[8px] px-[4px]  top-[5px]`}
                   >
                     {convertNumberToShorthand(tab?.count || 0)}
                   </span>

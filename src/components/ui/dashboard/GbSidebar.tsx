@@ -40,7 +40,7 @@ const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
       icon: 'ri-ancient-gate-line',
     },
     {
-      href: '/product',
+      href: '/products',
       title: 'Products',
       icon: 'ri-box-3-line',
     },
@@ -110,6 +110,10 @@ const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
           href: "/procurement/purchase-report",
           title: "Purchase Report"
         },
+        {
+          href: "/procurement/supplier",
+          title: "Supplier"
+        },
       ]
     },
      {
@@ -127,7 +131,12 @@ const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
           title: "Category"
         },
       ]
-    }
+    },
+     {
+      href: '/pos',
+      title: 'POS',
+      icon: 'ri-settings-2-line',
+    },
   ]
   .filter((mi:any)=>permission?.includes(mi.title) ||  userInfo?.role ==="admin" )
   const pathName=usePathname()
