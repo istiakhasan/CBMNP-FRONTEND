@@ -60,8 +60,9 @@ const ProductShowcase = () => {
     <div className="bg-[#E6EAED] min-h-[100vh]">
       <GbHeader />
       <div className=" p-[16px] grid grid-cols-12 gap-4">
-        <div className="col-span-8 ">
-          <div className=" mb-2">
+        <div className="col-span-8  ">
+        <div className="p-[16px] mb-3 bg-[#E6EAED]  sticky top-[60px]">
+            <div className=" mb-2 ">
             <h1 className="text-xl mb-0 font-bold text-gray-800">
               Welcome, Wesley Adrian
             </h1>
@@ -96,6 +97,7 @@ const ProductShowcase = () => {
               </button>
             </div>
           </div>
+        </div>
 
           {/* Product Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -162,7 +164,7 @@ const ProductShowcase = () => {
           </div>
         </div>
         {/* Cart Summary */}
-        <div className=" bg-white p-4 rounded shadow col-span-4">
+        <div className=" bg-white p-4 rounded h-fit shadow col-span-4 sticky top-[80px]">
           <ProductOrderList
             setCart={setCart}
             cart={cart}
