@@ -63,8 +63,9 @@ const LoadProducts = ({ setCart, cart }: any) => {
             <Divider />
             <div className="flex justify-between">
               <div>
-                <p className=" font-semibold text-[14px] ">
-                  BDT: {(+item?.salePrice || 0)?.toFixed(2)} <del className="text-slate-400 "> {(+item?.regularPrice || 0)?.toFixed(2)}</del>
+                 <p className=" font-semibold text-[14px] ">
+                  BDT: {(+item?.salePrice || 0)?.toFixed(2)}
+                  {Number(item?.regularPrice) >0 && <del className="text-slate-400 "> {(+item?.regularPrice || 0)?.toFixed(2)}</del>}
                 </p>
                 <span className="text-[14px] gb_border bg-[white] px-[15px] py-[2px] my-3 inline-block">
                   Pack Size: {item?.weight +" " +  item?.unit}

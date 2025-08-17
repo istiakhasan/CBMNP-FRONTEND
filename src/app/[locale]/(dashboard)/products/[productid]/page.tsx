@@ -52,7 +52,7 @@ const Page = () => {
             <p className="text-[20px] mb-5 flex justify-between">
               <span className="text-[#4b5766]">{productData?.name}</span>
             {permission?.includes("Edit Products") &&  <button
-                onClick={() => router.push(`/${local}/product/${productData?.id}/edit`)}
+                onClick={() => router.push(`/${local}/products/${productData?.id}/edit`)}
                 className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]"
               >
                 Edit

@@ -370,8 +370,12 @@ aside.gb_sidebar {
 
  }
 .floating-label-input input::placeholder{
-  font-size: 10px !important;
+  font-size: 12px !important;
 
+ }
+.floating-label-input input{
+  font-size: 12px !important;
+  padding: 6px !important;
  }
  .ant-input{
   box-shadow: none !important;

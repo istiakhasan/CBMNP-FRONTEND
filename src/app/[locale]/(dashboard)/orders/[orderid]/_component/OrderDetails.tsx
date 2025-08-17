@@ -293,9 +293,9 @@ const OrderDetails = ({ data, permission }: any) => {
                 </td>
                 <td>
                   <p>BDT {item?.product?.salePrice}</p>
-                  <p>
+                 {Number(item?.product?.regularPrice) >0 && <p>
                     <del>BDT {item?.product?.regularPrice}</del>
-                  </p>
+                  </p>}
                 </td>
                 <td>
                   BDT{" "}

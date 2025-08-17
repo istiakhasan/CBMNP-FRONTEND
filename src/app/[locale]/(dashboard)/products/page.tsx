@@ -59,7 +59,7 @@ const Page = () => {
       key: 1,
       //@ts-ignore
       render: (text, record, index) => {
-        return <span onClick={()=>router.push(`/${local}/product/${record?.id}`)} className="color_primary cursor-pointer">{record?.sku || "N/A"}</span>;
+        return <span onClick={()=>router.push(`/${local}/products/${record?.id}`)} className="color_primary cursor-pointer">{record?.sku || "N/A"}</span>;
       },
     },
     {
@@ -84,7 +84,7 @@ const Page = () => {
       render: (text, record, index) => {
         return (
           <>
-            <span onClick={()=>router.push(`/${local}/product/${record?.id}`)} className="block mb-2 color_primary cursor-pointer">{record?.name}</span>
+            <span onClick={()=>router.push(`/${local}/products/${record?.id}`)} className="block mb-2 color_primary cursor-pointer">{record?.name}</span>
             <button className="bg-[#e8f0f2] px-[8px] py-[4px] text-[#000] font-semibold">
               {record?.productType}
             </button>
@@ -141,9 +141,9 @@ const Page = () => {
       render: (text, record, index) => {
         return (
           <>
-            <del className="mb-[5px] block">
+            {Number(record?.regularPrice) >0 &&<del className="mb-[5px] block">
               BDT {record?.regularPrice || "0.00"}
-            </del>
+            </del>}
             <h1>BDT {record?.salePrice || "0.00"}</h1>
           </>
         );
@@ -257,7 +257,7 @@ const Page = () => {
       key: "0",
     },
     {
-      label: <button onClick={()=>router.push(`/${local}/product/add-product`)}>Add Variant Product</button>,
+      label: <button onClick={()=>router.push(`/${local}/products/add-product`)}>Add Variant Product</button>,
       key: "1",
     },
   ];
