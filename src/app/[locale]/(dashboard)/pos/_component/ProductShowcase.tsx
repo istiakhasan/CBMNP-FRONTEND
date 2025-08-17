@@ -107,15 +107,16 @@ const ProductShowcase = () => {
                     <img
                       src={product?.images?.[0]?.url}
                       alt={product.name}
-                      className="h-20 object-contain"
+                      className="h-[160px] w-[160px] object-fill"
                     />
                   </div>
 
                   {/* Info */}
                   <div className="p-4">
-                    <span className="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                    <span className="text-xs font-semibold text-primary bg-blue-100 px-2 py-1 rounded mr-2">
                       {product?.category?.label}
-                    </span>
+                    </span> 
+                    (<span>{product?.inventories?.stock || 0}</span>)
                     <h3 className="mt-2 text-lg font-semibold text-gray-800">
                       {product.name}
                     </h3>
