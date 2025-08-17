@@ -27,8 +27,9 @@ import StatsContainer from "./_component/StatusContainer";
 import { useLocale } from "next-intl";
 import { useGetUserByIdQuery } from "@/redux/api/usersApi";
 import { getUserInfo } from "@/service/authService";
+import OrderSearch from "@/components/OrderSearch";
 const Page = () => {
-  const local=useLocale()
+  const local = useLocale();
   const [updateProduct] = useUpdateProductMutation();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const query: Record<string, any> = {};
@@ -39,13 +40,13 @@ const Page = () => {
   const [rowData, setRowData] = useState<any[]>([]);
   query["page"] = page;
   query["limit"] = size;
-  query["searchProducts"] = searchTerm;
+  query["searchTerm"] = searchTerm;
   query["sortBy"] = "id";
-  const { data, isLoading } = useGetAllProductQuery(query,{
-    refetchOnMountOrArgChange:true
+  const { data, isLoading } = useGetAllProductQuery(query, {
+    refetchOnMountOrArgChange: true,
   });
   const [deleteBrandHandle] = useDeleteProductByIdMutation();
-  const router = useRouter();
+  const router = useRouter(); 
   const [open, setOpen] = useState(false);
   const userInfo: any = getUserInfo();
   const { data: userData, isLoading: getUserLoading } = useGetUserByIdQuery({
@@ -59,7 +60,14 @@ const Page = () => {
       key: 1,
       //@ts-ignore
       render: (text, record, index) => {
-        return <span onClick={()=>router.push(`/${local}/products/${record?.id}`)} className="color_primary cursor-pointer">{record?.sku || "N/A"}</span>;
+        return (
+          <span
+            onClick={() => router.push(`/${local}/products/${record?.id}`)}
+            className="color_primary cursor-pointer"
+          >
+            {record?.sku || "N/A"}
+          </span>
+        );
       },
     },
     {
@@ -71,7 +79,7 @@ const Page = () => {
           <Image
             height={44}
             width={44}
-            src={record?.images?.length>0 &&record?.images[0]?.url}
+            src={record?.images?.length > 0 && record?.images[0]?.url}
             alt=""
           />
         );
@@ -84,7 +92,12 @@ const Page = () => {
       render: (text, record, index) => {
         return (
           <>
-            <span onClick={()=>router.push(`/${local}/products/${record?.id}`)} className="block mb-2 color_primary cursor-pointer">{record?.name}</span>
+            <span
+              onClick={() => router.push(`/${local}/products/${record?.id}`)}
+              className="block mb-2 color_primary cursor-pointer"
+            >
+              {record?.name}
+            </span>
             <button className="bg-[#e8f0f2] px-[8px] py-[4px] text-[#000] font-semibold">
               {record?.productType}
             </button>
@@ -111,7 +124,11 @@ const Page = () => {
       align: "start",
       //@ts-ignore
       render: (text, record, index) => {
-        return <h1 className="border-[1px] border-[#ebebeb] w-fit px-5 py-1">Weight :{record?.weight+record?.unit}</h1>;
+        return (
+          <h1 className="border-[1px] border-[#ebebeb] w-fit px-5 py-1">
+            Weight :{record?.weight + record?.unit}
+          </h1>
+        );
       },
     },
     {
@@ -122,13 +139,15 @@ const Page = () => {
       render: (text, record, index) => {
         return (
           <>
-           {
-            record?.attributes?.map((item:{attributeName:string,label:string},i:number)=>(
-              <Fragment key={i}> 
-              <span className="border-[1px] border-[#ebebeb] w-fit px-5 py-1 mr-2">{item?.attributeName} :{item?.label}</span>
-              </Fragment>
-            ))
-           }
+            {record?.attributes?.map(
+              (item: { attributeName: string; label: string }, i: number) => (
+                <Fragment key={i}>
+                  <span className="border-[1px] border-[#ebebeb] w-fit px-5 py-1 mr-2">
+                    {item?.attributeName} :{item?.label}
+                  </span>
+                </Fragment>
+              )
+            )}
           </>
         );
       },
@@ -141,9 +160,11 @@ const Page = () => {
       render: (text, record, index) => {
         return (
           <>
-            {Number(record?.regularPrice) >0 &&<del className="mb-[5px] block">
-              BDT {record?.regularPrice || "0.00"}
-            </del>}
+            {Number(record?.regularPrice) > 0 && (
+              <del className="mb-[5px] block">
+                BDT {record?.regularPrice || "0.00"}
+              </del>
+            )}
             <h1>BDT {record?.salePrice || "0.00"}</h1>
           </>
         );
@@ -207,11 +228,15 @@ const Page = () => {
                     active: a,
                   },
                 }).unwrap();
-                if(res?.success){
-                  message.success(`Product ${record?.name} ${a?'active':'inactive'} successfully`)
+                if (res?.success) {
+                  message.success(
+                    `Product ${record?.name} ${
+                      a ? "active" : "inactive"
+                    } successfully`
+                  );
                 }
               } catch (error) {
-                message.error(customError)
+                message.error(customError);
               }
             }}
             defaultChecked={record?.active}
@@ -257,93 +282,106 @@ const Page = () => {
       key: "0",
     },
     {
-      label: <button onClick={()=>router.push(`/${local}/products/add-product`)}>Add Variant Product</button>,
+      label: (
+        <button onClick={() => router.push(`/${local}/products/add-product`)}>
+          Add Variant Product
+        </button>
+      ),
       key: "1",
     },
   ];
 
   return (
     <>
-    <GbHeader title="Products & Pricing" />
-    <div className="p-[16px]">
-      <div className="flex justify-end items-center py-4 px-2">
-        <GbDrawer open={drawerOpen} setOpen={setDrawerOpen}>
-          {" "}
-          <AddSimpleProuct setDrawerOpen={setDrawerOpen} />{" "}
-        </GbDrawer>
-        <div className="flex items-center gap-3 flex-wrap">
-          {/* <button className="border-[#4F8A6D] border text-[#4F8A6D]  font-bold text-[12px]  px-[20px] py-[5px]">
-            Action
-          </button> */}
-           {permission?.includes("Add Products") &&    <GbDropdown items={items}>
-            <button className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]">
-              Add Product
-            </button>
-          </GbDropdown>}
+      <GbHeader title="Products & Pricing" />
+      <div className="p-[16px]">
+              <GbDrawer open={drawerOpen} setOpen={setDrawerOpen}>
+            {" "}
+            <AddSimpleProuct setDrawerOpen={setDrawerOpen} />{" "}
+          </GbDrawer>
+        <div className=" py-4 px-2">
+    
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <OrderSearch
+              setSearchTerm={setSearchTerm}
+              searchTerm={searchTerm}
+              placeholder="Search"
+            />
+            {permission?.includes("Add Products") && (
+              <GbDropdown items={items}>
+                <button className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]">
+                  Add Product
+                </button>
+              </GbDropdown>
+            )}
+          </div>
         </div>
-      </div>
-      <div className="gb_border">
-        <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
-          <div className="flex gap-2">
-            <div className="border p-2 h-[35px] w-[35px] flex gap-3 items-center cursor-pointer justify-center">
-              <i
-                style={{ fontSize: "24px" }}
-                className="ri-restart-line text-gray-600"
-              ></i>
-            </div>
-            <Popover
-              placement="bottom"
-              content={
-                <div className=" min-w-[200px]">
-                  <Checkbox.Group
-                    className="flex flex-col gap-3"
-                    value={checkedList}
-                    options={options as CheckboxOptionType[]}
-                    onChange={(value) => {
-                      setCheckedList(value as string[]);
-                    }}
-                  />
-                </div>
-              }
-              trigger="click"
-              open={open}
-              onOpenChange={handleOpenChange}
-            >
-              <div className="border p-2 h-[35px] flex items-center gap-2 cursor-pointer">
+        <div className="gb_border">
+          <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
+            <div className="flex gap-2">
+              <div className="border p-2 h-[35px] w-[35px] flex gap-3 items-center cursor-pointer justify-center">
                 <i
                   style={{ fontSize: "24px" }}
-                  className="ri-equalizer-line text-gray-600"
-                ></i>{" "}
-                Filter Column
+                  className="ri-restart-line text-gray-600"
+                ></i>
               </div>
-            </Popover>
-            <StatsContainer />
+              <Popover
+                placement="bottom"
+                content={
+                  <div className=" min-w-[200px]">
+                    <Checkbox.Group
+                      className="flex flex-col gap-3"
+                      value={checkedList}
+                      options={options as CheckboxOptionType[]}
+                      onChange={(value) => {
+                        setCheckedList(value as string[]);
+                      }}
+                    />
+                  </div>
+                }
+                trigger="click"
+                open={open}
+                onOpenChange={handleOpenChange}
+              >
+                <div className="border p-2 h-[35px] flex items-center gap-2 cursor-pointer">
+                  <i
+                    style={{ fontSize: "24px" }}
+                    className="ri-equalizer-line text-gray-600"
+                  ></i>{" "}
+                  Filter Column
+                </div>
+              </Popover>
+              <StatsContainer />
+            </div>
+            <Pagination
+              pageSize={size}
+              total={data?.meta?.total}
+              onChange={(page, pageSize) => {
+                setPage(page);
+                setSize(pageSize);
+              }}
+              showSizeChanger={true} // must be true if you want to allow changing page size
+              pageSizeOptions={["5", "10", "20", "100", "500"]} // <-- options go here
+              onShowSizeChange={(current, pageSize) => {
+                setPage(1); // usually reset to first page
+                setSize(pageSize);
+              }}
+            />
           </div>
-          <Pagination
-            pageSize={size}
-            total={data?.meta?.total}
-            onChange={(v, d) => {
-              setPage(v);
-              setSize(d);
-            }}
-            showSizeChanger={false}
-            // onShowSizeChange={false}
-          />
-        </div>
-        <div className="max-h-[600px] overflow-scroll">
-          <GbTable
-            loading={isLoading}
-            columns={newColumns}
-            dataSource={data?.data}
-            pageSize={size}
-            // totalPages={data?.meta?.total}
-            onPaginationChange={onPaginationChange}
-            // showPagination={true}
-            // rowSelection={rowSelection}
-          />
+          <div className="max-h-[600px] overflow-scroll">
+            <GbTable
+              loading={isLoading}
+              columns={newColumns}
+              dataSource={data?.data}
+              pageSize={size}
+              // totalPages={data?.meta?.total}
+              onPaginationChange={onPaginationChange}
+              // showPagination={true}
+              // rowSelection={rowSelection}
+            />
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 };
