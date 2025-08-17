@@ -176,7 +176,7 @@ const ProductOrderList = ({
                   setCart([]);
                   setResponseData(null);
                   setSuccessModal(false);
-                  setPaymentMethod('')
+                  setPaymentMethod("");
                   message.success("Form reset");
                 }}
                 className="flex items-center clear-icon text-[10px] fw-medium"
@@ -201,6 +201,7 @@ const ProductOrderList = ({
                       <th>Item</th>
                       <th style={{ textAlign: "center" }}>QTY</th>
                       <th style={{ textAlign: "end" }}>Cost</th>
+                      <th style={{ textAlign: "end" }}>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -226,6 +227,16 @@ const ProductOrderList = ({
                         </td>
                         <td align="right">
                           {item?.quantity * item?.salePrice}
+                        </td>
+                        <td style={{ textAlign: "end" }}>
+                          <i
+                            onClick={() => {
+                              const _data = [...cart];
+                              _data.splice(i, 1); // remove 1 item at position 'index'
+                              setCart(_data); // update state if cart is state
+                            }}
+                            className="ri-delete-bin-line cursor-pointer text-red-700"
+                          ></i>
                         </td>
                       </tr>
                     ))}
@@ -313,7 +324,9 @@ const ProductOrderList = ({
               <div key={idx} className="">
                 <button
                   onClick={() => setPaymentMethod(item?.label)}
-                  className={`flex items-center border rounded flex-1 gap-2 justify-center p-2 ${paymentMethod===item?.label?'border-primary':''}`}
+                  className={`flex items-center border rounded flex-1 gap-2 justify-center p-2 ${
+                    paymentMethod === item?.label ? "border-primary" : ""
+                  }`}
                 >
                   <img
                     src={`${item.icon}`}
@@ -350,8 +363,8 @@ const ProductOrderList = ({
               shippingCharge: 0,
               locationId: warehouseData?.data[0]?.value,
               statusId: 8,
-              paymentMethod: paymentMethod, 
-              paymentStatus: 'Paid', 
+              paymentMethod: paymentMethod,
+              paymentStatus: "Paid",
               paymentHistory: [
                 {
                   paidAmount:

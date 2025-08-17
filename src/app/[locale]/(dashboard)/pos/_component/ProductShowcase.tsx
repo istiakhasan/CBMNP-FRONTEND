@@ -5,6 +5,7 @@ import GbHeader from "@/components/ui/dashboard/GbHeader";
 import { useGetAllProductQuery } from "@/redux/api/productApi";
 import { useEffect, useState } from "react";
 import ProductOrderList from "./Abc";
+import { message } from "antd";
 
 const ProductShowcase = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -26,6 +27,9 @@ const ProductShowcase = () => {
 
 
   const handleAddToCart = (product: any) => {
+    if(!product?.inventories?.stock && Number(product?.inventories?.stock || 0) < 1){
+         return message.error('Product has no quantity')
+    }
     setCart((prev) => {
       const existing = prev.find((p) => p.id === product.id);
       if (existing) {
@@ -136,7 +140,7 @@ const ProductShowcase = () => {
                           </button>
                           <span className="px-3 py-1">{cartItem.quantity}</span>
                           <button
-                            onClick={() => handleQuantityChange(product.id, 1)}
+                            onClick={() => {handleQuantityChange(product.id, 1)}}
                             className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-r-lg"
                           >
                             +
