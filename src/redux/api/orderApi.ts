@@ -26,6 +26,14 @@ export const orderApi = baseApi.injectEndpoints({
 			}),
 			providesTags: [tagTypes.order],
 		}),
+		getOrdersReports: build.query({
+			query: (arg) => ({
+				url: "/orders/reports",
+				method: "GET",
+				params: arg,
+			}),
+			providesTags: [tagTypes.order],
+		}),
 		getAllOrderStatus: build.query({
 			query: (arg) => ({
 				url: "/order-status",
@@ -104,5 +112,7 @@ export const {
 	useGetOrdersLogsQuery,
 	useChangeHoldOrderStatusMutation,
 	useReturnOrdersMutation,
-	useCreatePOSOrderMutation
+	useCreatePOSOrderMutation,
+	useLazyGetAllOrdersQuery,
+	useLazyGetOrdersReportsQuery
 } = orderApi;

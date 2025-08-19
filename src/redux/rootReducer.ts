@@ -1,7 +1,7 @@
 import { baseApi } from "./api/baseApi";
-// import  cartSlice from "./slice/cart";
+import  menuSlice from "./feature/menuSlice";
 
 export const reducer = {
-//   cart:cartSlice,
+  menu:menuSlice,
   [baseApi.reducerPath]: baseApi.reducer,
 };

@@ -11,15 +11,15 @@ const CircleChar = ({ text }:{text:string}) => {
 
   const circleStyle:any = {
     backgroundColor: bgColor,
-    width: '30px',
-    height: '30px',
+    width: '20px',
+    height:'20px',
     borderRadius: '50%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     color: 'white',
     fontWeight: 'bold',
-    fontSize: '16px',
+    fontSize: '12px',
     userSelect: 'none',
   };
 
