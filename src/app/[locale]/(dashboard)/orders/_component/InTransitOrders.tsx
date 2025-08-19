@@ -479,7 +479,7 @@ const InTransitOrders = ({searchTerm,warehosueIds,currierIds,rangeValue,productI
           />
         </div>
       </div>
-      <div className="max-h-[600px] overflow-scroll">
+      <div className="custom_scroll overflow-scroll">
         <GbTable
           loading={isLoading}
           columns={newColumns}

@@ -30,9 +30,8 @@ const Dashboard = () => {
     return;
   }
   const summaryData = smData?.data;
-  console.log(summaryData, "summary data");
   return (
-    <div className="h-screen overflow-auto">
+    <div className="h-screen overflow-auto custom_scroll">
       <GbHeader title="Dashboard" />
       <div className="p-[16px]">
         <div className="flex items-start gap-2">

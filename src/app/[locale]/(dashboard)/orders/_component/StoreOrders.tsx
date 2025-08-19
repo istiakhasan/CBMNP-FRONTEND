@@ -327,7 +327,7 @@ const StoreOrders = ({warehosueIds,currierIds,searchTerm,rangeValue,orderStatus}
           </div>
         </div>
       </div>
-      <div className="max-h-[600px] overflow-scroll">
+      <div className="custom_scroll overflow-scroll">
         <GbTable
           rowSelection={rowSelection}
           loading={isLoading}

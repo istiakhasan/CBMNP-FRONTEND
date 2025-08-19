@@ -7,7 +7,7 @@ const TopCustomers = ({ summaryData }: { summaryData: any }) => {
   return (
     <Card style={{ height: "100%" }} bordered={true}>
       <p className="text-[18px]  font-bold  leading-none">Top Customers</p>
-      <div className="mt-5 overflow-x-scroll">
+      <div className="mt-5 overflow-x-scroll custom_scroll">
         <GbTable
           dataSource={summaryData?.topCustomers}
           columns={[

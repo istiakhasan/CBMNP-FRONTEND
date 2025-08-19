@@ -188,13 +188,13 @@ const GbSidebar = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  console.log(rstate?.toggle);
+
   return (
     <>
       {loading && <Loader />}
        {rstate?.toggle &&   <aside
-        className={`gb_sidebar h-[100vh]    ${
-          isActive ? "show overflow-y-scroll" : "hide "
+        className={`gb_sidebar  sticky top-0   ${
+          isActive ? "show overflow-y-scroll h-[100vh]" : "hide h-fit"
         }`}
       >
          <div className="toggle_btn">
@@ -208,13 +208,14 @@ const GbSidebar = () => {
           ></i>
         </div>
 
-        <div className="menu_list_wraper">
+        <div className="menu_list_wraper ">
           {menuItems?.map((item, index) => {
             return (
               <Fragment key={index}>
                 {item?.children ? (
                   <>
-                    <div
+                    <div 
+                     
                       key={index}
                       className={`${
                         ((index === subMenuActive && isActive) ||
@@ -224,7 +225,7 @@ const GbSidebar = () => {
                               item?.href?.slice(1, item?.href?.length)
                             )) &&
                         "border"
-                      } duration-300 relative`}
+                      } duration-300 relative kashem_test`}
                     >
                       <Tooltip
                         placement="right"

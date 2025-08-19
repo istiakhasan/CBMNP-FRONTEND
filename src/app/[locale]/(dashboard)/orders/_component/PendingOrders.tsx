@@ -2,31 +2,23 @@
 import GbTable from "@/components/GbTable";
 import copyToClipboard from "@/components/ui/GbCopyToClipBoard";
 import GbModal from "@/components/ui/GbModal";
-import { getBaseUrl } from "@/helpers/config/envConfig";
 import {
   useGetAllOrdersQuery,
   useGetOrderByIdQuery,
 } from "@/redux/api/orderApi";
-import { useGetAllProductQuery } from "@/redux/api/productApi";
-import { useGetUserByIdQuery } from "@/redux/api/usersApi";
 import StatusBadge from "@/util/StatusBadge";
 import {
-  Button,
   Checkbox,
   CheckboxOptionType,
-  Image,
   MenuProps,
   Pagination,
   Popover,
-  Spin,
-  Switch,
   TableProps,
 } from "antd";
-import axios from "axios";
 import moment from "moment";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import React, {  useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import Invoice from "./Invoice";
 import GbDropdown from "@/components/ui/dashboard/GbDropdown";
@@ -243,9 +235,6 @@ const PendingOrders = ({
 
   const contentRef = useRef<HTMLDivElement | null>(null);
 
-  const reactToPrintFn = useReactToPrint({
-    content: () => contentRef.current,
-  });
 
   const rowSelection: TableProps<any>["rowSelection"] = {
     onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
@@ -328,7 +317,7 @@ const PendingOrders = ({
           </div>
         </div>
       </div>
-      <div className="h-[600px] overflow-scroll">
+      <div className=" overflow-scroll custom_scroll">
         <GbTable
           rowSelection={rowSelection}
           loading={isLoading}

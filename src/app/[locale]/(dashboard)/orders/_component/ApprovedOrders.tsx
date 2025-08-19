@@ -355,7 +355,7 @@ const ApprovedOrders = ({
           </div>
         </div>
       </div>
-      <div className="h-[600px] overflow-scroll">
+      <div className=" overflow-scroll custom_scroll">
         <GbTable
           rowSelection={rowSelection}
           loading={isLoading}

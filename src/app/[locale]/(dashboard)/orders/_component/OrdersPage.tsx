@@ -161,7 +161,7 @@ const OrdersPage = () => {
 
 
    
-  console.log(orderStatus,tabs);
+
   const components: { [key: string]: any } = {
     "1": (
       <PendingOrders

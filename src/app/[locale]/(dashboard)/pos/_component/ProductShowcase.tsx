@@ -64,7 +64,7 @@ const ProductShowcase = () => {
   if (isLoading) return null;
 
   return (
-    <div className="bg-[#E6EAED] min-h-[100vh]">
+    <div className="bg-[#E6EAED]">
       <GbHeader />
       <div className=" p-[8px] md:p-[16px] md:grid grid-cols-12 gap-4">
         <div className="col-span-8  ">
@@ -126,7 +126,8 @@ const ProductShowcase = () => {
           </div>
 
           {/* Product Grid */}
-          <div className="grid  grid-cols-2 md:grid-cols-3 lg:grid-cols-4 md:gap-6 gap-2">
+          <div className="h-[500px] overflow-y-scroll custom_scroll">
+            <div className="grid  grid-cols-2 md:grid-cols-3 lg:grid-cols-4 md:gap-6 gap-2">
             {data?.data?.map((product: any) => {
               const cartItem = cart.find((p) => p.id === product.id);
               return (
@@ -188,6 +189,7 @@ const ProductShowcase = () => {
                 </div>
               );
             })}
+          </div>
           </div>
         </div>
         {/* Cart Summary */}

@@ -242,7 +242,7 @@ const Delivered = ({warehosueIds,searchTerm,currierIds,rangeValue,orderStatus}: 
           showSizeChanger={false}
         />
       </div>
-      <div className="max-h-[600px] overflow-scroll">
+      <div className="custom_scroll overflow-scroll">
         <GbTable
           loading={isLoading}
           columns={newColumns}

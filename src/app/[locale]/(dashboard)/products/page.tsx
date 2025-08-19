@@ -368,7 +368,7 @@ const Page = () => {
               }}
             />
           </div>
-          <div className="max-h-[600px] overflow-scroll">
+          <div className="max-h-[600px] overflow-scroll custom_scroll">
             <GbTable
               loading={isLoading}
               columns={newColumns}

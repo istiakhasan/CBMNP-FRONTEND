@@ -3,7 +3,6 @@ import {getMessages} from 'next-intl/server';
 import {notFound} from 'next/navigation';
 import { Inter } from "next/font/google";
 import {routing} from '@/i18n/routing';
-import LocalSwitcher from '@/components/LocalSwitcher';
 import Providers from '@/lib/Providers';
  const inter = Inter({ subsets: ["latin"] });
 export default async function LocaleLayout({
