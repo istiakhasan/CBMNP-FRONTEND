@@ -6,15 +6,9 @@ import "remixicon/fonts/remixicon.css";
 import "react-confirm-alert/src/react-confirm-alert.css";
 import "react-quill/dist/quill.snow.css";
 const inter = Inter({ subsets: ["latin"] });
-// export const metadata: Metadata = {
-//   title: "GB-SME",
-//   description: "Enter price resource planning software for I Enterprise",
-// };
-export const metadata = {
-  title: 'My Next.js App',
-  description: 'Next.js App with PWA',
-  manifest: '/manifest.json',
-  themeColor: '#317EFB',
+export const metadata: Metadata = {
+  title: "GB-SME",
+  description: "Enter price resource planning software for I Enterprise",
 };
 
 export default function RootLayout({
