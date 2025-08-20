@@ -41,6 +41,7 @@
 		"react-toastify": "^11.0.5",
 		"remixicon": "^4.2.0",
 		"uuid": "^10.0.0",
+		"web-push": "^3.6.7",
 		"yup": "^1.4.0"
 	},
 	"devDependencies": {
@@ -50,6 +51,7 @@
 		"@types/react": "^18",
 		"@types/react-dom": "^18",
 		"@types/uuid": "^10.0.0",
+		"@types/web-push": "^3.6.4",
 		"eslint": "^8",
 		"eslint-config-next": "14.2.2",
 		"postcss": "^8",
