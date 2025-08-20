@@ -15,7 +15,7 @@ self.addEventListener('push', function (event) {
 
 self.addEventListener('notificationclick', function (event) {
   event.notification.close();
-  event.waitUntil(clients.openWindow('https://your-website.com'));
+  event.waitUntil(clients.openWindow('http://31.97.60.104:3000'));
 });
 
 
