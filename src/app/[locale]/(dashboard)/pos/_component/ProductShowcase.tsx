@@ -140,7 +140,7 @@ const ProductShowcase = () => {
                     <img
                       src={product?.images?.[0]?.url}
                       alt={product.name}
-                      className="md:h-[160px] md:w-[160px] w-[50px] h-[50px] object-fill"
+                      className="md:h-[170px] md:w-[170px] w-[50px] h-[50px] object-fill"
                     />
                   </div>
 
@@ -151,7 +151,7 @@ const ProductShowcase = () => {
                     </span>
                     (<span>{product?.inventories?.stock || 0}</span>)
                     <h3 className="mt-2 text-[12px] md:text-lg font-semibold text-gray-800">
-                      {product.name}
+                      {product?.name?.length>40?`${product?.name?.slice(0,40)}...`:product?.name}
                     </h3>
                     <p className="mt-1 text-[12px] md:text-xl font-bold text-gray-900">
                       ৳{product.salePrice?.toLocaleString()}
