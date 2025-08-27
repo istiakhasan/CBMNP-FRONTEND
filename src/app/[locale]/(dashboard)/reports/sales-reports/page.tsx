@@ -4,23 +4,29 @@ import GbHeader from "@/components/ui/dashboard/GbHeader";
 import { DatePicker, message, Select } from "antd";
 import React, { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
-import {
-  useLazyGetOrdersReportsQuery,
-} from "@/redux/api/orderApi";
+import { useLazyGetOrdersReportsQuery } from "@/redux/api/orderApi";
 import OrderReportTable from "../_component/OrderReportTable";
 import { useGetAllStatusQuery } from "@/redux/api/statusApi";
 import { useGetAllUsersOptionsQuery } from "@/redux/api/usersApi";
+import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
+import DownloadOrders from "./_component/DownloadButton";
+import { useGetDeliveryPartnerOptionsQuery } from "@/redux/api/partnerApi";
 const Page = () => {
   const [startDate, setStartDate] = useState<any>("");
   const [endDate, setEndDate] = useState<any>("");
-  const [status,setStatus]=useState<any>([])
-  const [agentIds,setAgentId]=useState<any>([])
-  const {data:usersData}=useGetAllUsersOptionsQuery(undefined)
+  const [status, setStatus] = useState<any>([]);
+  const [agentIds, setAgentId] = useState<any>([]);
+  const [warehosueIds, setWarehouseId] = useState<any>([]);
+  const [courierIds, setCourierId] = useState<any>([]);
+  const { data: usersData } = useGetAllUsersOptionsQuery(undefined);
+  const {data:deliveryPartner}=useGetDeliveryPartnerOptionsQuery(undefined)
+  const { data: warehouseOptions, isLoading: warehosueLoading } =
+    useLoadAllWarehouseOptionsQuery(undefined);
   const [loadProcurement] = useLazyGetOrdersReportsQuery();
   const [data, setData] = useState([]);
-    const { data: statusOptions, isLoading } = useGetAllStatusQuery({
-      label: "all",
-    });
+  const { data: statusOptions, isLoading } = useGetAllStatusQuery({
+    label: "all",
+  });
   const handleStartChange = (date: Dayjs | null) => {
     if (endDate && date && endDate.diff(date, "month", true) > 1) {
       message.error("Date range cannot be more than 1 month");
@@ -40,26 +46,56 @@ const Page = () => {
     <div>
       <GbHeader title="Sales report" />
       <div className="p-[16px]">
-        <div className="mb-3 flex  justify-between items-center">
-          <div>
+        <div className="mb-3 flex gap-4  justify-between items-start">
+          <div className="flex flex-wrap gap-4">
             <DatePicker
-              className="w-[250px] rounded-none me-3"
+              className="w-[250px] rounded-none"
               placeholder="From Date"
               value={startDate}
               onChange={handleStartChange}
             />
             <DatePicker
-              className="w-[250px] rounded-none me-3"
+              className="w-[250px] rounded-none "
               placeholder="To Date"
               value={endDate}
               onChange={handleEndChange}
             />
-            <Select className="border_less_select me-3" placeholder="Select status" onChange={(e)=>{
-                setStatus([e])
-            }} style={{width:"250px",borderRadius:"0"}} options={statusOptions?.data} />
-            <Select className="border_less_select" placeholder="Select agent" onChange={(e)=>{
-                setAgentId([e])
-            }} style={{width:"250px",borderRadius:"0"}} options={usersData?.data} />
+            <Select
+              className="border_less_select"
+              placeholder="Select status"
+              onChange={(e) => {
+                setStatus([e]);
+              }}
+              style={{ width: "250px", borderRadius: "0" }}
+              options={statusOptions?.data}
+            />
+            <Select
+              className="border_less_select"
+              placeholder="Select agent"
+              onChange={(e) => {
+                setAgentId([e]);
+              }}
+              style={{ width: "250px", borderRadius: "0" }}
+              options={usersData?.data}
+            />
+            <Select
+              className="border_less_select"
+              placeholder="Select warehouse"
+              onChange={(e) => {
+                setWarehouseId([e]);
+              }}
+              style={{ width: "250px", borderRadius: "0" }}
+              options={warehouseOptions?.data}
+            />
+            <Select
+              className="border_less_select"
+              placeholder="Select courier"
+              onChange={(e) => {
+                setCourierId([e]);
+              }}
+              style={{ width: "250px", borderRadius: "0" }}
+              options={deliveryPartner?.data}
+            />
           </div>
 
           <div className="flex gap-2">
@@ -71,6 +107,8 @@ const Page = () => {
                     endDate: endDate || dayjs(),
                     statusId: status,
                     agentIds: agentIds,
+                    locationId: warehosueIds,
+                    currier: courierIds,
                   }).unwrap();
                   setData(result);
                 } catch (error) {
@@ -84,18 +122,30 @@ const Page = () => {
             <button className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[3px]">
               Excel
             </button>
+            <DownloadOrders
+              filters={{
+                startDate: startDate || dayjs(),
+                endDate: endDate || dayjs(),
+                statusId: status,
+                agentIds: agentIds,
+                locationId: warehosueIds,
+                currier: courierIds,
+              }}
+            />
             <button className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[3px]">
               Print
             </button>
           </div>
         </div>
-          <OrderReportTable
+        <OrderReportTable
           reports={data}
           startDate={startDate}
           endDate={endDate}
           setData={setData}
           status={status}
           agentIds={agentIds}
+          warehosueIds={warehosueIds}
+          courierIds={courierIds}
         />
       </div>
     </div>

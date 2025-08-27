@@ -15,7 +15,7 @@ import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import React, {  useState } from "react";
 
-const Delivered = ({warehosueIds,searchTerm,currierIds,rangeValue,orderStatus}: any) => {
+const Delivered = ({warehosueIds,productIds,searchTerm,currierIds,rangeValue,orderStatus}: any) => {
   // all states
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
@@ -25,6 +25,7 @@ const Delivered = ({warehosueIds,searchTerm,currierIds,rangeValue,orderStatus}: 
     searchTerm,
     statusId:orderStatus?.length>0  ?( orderStatus?.includes(8) ? 8 : "112") : '8',
     locationId:warehosueIds,
+    productId:productIds,
     currier:currierIds,
     ...rangeValue,
   });

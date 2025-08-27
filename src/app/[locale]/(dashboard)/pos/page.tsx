@@ -4,7 +4,7 @@ import ProductShowcase from './_component/ProductShowcase';
 import './_component/style.css'
 const page = () => {
     return (
-        <div>
+        <div className='h-[100vh] overflow-y-auto custom_scroll'>
             <ProductShowcase /> 
         </div>
     );

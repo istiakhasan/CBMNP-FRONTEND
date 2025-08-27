@@ -30,7 +30,8 @@ const PendingOrders = ({
   warehosueIds,
   currierIds,
   rangeValue,
-  orderStatus
+  orderStatus,
+  productIds
 
 }: any) => {
   // all states
@@ -50,6 +51,7 @@ const PendingOrders = ({
     statusId:orderStatus?.length>0  ?( orderStatus?.includes(1) ? 1 : "112") : '1',
     locationId: warehosueIds,
     currier: currierIds,
+    productId:productIds,
     ...rangeValue,
   });
   const local = useLocale();

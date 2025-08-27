@@ -16,7 +16,7 @@ import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import React, {  useState } from "react";
 
-const AllOrders = ({searchTerm,warehosueIds,currierIds,rangeValue,orderStatus}: any) => {
+const AllOrders = ({searchTerm,warehosueIds,productIds,currierIds,rangeValue,orderStatus}: any) => {
   // all states
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
@@ -26,6 +26,7 @@ const AllOrders = ({searchTerm,warehosueIds,currierIds,rangeValue,orderStatus}: 
     searchTerm,
     locationId:warehosueIds,
     currier:currierIds,
+    productId:productIds,
     ...rangeValue,
     statusId:orderStatus,
   });

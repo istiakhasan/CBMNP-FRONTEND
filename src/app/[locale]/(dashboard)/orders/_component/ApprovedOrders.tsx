@@ -41,7 +41,8 @@ const ApprovedOrders = ({
   warehosueIds,
   currierIds,
   rangeValue,
-  orderStatus
+  orderStatus,
+  productIds
 }: any) => {
   // all states
   const [statuschangedModal, setStatusChangeModal] = useState(false);
@@ -66,6 +67,7 @@ const ApprovedOrders = ({
     searchTerm,
     locationId:locationId || warehosueIds,
     currier: currierIds,
+    productId:productIds,
     ...rangeValue,
     statusId:orderStatus?.length>0  ?( orderStatus?.includes(2) ? 2 : "112") : '2',
   });

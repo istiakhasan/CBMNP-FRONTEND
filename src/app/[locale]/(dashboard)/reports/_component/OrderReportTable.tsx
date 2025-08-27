@@ -7,7 +7,7 @@ import dayjs from "dayjs";
 import React, { useEffect, useState } from "react";
 import StatusBadge from "@/util/StatusBadge";
 
-const OrderReportTable = ({ reports, startDate, endDate, setData,status,agentIds }: any) => {
+const OrderReportTable = ({ reports, startDate, endDate, setData,status,agentIds,warehosueIds,courierIds }: any) => {
   const [loadProcurement] = useLazyGetOrdersReportsQuery();
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
@@ -15,6 +15,25 @@ const OrderReportTable = ({ reports, startDate, endDate, setData,status,agentIds
   return (
     <div>
       <div className="table_wrapper">
+        <div className="bg-[#eeeeee] h-[30px] sticky bottom-0 flex justify-end items-center mb-1 gap-[10px]">
+          <div><span>Total Orders :</span>
+            <strong>{reports?.meta?.total || 0}</strong>
+          </div>
+          <div><span>Total Amount :</span>
+            <strong>{reports?.meta?.totalAmount || 0}</strong>
+          </div>
+          <div><span>Total Paid Amount :</span>
+            <strong>{reports?.meta?.totalPaidAmount || 0}</strong>
+          </div>
+          <div>
+            <span>Damage Qty:</span>
+            <strong>{reports?.meta?.damageQuantity || 0}</strong>
+          </div>
+          <div>
+            <span>Return Qty:</span>
+            <strong>{reports?.meta?.totalReturnQty || 0}</strong>
+          </div>
+        </div>
         <table className="report-table">
           <thead>
             <tr>
@@ -54,10 +73,7 @@ const OrderReportTable = ({ reports, startDate, endDate, setData,status,agentIds
             ))}
           </tbody>
         </table>
-        <div className="bg-[#eeeeee] h-[30px] sticky bottom-0 flex justify-end items-center gap-[200px]">
-          <span>Total</span>
-          <strong>{reports?.meta?.totalAmount || 0}</strong>
-        </div>
+        
       </div>
 
       {/* Pagination */}
@@ -76,6 +92,8 @@ const OrderReportTable = ({ reports, startDate, endDate, setData,status,agentIds
               limit: s,
               statusId: status,
               agentIds: agentIds,
+              locationId: warehosueIds,
+              currier: courierIds,
             }).unwrap();
 
             setData(result);

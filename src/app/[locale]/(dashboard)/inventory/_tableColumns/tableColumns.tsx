@@ -13,6 +13,7 @@ import { Tooltip } from "antd";
     {
       title: "Name",
       key: 3,
+      width:"300px",
       //@ts-ignore
       render: (text, record, index) => {
         return (
@@ -315,6 +316,7 @@ import { Tooltip } from "antd";
     {
       title: "Product Name",
       key: 1,
+      width:'300px',
       //@ts-ignore
       render: (text, record, index) => {
         return <span className="color_primary cursor-pointer">{record?.productname || "N/A"}</span>;

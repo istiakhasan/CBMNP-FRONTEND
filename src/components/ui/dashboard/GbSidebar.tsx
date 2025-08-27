@@ -145,11 +145,7 @@ const GbSidebar = () => {
         {
           href: "/reports/sales-reports",
           title: "Sales Reports",
-        },
-        {
-          href: "/reports/agent-reports",
-          title: "Agent Reports",
-        },
+        }
       ],
     },
   ].filter(
@@ -208,7 +204,7 @@ const GbSidebar = () => {
           ></i>
         </div>
 
-        <div className="menu_list_wraper ">
+        <div className="menu_list_wraper">
           {menuItems?.map((item, index) => {
             return (
               <Fragment key={index}>

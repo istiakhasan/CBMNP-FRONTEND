@@ -7,28 +7,47 @@ import StatusBadge from "@/util/StatusBadge";
 import {
   Checkbox,
   CheckboxOptionType,
+  ConfigProvider,
   Pagination,
   Popover,
+  Segmented,
 } from "antd";
 import moment from "moment";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
-import React, {  useState } from "react";
+import React, { useState } from "react";
 
-const ReturnOrders = ({warehosueIds,searchTerm,currierIds,rangeValue,status,orderStatus}: any) => {
+const ReturnOrders = ({
+  warehosueIds,
+  searchTerm,
+  currierIds,
+  rangeValue,
+  status,
+  orderStatus,
+  productIds,
+  countData
+}: any) => {
+  console.log(countData,'countData');
   // all states
+  const [returnId, setReturnId] = useState(11);
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
   const { data, isLoading } = useGetAllOrdersQuery({
-     page:searchTerm?1:page,
+    page: searchTerm ? 1 : page,
     limit: size,
     searchTerm,
-    statusId:orderStatus?.length>0  ?( orderStatus?.includes(status) ? status : "112") : status,
-    locationId:warehosueIds,
-    currier:currierIds,
+    productId:productIds,
+    statusId:
+      orderStatus?.length > 0
+        ? orderStatus?.includes(returnId)
+          ? returnId
+          : "112"
+        : returnId,
+    locationId: warehosueIds,
+    currier: currierIds,
     ...rangeValue,
   });
-  const local=useLocale()
+  const local = useLocale();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const tableColumn = [
@@ -54,7 +73,7 @@ const ReturnOrders = ({warehosueIds,searchTerm,currierIds,rangeValue,status,orde
             {record?.orderNumber}
           </span>
           <i
-            onClick={() => copyToClipboard(record?.orderNumber)} 
+            onClick={() => copyToClipboard(record?.orderNumber)}
             className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[4px]"
           ></i>
         </>
@@ -80,7 +99,7 @@ const ReturnOrders = ({warehosueIds,searchTerm,currierIds,rangeValue,status,orde
             {record?.receiverPhoneNumber}
           </span>
           <i
-             onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
+            onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
             className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[4px]"
           ></i>
         </>
@@ -92,7 +111,7 @@ const ReturnOrders = ({warehosueIds,searchTerm,currierIds,rangeValue,status,orde
       align: "start",
       render: (_: any, record: any) => (
         <>
-       <StatusBadge status={record?.status} />
+          <StatusBadge status={record?.status} />
         </>
       ),
     },
@@ -173,7 +192,10 @@ const ReturnOrders = ({warehosueIds,searchTerm,currierIds,rangeValue,status,orde
                 onClick={() => router.push(`/${local}/orders/${record?.id}`)}
                 className=" text-white text-[10px] py-[2px] px-[10px] cursor-pointer"
               >
-                <i style={{fontSize:"18px"}} className="ri-eye-fill color_primary"></i>
+                <i
+                  style={{ fontSize: "18px" }}
+                  className="ri-eye-fill color_primary"
+                ></i>
               </span>
             }
           </>
@@ -196,60 +218,86 @@ const ReturnOrders = ({warehosueIds,searchTerm,currierIds,rangeValue,status,orde
     value: key,
   }));
   return (
-    <div className="gb_border">
-      <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
-        <div className="flex gap-2">
-          <div className="border p-2 h-[35px] w-[35px] flex gap-3 items-center cursor-pointer justify-center">
-            <i
-              style={{ fontSize: "24px" }}
-              className="ri-restart-line text-gray-600"
-            ></i>
-          </div>
-          <Popover
-            placement="bottom"
-            content={
-              <div className=" min-w-[200px]">
-                <Checkbox.Group
-                  className="flex flex-col gap-3"
-                  value={checkedList}
-                  options={options as CheckboxOptionType[]}
-                  onChange={(value) => {
-                    setCheckedList(value as string[]);
-                  }}
-                />
-              </div>
-            }
-            trigger="click"
-            open={open}
-            onOpenChange={handleOpenChange}
-          >
-            <div className="border p-2 h-[35px] flex items-center gap-2 cursor-pointer">
+    <>
+      <ConfigProvider
+        theme={{
+          components: {
+            Segmented: {
+              itemSelectedBg: "#4F8A6D",   
+              itemSelectedColor: "#fff", 
+              fontSize:10
+            },
+          },
+        }}
+      >
+        <Segmented 
+          options={[
+            { label: `Pending-Return (${countData?.data?.find((ab:any)=>ab?.id===11).count || 0})`, value: 11 },
+            { label: `Partial-Return  (${countData?.data?.find((ab:any)=>ab?.id===12).count || 0})`, value: 12 },
+            { label: `Full-Return  (${countData?.data?.find((ab:any)=>ab?.id===10).count || 0})`, value: 10 },
+            // { label: "Damage", value: 13 },
+          ]}
+          onChange={(val) => {
+            setReturnId(val)
+          }}
+        />
+      </ConfigProvider>
+
+      <div className="gb_border mt-1">
+        <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
+          <div className="flex gap-2">
+            <div className="border p-2 h-[35px] w-[35px] flex gap-3 items-center cursor-pointer justify-center">
               <i
                 style={{ fontSize: "24px" }}
-                className="ri-equalizer-line text-gray-600"
-              ></i>{" "}
-              Filter Column
+                className="ri-restart-line text-gray-600"
+              ></i>
             </div>
-          </Popover>
+            <Popover
+              placement="bottom"
+              content={
+                <div className=" min-w-[200px]">
+                  <Checkbox.Group
+                    className="flex flex-col gap-3"
+                    value={checkedList}
+                    options={options as CheckboxOptionType[]}
+                    onChange={(value) => {
+                      setCheckedList(value as string[]);
+                    }}
+                  />
+                </div>
+              }
+              trigger="click"
+              open={open}
+              onOpenChange={handleOpenChange}
+            >
+              <div className="border p-2 h-[35px] flex items-center gap-2 cursor-pointer">
+                <i
+                  style={{ fontSize: "24px" }}
+                  className="ri-equalizer-line text-gray-600"
+                ></i>{" "}
+                Filter Column
+              </div>
+            </Popover>
+          </div>
+          <Pagination
+            pageSize={size}
+            total={data?.meta?.total}
+            onChange={(v, d) => {
+              setPage(v);
+              setSize(d);
+            }}
+            showSizeChanger={false}
+          />
         </div>
-        <Pagination
-          pageSize={size}
-          total={data?.meta?.total}
-          onChange={(v, d) => {
-            setPage(v);
-            setSize(d);
-          }}
-          showSizeChanger={false}
-        />
+        <div className="custom_scroll overflow-scroll">
+          <GbTable
+            loading={isLoading}
+            columns={newColumns}
+            dataSource={data?.data}
+          />
+        </div>
       </div>
-      <div className="custom_scroll overflow-scroll">
-        <GbTable
-          loading={isLoading}
-          columns={newColumns}
-          dataSource={data?.data}
-        />
-      </div>
-    </div>
+    </>
   );
 };
 

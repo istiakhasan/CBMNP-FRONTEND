@@ -126,7 +126,7 @@ const ProductShowcase = () => {
           </div>
 
           {/* Product Grid */}
-          <div className="h-[500px] overflow-y-scroll custom_scroll">
+          <div className="md:h-[550px] h-auto overflow-y-scroll custom_scroll">
             <div className="grid  grid-cols-2 md:grid-cols-3 lg:grid-cols-4 md:gap-6 gap-2">
             {data?.data?.map((product: any) => {
               const cartItem = cart.find((p) => p.id === product.id);

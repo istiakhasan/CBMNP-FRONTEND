@@ -60,6 +60,7 @@ const OrdersPage = () => {
     searchTerm,
     statusId: orderStatus,
     locationId: warehosueIds,
+    productIds:productIds,
     currier: partnerIds,
     ...rangeValue,
   });
@@ -111,18 +112,18 @@ const OrdersPage = () => {
       color: "bg-[#009688]",
     },
     // it't permission title should be changed
-    {
-      id: "110",
-      name: "Pending-Return",
-      permission: "VIEW_PENDING_RETURN_ORDERS",
-      color: "bg-[#795548]",
-    },
-    {
-      id: "120",
-      name: "Partial-Return",
-      permission: "VIEW_PARTIAL_RETURN_ORDERS",
-      color: "bg-[#795548]",
-    },
+    // {
+    //   id: "110",
+    //   name: "Pending-Return",
+    //   permission: "VIEW_PENDING_RETURN_ORDERS",
+    //   color: "bg-[#795548]",
+    // },
+    // {
+    //   id: "120",
+    //   name: "Partial-Return",
+    //   permission: "VIEW_PARTIAL_RETURN_ORDERS",
+    //   color: "bg-[#795548]",
+    // },
     {
       id: "10",
       name: "Returned",
@@ -143,24 +144,53 @@ const OrdersPage = () => {
     },
   ];
 
-  const tabs = allTabs
-    .filter((tab:any) => permission?.includes(tab.permission))
-  
-    .map((item:any) => ({
+  // const tabs = allTabs
+  //   .filter((tab:any) => permission?.includes(tab.permission))
+  //   .map((item:any) => ({
+  //     ...item,
+  //     //@ts-ignore
+  //     count:
+  //       countData?.data?.find(
+  //         (od: any) => od?.label?.toLowerCase() === item?.name?.toLowerCase()
+  //       )?.count || "0",
+  //     statusId:
+  //       countData?.data?.find(
+  //         (od: any) => od?.label?.toLowerCase() === item?.name?.toLowerCase()
+  //       )?.id || "0",
+  //   }))
+
+
+   const tabs = allTabs
+  .filter((tab: any) => permission?.includes(tab.permission))
+  .map((item: any) => {
+    let count = "0";
+    let statusId = "0";
+
+    if (item.name.toLowerCase() === "returned") {
+      // sum Pending-Return + Partial-Return + Returned
+      const returnedLabels = ["returned", "pending-return", "partial-return"];
+      const sum = countData?.data
+        ?.filter((od: any) =>
+          returnedLabels.includes(od?.label?.toLowerCase())
+        )
+        ?.reduce((acc: number, od: any) => acc + Number(od?.count || 0), 0);
+
+      count = String(sum);
+    } else {
+      const found = countData?.data?.find(
+        (od: any) => od?.label?.toLowerCase() === item?.name?.toLowerCase()
+      );
+      count = found?.count || "0";
+      statusId = found?.id || "0";
+    }
+
+    return {
       ...item,
-      //@ts-ignore
-      count:
-        countData?.data?.find(
-          (od: any) => od?.label?.toLowerCase() === item?.name?.toLowerCase()
-        )?.count || "0",
-      statusId:
-        countData?.data?.find(
-          (od: any) => od?.label?.toLowerCase() === item?.name?.toLowerCase()
-        )?.id || "0",
-    }))
+      count,
+      statusId,
+    };
+  });
 
-
-   
 
   const components: { [key: string]: any } = {
     "1": (
@@ -171,6 +201,7 @@ const OrdersPage = () => {
         currierIds={partnerIds}
         rangeValue={rangeValue}
         orderStatus={orderStatus}
+        productIds={productIds}
       />
     ),
     "3": (
@@ -182,6 +213,7 @@ const OrdersPage = () => {
         currierIds={partnerIds}
         rangeValue={rangeValue}
         orderStatus={orderStatus}
+        productIds={productIds}
       />
     ),
     "4": (
@@ -191,6 +223,7 @@ const OrdersPage = () => {
         currierIds={partnerIds}
         rangeValue={rangeValue}
         orderStatus={orderStatus}
+        productIds={productIds}
       />
     ),
     "9": (
@@ -201,6 +234,7 @@ const OrdersPage = () => {
         currierIds={partnerIds}
         rangeValue={rangeValue}
         orderStatus={orderStatus}
+        productIds={productIds}
       />
     ),
     "5": (
@@ -210,6 +244,7 @@ const OrdersPage = () => {
         currierIds={partnerIds}
         rangeValue={rangeValue}
         orderStatus={orderStatus}
+        productIds={productIds}
       />
     ),
     "6": (
@@ -219,6 +254,7 @@ const OrdersPage = () => {
         warehosueIds={warehosueIds}
         currierIds={partnerIds}
         orderStatus={orderStatus}
+        productIds={productIds}
       />
     ),
     "7": (
@@ -238,20 +274,21 @@ const OrdersPage = () => {
         currierIds={partnerIds}
         rangeValue={rangeValue}
         orderStatus={orderStatus}
+        productIds={productIds}
       />
     ),
-    // pending return
-    "110": (
-      <ReturnOrders
-        searchTerm={searchTerm}
-        warehosueIds={warehosueIds}
-        currierIds={partnerIds}
-        rangeValue={rangeValue}
-        orderStatus={orderStatus}
-        status={11}
-      />
-    ),
-    // Return
+    // // pending return
+    // "110": (
+    //   <ReturnOrders
+    //     searchTerm={searchTerm}
+    //     warehosueIds={warehosueIds}
+    //     currierIds={partnerIds}
+    //     rangeValue={rangeValue}
+    //     orderStatus={orderStatus}
+    //     status={11}
+    //   />
+    // ),
+    // //partial Return
     "10": (
       <ReturnOrders
         searchTerm={searchTerm}
@@ -259,20 +296,22 @@ const OrdersPage = () => {
         currierIds={partnerIds}
         rangeValue={rangeValue}
         orderStatus={orderStatus}
+        productIds={productIds}
         status={10}
+        countData={countData}
       />
     ),
-    // Return
-    "120": (
-      <ReturnOrders
-        searchTerm={searchTerm}
-        warehosueIds={warehosueIds}
-        currierIds={partnerIds}
-        rangeValue={rangeValue}
-        orderStatus={orderStatus}
-        status={12}
-      />
-    ),
+    //full  Return
+    // "120": (
+    //   <ReturnOrders
+    //     searchTerm={searchTerm}
+    //     warehosueIds={warehosueIds}
+    //     currierIds={partnerIds}
+    //     rangeValue={rangeValue}
+    //     orderStatus={orderStatus}
+    //     status={12}
+    //   />
+    // ),
     "11": (
       <CancelOrders
         searchTerm={searchTerm}
@@ -280,6 +319,7 @@ const OrdersPage = () => {
         currierIds={partnerIds}
         rangeValue={rangeValue}
         orderStatus={orderStatus}
+        productIds={productIds}
       />
     ),
   };

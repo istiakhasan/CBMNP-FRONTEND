@@ -33,7 +33,7 @@ const getStatusStyle = (label:string) => {
   
     return (
       <span
-        className={`${borderClass} font-semibold text-[10px] px-2 py-[1px] w-[90px] text-center block`}
+        className={`${borderClass} font-semibold text-[10px] px-2 py-[1px] w-[90px] text-center whitespace-nowrap block`}
         style={{ backgroundColor: bgColor, color: textColor }}
       >
         {status?.label || "N/A"}

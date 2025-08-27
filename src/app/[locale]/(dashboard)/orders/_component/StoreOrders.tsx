@@ -28,7 +28,7 @@ import copyToClipboard from "@/components/ui/GbCopyToClipBoard";
 import { useLocale } from "next-intl";
 import Invoice from "./Invoice";
 
-const StoreOrders = ({warehosueIds,currierIds,searchTerm,rangeValue,orderStatus}: any) => {
+const StoreOrders = ({warehosueIds,productIds,currierIds,searchTerm,rangeValue,orderStatus}: any) => {
   // all states
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
@@ -46,6 +46,7 @@ const StoreOrders = ({warehosueIds,currierIds,searchTerm,rangeValue,orderStatus}
     searchTerm,
     statusId:orderStatus?.length>0  ?( orderStatus?.includes(5) ? 5 : "112") : '5',
     locationId:warehosueIds,
+    productId:productIds,
     currier:currierIds,
     ...rangeValue,
   });
