@@ -145,7 +145,11 @@ const GbSidebar = () => {
         {
           href: "/reports/sales-reports",
           title: "Sales Reports",
-        }
+        },
+        {
+          href: "/reports/product-sales-report",
+          title: "Product Sales Reports",
+        },
       ],
     },
   ].filter(

@@ -7,7 +7,19 @@ import dayjs from "dayjs";
 import React, { useEffect, useState } from "react";
 import StatusBadge from "@/util/StatusBadge";
 
-const OrderReportTable = ({ reports, startDate, endDate, setData,status,agentIds,warehosueIds,courierIds }: any) => {
+const OrderReportTable = ({
+  orderSources,
+  reports,
+  startDate,
+  endDate,
+  setData,
+  status,
+  agentIds,
+  warehosueIds,
+  courierIds,
+  paymentMethodIds,
+  productIds,
+}: any) => {
   const [loadProcurement] = useLazyGetOrdersReportsQuery();
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
@@ -16,13 +28,16 @@ const OrderReportTable = ({ reports, startDate, endDate, setData,status,agentIds
     <div>
       <div className="table_wrapper">
         <div className="bg-[#eeeeee] h-[30px] sticky bottom-0 flex justify-end items-center mb-1 gap-[10px]">
-          <div><span>Total Orders :</span>
+          <div>
+            <span>Total Orders :</span>
             <strong>{reports?.meta?.total || 0}</strong>
           </div>
-          <div><span>Total Amount :</span>
+          <div>
+            <span>Total Amount :</span>
             <strong>{reports?.meta?.totalAmount || 0}</strong>
           </div>
-          <div><span>Total Paid Amount :</span>
+          <div>
+            <span>Total Paid Amount :</span>
             <strong>{reports?.meta?.totalPaidAmount || 0}</strong>
           </div>
           <div>
@@ -55,7 +70,7 @@ const OrderReportTable = ({ reports, startDate, endDate, setData,status,agentIds
                   {moment(row?.createdAt).format("DD-MM-YYYY")}
                 </td>
                 <td align="center">
-                  <StatusBadge status={{label:row?.status?.label}} />
+                  <StatusBadge status={{ label: row?.status?.label }} />
                 </td>
                 <td align="center">
                   <span className="flex items-center gap-1">
@@ -73,7 +88,6 @@ const OrderReportTable = ({ reports, startDate, endDate, setData,status,agentIds
             ))}
           </tbody>
         </table>
-        
       </div>
 
       {/* Pagination */}
@@ -94,6 +108,9 @@ const OrderReportTable = ({ reports, startDate, endDate, setData,status,agentIds
               agentIds: agentIds,
               locationId: warehosueIds,
               currier: courierIds,
+              paymentMethodIds: paymentMethodIds,
+              orderSources: orderSources,
+              productId: productIds,
             }).unwrap();
 
             setData(result);
