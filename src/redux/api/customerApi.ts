@@ -27,6 +27,14 @@ export const customerApi = baseApi.injectEndpoints({
       }),
       providesTags: [tagTypes.customer],
     }),
+    getCustomerRetentionReports: build.query({
+      query: (params) => ({
+        url: "/customers/retention-reports",
+        method: "GET",
+        params
+      }),
+      providesTags: [tagTypes.customer],
+    }),
     getCustomerById: build.query({
       query: (params) => ({
         url: `/customers/${params.id}`,
@@ -41,5 +49,7 @@ export const {
     useCreateCustomerMutation,
     useGetAllCustomersQuery,
     useGetCustomerByIdQuery,
-    useEditCustomerMutation
+    useEditCustomerMutation,
+    useGetCustomerRetentionReportsQuery,
+    useLazyGetCustomerRetentionReportsQuery
 } = customerApi;

@@ -8,8 +8,10 @@ import OrderReportTable from "../_component/OrderReportTable";
 import { useGetAllStatusQuery } from "@/redux/api/statusApi";
 import { useGetAllUsersOptionsQuery } from "@/redux/api/usersApi";
 import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
-import DownloadOrders from "./_component/DownloadButton";
+// import DownloadOrders from "./_component/DownloadButton";
 import { useGetDeliveryPartnerOptionsQuery } from "@/redux/api/partnerApi";
+import { useLazyGetCustomerRetentionReportsQuery } from "@/redux/api/customerApi";
+import RetentionreportTable from "./_component/RetentionreportTable";
 
 const Page = () => {
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
@@ -24,7 +26,7 @@ const Page = () => {
   const { data: usersData, isLoading: usersLoading } = useGetAllUsersOptionsQuery(undefined);
   const { data: deliveryPartner, isLoading: courierLoading } = useGetDeliveryPartnerOptionsQuery(undefined);
   const { data: warehouseOptions, isLoading: warehouseLoading } = useLoadAllWarehouseOptionsQuery(undefined);
-  const [loadProcurement] = useLazyGetOrdersReportsQuery();
+  const [loadCustomerRetentionReports] = useLazyGetCustomerRetentionReportsQuery();
   const { data: statusOptions, isLoading: statusLoading } = useGetAllStatusQuery({ label: "all" });
 
   const handleStartChange = (date: Dayjs | null) => {
@@ -46,7 +48,7 @@ const Page = () => {
   const handleViewClick = async () => {
     setLoading(true);
     try {
-      const result = await loadProcurement({
+      const result = await loadCustomerRetentionReports({
         startDate: startDate || dayjs(),
         endDate: endDate || dayjs(),
         statusId: status,
@@ -85,7 +87,7 @@ const Page = () => {
               value={endDate}
               onChange={handleEndChange}
             />
-            <Select
+            {/* <Select
               className="border_less_select"
               placeholder="Select status"
               onChange={(e) => setStatus([e])}
@@ -93,8 +95,8 @@ const Page = () => {
               options={statusOptions?.data}
               loading={statusLoading}
               allowClear
-            />
-            <Select
+            /> */}
+            {/* <Select
               className="border_less_select"
               placeholder="Select agent"
               onChange={(e) => setAgentId([e])}
@@ -102,8 +104,8 @@ const Page = () => {
               options={usersData?.data}
               loading={usersLoading}
               allowClear
-            />
-            <Select
+            /> */}
+            {/* <Select
               className="border_less_select"
               placeholder="Select warehouse"
               onChange={(e) => setWarehouseId([e])}
@@ -111,7 +113,7 @@ const Page = () => {
               options={warehouseOptions?.data}
               loading={warehouseLoading}
               allowClear
-            />
+            /> */}
             <Select
               className="border_less_select"
               placeholder="Select courier"
@@ -121,18 +123,15 @@ const Page = () => {
               loading={courierLoading}
               allowClear
             />
-
-          </div>
-
-          <div className="flex justify-end gap-2 mt-2">
+            <div className="flex justify-end gap-2 ">
               <button
               onClick={handleViewClick}
               disabled={loading}
-              className="bg-primary text-white font-bold text-[12px] px-[40px] py-[3px] disabled:opacity-50"
+              className="bg-primary text-white font-bold text-[12px] px-[40px]  disabled:opacity-50"
             >
               {loading ? "Loading..." : "View"}
             </button>
-            <DownloadOrders
+             {/* <DownloadOrders
               filters={{
                 startDate: startDate || dayjs(),
                 endDate: endDate || dayjs(),
@@ -141,17 +140,20 @@ const Page = () => {
                 locationId: warehosueIds,
                 currier: courierIds,
               }}
-            />
-            <button className="bg-primary text-white font-bold text-[12px] px-[20px] py-[3px]">
+            /> */}
+            <button className="bg-primary text-white font-bold text-[12px] px-[20px] ">
               Print
             </button>
           </div>
+          </div>
+
+          
         </div>
 
         {loading ? (
           <Skeleton active paragraph={{ rows: 10 }} />
         ) : (
-          <OrderReportTable
+          <RetentionreportTable
             reports={data}
             startDate={startDate}
             endDate={endDate}
