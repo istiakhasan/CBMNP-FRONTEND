@@ -377,7 +377,7 @@ aside.gb_sidebar {
   font-size: 12px !important;
   padding: 6px !important;
  }
- .ant-input{
+.custom_input .ant-input,.custom_input.ant-input{
   box-shadow: none !important;
   background: #F6F6F6 !important;
  }
@@ -467,11 +467,11 @@ aside.gb_sidebar {
   background: none !important;
   padding: 4px !important;
 }
-.ant-input{
+.custom_input .ant-input,.custom_input.ant-input{
   box-shadow: none !important;
   border: none !important;
   background: none !important;
-  padding: 0 !important;
+  padding: 6px !important;
   border-radius: 0px; 
   font-size: 12px;
 }

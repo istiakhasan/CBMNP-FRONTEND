@@ -72,7 +72,8 @@ const GbBDTInput = ({
         render={({ field }) => (
           <div style={errorMessage && {border:"1px solid red"}} className="floating-label-input">
             <label className="text-[#999] text-[12px]">{label}</label>
-            <Input
+            <Input 
+              className="custom_input"
               autoFocus
               addonBefore={addon}
               disabled={disabled}

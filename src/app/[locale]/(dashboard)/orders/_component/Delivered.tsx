@@ -7,16 +7,19 @@ import StatusBadge from "@/util/StatusBadge";
 import {
   Checkbox,
   CheckboxOptionType,
+  ConfigProvider,
   Pagination,
   Popover,
+  Segmented,
 } from "antd";
 import moment from "moment";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import React, {  useState } from "react";
 
-const Delivered = ({warehosueIds,productIds,searchTerm,currierIds,rangeValue,orderStatus}: any) => {
+const Delivered = ({warehosueIds,productIds,searchTerm,currierIds,rangeValue,orderStatus,countData}: any) => {
   // all states
+  const [paymentStatus, setPaymentStatus] = useState<any>('Pending');
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
   const { data, isLoading } = useGetAllOrdersQuery({
@@ -27,6 +30,7 @@ const Delivered = ({warehosueIds,productIds,searchTerm,currierIds,rangeValue,ord
     locationId:warehosueIds,
     productId:productIds,
     currier:currierIds,
+    paymentStatus:paymentStatus,
     ...rangeValue,
   });
   const local=useLocale()
@@ -197,7 +201,35 @@ const Delivered = ({warehosueIds,productIds,searchTerm,currierIds,rangeValue,ord
     value: key,
   }));
   return (
-    <div className="gb_border">
+    <>
+      <ConfigProvider
+        theme={{
+          components: {
+            Segmented: {
+              itemSelectedBg: "#4F8A6D",   
+              itemSelectedColor: "#fff", 
+              fontSize:10
+            },
+          },
+        }}
+      >
+        <Segmented 
+          options={[
+            { label: `Pay Due`, value: 'Pending' },
+            { label: `Partial Delivered `, value: 'Partial' },
+            { label: `Pay Collected `, value: 'Paid' },
+            { label: `All`, value: '' },
+            // { label: `Pay Due (${countData?.data?.find((ab:any)=>ab?.id===11)?.count || 0})`, value: 'Pending' },
+            // { label: `Partial Delivered  (${countData?.data?.find((ab:any)=>ab?.id===12)?.count || 0})`, value: 'Partial' },
+            // { label: `Pay Collected  (${countData?.data?.find((ab:any)=>ab?.id===10)?.count || 0})`, value: 'Paid' },
+            // { label: `All  (${countData?.data?.find((ab:any)=>ab?.id===10)?.count || 0})`, value: '' },
+          ]}
+          onChange={(val) => {
+            setPaymentStatus(val)
+          }}
+        />
+      </ConfigProvider>
+    <div className="gb_border mt-1">
       <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
         <div className="flex gap-2">
           <div className="border p-2 h-[35px] w-[35px] flex gap-3 items-center cursor-pointer justify-center">
@@ -251,6 +283,7 @@ const Delivered = ({warehosueIds,productIds,searchTerm,currierIds,rangeValue,ord
         />
       </div>
     </div>
+    </>
   );
 };
 

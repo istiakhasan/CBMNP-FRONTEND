@@ -169,11 +169,12 @@ const Customers = () => {
       payload["district"] = data?.district?.label;
       payload["division"] = data?.division?.label;
       payload["thana"] = data?.thana?.label;
+      payload["addressBook"] = false;
       if (!!data?.country) {
         payload["country"] = data?.country?.value;
       }
 
-      const res = await handleCreateCustomer(payload).unwrap();
+      const res = await handleCreateCustomer({data:payload,addressBook:false}).unwrap();
       if (res?.success === true) {
         message.success("Customer create successfully");
         setOpenAddCustomerModal(false);
@@ -196,6 +197,7 @@ const Customers = () => {
       payload["district"] = data?.district?.label;
       payload["division"] = data?.division?.label;
       payload["thana"] = data?.thana?.label;
+      
       if (!!data?.country) {
         payload["country"] = data?.country?.value;
       }

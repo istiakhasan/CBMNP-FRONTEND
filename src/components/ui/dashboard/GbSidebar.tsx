@@ -154,6 +154,14 @@ const GbSidebar = () => {
           href: "/reports/customer-retention-report",
           title: "Customer Retention Report",
         },
+        {
+          href: "/reports/top-customers",
+          title: "Top Customers",
+        },
+        {
+          href: "/reports/shipment-report",
+          title: "Shipment Report"
+        },
       ],
     },
   ].filter(
