@@ -25,6 +25,7 @@ import FixedCustomerDetailsEdit from "./_test/FixedCustomerDetailsEdit";
 import { getBaseUrl } from "@/helpers/config/envConfig";
 import { instance } from "@/helpers/axios/axiosInstance";
 import MinimalAddressSelectionEdit from "./_test/MinimalAddressSelectionEdit";
+import ProductSearchPanelEdit from "./_test/ProductSearchPanelEdit";
 
 const Page = () => {
   const userInfo: any = getUserInfo();
@@ -278,7 +279,7 @@ console.log(orderDetails,"==========================",orderData);
 
               {/* Middle Column - Products → Customer Search → Address Selection → Order Details */}
               <div className="lg:col-span-6 space-y-6">
-                <ProductSearchPanel onAddToCart={addToCart} />
+                <ProductSearchPanelEdit onAddToCart={addToCart} />
 
                 <CustomerSearchPanel
                   selectedCustomer={selectedCustomer}

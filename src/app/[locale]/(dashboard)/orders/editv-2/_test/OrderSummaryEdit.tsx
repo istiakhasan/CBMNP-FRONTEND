@@ -77,17 +77,17 @@ export default function OrderSummaryEdit({
   if (!orderDetails.orderSource)
     missingRequirements.push("Select Order source");
   if (!orderDetails.currier) missingRequirements.push("Select courier");
-
+  console.log(cartItems,"abcd");
   return (
     <div className="lg:sticky lg:top-4 space-y-4">
-      <Card className="shadow-xl border-0 overflow-hidden">
+      <Card className=" border-0 overflow-hidden">
         <CardHeader className=" border-b">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-gray-900 whitespace-nowrap">
               <ShoppingCart className="w-5 h-5 text-indigo-600" />
               Order Summary
               {cartItems.length > 0 && (
-                <Badge className=" ml-2">
+                <Badge variant="secondary" className=" ml-2">
                   {cartItems.length} {cartItems.length === 1 ? "item" : "items"}
                 </Badge>
               )}
@@ -252,25 +252,37 @@ export default function OrderSummaryEdit({
             </>
           )}
 
-          {/* Price Breakdown */}
-          {cartItems.length > 0 && (
+               {cartItems.length > 0 && (
             <>
               <Separator className="bg-gray-200" />
               <div className="space-y-3  p-4 rounded-lg border ">
                 <div className="flex justify-between text-sm font-medium">
                   <span className="text-gray-700">Subtotal:</span>
-                  <span className="text-gray-900">{formatPrice(subtotal)}</span>
+                  <span className="text-gray-900">{subtotal} ৳</span>
                 </div>
                 <div className="flex justify-between text-sm font-medium">
                   <span className="text-gray-700">Shipping:</span>
                   <span className="text-gray-900">
-                    {shipping > 0 ? formatPrice(shipping) : "Free"}
+                    {shipping > 0 ? shipping : "Free"} ৳
                   </span>
                 </div>
-                <Separator className="bg-primary" />
-                <div className="flex justify-between font-semibold text-lg">
-                  <span className="text-gray-900">Total:</span>
-                  <span className="text-primary">{formatPrice(total)}</span>
+                   <div className="flex justify-between text-sm font-medium">
+                  <span className="text-gray-700">Total:</span>
+                  <span className="text-gray-900">
+                    {total} ৳
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm font-medium">
+                  <span className="text-gray-700">Paid:</span>
+                  <span className="text-gray-900">
+                    {orderDetails?.amount > 0 ? orderDetails?.amount : 0} ৳
+                  </span>
+                </div>
+             
+                <Separator className="bg-gray-200" />
+                <div className="flex justify-between font-semibold text-[12px]">
+                  <span className="text-gray-900">Total Receivable:</span>
+                  <span className="">{Number(total || 0) - Number(orderDetails?.amount || 0)} ৳</span>
                 </div>
               </div>
             </>
@@ -301,7 +313,7 @@ export default function OrderSummaryEdit({
       </Card>
 
       {/* Action Buttons - Sticky on Mobile */}
-      <div className="lg:relative fixed bottom-0 left-0 right-0 lg:bottom-auto lg:left-auto lg:right-auto bg-white lg:bg-transparent p-4 lg:p-0 border-t lg:border-t-0 border-gray-200 lg:border-none shadow-lg lg:shadow-none z-50">
+      <div className="lg:sticky lg:bg-white fixed bottom-0 left-0 right-0 lg:bottom-0 lg:right-auto bg-white lg:bg-transparent p-4 lg:p-0 border-t lg:border-t-0 border-gray-200 lg:border-none shadow-lg lg:shadow-none z-50">
         <div className="max-w-7xl mx-auto lg:max-w-none">
           <div className="space-y-3">
             <Button

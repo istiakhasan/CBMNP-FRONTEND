@@ -80,10 +80,10 @@ export default function FixedCustomerDetailsEdit({
  
   return (
     <div className="lg:sticky lg:top-4 h-[90vh] overflow-scroll custom_scroll">
-      <Card className="shadow-xl border-0 overflow-hidden">
+      <Card className="shadow-xl border-0">
         <CardHeader className=" border-b">
           <CardTitle className="flex items-center gap-2 text-gray-900">
-            <User className="w-5 h-5 text-blue-600" />
+            <User className="w-5 h-5 text-primary" />
             Customer Details
             {selectedCustomer?.isNew && (
               <Badge className="bg-green-100 text-green-800 ml-2">NEW</Badge>
@@ -91,7 +91,7 @@ export default function FixedCustomerDetailsEdit({
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="p-6 space-y-6">
+        <CardContent className="p-0 space-y-6">
           {/* Customer Header with Basic Info */}
           <div className="p-4  rounded-lg border space-y-3">
             <div className="flex justify-between items-start">
@@ -147,8 +147,8 @@ export default function FixedCustomerDetailsEdit({
               </div>
               <div className="text-center p-2  rounded border ">
                 <div className="flex items-center justify-center gap-1 mb-1">
-                  <BarChart3 className="w-3 h-3 text-blue-600" />
-                  <span className="text-sm font-semibold text-blue-600">
+                  <BarChart3 className="w-3 h-3 text-primary" />
+                  <span className="text-sm font-semibold text-primary">
                     {selectedCustomerOrdersCount?.find((item:any)=>item?.label==='Total')?.count || 0}
                   </span>
                 </div>
@@ -206,7 +206,7 @@ export default function FixedCustomerDetailsEdit({
                   {selectedCustomer?.orders?.map((order:any) => (
                     <div key={order.id} className="p-2 bg-white rounded border text-xs">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium text-blue-600">{order?.id}</span>
+                        <span className="font-medium text-primary">{order?.id}</span>
                         <StatusTextBadge status={{label:order?.status?.label}} />
                       </div>
                       <div className="flex justify-between items-center">
@@ -273,7 +273,7 @@ export default function FixedCustomerDetailsEdit({
                     </Badge>
                   </div>
                 ))}
-                <p className="text-xs text-blue-600 text-center">
+                <p className="text-xs text-primary text-center">
                   Updated by {selectedCustomer?.deliveryStats?.updatedBy}
                 </p>
               </CollapsibleContent>
