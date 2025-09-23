@@ -122,7 +122,7 @@ console.log("orderSource exists:", orderDetails?.orderSource?.length > 0);
               <ShoppingCart className="w-5 h-5 text-primary" />
               Order Summary
               {cartItems.length > 0 && (
-                <Badge className="bg-indigo-100 text-primary ml-2">
+                <Badge variant="outline" className="bg-indigo-100 text-primary ml-2">
                   {cartItems.length} {cartItems.length === 1 ? "item" : "items"}
                 </Badge>
               )}

@@ -17,7 +17,7 @@ interface ProductSearchPanelProps {
   onAddToCart: (product: any, quantity: number) => void;
 }
 
-export default function ProductSearchPanel({
+export default function ProductSearchPanelEdit({
   onAddToCart,
 }: ProductSearchPanelProps) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -74,7 +74,7 @@ export default function ProductSearchPanel({
       return {
         variant: "destructive" as const,
         text: "Out of Stock",
-        color: "border-red-200",
+        // color: "border-red-200",
       };
     if (available < 5)
       return {
@@ -91,15 +91,15 @@ export default function ProductSearchPanel({
     return {
       variant: "secondary" as const,
       text: `${available} available`,
-      color: "border-green-200",
+      color: "border-gray-100",
     };
   };
 
   return (
     <Card className="shadow-lg border-0">
-      <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b">
+      <CardHeader className="  border-b">
         <CardTitle className="flex items-center gap-2 text-gray-900">
-          <Package className="w-5 h-5 text-green-600" />
+          <Package className="w-5 h-5 " />
           Product Search & Add to Cart
         </CardTitle>
       </CardHeader>
@@ -111,7 +111,7 @@ export default function ProductSearchPanel({
             placeholder="Search products by name or ID..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 h-12 shadow-sm border-gray-200 focus:border-green-500 focus:ring-green-500"
+            className="pl-10 h-12   "
           />
         </div>
 
@@ -119,7 +119,7 @@ export default function ProductSearchPanel({
         {/* Product Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
           {mockProducts?.data
-            ?.slice() // create a shallow copy to avoid mutating original data
+            ?.slice() 
             .sort(
               (a: any, b: any) =>
                 (b?.inventories?.stock || 0) - (a?.inventories?.stock || 0)
@@ -140,7 +140,7 @@ export default function ProductSearchPanel({
                   } ${
                     isOutOfStock
                       ? "opacity-50 bg-gray-50"
-                      : "bg-white hover:bg-gradient-to-br hover:from-white hover:to-green-50 hover:border-green-300"
+                      : "bg-white  hover:from-white  "
                   }`}
                 >
                   <div className="flex justify-between items-start">
@@ -151,7 +151,7 @@ export default function ProductSearchPanel({
                       <p className="text-sm text-muted-foreground">
                         ID: {product?.internalId}
                       </p>
-                      <p className="font-semibold text-green-600 mt-1">
+                      <p className="font-semibold text-[#4F8A6D] mt-1">
                         {formatPrice(product?.salePrice)}
                       </p>
                     </div>
@@ -215,7 +215,7 @@ export default function ProductSearchPanel({
                           </Button>
                         </div>
                         {quantity > 1 && (
-                          <span className="text-sm font-medium text-green-600">
+                          <span className="text-sm font-medium text-[#4F8A6D]">
                             = {formatPrice(product?.salePrice * quantity)}
                           </span>
                         )}
@@ -225,7 +225,7 @@ export default function ProductSearchPanel({
                       <Button
                         onClick={() => addToCart(product)}
                         disabled={isQuantityExceeded}
-                        className="w-full h-10 bg-green-600 hover:bg-green-700 text-white font-medium transition-all duration-200 hover:scale-105 shadow-md"
+                        className="w-full h-10 bg-[#4F8A6D]  text-white font-medium transition-all duration-200 hover:scale-105 shadow-md"
                         title={
                           isQuantityExceeded
                             ? `Quantity exceeds available stock (${product?.available} available)`
@@ -247,7 +247,7 @@ export default function ProductSearchPanel({
 
                   {isOutOfStock && (
                     <Badge
-                      variant="destructive"
+                      // variant="outline"
                       className="w-full justify-center py-2 font-medium"
                     >
                       Out of Stock
