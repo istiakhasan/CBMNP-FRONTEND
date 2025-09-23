@@ -62,7 +62,8 @@ const GbFormInput = ({
           name={name}
           defaultValue={value || ""}
           render={({ field }) => (
-            <Input
+            <Input 
+              className="custom_input"
               id={name} // Add id here
               autoFocus
               disabled={disabled}

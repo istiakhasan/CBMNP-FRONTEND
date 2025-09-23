@@ -7,6 +7,15 @@ export const customerApi = baseApi.injectEndpoints({
       query: (data) => ({
         url: "/customers",
         method: "POST",
+        data:data?.data,
+        params:data?.params
+      }),
+      invalidatesTags: [tagTypes.customer],
+    }),
+    addAddress: build.mutation({
+      query: (data) => ({
+        url: "/customers/create-adress",
+        method: "POST",
         data,
       }),
       invalidatesTags: [tagTypes.customer],
@@ -42,6 +51,14 @@ export const customerApi = baseApi.injectEndpoints({
       }),
       providesTags: [tagTypes.customer],
     }),
+    topCustomersReports: build.query({
+      query: (params) => ({
+        url: `/customers/top-customers-reports`,
+        method: "GET",
+        params
+      }),
+      providesTags: [tagTypes.customer],
+    }),
   }),
 });
 
@@ -51,5 +68,10 @@ export const {
     useGetCustomerByIdQuery,
     useEditCustomerMutation,
     useGetCustomerRetentionReportsQuery,
-    useLazyGetCustomerRetentionReportsQuery
+    useLazyGetCustomerRetentionReportsQuery,
+    useTopCustomersReportsQuery,
+    useLazyTopCustomersReportsQuery,
+    useAddAddressMutation,
+    useLazyGetCustomerByIdQuery
+
 } = customerApi;

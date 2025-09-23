@@ -261,7 +261,7 @@ const OrderDetails = ({ data, permission }: any) => {
               >
                 Warehouse
               </td>
-              <td style={{ color: "#4b5766", fontSize: "12px" }}>N/A</td>
+              <td style={{ color: "#4b5766", fontSize: "12px" }}>{data?.warehouse?.name}</td>
             </tr>
             <tr>
               <th>Product Code</th>
