@@ -50,7 +50,7 @@ const ApprovedOrders = ({
   const [loadStockByWarehouseProduct] =
     useLazyLoadStockByProductIdAndLocationIdQuery();
   const [page, setPage] = useState<number>(1);
-  const [size, setSize] = useState<number>(10);
+  const [size, setSize] = useState<number>(500);
   const [printModal, setPrintModal] = useState(false);
   const [selectedOrders, setSelectedOrders] = useState<any>([]);
   const [rowId, setRowId] = useState<any>(null);
