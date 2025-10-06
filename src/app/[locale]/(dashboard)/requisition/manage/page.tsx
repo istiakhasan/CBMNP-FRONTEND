@@ -194,7 +194,7 @@ const Page = ({}: any) => {
           </div>
           <div className="max-h-[600px] overflow-scroll">
             <GbTable
-              rowSelection={rowSelection}
+              // rowSelection={rowSelection}
               loading={isLoading}
               columns={newColumns}
               dataSource={data?.data}

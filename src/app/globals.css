@@ -772,4 +772,23 @@ aside.gb_sidebar {
   .border_less_select .ant-select-selector{
     border-radius: 0 !important;
   }
+
+
+  /* requistion from table  */
+  .requistion_form_table{
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .requistion_form_table td{
+    border: 1px solid rgba(0, 0, 0, .2);
+    padding: 2px 6px;
+    font-size: 12px;
+  }
+  .requistion_form_table th{
+    border: 1px solid rgba(0, 0, 0, .2);
+    padding: 2px 6px;
+    font-size: 12px;
+  }
+  .requistion_form_table{}
+  .requistion_form_table{}
   
