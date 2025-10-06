@@ -42,7 +42,8 @@ const ApprovedOrders = ({
   currierIds,
   rangeValue,
   orderStatus,
-  productIds
+  productIds,
+  locationId
 }: any) => {
   // all states
   const [statuschangedModal, setStatusChangeModal] = useState(false);
@@ -59,13 +60,13 @@ const ApprovedOrders = ({
   });
   const local = useLocale();
   const { data: warehouseOptions } = useLoadAllWarehouseOptionsQuery(undefined);
-  const [locationId, setLocationId] = useState("");
+  // const [locationId, setLocationId] = useState("");
   const [openModal, setOpenModal] = useState(false);
   const { data, isLoading, refetch } = useGetAllOrdersQuery({
     page:searchTerm?1:page,
     limit: size,
     searchTerm,
-    locationId:locationId || warehosueIds,
+    locationId: warehosueIds,
     currier: currierIds,
     productId:productIds,
     ...rangeValue,
@@ -327,13 +328,13 @@ const ApprovedOrders = ({
               Filter Column
             </div>
           </Popover>
-          <Select
+          {/* <Select
             size={"middle"}
             placeholder='Select Warehouse'
             onChange={(e) => setLocationId(e)}
             style={{ width: 200, height: "36px", borderRadius: "0px" }}
             options={warehouseOptions?.data}
-          />
+          /> */}
         </div>
         <div className="flex gap-3">
           <Pagination
@@ -348,7 +349,7 @@ const ApprovedOrders = ({
 
           <div>
             {
-              <GbDropdown state={locationId} items={items}>
+              <GbDropdown items={items}>
                 <button className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]">
                   Action
                 </button>

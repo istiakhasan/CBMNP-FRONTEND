@@ -29,12 +29,23 @@ import dayjs from "dayjs";
 import ShipmentTable from "./ShipmentTable";
 import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
 import { useGetDeliveryPartnerOptionsQuery } from "@/redux/api/partnerApi";
+import GbForm from "@/components/forms/GbForm";
+import BulkChangeOrders from "./BulkChangeOrders";
 const { RangePicker } = DatePicker;
-const InTransitOrders = ({searchTerm,warehosueIds,currierIds,rangeValue,productIds,orderStatus}: any) => {
+const InTransitOrders = ({
+  searchTerm,
+  warehosueIds,
+  currierIds,
+  rangeValue,
+  productIds,
+  orderStatus,
+}: any) => {
   const [openModal, setOpenModal] = useState(false);
   const [location, setLocationId] = useState<any>([]);
-  const [selecteddeliveryPartner, setSelectedDeliveryPartner] =
-    useState<any>([]);
+  const [statuschangedModal, setStatusChangeModal] = useState(false);
+  const [selecteddeliveryPartner, setSelectedDeliveryPartner] = useState<any>(
+    []
+  );
   const { data: warehouseOptions } = useLoadAllWarehouseOptionsQuery(undefined);
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
@@ -44,14 +55,15 @@ const InTransitOrders = ({searchTerm,warehosueIds,currierIds,rangeValue,productI
   const { data: deliveryPartnerOptions, isLoading: deliveryPartnerLoading } =
     useGetDeliveryPartnerOptionsQuery(undefined);
   const { data, isLoading } = useGetAllOrdersQuery({
-     page:searchTerm?1:page,
+    page: searchTerm ? 1 : page,
     limit: size,
     searchTerm,
-    statusId:orderStatus?.length>0  ?( orderStatus?.includes(7) ? 7 : "112") : '7',
+    statusId:
+      orderStatus?.length > 0 ? (orderStatus?.includes(7) ? 7 : "112") : "7",
     locationId: warehosueIds,
     currier: currierIds,
     ...rangeValue,
-    productId:productIds
+    productId: productIds,
   });
   const { data: rowData, isLoading: rowDataLoading } = useGetOrderByIdQuery({
     id: rowId,
@@ -116,7 +128,7 @@ const InTransitOrders = ({searchTerm,warehosueIds,currierIds,rangeValue,productI
             {record?.receiverPhoneNumber}
           </span>
           <i
-             onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
+            onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
             className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[4px]"
           ></i>
         </>
@@ -316,23 +328,25 @@ const InTransitOrders = ({searchTerm,warehosueIds,currierIds,rangeValue,productI
                       className="text-black flex items-center gap-2"
                       key={i}
                     >
-                      <input type="checkbox" value={item?.value} onChange={(e) => {
+                      <input
+                        type="checkbox"
+                        value={item?.value}
+                        onChange={(e) => {
                           if (e.target.checked) {
                             // Add item
                             setLocationId((prev: any[]) => [
                               ...prev,
-                             item.value 
+                              item.value,
                             ]);
                           } else {
                             // Remove item
                             setLocationId((prev: any[]) =>
-                              prev.filter(
-                                (entry) => entry !== item?.value
-                              )
+                              prev.filter((entry) => entry !== item?.value)
                             );
                           }
                         }}
-                      name={item.label} />
+                        name={item.label}
+                      />
                       {item?.label}
                     </span>
                   ))}
@@ -352,14 +366,12 @@ const InTransitOrders = ({searchTerm,warehosueIds,currierIds,rangeValue,productI
                             // Add item
                             setSelectedDeliveryPartner((prev: any[]) => [
                               ...prev,
-                             item.value 
+                              item.value,
                             ]);
                           } else {
                             // Remove item
                             setSelectedDeliveryPartner((prev: any[]) =>
-                              prev.filter(
-                                (entry) => entry !== item?.value
-                              )
+                              prev.filter((entry) => entry !== item?.value)
                             );
                           }
                         }}
@@ -400,7 +412,7 @@ const InTransitOrders = ({searchTerm,warehosueIds,currierIds,rangeValue,productI
                     // }}
                   />
                 </div>
-{/* 
+                {/* 
                 <div className="flex justify-end">
                   <button className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px] mt-3">
                     Apply
@@ -440,25 +452,14 @@ const InTransitOrders = ({searchTerm,warehosueIds,currierIds,rangeValue,productI
                   },
                   {
                     label: (
-                      <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
-                        <span
-                          onClick={async () => {
-                            setOpenModal(true);
-                          }}
-                        >
-                          Report
-                        </span>
-                      </span>
-                    ),
-                    key: "1",
-                  },
-                  {
-                    label: (
-                      <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
+                      <span
+                        onClick={() => setStatusChangeModal(true)}
+                        className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center"
+                      >
                         <span>Change Status</span>
                       </span>
                     ),
-                    key: "1",
+                    key: "2",
                   },
                 ]}
               >
@@ -596,6 +597,21 @@ const InTransitOrders = ({searchTerm,warehosueIds,currierIds,rangeValue,productI
             </div>
           </div>
         </div>
+      </GbModal>
+      <GbModal
+        width="600px"
+        clseTab={false}
+        isModalOpen={statuschangedModal}
+        openModal={() => setStatusChangeModal(true)}
+        closeModal={() => setStatusChangeModal(false)}
+      >
+        <GbForm submitHandler={(data: any) => console.log(data)}>
+          <BulkChangeOrders
+            status="In-transit"
+            setModalOpen={setStatusChangeModal}
+            selectedOrders={selectedOrders}
+          />
+        </GbForm>
       </GbModal>
       <GbModal
         width="900px"

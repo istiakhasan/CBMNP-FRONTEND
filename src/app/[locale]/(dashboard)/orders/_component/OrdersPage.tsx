@@ -2,7 +2,7 @@
 import GbHeader from "@/components/ui/dashboard/GbHeader";
 import { useGetUserByIdQuery } from "@/redux/api/usersApi";
 import convertNumberToShorthand from "@/util/convertNumberToShorthand";
-import { DatePicker, Divider, Spin, Tooltip } from "antd";
+import { DatePicker, Divider, Select, Spin, Tooltip } from "antd";
 import React, { useState } from "react";
 import { useLocale } from "next-intl";
 import AllOrders from "./AllOrders";
@@ -35,6 +35,9 @@ const OrdersPage = () => {
   const [productIds, setProductsIds] = useState<any>([]);
   const [partnerIds, setPartnerIds] = useState<any>([]);
   const [activeTab, setActiveTab] = useState<string>("1");
+  const [selectedWarehouse, setSelectedWarehouse] = useState<
+    string | undefined
+  >();
   const [searchTerm, setSearchTerm] = useState("");
   const userInfo: any = getUserInfo();
   const router = useRouter();
@@ -60,15 +63,14 @@ const OrdersPage = () => {
     searchTerm,
     statusId: orderStatus,
     locationId: warehosueIds,
-    productIds:productIds,
+    productIds: productIds,
     currier: partnerIds,
     ...rangeValue,
   });
 
-
   const permission = userData?.permission?.map((item: any) => item?.label);
 
-  const allTabs:any = [
+  const allTabs: any = [
     {
       id: "1",
       name: "Pending",
@@ -159,38 +161,36 @@ const OrdersPage = () => {
   //       )?.id || "0",
   //   }))
 
+  const tabs = allTabs
+    .filter((tab: any) => permission?.includes(tab.permission))
+    .map((item: any) => {
+      let count = "0";
+      let statusId = "0";
 
-   const tabs = allTabs
-  .filter((tab: any) => permission?.includes(tab.permission))
-  .map((item: any) => {
-    let count = "0";
-    let statusId = "0";
+      if (item.name.toLowerCase() === "returned") {
+        // sum Pending-Return + Partial-Return + Returned
+        const returnedLabels = ["returned", "pending-return", "partial-return"];
+        const sum = countData?.data
+          ?.filter((od: any) =>
+            returnedLabels.includes(od?.label?.toLowerCase())
+          )
+          ?.reduce((acc: number, od: any) => acc + Number(od?.count || 0), 0);
 
-    if (item.name.toLowerCase() === "returned") {
-      // sum Pending-Return + Partial-Return + Returned
-      const returnedLabels = ["returned", "pending-return", "partial-return"];
-      const sum = countData?.data
-        ?.filter((od: any) =>
-          returnedLabels.includes(od?.label?.toLowerCase())
-        )
-        ?.reduce((acc: number, od: any) => acc + Number(od?.count || 0), 0);
+        count = String(sum);
+      } else {
+        const found = countData?.data?.find(
+          (od: any) => od?.label?.toLowerCase() === item?.name?.toLowerCase()
+        );
+        count = found?.count || "0";
+        statusId = found?.id || "0";
+      }
 
-      count = String(sum);
-    } else {
-      const found = countData?.data?.find(
-        (od: any) => od?.label?.toLowerCase() === item?.name?.toLowerCase()
-      );
-      count = found?.count || "0";
-      statusId = found?.id || "0";
-    }
-
-    return {
-      ...item,
-      count,
-      statusId,
-    };
-  });
-
+      return {
+        ...item,
+        count,
+        statusId,
+      };
+    });
 
   const components: { [key: string]: any } = {
     "1": (
@@ -214,6 +214,7 @@ const OrdersPage = () => {
         rangeValue={rangeValue}
         orderStatus={orderStatus}
         productIds={productIds}
+        locationId={selectedWarehouse}
       />
     ),
     "4": (
@@ -324,7 +325,13 @@ const OrdersPage = () => {
     ),
   };
 
-
+  React.useEffect(() => {
+    if (warehouseOptions?.data?.length && !selectedWarehouse) {
+      const defaultWarehouse = warehouseOptions.data[0]?.value;
+      setSelectedWarehouse(defaultWarehouse);
+      setWarehouseIds([defaultWarehouse]); // Load orders for default warehouse
+    }
+  }, [warehouseOptions?.data]);
   return (
     <div>
       <GbHeader title="Orders" />
@@ -342,7 +349,20 @@ const OrdersPage = () => {
                     setSearchTerm={setSearchTerm}
                     searchTerm={searchTerm}
                   />
-
+                  <Select
+                    placeholder="Select warehouse"
+                    style={{
+                      width: "250px",
+                      height: "35px",
+                      borderRadius: "0",
+                    }}
+                    options={warehouseOptions?.data}
+                    value={selectedWarehouse}
+                    onChange={(value) => {
+                      setSelectedWarehouse(value);
+                      setWarehouseIds([value]); // Update orders when user changes warehouse
+                    }}
+                  />
                   <Tooltip
                     styles={{
                       body: {
@@ -531,7 +551,7 @@ const OrdersPage = () => {
               </div>
             )}
             <div className="flex gap-[20px] bg-white my-2">
-              {tabs?.map((tab:any) => (
+              {tabs?.map((tab: any) => (
                 <p
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}

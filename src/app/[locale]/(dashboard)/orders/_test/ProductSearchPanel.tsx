@@ -119,7 +119,7 @@ export default function ProductSearchPanel({
         {/* Product Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
           {mockProducts?.data
-            ?.slice() 
+            ?.slice()
             .sort(
               (a: any, b: any) =>
                 (b?.inventories?.stock || 0) - (a?.inventories?.stock || 0)
@@ -162,6 +162,25 @@ export default function ProductSearchPanel({
                       >
                         {stockStatus.text}
                       </Badge>
+                      <span className="px-3 text-[10px]">
+                        BS:
+                        {(() => {
+                          const stock = Number(
+                            product?.inventories?.stock ?? 0
+                          );
+                          const processing = Number(
+                            product?.inventories?.processing ?? 0
+                          );
+                          const orderQue = Number(
+                            product?.inventories?.orderQue ?? 0
+                          );
+                          const hoildQue = Number(
+                            product?.inventories?.hoildQue ?? 0
+                          );
+
+                          return stock - (processing + orderQue + hoildQue);
+                        })()}
+                      </span>
                       {isLowStock && !isOutOfStock && (
                         <div
                           className="flex items-center gap-1 text-amber-600"

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Modal,
   Form,
@@ -14,56 +14,22 @@ import {
   UserOutlined,
   GlobalOutlined,
   PhoneOutlined,
-  EnvironmentOutlined,
 } from "@ant-design/icons";
+import axios from "axios";
 import { useCreateCustomerMutation } from "@/redux/api/customerApi";
+import { getBaseUrl } from "@/helpers/config/envConfig";
+import { countryData } from "../create-order/_component/countryCode";
+
 
 const { TextArea } = Input;
 const { Option } = Select;
-
-const districts = [
-  "Dhaka",
-  "Chittagong",
-  "Sylhet",
-  "Rajshahi",
-  "Khulna",
-  "Barisal",
-  "Rangpur",
-  "Mymensingh",
-];
-const divisions = [
-  "Dhaka",
-  "Chittagong",
-  "Sylhet",
-  "Rajshahi",
-  "Khulna",
-  "Barisal",
-  "Rangpur",
-  "Mymensingh",
-];
-const countries = [
-  "Saudi Arabia",
-  "UAE",
-  "Qatar",
-  "Kuwait",
-  "Oman",
-  "Bahrain",
-  "Malaysia",
-  "Singapore",
-  "Italy",
-  "Spain",
-  "UK",
-  "USA",
-  "Canada",
-  "Australia",
-];
 
 interface CustomerRegistrationFormProps {
   isOpen: boolean;
   onClose: () => void;
   onRegister: any;
   selectedCustomer?: any;
-  setCustomerAddresses: any;
+  setCustomerAddresses?: any;
 }
 
 export default function CustomerRegistrationForm({
@@ -76,35 +42,98 @@ export default function CustomerRegistrationForm({
     "NON_PROBASHI"
   );
 
+  const [divisionData, setDivisionData] = useState<any[]>([]);
+  const [districtData, setDistrictData] = useState<any[]>([]);
+  const [thanaData, setThanaData] = useState<any[]>([]);
+
   const [handleCreateCustomer] = useCreateCustomerMutation();
+
+  // Fetch divisions
+  useEffect(() => {
+    axios
+      .get(`${getBaseUrl()}/divisions`)
+      .then((res) => setDivisionData(res?.data))
+      .catch((error) => console.log(error));
+  }, []);
+
+  const handleDivisionChange = (divisionId: any) => {
+    const divisionObj = divisionData.find((d) => d.id === divisionId);
+    form.setFieldsValue({
+      divisionId,
+      divisionName: divisionObj?.name_en,
+      district: null,
+      districtId: null,
+      districtName: null,
+      thana: null,
+      thanaId: null,
+      thanaName: null,
+    });
+    setDistrictData([]);
+    setThanaData([]);
+
+    axios
+      .get(`${getBaseUrl()}/divisions/${divisionId}`)
+      .then((res) => setDistrictData(res?.data?.district_info))
+      .catch((error) => console.log(error));
+  };
+
+  const handleDistrictChange = (districtId: any) => {
+    const districtObj = districtData.find((d) => d.id === districtId);
+    form.setFieldsValue({
+      districtId,
+      districtName: districtObj?.name_en,
+      thana: null,
+      thanaId: null,
+      thanaName: null,
+    });
+    setThanaData([]);
+
+    axios
+      .get(`${getBaseUrl()}/districts/${districtId}`)
+      .then((res) => setThanaData(res?.data?.thana_info))
+      .catch((error) => console.log(error));
+  };
+
+  const handleThanaChange = (thanaId: any) => {
+    const thanaObj = thanaData.find((t) => t.id === thanaId);
+    form.setFieldsValue({
+      thanaId,
+      thanaName: thanaObj?.name_en,
+    });
+  };
 
   const formSubmit = async (data: any) => {
     try {
       const payload: any = { ...data };
       payload["customerType"] = customerType;
 
+      // For local customer
       if (customerType === "NON_PROBASHI") {
-        if (data?.district) payload["district"] = data?.district;
-        if (data?.division) payload["division"] = data?.division;
-        if (data?.thana) payload["thana"] = data?.thana;
+       payload.division =data?.divisionName;
+       payload.district=data?.districtName;
+       payload.thana=data?.thanaName;
+       delete payload['divisionName']
+       delete payload['districtName']
+       delete payload['thanaName']
+       
       }
-
+  
+      // For probashi customer
       if (customerType === "PROBASHI") {
-        if (data?.country) payload["country"] = data?.country;
+        payload.country = data.country;
       }
-
+       
       const res = await handleCreateCustomer({
         data: payload,
         params: { addressBook: true },
       }).unwrap();
+
       if (res?.success === true) {
-        console.log(res, "res");
         onRegister(res?.data);
         message.success("Customer created successfully");
-        // form.resetFields();
-        // onClose()
       }
     } catch (error: any) {
+      console.error(error);
       if (error?.data?.errorMessages?.length > 0) {
         error?.data?.errorMessages?.forEach((item: any) => {
           message.error(item?.message);
@@ -112,7 +141,6 @@ export default function CustomerRegistrationForm({
       } else {
         message.error("Something went wrong");
       }
-      // form.resetFields();
     }
   };
 
@@ -177,8 +205,9 @@ export default function CustomerRegistrationForm({
               </Form.Item>
             </Col>
           </Row>
-          <Row gutter={16}>
-            {customerType === "PROBASHI" && (
+
+          {customerType === "PROBASHI" && (
+            <Row gutter={16}>
               <Col span={12}>
                 <Form.Item
                   name="country"
@@ -186,16 +215,16 @@ export default function CustomerRegistrationForm({
                   rules={[{ required: true, message: "Please select country" }]}
                 >
                   <Select placeholder="Select country">
-                    {countries.map((c) => (
-                      <Option key={c} value={c}>
-                        {c}
+                    {countryData.map((c) => (
+                      <Option key={c.value} value={c.value}>
+                        {c.label}
                       </Option>
                     ))}
                   </Select>
                 </Form.Item>
               </Col>
-            )}
-          </Row>
+            </Row>
+          )}
         </Card>
 
         {/* Address Info */}
@@ -209,18 +238,33 @@ export default function CustomerRegistrationForm({
         >
           {customerType === "NON_PROBASHI" ? (
             <>
+              {/* Hidden name fields */}
+              <Form.Item name="divisionName" hidden />
+              <Form.Item name="districtName" hidden />
+              <Form.Item name="thanaName" hidden />
+
               <Row gutter={16}>
                 <Col span={12}>
-                  <Form.Item name="division" label="Division">
-                    <Select placeholder="Select division">
-                      {divisions.map((d) => (
-                        <Option key={d} value={d}>
-                          {d}
+                  <Form.Item
+                    name="division"
+                    label="Division"
+                    rules={[
+                      { required: true, message: "Please select division" },
+                    ]}
+                  >
+                    <Select
+                      placeholder="Select division"
+                      onChange={handleDivisionChange}
+                    >
+                      {divisionData?.map((d) => (
+                        <Option key={d.id} value={d.id}>
+                          {d.name_en}
                         </Option>
                       ))}
                     </Select>
                   </Form.Item>
                 </Col>
+
                 <Col span={12}>
                   <Form.Item
                     name="district"
@@ -229,10 +273,13 @@ export default function CustomerRegistrationForm({
                       { required: true, message: "Please select district" },
                     ]}
                   >
-                    <Select placeholder="Select district">
-                      {districts.map((d) => (
-                        <Option key={d} value={d}>
-                          {d}
+                    <Select
+                      placeholder="Select district"
+                      onChange={handleDistrictChange}
+                    >
+                      {districtData?.map((d) => (
+                        <Option key={d.id} value={d.id}>
+                          {d.name_en}
                         </Option>
                       ))}
                     </Select>
@@ -243,12 +290,12 @@ export default function CustomerRegistrationForm({
               <Form.Item
                 name="thana"
                 label="Thana"
-                rules={[{ required: true, message: "Please select district" }]}
+                rules={[{ required: true, message: "Please select thana" }]}
               >
-                <Select placeholder="Select district">
-                  {districts.map((d) => (
-                    <Option key={d} value={d}>
-                      {d}
+                <Select placeholder="Select thana" onChange={handleThanaChange}>
+                  {thanaData?.map((d) => (
+                    <Option key={d.id} value={d.id}>
+                      {d.name_en}
                     </Option>
                   ))}
                 </Select>
@@ -266,6 +313,7 @@ export default function CustomerRegistrationForm({
             </>
           ) : (
             <>
+              {/* Existing Probashi fields */}
               <Row gutter={16}>
                 <Col span={12}>
                   <Form.Item
@@ -291,41 +339,15 @@ export default function CustomerRegistrationForm({
                 </Col>
               </Row>
               <Form.Item
+                name="receiverPhone"
+                label="Receiver Phone"
                 rules={[
                   { required: true, message: "Please enter receiver phone" },
                 ]}
-                name="receiverPhone"
-                label="Receiver Phone"
               >
                 <Input placeholder="+8801XXXXXXXXX" />
               </Form.Item>
-              <Row gutter={16}>
-                <Col span={12}>
-                  <Form.Item name="receiverDivision" label="Division">
-                    <Select placeholder="Select division">
-                      {divisions.map((d) => (
-                        <Option key={d} value={d}>
-                          {d}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item name="receiverDistrict" label="District">
-                    <Select placeholder="Select district">
-                      {districts.map((d) => (
-                        <Option key={d} value={d}>
-                          {d}
-                        </Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </Col>
-              </Row>
-              <Form.Item name="receiverThana" label="Thana/Upazila">
-                <Input placeholder="Enter thana/upazila" />
-              </Form.Item>
+
               <Form.Item
                 name="receiverAddress"
                 label="Receiver Address"

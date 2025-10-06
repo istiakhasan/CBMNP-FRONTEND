@@ -281,14 +281,14 @@ console.log(orderDetails,"==========================",orderData);
               <div className="lg:col-span-6 space-y-6">
                 <ProductSearchPanelEdit onAddToCart={addToCart} />
 
-                <CustomerSearchPanel
+                {/* <CustomerSearchPanel
                   selectedCustomer={selectedCustomer}
                   onCustomerSelect={handleCustomerSelect}
                   setSelectedCustomerOrderCount={setSelectedCustomerOrderCount}
                   setOrderDetails={setOrderDetails}
                   setCustomerAddresses={setCustomerAddresses}
                   onDeliveryAddressSelect={handleDeliveryAddressChange}
-                />
+                /> */}
 
                 {/* Minimal Address Selection - Shows after customer selection */}
                 {selectedCustomer && (
