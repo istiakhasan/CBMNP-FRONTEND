@@ -39,9 +39,9 @@ export default function OrderSummary({
     }).format(price);
   };
 
-  const subtotal = getTotalAmount();
+  const total = getTotalAmount();
   const shipping = orderDetails.shippingCharge;
-  const total = subtotal + shipping;
+  const subTotal = total - shipping;
   const updateQuantity = (productId: string, change: number) => {
     const item = cartItems.find((item) => item.product.id === productId);
     if (item) {
@@ -294,7 +294,7 @@ console.log("orderSource exists:", orderDetails?.orderSource?.length > 0);
               <div className="space-y-3  p-4 rounded-lg border ">
                 <div className="flex justify-between text-sm font-medium">
                   <span className="text-gray-700">Subtotal:</span>
-                  <span className="text-gray-900">{subtotal} ৳</span>
+                  <span className="text-gray-900">{subTotal} ৳</span>
                 </div>
                 <div className="flex justify-between text-sm font-medium">
                   <span className="text-gray-700">Shipping:</span>
