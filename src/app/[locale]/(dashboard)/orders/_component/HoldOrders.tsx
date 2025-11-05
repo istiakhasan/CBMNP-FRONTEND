@@ -229,8 +229,8 @@ const HoldOrders = ({warehosueIds,currierIds,productIds,searchTerm,rangeValue,or
           ];
   return (
     <div className="gb_border">
-      <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
-        <div className="flex gap-2">
+      <div className="flex justify-end gap-2 flex-wrap mt-2 p-3">
+        {/* <div className="flex gap-2">
           <div className="border p-2 h-[35px] w-[35px] flex gap-3 items-center cursor-pointer justify-center">
             <i
               style={{ fontSize: "24px" }}
@@ -263,17 +263,9 @@ const HoldOrders = ({warehosueIds,currierIds,productIds,searchTerm,rangeValue,or
               Filter Column
             </div>
           </Popover>
-        </div>
+        </div> */}
         <div className="flex gap-3">
-          <Pagination
-            pageSize={size}
-            total={data?.meta?.total}
-            onChange={(v, d) => {
-              setPage(v);
-              setSize(d);
-            }}
-            showSizeChanger={false}
-          />
+         
 
           <div>
             <GbDropdown items={items}>
@@ -287,14 +279,27 @@ const HoldOrders = ({warehosueIds,currierIds,productIds,searchTerm,rangeValue,or
           </div>
         </div>
       </div>
-      <div className="custom_scroll overflow-scroll">
+      <div className="custom_scroll overflow-scroll h-[400px]">
         <GbTable
           loading={isLoading}
           columns={newColumns}
           dataSource={data?.data}
           rowSelection={rowSelection}
         />
+     
       </div>
+         <div className="my-4 flex justify-end">
+           <Pagination
+            pageSize={size}
+            total={data?.meta?.total}
+            onChange={(v, d) => {
+              setPage(v);
+              setSize(d);
+            }}
+            pageSizeOptions={[10,20,50,100,500]}
+            showSizeChanger={true}
+          />
+        </div>
       <GbModal width="600px" clseTab={false} isModalOpen={statuschangedModal} openModal={()=>setStatusChangeModal(true)} closeModal={()=>setStatusChangeModal(false)}>
         <GbForm submitHandler={(data:any)=>console.log(data)}>
         <BulkChangeOrders status="Hold" setModalOpen={setStatusChangeModal} selectedOrders={selectedOrders}/>

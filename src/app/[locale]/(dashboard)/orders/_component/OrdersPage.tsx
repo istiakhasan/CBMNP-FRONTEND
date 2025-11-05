@@ -2,7 +2,7 @@
 import GbHeader from "@/components/ui/dashboard/GbHeader";
 import { useGetUserByIdQuery } from "@/redux/api/usersApi";
 import convertNumberToShorthand from "@/util/convertNumberToShorthand";
-import { DatePicker, Divider, Select, Spin, Tooltip } from "antd";
+import { DatePicker, Divider, Modal, Select, Spin, Tooltip } from "antd";
 import React, { useState } from "react";
 import { useLocale } from "next-intl";
 import AllOrders from "./AllOrders";
@@ -27,6 +27,7 @@ import { useGetDeliveryPartnerOptionsQuery } from "@/redux/api/partnerApi";
 import dayjs from "dayjs";
 import { useGetAllProductQuery } from "@/redux/api/productApi";
 import ReturnOrders from "./UnreachableOrders";
+import ScanOrderToIntransit from "./ScanOrderToIntransit";
 const { RangePicker } = DatePicker;
 const OrdersPage = () => {
   const [rangeValue, setRangeValue] = useState<any>(null);
@@ -35,6 +36,8 @@ const OrdersPage = () => {
   const [productIds, setProductsIds] = useState<any>([]);
   const [partnerIds, setPartnerIds] = useState<any>([]);
   const [activeTab, setActiveTab] = useState<string>("1");
+  // Modal visibility
+  
   const [selectedWarehouse, setSelectedWarehouse] = useState<
     string | undefined
   >();
@@ -146,21 +149,6 @@ const OrdersPage = () => {
     },
   ];
 
-  // const tabs = allTabs
-  //   .filter((tab:any) => permission?.includes(tab.permission))
-  //   .map((item:any) => ({
-  //     ...item,
-  //     //@ts-ignore
-  //     count:
-  //       countData?.data?.find(
-  //         (od: any) => od?.label?.toLowerCase() === item?.name?.toLowerCase()
-  //       )?.count || "0",
-  //     statusId:
-  //       countData?.data?.find(
-  //         (od: any) => od?.label?.toLowerCase() === item?.name?.toLowerCase()
-  //       )?.id || "0",
-  //   }))
-
   const tabs = allTabs
     .filter((tab: any) => permission?.includes(tab.permission))
     .map((item: any) => {
@@ -168,7 +156,6 @@ const OrdersPage = () => {
       let statusId = "0";
 
       if (item.name.toLowerCase() === "returned") {
-        // sum Pending-Return + Partial-Return + Returned
         const returnedLabels = ["returned", "pending-return", "partial-return"];
         const sum = countData?.data
           ?.filter((od: any) =>
@@ -209,12 +196,12 @@ const OrdersPage = () => {
         refetch={refetch}
         countData={countData}
         searchTerm={searchTerm}
-        warehosueIds={warehosueIds}
+        // warehosueIds={warehosueIds}
         currierIds={partnerIds}
         rangeValue={rangeValue}
         orderStatus={orderStatus}
         productIds={productIds}
-        locationId={selectedWarehouse}
+        // locationId={selectedWarehouse}
       />
     ),
     "4": (
@@ -278,18 +265,6 @@ const OrdersPage = () => {
         productIds={productIds}
       />
     ),
-    // // pending return
-    // "110": (
-    //   <ReturnOrders
-    //     searchTerm={searchTerm}
-    //     warehosueIds={warehosueIds}
-    //     currierIds={partnerIds}
-    //     rangeValue={rangeValue}
-    //     orderStatus={orderStatus}
-    //     status={11}
-    //   />
-    // ),
-    // //partial Return
     "10": (
       <ReturnOrders
         searchTerm={searchTerm}
@@ -302,17 +277,6 @@ const OrdersPage = () => {
         countData={countData}
       />
     ),
-    //full  Return
-    // "120": (
-    //   <ReturnOrders
-    //     searchTerm={searchTerm}
-    //     warehosueIds={warehosueIds}
-    //     currierIds={partnerIds}
-    //     rangeValue={rangeValue}
-    //     orderStatus={orderStatus}
-    //     status={12}
-    //   />
-    // ),
     "11": (
       <CancelOrders
         searchTerm={searchTerm}
@@ -332,6 +296,7 @@ const OrdersPage = () => {
       setWarehouseIds([defaultWarehouse]); // Load orders for default warehouse
     }
   }, [warehouseOptions?.data]);
+
   return (
     <div>
       <GbHeader title="Orders" />
@@ -356,11 +321,19 @@ const OrdersPage = () => {
                       height: "35px",
                       borderRadius: "0",
                     }}
-                    options={warehouseOptions?.data}
+                    options={[
+                      { label: "All", value: "All" },
+                      ...(warehouseOptions?.data || []),
+                    ]}
                     value={selectedWarehouse}
                     onChange={(value) => {
-                      setSelectedWarehouse(value);
-                      setWarehouseIds([value]); // Update orders when user changes warehouse
+                      if (value === "All") {
+                        setSelectedWarehouse("");
+                        setWarehouseIds([]);
+                      } else {
+                        setSelectedWarehouse(value);
+                        setWarehouseIds([value]); // Update orders when user changes warehouse
+                      }
                     }}
                   />
                   <Tooltip
@@ -541,6 +514,8 @@ const OrdersPage = () => {
                       Filter Orders
                     </div>
                   </Tooltip>
+
+                <ScanOrderToIntransit />
                 </div>
                 <button
                   onClick={() => router.push(`/${local}/orders/create-order`)}
@@ -575,6 +550,7 @@ const OrdersPage = () => {
           </>
         )}
       </div>
+     
     </div>
   );
 };

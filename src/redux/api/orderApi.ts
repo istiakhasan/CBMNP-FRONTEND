@@ -96,6 +96,13 @@ export const orderApi = baseApi.injectEndpoints({
 			}),
 			providesTags: [tagTypes.order],
 		}),
+		getScanOrderById: build.query({
+			query: (arg) => ({
+				url: `/orders/scan/${arg.id}`,
+				method: "GET",
+			}),
+			providesTags: [tagTypes.order],
+		}),
 		updateOrder: build.mutation({
 			query: (data) => ({
 				url: `/orders/${data?.id}`,
@@ -133,5 +140,7 @@ export const {
 	useLazyGetOrdersReportsQuery,
 	useLazyGetProductWiseSalesReportQuery,
 	useDeliveryPartnerReportQuery,
-	useLazyDeliveryPartnerReportQuery
+	useLazyDeliveryPartnerReportQuery,
+	useGetScanOrderByIdQuery,
+	useLazyGetScanOrderByIdQuery
 } = orderApi;
