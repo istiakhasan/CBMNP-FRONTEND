@@ -18,7 +18,7 @@ import {
 import moment from "moment";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
-import React, {  useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import Invoice from "./Invoice";
 import GbDropdown from "@/components/ui/dashboard/GbDropdown";
@@ -31,8 +31,7 @@ const PendingOrders = ({
   currierIds,
   rangeValue,
   orderStatus,
-  productIds
-
+  productIds,
 }: any) => {
   // all states
   const [selectedOrders, setSelectedOrders] = useState<any>([]);
@@ -45,13 +44,14 @@ const PendingOrders = ({
     id: rowId,
   });
   const { data, isLoading } = useGetAllOrdersQuery({
-     page:searchTerm?1:page,
+    page: searchTerm ? 1 : page,
     limit: size,
     searchTerm,
-    statusId:orderStatus?.length>0  ?( orderStatus?.includes(1) ? 1 : "112") : '1',
+    statusId:
+      orderStatus?.length > 0 ? (orderStatus?.includes(1) ? 1 : "112") : "1",
     locationId: warehosueIds,
     currier: currierIds,
-    productId:productIds,
+    productId: productIds,
     ...rangeValue,
   });
   const local = useLocale();
@@ -77,20 +77,6 @@ const PendingOrders = ({
       key: "orderId",
       render: (text: string, record: any) => (
         <>
-          <div>
-            <i className="ri-information-2-line text-[18px]  text-primary cursor-pointer"></i>
-            <i
-              onClick={() => {
-                setPrintModal(true);
-                setRowId(record?.id);
-              }}
-              className="ri-printer-line text-[18px]  text-primary ml-[4px] cursor-pointer"
-            ></i>
-            <i
-              onClick={() => copyToClipboard(record?.orderNumber)}
-              className="ri-file-copy-line text-primary cursor-pointer ml-[4px] text-[18px] "
-            ></i>
-          </div>
           <span className="mt-[2px] block">{record?.orderNumber}</span>
         </>
       ),
@@ -200,11 +186,23 @@ const PendingOrders = ({
     {
       title: "Action",
       key: "action",
-      width: "60px",
+      // width: "60px",
       render: (text: string, record: any) => {
         return (
           <>
-            {
+            <div>
+              <i className="ri-information-2-line text-[18px]  text-primary cursor-pointer"></i>
+              <i
+                onClick={() => {
+                  setPrintModal(true);
+                  setRowId(record?.id);
+                }}
+                className="ri-printer-line text-[18px]  text-primary ml-[4px] cursor-pointer"
+              ></i>
+              <i
+                onClick={() => copyToClipboard(record?.orderNumber)}
+                className="ri-file-copy-line text-primary cursor-pointer ml-[4px] text-[18px] "
+              ></i>
               <span
                 onClick={() => router.push(`/${local}/orders/${record?.id}`)}
                 className=" text-white text-[10px] py-[2px] px-[10px] cursor-pointer"
@@ -214,7 +212,7 @@ const PendingOrders = ({
                   className="ri-eye-fill color_primary"
                 ></i>
               </span>
-            }
+            </div>
           </>
         );
       },
@@ -236,7 +234,6 @@ const PendingOrders = ({
   }));
 
   const contentRef = useRef<HTMLDivElement | null>(null);
-
 
   const rowSelection: TableProps<any>["rowSelection"] = {
     onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
@@ -263,8 +260,8 @@ const PendingOrders = ({
   ];
   return (
     <div className="gb_border">
-      <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
-        <div className="flex gap-2">
+      <div className="flex justify-end gap-2 flex-wrap mt-2 p-3">
+        {/* <div className="flex gap-2">
           <div className="border p-2 h-[35px] w-[35px] flex gap-3 items-center cursor-pointer justify-center">
             <i
               style={{ fontSize: "24px" }}
@@ -297,26 +294,15 @@ const PendingOrders = ({
               Filter Column
             </div>
           </Popover>
-        </div>
-        <div className="flex gap-3">
-          <Pagination
-            pageSize={size}
-            total={data?.meta?.total}
-            onChange={(v, d) => {
-              setPage(v);
-              setSize(d);
-            }}
-            showSizeChanger={false}
-          />
-          <div>
-            {
-              <GbDropdown items={items}>
-                <button className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]">
-                  Action
-                </button>
-              </GbDropdown>
-            }
-          </div>
+        </div> */}
+        <div className="flex justify-end gap-3">
+          {
+            <GbDropdown items={items}>
+              <button className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]">
+                Action
+              </button>
+            </GbDropdown>
+          }
         </div>
       </div>
       <div className=" overflow-scroll custom_scroll">
@@ -325,6 +311,17 @@ const PendingOrders = ({
           loading={isLoading}
           columns={newColumns}
           dataSource={data?.data}
+        />
+      </div>
+      <div className="flex justify-end my-4"> 
+        <Pagination
+          pageSize={size}
+          total={data?.meta?.total}
+          onChange={(v, d) => {
+            setPage(v);
+            setSize(d);
+          }}
+          showSizeChanger={false}
         />
       </div>
 

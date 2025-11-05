@@ -71,7 +71,6 @@ const ChangeStatusModal = ({ setModalOpen, rowData }: any) => {
       setModalOpen(false);
     }
   };
-  console.log(returnableProducts, "abcd");
   return (
     <div className="p-[15px] bg-[#FFFFFF]">
       <div className="flex justify-between mb-6">

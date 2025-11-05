@@ -55,8 +55,8 @@ const AttributesAndVariants = ({setSelectedValue,selectedValue}:any) => {
     return result;
   }
   return (
-    <div className="grid grid-cols-3 gap-[24px]">
-      <div className="bg-[#fafafa] p-[24px]  gap-[24px]">
+    <div className=" gap-[24px]">
+      <div className="bg-[#fafafa] p-[24px]   gap-[24px]">
         <h1 className="font-semibold">Attributes</h1>
         <div className="floating-label-input mb-2">
           <label className="text-[#999] text-[12px]">Attribute Name</label>
@@ -107,7 +107,7 @@ const AttributesAndVariants = ({setSelectedValue,selectedValue}:any) => {
         </div>
         <GbCollaps attributes={attributes} setAttributes={setAttributes} />
       </div>
-      <div className="h-auto bg-[#fafafa] col-span-2 p-[24px] ">
+      <div className="h-auto bg-[#fafafa]  p-[24px] ">
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
           <h1 className="font-semibold mb-0">Variants</h1>

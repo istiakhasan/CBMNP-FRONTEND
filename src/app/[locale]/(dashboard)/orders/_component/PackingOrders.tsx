@@ -35,7 +35,14 @@ import copyToClipboard from "@/components/ui/GbCopyToClipBoard";
 import { useLocale } from "next-intl";
 import Invoice from "./Invoice";
 
-const PackingOrders = ({rangeValue,productIds,warehosueIds,searchTerm,currierIds,orderStatus}: any) => {
+const PackingOrders = ({
+  rangeValue,
+  productIds,
+  warehosueIds,
+  searchTerm,
+  currierIds,
+  orderStatus,
+}: any) => {
   // all states
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
@@ -43,20 +50,20 @@ const PackingOrders = ({rangeValue,productIds,warehosueIds,searchTerm,currierIds
   const { data: warehouseOptions } = useLoadAllWarehouseOptionsQuery(undefined);
   const [printModal, setPrintModal] = useState(false);
   const [rowId, setRowId] = useState<any>(null);
-  const local=useLocale()
+  const local = useLocale();
   const { data: rowData, isLoading: rowDataLoading } = useGetOrderByIdQuery({
     id: rowId,
   });
   const { data, isLoading } = useGetAllOrdersQuery({
-     page:searchTerm?1:page,
+    page: searchTerm ? 1 : page,
     limit: size,
     searchTerm,
-    statusId:orderStatus?.length>0  ?( orderStatus?.includes(6) ? 6 : "112") : '6',
+    statusId:
+      orderStatus?.length > 0 ? (orderStatus?.includes(6) ? 6 : "112") : "6",
     locationId: warehosueIds,
-    productId:productIds,
+    productId: productIds,
     ...rangeValue,
-    currier:currierIds
-
+    currier: currierIds,
   });
   const [selectedOrders, setSelectedOrders] = useState<any>([]);
   const [statuschangedModal, setStatusChangeModal] = useState(false);
@@ -81,20 +88,6 @@ const PackingOrders = ({rangeValue,productIds,warehosueIds,searchTerm,currierIds
       key: "orderId",
       render: (text: string, record: any) => (
         <>
-          <div>
-            <i className="ri-information-2-line text-[18px]  text-primary cursor-pointer"></i>
-            <i
-              onClick={() => {
-                setPrintModal(true);
-                setRowId(record?.id);
-              }}
-              className="ri-printer-line text-[18px]  text-primary ml-[4px] cursor-pointer"
-            ></i>
-            <i
-              onClick={() => copyToClipboard(record?.orderNumber)}
-              className="ri-file-copy-line text-primary cursor-pointer ml-[4px] text-[18px] "
-            ></i>
-          </div>
           <span className="mt-[2px] block">{record?.orderNumber}</span>
         </>
       ),
@@ -119,7 +112,7 @@ const PackingOrders = ({rangeValue,productIds,warehosueIds,searchTerm,currierIds
             {record?.receiverPhoneNumber}
           </span>
           <i
-             onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
+            onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
             className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[4px]"
           ></i>
         </>
@@ -175,7 +168,7 @@ const PackingOrders = ({rangeValue,productIds,warehosueIds,searchTerm,currierIds
       align: "start",
       render: (text: string, record: any) => (
         <span className="text-[#7D7D7D] font-[500] px-0">
-           {record?.partner?.partnerName ? record?.partner?.partnerName : "-"}
+          {record?.partner?.partnerName ? record?.partner?.partnerName : "-"}
         </span>
       ),
     },
@@ -203,11 +196,22 @@ const PackingOrders = ({rangeValue,productIds,warehosueIds,searchTerm,currierIds
     {
       title: "Action",
       key: "action",
-      width: "60px",
       render: (text: string, record: any) => {
         return (
           <>
-            {
+            <div>
+              <i className="ri-information-2-line text-[18px]  text-primary cursor-pointer"></i>
+              <i
+                onClick={() => {
+                  setPrintModal(true);
+                  setRowId(record?.id);
+                }}
+                className="ri-printer-line text-[18px]  text-primary ml-[4px] cursor-pointer"
+              ></i>
+              <i
+                onClick={() => copyToClipboard(record?.orderNumber)}
+                className="ri-file-copy-line text-primary cursor-pointer ml-[4px] text-[18px] "
+              ></i>
               <span
                 onClick={() => router.push(`/${local}/orders/${record?.id}`)}
                 className=" text-white text-[10px] py-[2px] px-[10px] cursor-pointer"
@@ -217,7 +221,7 @@ const PackingOrders = ({rangeValue,productIds,warehosueIds,searchTerm,currierIds
                   className="ri-eye-fill color_primary"
                 ></i>
               </span>
-            }
+            </div>
           </>
         );
       },
@@ -271,8 +275,8 @@ const PackingOrders = ({rangeValue,productIds,warehosueIds,searchTerm,currierIds
   });
   return (
     <div className="gb_border">
-      <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
-        <div className="flex gap-2">
+      <div className="flex justify-end gap-2 flex-wrap mt-2 p-3">
+        {/* <div className="flex gap-2">
           <div className="border p-2 h-[35px] w-[35px] flex gap-3 items-center cursor-pointer justify-center">
             <i
               style={{ fontSize: "24px" }}
@@ -311,18 +315,8 @@ const PackingOrders = ({rangeValue,productIds,warehosueIds,searchTerm,currierIds
             style={{ width: 200, height: "36px", borderRadius: "0px" }}
             options={warehouseOptions?.data}
           />
-        </div>
+        </div> */}
         <div className="flex gap-3">
-          <Pagination
-            pageSize={size}
-            total={data?.meta?.total}
-            onChange={(v, d) => {
-              setPage(v);
-              setSize(d);
-            }}
-            showSizeChanger={false}
-          />
-
           <div>
             <GbDropdown items={items}>
               <button
@@ -335,12 +329,24 @@ const PackingOrders = ({rangeValue,productIds,warehosueIds,searchTerm,currierIds
           </div>
         </div>
       </div>
-      <div className="custom_scroll overflow-scroll">
+      <div className="custom_scroll overflow-scroll h-[400px]">
         <GbTable
           loading={isLoading}
           columns={newColumns}
           dataSource={data?.data}
           rowSelection={rowSelection}
+        />
+      </div>
+      <div className="my-4 flex justify-end">
+        <Pagination
+          pageSize={size}
+          total={data?.meta?.total}
+          onChange={(v, d) => {
+            setPage(v);
+            setSize(d);
+          }}
+          pageSizeOptions={[10,20,100,500]}
+          showSizeChanger={true}
         />
       </div>
 
@@ -366,7 +372,7 @@ const PackingOrders = ({rangeValue,productIds,warehosueIds,searchTerm,currierIds
         isModalOpen={printModal}
         // clseTab={false}
       >
-       <Invoice rowData={rowData}/>
+        <Invoice rowData={rowData} />
       </GbModal>
     </div>
   );

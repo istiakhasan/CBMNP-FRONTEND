@@ -34,6 +34,7 @@ import { useReactToPrint } from "react-to-print";
 import Invoice from "./Invoice";
 import GeneratePreviewButton from "./GeneratePreviewButton";
 import BulkChangeOrders from "./BulkChangeOrders";
+import BulkInvoice from "@/components/BulkInvoice";
 
 const ApprovedOrders = ({
   refetch: countRefetch,
@@ -43,7 +44,7 @@ const ApprovedOrders = ({
   rangeValue,
   orderStatus,
   productIds,
-  locationId
+  locationId,
 }: any) => {
   // all states
   const [statuschangedModal, setStatusChangeModal] = useState(false);
@@ -51,7 +52,7 @@ const ApprovedOrders = ({
   const [loadStockByWarehouseProduct] =
     useLazyLoadStockByProductIdAndLocationIdQuery();
   const [page, setPage] = useState<number>(1);
-  const [size, setSize] = useState<number>(500);
+  const [size, setSize] = useState<number>(10);
   const [printModal, setPrintModal] = useState(false);
   const [selectedOrders, setSelectedOrders] = useState<any>([]);
   const [rowId, setRowId] = useState<any>(null);
@@ -63,14 +64,15 @@ const ApprovedOrders = ({
   // const [locationId, setLocationId] = useState("");
   const [openModal, setOpenModal] = useState(false);
   const { data, isLoading, refetch } = useGetAllOrdersQuery({
-    page:searchTerm?1:page,
+    page: searchTerm ? 1 : page,
     limit: size,
     searchTerm,
     locationId: warehosueIds,
     currier: currierIds,
-    productId:productIds,
+    productId: productIds,
     ...rangeValue,
-    statusId:orderStatus?.length>0  ?( orderStatus?.includes(2) ? 2 : "112") : '2',
+    statusId:
+      orderStatus?.length > 0 ? (orderStatus?.includes(2) ? 2 : "112") : "2",
   });
 
   const [handleCreateRequisition] = useCreateRequisitionMutation();
@@ -97,20 +99,6 @@ const ApprovedOrders = ({
       key: "orderId",
       render: (text: string, record: any) => (
         <>
-          <div>
-            <i className="ri-information-2-line text-[18px]  text-primary cursor-pointer"></i>
-            <i
-              onClick={() => {
-                setPrintModal(true);
-                setRowId(record?.id);
-              }}
-              className="ri-printer-line text-[18px]  text-primary ml-[4px] cursor-pointer"
-            ></i>
-            <i
-              onClick={() => copyToClipboard(record?.orderNumber)}
-              className="ri-file-copy-line text-primary cursor-pointer ml-[4px] text-[18px] "
-            ></i>
-          </div>
           <span className="mt-[2px] block">{record?.orderNumber}</span>
         </>
       ),
@@ -219,11 +207,23 @@ const ApprovedOrders = ({
     {
       title: "Action",
       key: "action",
-      width: "60px",
+      // width: "60px",
       render: (text: string, record: any) => {
         return (
           <>
-            {
+            <div>
+              <i className="ri-information-2-line text-[18px]  text-primary cursor-pointer"></i>
+              <i
+                onClick={() => {
+                  setPrintModal(true);
+                  setRowId(record?.id);
+                }}
+                className="ri-printer-line text-[18px]  text-primary ml-[4px] cursor-pointer"
+              ></i>
+              <i
+                onClick={() => copyToClipboard(record?.orderNumber)}
+                className="ri-file-copy-line text-primary cursor-pointer ml-[4px] text-[18px] "
+              ></i>
               <span
                 onClick={() => router.push(`/${local}/orders/${record?.id}`)}
                 className=" text-white text-[10px] py-[2px] px-[10px] cursor-pointer"
@@ -233,7 +233,7 @@ const ApprovedOrders = ({
                   className="ri-eye-fill color_primary"
                 ></i>
               </span>
-            }
+            </div>
           </>
         );
       },
@@ -263,6 +263,10 @@ const ApprovedOrders = ({
       name: record.name,
     }),
   };
+  const bulkPrintRef = useRef(null);
+  const handlePrintAll = useReactToPrint({
+    content: () => bulkPrintRef.current,
+  });
 
   const items: MenuProps["items"] = [
     {
@@ -290,13 +294,17 @@ const ApprovedOrders = ({
       ),
       key: "1",
     },
+    {
+      label: <span onClick={handlePrintAll}>🖨 Print Selected Orders</span>,
+      key: "2",
+    },
   ];
 
   return (
     <div className="gb_border">
       <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
         <div className="flex gap-2">
-          <div className="border p-2 h-[35px] w-[35px] flex gap-3 items-center cursor-pointer justify-center">
+          {/* <div className="border p-2 h-[35px] w-[35px] flex gap-3 items-center cursor-pointer justify-center">
             <i
               style={{ fontSize: "24px" }}
               className="ri-restart-line text-gray-600"
@@ -327,7 +335,7 @@ const ApprovedOrders = ({
               ></i>{" "}
               Filter Column
             </div>
-          </Popover>
+          </Popover> */}
           {/* <Select
             size={"middle"}
             placeholder='Select Warehouse'
@@ -337,16 +345,6 @@ const ApprovedOrders = ({
           /> */}
         </div>
         <div className="flex gap-3">
-          <Pagination
-            pageSize={size}
-            total={data?.meta?.total}
-            onChange={(v, d) => {
-              setPage(v);
-              setSize(d);
-            }}
-            showSizeChanger={false}
-          />
-
           <div>
             {
               <GbDropdown items={items}>
@@ -358,12 +356,25 @@ const ApprovedOrders = ({
           </div>
         </div>
       </div>
-      <div className=" overflow-scroll custom_scroll">
+      <div className=" overflow-scroll custom_scroll h-[400px]">
         <GbTable
           rowSelection={rowSelection}
           loading={isLoading}
           columns={newColumns}
           dataSource={data?.data}
+          showSizeChanger={true}
+        />
+      </div>
+      <div className="my-4 flex justify-end">
+        <Pagination
+          pageSize={size}
+          total={data?.meta?.total}
+          onChange={(v, d) => {
+            setPage(v);
+            setSize(d);
+          }}
+          pageSizeOptions={[10, 20, 50, 100, 500]}
+          showSizeChanger={true}
         />
       </div>
 
@@ -401,7 +412,7 @@ const ApprovedOrders = ({
             <tbody>
               {reqPreviewData?.map((product: any) => {
                 const totalQuantity = product.orders.reduce(
-                  (sum: any, order: any) => sum + order.orderQuantity,
+                  (sum: any, order: any) => sum + order.qty,
                   0
                 );
                 return (
@@ -502,6 +513,13 @@ const ApprovedOrders = ({
           />
         </GbForm>
       </GbModal>
+
+      {/* Hidden Component Only for Printing */}
+      <div style={{ display: "none" }}>
+        <div ref={bulkPrintRef}>
+          <BulkInvoice orders={selectedOrders} />
+        </div>
+      </div>
     </div>
   );
 };

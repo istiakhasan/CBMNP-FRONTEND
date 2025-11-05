@@ -13,7 +13,7 @@ import { Tooltip } from "antd";
     {
       title: "Name",
       key: 3,
-      width:"300px",
+      width:"200px",
       //@ts-ignore
       render: (text, record, index) => {
         return (
@@ -33,7 +33,7 @@ import { Tooltip } from "antd";
           <div className="flex items-center gap-2">
             <span>{record?.inventoryItems?.length || "N/A"}</span>
             <Tooltip
-              overlayInnerStyle={{ background: "green", width: "1200px" }}
+              overlayInnerStyle={{ background: "green", width: "800px" }}
               autoAdjustOverflow={false}
               trigger={["click"]}
               color="white"

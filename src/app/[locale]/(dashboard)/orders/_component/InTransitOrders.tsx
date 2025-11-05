@@ -90,20 +90,6 @@ const InTransitOrders = ({
       key: "orderId",
       render: (text: string, record: any) => (
         <>
-          <div>
-            <i className="ri-information-2-line text-[18px]  text-primary cursor-pointer"></i>
-            <i
-              onClick={() => {
-                setPrintModal(true);
-                setRowId(record?.id);
-              }}
-              className="ri-printer-line text-[18px]  text-primary ml-[4px] cursor-pointer"
-            ></i>
-            <i
-              onClick={() => copyToClipboard(record?.orderNumber)}
-              className="ri-file-copy-line text-primary cursor-pointer ml-[4px] text-[18px] "
-            ></i>
-          </div>
           <span className="mt-[2px] block">{record?.orderNumber}</span>
         </>
       ),
@@ -221,11 +207,22 @@ const InTransitOrders = ({
     {
       title: "Action",
       key: "action",
-      width: "60px",
       render: (text: string, record: any) => {
         return (
           <>
-            {
+            <div>
+              <i className="ri-information-2-line text-[18px]  text-primary cursor-pointer"></i>
+              <i
+                onClick={() => {
+                  setPrintModal(true);
+                  setRowId(record?.id);
+                }}
+                className="ri-printer-line text-[18px]  text-primary ml-[4px] cursor-pointer"
+              ></i>
+              <i
+                onClick={() => copyToClipboard(record?.orderNumber)}
+                className="ri-file-copy-line text-primary cursor-pointer ml-[4px] text-[18px] "
+              ></i>
               <span
                 onClick={() => router.push(`/${local}/orders/${record?.id}`)}
                 className=" text-white text-[10px] py-[2px] px-[10px] cursor-pointer"
@@ -235,7 +232,7 @@ const InTransitOrders = ({
                   className="ri-eye-fill color_primary"
                 ></i>
               </span>
-            }
+            </div>
           </>
         );
       },
@@ -275,8 +272,8 @@ const InTransitOrders = ({
   console.log(selecteddeliveryPartner, "selected delivery partner  ");
   return (
     <div className="gb_border">
-      <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
-        <div className="flex gap-2">
+      <div className="flex justify-end gap-2 flex-wrap mt-2 p-3">
+        {/* <div className="flex gap-2">
           <div className="border p-2 h-[35px] w-[35px] flex gap-3 items-center cursor-pointer justify-center">
             <i
               style={{ fontSize: "24px" }}
@@ -412,12 +409,12 @@ const InTransitOrders = ({
                     // }}
                   />
                 </div>
-                {/* 
+             
                 <div className="flex justify-end">
                   <button className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px] mt-3">
                     Apply
                   </button>
-                </div> */}
+                </div> 
               </div>
             }
           >
@@ -429,7 +426,7 @@ const InTransitOrders = ({
               Filter Orders
             </div>
           </Tooltip>
-        </div>
+        </div> */}
 
         <div className="flex gap-3">
           <div>
@@ -469,18 +466,9 @@ const InTransitOrders = ({
               </GbDropdown>
             }
           </div>
-          <Pagination
-            pageSize={size}
-            total={data?.meta?.total}
-            onChange={(v, d) => {
-              setPage(v);
-              setSize(d);
-            }}
-            showSizeChanger={false}
-          />
         </div>
       </div>
-      <div className="custom_scroll overflow-scroll">
+      <div className="custom_scroll overflow-scroll h-[400px]">
         <GbTable
           loading={isLoading}
           columns={newColumns}
@@ -488,6 +476,19 @@ const InTransitOrders = ({
           rowSelection={rowSelection}
         />
       </div>
+      <div className="my-4 flex justify-end ">
+        <Pagination
+          pageSize={size}
+          total={data?.meta?.total}
+          onChange={(v, d) => {
+            setPage(v);
+            setSize(d);
+          }}
+          pageSizeOptions={[10,20,50,100,500]}
+          showSizeChanger={true}
+        />
+      </div>
+
       <GbModal
         width="900px"
         closeModal={() => setPrintModal(false)}

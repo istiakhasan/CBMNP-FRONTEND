@@ -1,84 +1,137 @@
 import React, { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
-import moment from "moment";
 import { useGetOrganizationByIdQuery } from "@/redux/api/organizationApi";
 import { AiOutlinePrinter } from "react-icons/ai";
-const Invoice = ({ rowData }:any) => {
-  const {data}=useGetOrganizationByIdQuery(undefined)
-  const organization=data?.data
+
+const Invoice = ({ rowData }: any) => {
+  const { data } = useGetOrganizationByIdQuery(undefined);
+  const organization = data?.data;
   const contentRef = useRef(null);
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString)
+      return new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
   const reactToPrintFn = useReactToPrint({
     content: () => contentRef.current,
   });
+console.log(rowData,"row data");
   return (
     <div>
-       <button 
-        onClick={reactToPrintFn} 
-        className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px] flex items-center gap-2 rounded-md hover:bg-blue-600 transition"
+      {/* Print Button */}
+      <button
+        onClick={reactToPrintFn}
+        className="bg-primary text-white font-bold text-[12px] px-[20px] py-[5px] flex items-center gap-2 rounded-md hover:bg-blue-600 transition"
       >
         <AiOutlinePrinter /> Print Invoice
       </button>
-      <div ref={contentRef}>
-        <div>
-          <h1 className="text-3xl font-semibold mb-0 text-[#000] text-center">{organization?.name}</h1>
-          <h1 className="text-lg mb-0 text-[#000] text-center">{organization?.address}</h1>
-          <h1 className="text-lg mb-0 text-[#000] text-center">+88{organization?.phone}</h1>
-          <div className="flex justify-between">
-            <div className="mb-3">
-              <h2 className="text-[#000] font-[600] mb-0">Bill To: </h2>
-              <h2 className="text-[#000] font-[600] mb-0">{rowData?.customer?.customerName}</h2>
-              <h2 className="text-[#000] font-[600] mb-0">{rowData?.receiverPhoneNumber}</h2>
-              <h2 className="text-[#000] font-[600] mb-0">{rowData?.receiverAddress}</h2>
-            </div>
-            <div className="mb-3">
-              <h2 className="mb-0">Invoice No: <strong>{rowData?.invoiceNumber}</strong></h2>
-              <h2 className="mb-0">Date: <strong>{moment(rowData?.deliveryDate).format('DD MMMM YYYY')}</strong></h2>
+
+      {/* Printable Section */}
+      <div ref={contentRef} className="p-8 bg-white" style={{ maxWidth: "800px", margin: "0 auto" }}>
+        {/* Header */}
+        <div className="flex justify-between items-start mb-8">
+          <div>
+            <h1 className="text-2xl font-bold">{organization?.name}</h1>
+            <p className="text-gray-600">{organization?.address}</p>
+            <p className="text-gray-600">Phone: +88{organization?.phone}</p>
+          </div>
+          <div className="text-right">
+            <h2 className="text-2xl font-bold mb-1">INVOICE</h2>
+            <p className="text-gray-600 mb-1">Invoice #{rowData?.invoiceNumber}</p>
+            <p className="text-gray-600">{formatDate(rowData?.deliveryDate)}</p>
+          </div>
+        </div>
+
+        {/* Customer Info */}
+        <div className="grid grid-cols-2 gap-8 mb-8">
+          <div>
+            <h3 className="text-lg font-semibold mb-3">Bill To:</h3>
+            <p className="font-medium">{rowData?.customer?.customerName}</p>
+            <p>{rowData?.receiverAddress || "-"}</p>
+            <p>{rowData?.receiverPhoneNumber}</p>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold mb-3">Order Details:</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Status:</span>
+                <span className="font-medium capitalize">
+                  {rowData?.status?.label || "-"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Total Amount:</span>
+                <span className="font-medium">৳{rowData?.totalPrice}</span>
+              </div>
             </div>
           </div>
-          <table className="warehouse-table">
+        </div>
+
+        {/* Item Table */}
+        <div className="mb-8">
+          <table className="w-full border-collapse">
             <thead>
-              <tr>
-                <th>SL</th>
-                <th>Product Name</th>
-                <th>Unit Price (Tk)</th>
-                <th>Qty</th>
-                <th>Amount</th>
+              <tr className="bg-gray-100">
+                <th className="border px-4 py-2">SL</th>
+                <th className="border px-4 py-2 text-left">Product</th>
+                <th className="border px-4 py-2 text-center">Qty</th>
+                <th className="border px-4 py-2 text-right">Price</th>
+                <th className="border px-4 py-2 text-right">Total</th>
               </tr>
             </thead>
             <tbody>
-              {rowData?.products?.map((item:any, index:any) => (
+              {rowData?.products?.map((item: any, index: number) => (
                 <tr key={index}>
-                  <td>{index + 1}</td>
-                  <td>{item?.product?.name} {item?.product?.weight} {item?.product?.unit}</td>
-                  <td>{item?.productPrice}</td>
-                  <td>{item?.productQuantity}</td>
-                  <td>{item?.subtotal}</td>
+                  <td className="border px-4 py-2">{index + 1}</td>
+                  <td className="border px-4 py-2">
+                    {item?.product?.name} {item?.product?.weight} {item?.product?.unit}
+                  </td>
+                  <td className="border px-4 py-2 text-center">{item?.productQuantity}</td>
+                  <td className="border px-4 py-2 text-right">৳{item?.productPrice}</td>
+                  <td className="border px-4 py-2 text-right font-medium">
+                    ৳{item?.subtotal}
+                  </td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr>
-                <td rowSpan={3} colSpan={2} style={{ padding: 0 }}>
-                  <div className="mt-3">
-                    <h1 className="mb-0 text-[#000] flex items-center gap-3"><i className="ri-discuss-line"></i> info.mishelinfo@gmail.com</h1>
-                    <h1 className="mb-0 text-[#000] flex items-center gap-3"><i className="ri-global-line"></i> infomishelinfo.com</h1>
-                    <h1 className="mb-0 text-[#000] flex items-center gap-3"><i className="ri-phone-fill"></i> +001835437676</h1>
-                    <h1 className="mb-0 text-[#000] flex items-center gap-3"><i className="ri-map-pin-line"></i> House-2, Road-16, Block-B, Nikunjo Dhaka-1230</h1>
-                  </div>
+                <td colSpan={4} className="border px-4 py-2 text-right font-semibold">
+                  Subtotal:
                 </td>
-                <td colSpan={2} style={{ background: "#F7F7F7" }}>Sub Total</td>
-                <td style={{ background: "#F7F7F7" }}>{Number(rowData?.productValue)}</td>
+                <td className="border px-4 py-2 text-right">৳{rowData?.productValue}</td>
               </tr>
               <tr>
-                <td colSpan={2} style={{ background: "#EBEBEB" }}>Grand Total</td>
-                <td style={{ background: "#EBEBEB" }}>{rowData?.totalPrice}</td>
+                <td colSpan={4} className="border px-4 py-2 text-right font-semibold">
+                  Grand Total:
+                </td>
+                <td className="border px-4 py-2 text-right font-bold">৳{rowData?.totalPrice}</td>
               </tr>
-              <tr style={{background:"#4F8A6D"}}>
-                <td colSpan={2}>Due Total</td>
-                <td>{rowData?.totalReceiveAbleAmount}</td>
+              <tr>
+                <td colSpan={4} className="border px-4 py-2 text-right font-semibold">
+                  Due:
+                </td>
+                <td className="border px-4 py-2 text-right text-red-600">
+                  ৳{rowData?.totalReceiveAbleAmount}
+                </td>
               </tr>
             </tfoot>
           </table>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center text-gray-600 text-sm">
+          <p>Thank you for your business!</p>
         </div>
       </div>
     </div>

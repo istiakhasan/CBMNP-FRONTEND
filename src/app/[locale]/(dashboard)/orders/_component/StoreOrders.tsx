@@ -27,8 +27,16 @@ import { useReactToPrint } from "react-to-print";
 import copyToClipboard from "@/components/ui/GbCopyToClipBoard";
 import { useLocale } from "next-intl";
 import Invoice from "./Invoice";
+import BulkInvoice from "@/components/BulkInvoice";
 
-const StoreOrders = ({warehosueIds,productIds,currierIds,searchTerm,rangeValue,orderStatus}: any) => {
+const StoreOrders = ({
+  warehosueIds,
+  productIds,
+  currierIds,
+  searchTerm,
+  rangeValue,
+  orderStatus,
+}: any) => {
   // all states
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
@@ -39,20 +47,25 @@ const StoreOrders = ({warehosueIds,productIds,currierIds,searchTerm,rangeValue,o
   const { data: rowData, isLoading: rowDataLoading } = useGetOrderByIdQuery({
     id: rowId,
   });
-  const local=useLocale()
+  const local = useLocale();
   const { data, isLoading } = useGetAllOrdersQuery({
-     page:searchTerm?1:page,
+    page: searchTerm ? 1 : page,
     limit: size,
     searchTerm,
-    statusId:orderStatus?.length>0  ?( orderStatus?.includes(5) ? 5 : "112") : '5',
-    locationId:warehosueIds,
-    productId:productIds,
-    currier:currierIds,
+    statusId:
+      orderStatus?.length > 0 ? (orderStatus?.includes(5) ? 5 : "112") : "5",
+    locationId: warehosueIds,
+    productId: productIds,
+    currier: currierIds,
+    includeProducts:true,
     ...rangeValue,
   });
 
   const { data: warehouseOptions } = useLoadAllWarehouseOptionsQuery(undefined);
-
+  const bulkPrintRef = useRef(null);
+  const handlePrintAll = useReactToPrint({
+    content: () => bulkPrintRef.current,
+  });
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const tableColumn = [
@@ -74,20 +87,6 @@ const StoreOrders = ({warehosueIds,productIds,currierIds,searchTerm,rangeValue,o
       key: "orderId",
       render: (text: string, record: any) => (
         <>
-          <div>
-            <i className="ri-information-2-line text-[18px]  text-primary cursor-pointer"></i>
-            <i
-              onClick={() => {
-                setPrintModal(true);
-                setRowId(record?.id);
-              }}
-              className="ri-printer-line text-[18px]  text-primary ml-[4px] cursor-pointer"
-            ></i>
-            <i
-              onClick={() => copyToClipboard(record?.orderNumber)}
-              className="ri-file-copy-line text-primary cursor-pointer ml-[4px] text-[18px] "
-            ></i>
-          </div>
           <span className="mt-[2px] block">{record?.orderNumber}</span>
         </>
       ),
@@ -112,7 +111,7 @@ const StoreOrders = ({warehosueIds,productIds,currierIds,searchTerm,rangeValue,o
             {record?.receiverPhoneNumber}
           </span>
           <i
-             onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
+            onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
             className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[4px]"
           ></i>
         </>
@@ -168,7 +167,7 @@ const StoreOrders = ({warehosueIds,productIds,currierIds,searchTerm,rangeValue,o
       align: "start",
       render: (text: string, record: any) => (
         <span className="text-[#7D7D7D] font-[500] px-0">
-           {record?.partner?.partnerName ? record?.partner?.partnerName : "-"}
+          {record?.partner?.partnerName ? record?.partner?.partnerName : "-"}
         </span>
       ),
     },
@@ -200,7 +199,19 @@ const StoreOrders = ({warehosueIds,productIds,currierIds,searchTerm,rangeValue,o
       render: (text: string, record: any) => {
         return (
           <>
-            {
+            <div>
+              <i className="ri-information-2-line text-[18px]  text-primary cursor-pointer"></i>
+              <i
+                onClick={() => {
+                  setPrintModal(true);
+                  setRowId(record?.id);
+                }}
+                className="ri-printer-line text-[18px]  text-primary ml-[4px] cursor-pointer"
+              ></i>
+              <i
+                onClick={() => copyToClipboard(record?.orderNumber)}
+                className="ri-file-copy-line text-primary cursor-pointer ml-[4px] text-[18px] "
+              ></i>
               <span
                 onClick={() => router.push(`/${local}/orders/${record?.id}`)}
                 className=" text-white text-[10px] py-[2px] px-[10px] cursor-pointer"
@@ -210,7 +221,7 @@ const StoreOrders = ({warehosueIds,productIds,currierIds,searchTerm,rangeValue,o
                   className="ri-eye-fill color_primary"
                 ></i>
               </span>
-            }
+            </div>
           </>
         );
       },
@@ -255,6 +266,10 @@ const StoreOrders = ({warehosueIds,productIds,currierIds,searchTerm,rangeValue,o
       ),
       key: "1",
     },
+     {
+      label: <span onClick={handlePrintAll}>🖨 Print Selected Orders</span>,
+      key: "2",
+    },
   ];
 
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -266,7 +281,7 @@ const StoreOrders = ({warehosueIds,productIds,currierIds,searchTerm,rangeValue,o
     <div className="gb_border">
       <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
         <div className="flex gap-2">
-          <div className="border p-2 h-[35px] w-[35px] flex gap-3 items-center cursor-pointer justify-center">
+          {/* <div className="border p-2 h-[35px] w-[35px] flex gap-3 items-center cursor-pointer justify-center">
             <i
               style={{ fontSize: "24px" }}
               className="ri-restart-line text-gray-600"
@@ -297,7 +312,7 @@ const StoreOrders = ({warehosueIds,productIds,currierIds,searchTerm,rangeValue,o
               ></i>{" "}
               Filter Column
             </div>
-          </Popover>
+          </Popover> */}
           {/* <Select
             size={"middle"}
             onChange={(e) => setLocationId(e)}
@@ -306,16 +321,6 @@ const StoreOrders = ({warehosueIds,productIds,currierIds,searchTerm,rangeValue,o
           /> */}
         </div>
         <div className="flex gap-3">
-          <Pagination
-            pageSize={size}
-            total={data?.meta?.total}
-            onChange={(v, d) => {
-              setPage(v);
-              setSize(d);
-            }}
-            showSizeChanger={false}
-          />
-
           <div>
             <GbDropdown items={items}>
               <button
@@ -328,12 +333,24 @@ const StoreOrders = ({warehosueIds,productIds,currierIds,searchTerm,rangeValue,o
           </div>
         </div>
       </div>
-      <div className="custom_scroll overflow-scroll">
+      <div className="custom_scroll overflow-scroll h-[400px]">
         <GbTable
           rowSelection={rowSelection}
           loading={isLoading}
           columns={newColumns}
           dataSource={data?.data}
+        />
+      </div>
+      <div className="flex justify-end my-4">
+        <Pagination
+          pageSize={size}
+          total={data?.meta?.total}
+          onChange={(v, d) => {
+            setPage(v);
+            setSize(d);
+          }}
+          pageSizeOptions={[10,20,100,500]}
+          showSizeChanger={true}
         />
       </div>
       <GbModal
@@ -359,8 +376,15 @@ const StoreOrders = ({warehosueIds,productIds,currierIds,searchTerm,rangeValue,o
         isModalOpen={printModal}
         // clseTab={false}
       >
-        <Invoice rowData={rowData}/>
+        <Invoice rowData={rowData} />
       </GbModal>
+
+       {/* Hidden Component Only for Printing */}
+      <div style={{ display: "none" }}>
+        <div ref={bulkPrintRef}>
+          <BulkInvoice orders={selectedOrders} />
+        </div>
+      </div>
     </div>
   );
 };

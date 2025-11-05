@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Button } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import { useGetOrganizationByIdQuery } from "@/redux/api/organizationApi";
+import { instance } from "@/helpers/axios/axiosInstance";
+import { getBaseUrl } from "@/helpers/config/envConfig";
 
 const GeneratePreviewButton = ({
   selectedOrders,
@@ -17,62 +19,71 @@ const GeneratePreviewButton = ({
   const handleGeneratePreview = async () => {
     setLoading(true);
     try {
-      const array = [];
-      for (let i = 0; i < selectedOrders.length; i++) {
-        const element = selectedOrders[i];
-        const res = await loadOrdersById({ id: element.id }).unwrap();
-        array.push(res);
-      }
-
-      let updatedProductData: any = [];
-      array?.forEach((mitem: any) => {
-        mitem?.products?.forEach((dt: any) => {
-          updatedProductData.push({
-            productId: dt?.productId,
-            orderId: mitem?.orderNumber,
-            orderQuantity: dt?.productQuantity,
-            name: dt?.product?.name,
-            packSize: dt?.product?.weight + " " + dt?.product?.unit,
-          });
-        });
+      const res = await instance.get(`${getBaseUrl()}/requisition/preview`, {
+        params: {
+          orderIds: selectedOrders.map((o: any) => o.id).join(","),
+          locationId,
+        },
       });
 
-      const groupedData: any = {};
-      updatedProductData.forEach(
-        ({ productId, orderId, orderQuantity, name, packSize }: any) => {
-          if (!groupedData[productId]) {
-            groupedData[productId] = {
-              productId,
-              name,
-              packSize,
-              orders: [],
-            };
-          }
-          groupedData[productId].orders.push({ orderId, orderQuantity });
-        }
-      );
+      setReqPreviewData(res.data.products);
+    
+      // const array = selectedOrders;
+      // for (let i = 0; i < selectedOrders.length; i++) {
+      //   const element = selectedOrders[i];
+      //   const res = await loadOrdersById({ id: element.id }).unwrap();
+      //   array.push(res);
+      // }
+      // console.log(array, "array");
+      // let updatedProductData: any = [];
+      // array?.forEach((mitem: any) => {
+      //   mitem?.products?.forEach((dt: any) => {
+      //     updatedProductData.push({
+      //       productId: dt?.productId,
+      //       orderId: mitem?.orderNumber,
+      //       orderQuantity: dt?.productQuantity,
+      //       name: dt?.product?.name,
+      //       packSize: dt?.product?.weight + " " + dt?.product?.unit,
+      //     });
+      //   });
+      // });
 
-      const result = Object.values(groupedData);
+      // const groupedData: any = {};
+      // updatedProductData.forEach(
+      //   ({ productId, orderId, orderQuantity, name, packSize }: any) => {
+      //     if (!groupedData[productId]) {
+      //       groupedData[productId] = {
+      //         productId,
+      //         name,
+      //         packSize,
+      //         orders: [],
+      //       };
+      //     }
+      //     groupedData[productId].orders.push({ orderId, orderQuantity });
+      //   }
+      // );
 
-      const finalData = await Promise.all(
-        result.map(async (abc: any) => {
-          let res;
-          try {
-            res = await loadStockByWarehouseProduct({
-              productId: abc?.productId,
-              locationId: locationId,
-            }).unwrap();
-          } catch (error) {
-            console.log(error);
-          }
-          return {
-            ...abc,
-            stock: res?.data?.quantity || 0,
-          };
-        })
-      );
+      // const result = Object.values(groupedData);
 
-      setReqPreviewData(finalData);
+      // const finalData = await Promise.all(
+      //   result.map(async (abc: any) => {
+      //     let res;
+      //     try {
+      //       res = await loadStockByWarehouseProduct({
+      //         productId: abc?.productId,
+      //         locationId: locationId,
+      //       }).unwrap();
+      //     } catch (error) {
+      //       console.log(error);
+      //     }
+      //     return {
+      //       ...abc,
+      //       stock: res?.data?.quantity || 0,
+      //     };
+      //   })
+      // );
+
+      // setReqPreviewData(finalData);
     } catch (error) {
       console.error("Error generating preview:", error);
     }

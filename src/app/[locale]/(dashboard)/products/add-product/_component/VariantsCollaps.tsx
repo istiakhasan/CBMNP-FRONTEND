@@ -88,7 +88,7 @@ const VariantsCollaps = ({ remove, fields, attributes }: any) => {
               Product Specifications
             </p>
 
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-1 gap-2">
               <div className="mb-2">
                 <GbFormInput
                   name={`variants[${i}].weight`}
