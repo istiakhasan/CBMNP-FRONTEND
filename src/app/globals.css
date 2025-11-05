@@ -102,19 +102,19 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 P {
-  font-size: 14px;
+  font-size: 12px;
 }
 
 html {
   scroll-behavior: smooth;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 body {
   background: var(--bglight) !important;
   /* max-width: 1440px; */
   margin: 0 auto;
-  min-height: 100vh;
+  height: 100vh;
 }
 /* =========================================common css start==================== */
 /* =========================================common css start==================== */
@@ -134,7 +134,7 @@ aside.gb_sidebar {
 	width: 75px;
 	/* position: fixed; */
 	background: var(--bglight);
-	box-shadow: 1px 0 32px rgba(0, 0, 0, 0.12);
+	/* box-shadow: 1px 0 32px rgba(0, 0, 0, 0.12); */
 	transition: width 0.3s ease-in-out;
   }
   
@@ -165,7 +165,7 @@ aside.gb_sidebar {
 	color: var(--secondaryText);
 	display: flex;
 	align-items: center;
-	height: 55px;
+	height: 40px;
 	width: 100%;
 	padding-left: 16px;
 	transition: 0.2s ease-in-out;
@@ -177,7 +177,7 @@ aside.gb_sidebar {
   }
   
   .hide .menu_list_wraper .menu_list {
-	border-radius: 50%;
+	/* border-radius: 50%; */
   }
   
   .show .menu_list_wraper .menu_list {
@@ -280,12 +280,12 @@ aside.gb_sidebar {
 
   /* custom scroll */
   .custom_scroll::-webkit-scrollbar {
-    width: 0px;
+    width: 0px !important;
     height: 0;
   }
   /* width */
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 2px;
 }
 
 /* Track */
@@ -578,7 +578,7 @@ aside.gb_sidebar {
 	color: black;
 	font-weight: 600;
 	background: #FAFAFA;
-	font-size: 14px;
+	font-size: 12px;
 	line-height: 18px;
   }
 
@@ -596,7 +596,7 @@ aside.gb_sidebar {
   color: black;
   font-weight: 600;
   background: #EAA5A7;
-  font-size: 14px;
+  font-size: 12px;
   line-height: 18px;
 }
 
@@ -605,7 +605,7 @@ aside.gb_sidebar {
   color: black;
   font-weight: 500;
   background: #F5EEDC; /* You can choose a lighter/different shade */
-  font-size: 14px;
+  font-size: 12px;
   line-height: 18px;
 }
 

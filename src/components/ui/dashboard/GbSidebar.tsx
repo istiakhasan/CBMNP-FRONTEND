@@ -204,7 +204,7 @@ const GbSidebar = () => {
   return (
     <>
       {loading && <Loader />}
-       {rstate?.toggle &&   <aside
+       {rstate?.toggle &&   <aside 
         className={`gb_sidebar  sticky top-0   ${
           isActive ? "show overflow-y-scroll h-[100vh]" : "hide h-fit"
         }`}

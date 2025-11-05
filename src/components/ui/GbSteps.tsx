@@ -159,7 +159,7 @@ const GbSteps: React.FC = () => {
   const contentStyle: React.CSSProperties = {
     color: token.colorTextTertiary,
     borderRadius: token.borderRadiusLG,
-    marginTop: 16,
+    // marginTop: 16,
     minHeight: "100vh",
   };
 
@@ -245,8 +245,8 @@ const GbSteps: React.FC = () => {
         submitHandler={submitHandler}
       >
         <div
-          style={{ top: 60 }}
-          className="flex sticky bg-[white] py-[15px]  z-20   items-center justify-center"
+          style={{ top: 0 }}
+          className="flex sticky bg-[white]   z-20   items-center justify-center"
         >
           <Steps
             style={{ width: "560px", fontWeight: "bold" }}

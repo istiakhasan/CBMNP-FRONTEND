@@ -47,7 +47,7 @@ const Page = () => {
   return (
     <div>
       <GbHeader title="Edit product" />
-      <div className="p-[16px]">
+      <div className="p-[16px] h-[90vh]">
         <GbForm
           defaultValues={{ ...defaultValue }}
           submitHandler={async (payload: any) => {

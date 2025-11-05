@@ -11,13 +11,13 @@ import { handleCopy } from "@/util/copyOrderInfo";
 import { getUserInfo } from "@/service/authService";
 import { useGetUserByIdQuery } from "@/redux/api/usersApi";
 import { useLocale } from "next-intl";
-
+import { OrderPageView } from "@/components/Orderview";
 
 const Page = () => {
   const [active, setActive] = useState(1);
   const { orderid } = useParams();
   const router = useRouter();
-  const local=useLocale()
+  const local = useLocale();
   const { data, isLoading } = useGetOrderByIdQuery({
     id: orderid,
   });
@@ -31,10 +31,12 @@ const Page = () => {
     2: <OrderLog data={data} />,
   };
   const [copyLoading, setCopyLoading] = useState(false);
+
+  return <OrderPageView orderData={data} permission={permission} />;
   return (
-    <div >
+    <div>
       <div className="mb-2">
-      <GbHeader title="Order" />
+        <GbHeader title="Order" />
       </div>
       <div className=" ">
         <div className="h-[90vh]  overflow-x-scroll custom_scroll">
@@ -63,19 +65,18 @@ const Page = () => {
               {/* copy order info */}
 
               <div className="ml-auto flex">
-                <p onClick={() =>
-                      handleCopy(data, setCopyLoading, () => {
-                        message.success(
-                          "Order information copied successfully!"
-                        );
-                      })
-                    } className="border-[#4F8A6D] border text-[#4F8A6D]  cursor-pointer  px-[25px] py-[4px]  mr-2">
-                  <i
-                    className="ri-file-copy-2-line text-[18px]  cursor-pointer"
-                  ></i>
+                <p
+                  onClick={() =>
+                    handleCopy(data, setCopyLoading, () => {
+                      message.success("Order information copied successfully!");
+                    })
+                  }
+                  className="border-[#4F8A6D] border text-[#4F8A6D]  cursor-pointer  px-[25px] py-[4px]  mr-2"
+                >
+                  <i className="ri-file-copy-2-line text-[18px]  cursor-pointer"></i>
                   Copy Info{" "}
                 </p>
-                { permission?.includes("UPDATE_ORDERS") && 
+                {permission?.includes("UPDATE_ORDERS") && (
                   <button
                     onClick={() =>
                       router.push(
@@ -86,7 +87,7 @@ const Page = () => {
                   >
                     Edit
                   </button>
-                }
+                )}
               </div>
             </div>
             <Divider style={{ padding: "0", margin: "0" }} />

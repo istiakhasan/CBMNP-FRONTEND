@@ -374,7 +374,7 @@ const OrdersPage = () => {
                     trigger={["click"]}
                     placement="rightBottom"
                     title={
-                      <div>
+                      <div className="h-[500px] overflow-y-scroll">
                         <h1>Filter by status</h1>
                         <div className="flex gap-2 flex-wrap">
                           {statusOptions?.data?.map((item: any, i: any) => (
@@ -525,7 +525,7 @@ const OrdersPage = () => {
                           />
                         </div>
 
-                        <div className="flex justify-end">
+                        <div className="flex justify-end sticky bottom-0">
                           <button className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px] mt-3">
                             Apply
                           </button>

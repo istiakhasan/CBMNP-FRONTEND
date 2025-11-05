@@ -39,9 +39,9 @@ export default function OrderSummaryEdit({
     }).format(price);
   };
 
-  const subtotal = getTotalAmount();
+  const total = getTotalAmount();
   const shipping = orderDetails.shippingCharge;
-  const total = subtotal + shipping;
+  const subtotal = total - shipping;
   const updateQuantity = (productId: string, change: number) => {
     const item = cartItems.find((item) => item.product.id === productId);
     if (item) {
@@ -323,7 +323,7 @@ export default function OrderSummaryEdit({
               size="lg"
             >
               <Check className="w-5 h-5 mr-2" />
-              Update Order {cartItems.length > 0 && `• ${formatPrice(total)}`}
+              Update Order {Number(total || 0) - Number(orderDetails?.amount || 0)}
             </Button>
 
             {cartItems.length > 0 && (

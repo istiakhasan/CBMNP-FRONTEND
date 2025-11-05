@@ -308,12 +308,17 @@ const Page = () => {
               placeholder="Search"
             />
             {permission?.includes("Add Products") && (
+                <button onClick={() => router.push(`/${local}/products/add-product`)} className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]">
+                  Add Product
+                </button>
+            )}
+            {/* {permission?.includes("Add Products") && (
               <GbDropdown items={items}>
                 <button className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]">
                   Add Product
                 </button>
               </GbDropdown>
-            )}
+            )} */}
           </div>
         </div>
         <div className="gb_border">
@@ -368,7 +373,7 @@ const Page = () => {
               }}
             />
           </div>
-          <div className="max-h-[600px] overflow-scroll custom_scroll">
+          <div className="max-h-[500px] overflow-scroll custom_scroll">
             <GbTable
               loading={isLoading}
               columns={newColumns}
