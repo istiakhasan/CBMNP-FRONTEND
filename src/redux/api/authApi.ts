@@ -11,6 +11,14 @@ export const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [tagTypes.auth],
     }),
+    superAdminLogIn: build.mutation({
+      query: (data) => ({
+        url: "/auth/super/log-in",
+        method: "POST",
+        data,
+      }),
+      invalidatesTags: [tagTypes.auth],
+    }),
     getProfileInfo: build.query({
       query: () => ({
         url: "/auth/profile",
@@ -18,11 +26,11 @@ export const authApi = baseApi.injectEndpoints({
       }),
       providesTags: [tagTypes.auth,tagTypes.users],
     }),
-   
   }),
 });
 
 export const {
  useSignInMutation,
- useGetProfileInfoQuery
+ useGetProfileInfoQuery,
+ useSuperAdminLogInMutation
 } = authApi;
