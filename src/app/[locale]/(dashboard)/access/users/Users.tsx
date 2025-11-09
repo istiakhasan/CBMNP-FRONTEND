@@ -119,7 +119,7 @@ const Users = () => {
             unCheckedChildren="Inactive"
             onChange={async (a) => {
                 const res = await updateUser({
-                  id: record?.userId,
+                  id: record?.id,
                   data: {
                     active: a,
                   },
