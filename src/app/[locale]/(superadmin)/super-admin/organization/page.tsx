@@ -59,7 +59,7 @@ const OrganizationPage = () => {
     if (!selectedOrgId) return;
     try {
       setLoading(true);
-      await axios.post(`${getBaseUrl()}/users`, values, {
+      await axios.post(`${getBaseUrl()}/user`,values, {
         headers: { "x-organization-id": selectedOrgId },
       });
       message.success("User added successfully!");
@@ -137,6 +137,7 @@ const OrganizationPage = () => {
   const userColumns = [
     { title: "Name", dataIndex: "name" },
     { title: "Email", dataIndex: "email" },
+    { title: "Internal Id", dataIndex: "internalId" },
     { title: "Phone", dataIndex: "phone" },
     { title: "Role", dataIndex: "role" },
     { title: "Address", dataIndex: "address" },
@@ -243,6 +244,11 @@ const OrganizationPage = () => {
             </Col>
             <Col span={12}>
               <Form.Item label="Phone" name="phone" rules={[{ required: true }]}>
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Internal Id" name="internalId" rules={[{ required: true }]}>
                 <Input />
               </Form.Item>
             </Col>
