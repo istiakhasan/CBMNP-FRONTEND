@@ -34,15 +34,20 @@ const Dashboard = () => {
     <div className="h-screen overflow-auto custom_scroll">
       <GbHeader title="Dashboard" />
       <div className="p-[16px]">
-        <div className="flex items-start gap-2">
-          <i className="ri-layout-grid-fill text-[20px]"></i>
-          <div className="">
-            <p className="text-[26px]  font-bold  leading-none">{t("title")}</p>
-            <p className="text-[16px] text-gray-500  my-0 py-0">
-              {t("bio")}
-              {data?.data?.name}!
-            </p>
+        <div className="flex justify-between">
+          <div className="flex items-start gap-2">
+            <i className="ri-layout-grid-fill text-[20px]"></i>
+            <div className="">
+              <p className="text-[26px]  font-bold  leading-none">
+                {t("title")}
+              </p>
+              <p className="text-[16px] text-gray-500  my-0 py-0">
+                {t("bio")}
+                {data?.data?.name}!
+              </p>
+            </div>
           </div>
+          <div>filter dashboard</div>
         </div>
         <div>
           <div className="my-4"></div>
@@ -248,22 +253,50 @@ const Dashboard = () => {
               </Card>
             </Col> */}
 
-            <Col style={{ height: "auto" }} className="mb-5"  xs={24} sm={12} md={12} lg={12}>
+            <Col
+              style={{ height: "auto" }}
+              className="mb-5"
+              xs={24}
+              sm={12}
+              md={12}
+              lg={12}
+            >
               <Card style={{ height: "auto" }} bordered={true}>
                 <PortFolioOverview />
               </Card>
             </Col>
-            <Col style={{ height: "auto" }} className="mb-5"  xs={24} sm={24} md={12} lg={12}>
+            <Col
+              style={{ height: "auto" }}
+              className="mb-5"
+              xs={24}
+              sm={24}
+              md={12}
+              lg={12}
+            >
               <Card style={{ height: "100%" }} bordered={true}>
                 <OrderStatusDistribution />
               </Card>
             </Col>
-            <Col style={{ height: "auto" }} className="mb-5" xs={24} sm={12} md={12} lg={12}>
+            <Col
+              style={{ height: "auto" }}
+              className="mb-5"
+              xs={24}
+              sm={12}
+              md={12}
+              lg={12}
+            >
               <Card style={{ height: "100%" }} bordered={true}>
                 <DeliveryPartner />
               </Card>
             </Col>
-            <Col style={{ height: "auto" }} className="mb-5" xs={24} sm={12} md={12} lg={12}>
+            <Col
+              style={{ height: "auto" }}
+              className="mb-5"
+              xs={24}
+              sm={12}
+              md={12}
+              lg={12}
+            >
               <TopProducts />
             </Col>
             <Col style={{ height: "auto" }} span={24}>

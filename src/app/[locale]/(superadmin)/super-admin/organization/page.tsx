@@ -42,7 +42,7 @@ const OrganizationPage = () => {
   const handleCreate = async (values: any) => {
     try {
       setLoading(true);
-      await axios.post("http://localhost:8080/api/v1/organization", values);
+      await axios.post(`${getBaseUrl()}/organization`, values);
       message.success("Organization created successfully!");
       setIsModalOpen(false);
       form.resetFields();
@@ -59,7 +59,7 @@ const OrganizationPage = () => {
     if (!selectedOrgId) return;
     try {
       setLoading(true);
-      await axios.post("http://localhost:8080/api/v1/users", values, {
+      await axios.post(`${getBaseUrl()}/users`, values, {
         headers: { "x-organization-id": selectedOrgId },
       });
       message.success("User added successfully!");
