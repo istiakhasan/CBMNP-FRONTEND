@@ -15,61 +15,61 @@ const GbHeader = ({ title }: { title?: string }) => {
   const router = useRouter();
   const local = useLocale();
   const items: MenuProps["items"] = [
-    {
-      label: (
-        <Link href="/profile">
-          <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
-            <i style={{ fontSize: "20px" }} className="ri-user-line"></i>
-            <span>Profile</span>
-          </span>
-        </Link>
-      ),
-      key: "0",
-    },
-    {
-      label: (
-        <Link href="/profile">
-          <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
-            <i style={{ fontSize: "20px" }} className="ri-settings-3-line"></i>
-            <span>Company Settings</span>
-          </span>
-        </Link>
-      ),
-      key: "1",
-    },
-    {
-      label: (
-        <Link href="/profile">
-          <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
-            <i style={{ fontSize: "20px" }} className="ri-bank-card-line"></i>
-            <span>Payments</span>
-          </span>
-        </Link>
-      ),
-      key: "2",
-    },
-    {
-      label: (
-        <Link href="/profile">
-          <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
-            <i style={{ fontSize: "20px" }} className="ri-question-fill"></i>
-            <span>Help desk</span>
-          </span>
-        </Link>
-      ),
-      key: "3",
-    },
-    {
-      label: (
-        <Link href="/profile">
-          <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
-            <i style={{ fontSize: "20px" }} className="ri-message-2-line"></i>
-            <span>Live Support</span>
-          </span>
-        </Link>
-      ),
-      key: "4",
-    },
+    // {
+    //   label: (
+    //     <Link href="/profile">
+    //       <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
+    //         <i style={{ fontSize: "20px" }} className="ri-user-line"></i>
+    //         <span>Profile</span>
+    //       </span>
+    //     </Link>
+    //   ),
+    //   key: "0",
+    // },
+    // {
+    //   label: (
+    //     <Link href="/profile">
+    //       <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
+    //         <i style={{ fontSize: "20px" }} className="ri-settings-3-line"></i>
+    //         <span>Company Settings</span>
+    //       </span>
+    //     </Link>
+    //   ),
+    //   key: "1",
+    // },
+    // {
+    //   label: (
+    //     <Link href="/profile">
+    //       <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
+    //         <i style={{ fontSize: "20px" }} className="ri-bank-card-line"></i>
+    //         <span>Payments</span>
+    //       </span>
+    //     </Link>
+    //   ),
+    //   key: "2",
+    // },
+    // {
+    //   label: (
+    //     <Link href="/profile">
+    //       <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
+    //         <i style={{ fontSize: "20px" }} className="ri-question-fill"></i>
+    //         <span>Help desk</span>
+    //       </span>
+    //     </Link>
+    //   ),
+    //   key: "3",
+    // },
+    // {
+    //   label: (
+    //     <Link href="/profile">
+    //       <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
+    //         <i style={{ fontSize: "20px" }} className="ri-message-2-line"></i>
+    //         <span>Live Support</span>
+    //       </span>
+    //     </Link>
+    //   ),
+    //   key: "4",
+    // },
     {
       label: (
         <>
