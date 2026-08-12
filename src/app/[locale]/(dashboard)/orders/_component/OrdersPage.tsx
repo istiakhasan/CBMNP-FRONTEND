@@ -291,9 +291,13 @@ const OrdersPage = () => {
 
   React.useEffect(() => {
     if (warehouseOptions?.data?.length && !selectedWarehouse) {
-      const defaultWarehouse = warehouseOptions.data[0]?.value;
-      setSelectedWarehouse(defaultWarehouse);
-      setWarehouseIds([defaultWarehouse]); // Load orders for default warehouse
+     const defaultWarehouse = warehouseOptions.data.find(
+      (item: any) => item?.isDefault
+    );
+    const warehouseToSelect = defaultWarehouse?.value || warehouseOptions.data[0]?.value;
+
+      setSelectedWarehouse(warehouseToSelect);
+      setWarehouseIds([warehouseToSelect]); // Load orders for default warehouse
     }
   }, [warehouseOptions?.data]);
 
