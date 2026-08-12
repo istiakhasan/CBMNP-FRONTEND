@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 
-import { Button, Card, Table, Tag, Input, Space, Typography, Row, Col, Divider, Tabs } from "antd"
+import { Button, Card, Table, Tag, Input, Space, Typography, Row, Col, Divider, Tabs, Tooltip } from "antd"
 import {
   RiFileTextLine,
   RiTruckLine,
@@ -114,9 +114,24 @@ const OrderInformationContent = ({rowData}:any) => {
       )
       },
     },
+   {
+  title: "Name",
+  key: "name",
+  width: 250,
+  ellipsis: {
+    showTitle: false,
+  },
+  render: (_text: any, record: any) => (
+    <Tooltip title={record.product?.name || "N/A"}>
+      <span>
+        {record.product?.name || "N/A"}
+      </span>
+    </Tooltip>
+  ),
+},
     {
       title: "Code",
-      render: (text:any, record:any) => record.product?.internalId || "-",
+      render: (text:any, record:any) => record.product?.internalId || record.product?.sku || "-",
       key: "code",
     },
     {
@@ -447,7 +462,7 @@ const OrderInformationContent = ({rowData}:any) => {
             ))}
           </div>
         ) : (
-          <Table columns={returnProductsColumns} dataSource={returnProducts} pagination={false} rowKey="code" />
+          <Table columns={returnProductsColumns} dataSource={rowData?.productReturns} pagination={false} rowKey="code" />
         )}
       </Card>
 
