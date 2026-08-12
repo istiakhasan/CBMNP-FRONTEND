@@ -1,5 +1,5 @@
 import { tagTypes } from "../tag-types";
-import { baseApi } from "./baseApi"; 
+import { baseApi } from "./baseApi";
 
 export const warehouseApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
@@ -7,7 +7,7 @@ export const warehouseApi = baseApi.injectEndpoints({
       query: (data) => ({
         url: "/warehouse",
         method: "POST",
-        data
+        data,
       }),
       invalidatesTags: [tagTypes.warehouse],
     }),
@@ -15,7 +15,7 @@ export const warehouseApi = baseApi.injectEndpoints({
       query: (data) => ({
         url: `/warehouse/${data?.id}`,
         method: "PATCH",
-        data:data?.data
+        data: data?.data,
       }),
       invalidatesTags: [tagTypes.warehouse],
     }),
@@ -23,24 +23,31 @@ export const warehouseApi = baseApi.injectEndpoints({
       query: (arg) => ({
         url: "/warehouse",
         method: "GET",
-        params: arg
+        params: arg,
       }),
       providesTags: [tagTypes.warehouse],
     }),
     loadAllWarehouseOptions: build.query({
       query: () => ({
         url: "/warehouse/options",
-        method: "GET"
+        method: "GET",
       }),
       providesTags: [tagTypes.warehouse],
-    })
- 
+    }),
+    setDefaultWarehouse: build.mutation({
+      query: (id: string) => ({
+        url: `/warehouse/set-default/${id}`,
+        method: "PATCH",
+      }),
+      invalidatesTags: [tagTypes.warehouse], // apnar tag name onujayi change korben
+    }),
   }),
 });
 
 export const {
-    useLoadAllWarehouseQuery,
-    useCreateWarehouseMutation,
-    useLoadAllWarehouseOptionsQuery,
-    useUpdateWarehouseMutation
+  useLoadAllWarehouseQuery,
+  useCreateWarehouseMutation,
+  useLoadAllWarehouseOptionsQuery,
+  useUpdateWarehouseMutation,
+  useSetDefaultWarehouseMutation
 } = warehouseApi;

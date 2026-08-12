@@ -2,10 +2,13 @@
 "use client";
 import { useState } from "react";
 import GbTable from "@/components/GbTable";
-import { Pagination } from "antd";
+import { message, Pagination, Popconfirm } from "antd";
 import { useSearchParams } from "next/navigation";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
-import { useLoadAllWarehouseQuery } from "@/redux/api/warehouse";
+import {
+  useLoadAllWarehouseQuery,
+  useSetDefaultWarehouseMutation,
+} from "@/redux/api/warehouse";
 import GbModal from "@/components/ui/GbModal";
 import CreateWarehouse from "./_component/CreateWarehouse";
 import EditWarehouse from "./_component/EditWarehouse";
@@ -14,9 +17,11 @@ const Page = () => {
   const query: Record<string, any> = {};
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
-  const [rowData,setRowData]=useState<any>(null)
+  const [rowData, setRowData] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [open, setOpen] = useState(false);
+  const [setDefaultWarehouse, { isLoading: settingDefault }] =
+    useSetDefaultWarehouseMutation();
   const [editWarehouse, setEditWarehouse] = useState(false);
   query["page"] = page;
   query["limit"] = size;
@@ -55,14 +60,51 @@ const Page = () => {
       dataIndex: "phone",
     },
     {
+      title: "Default",
+      key: 8,
+      align: "center",
+      //@ts-ignore
+      render: (_, record) => {
+        if (record.isDefault) {
+          return (
+            <i
+              className="ri-star-fill text-[18px]"
+              style={{ color: "#FBBF24" }}
+              title="Default warehouse"
+            ></i>
+          );
+        }
+        return (
+          <Popconfirm
+            title="Set as default warehouse?"
+            description={`"${record.name}" will become the default warehouse for this organization.`}
+            okText="Yes"
+            cancelText="No"
+            disabled={settingDefault}
+            onConfirm={() => handleSetDefault(record.id)}
+          >
+            <i
+              className="ri-star-line text-[18px] text-gray-400 cursor-pointer hover:text-[#FBBF24]"
+              title="Set as default"
+            ></i>
+          </Popconfirm>
+        );
+      },
+    },
+    {
       title: "Action",
       key: 7,
       align: "end",
-      render: (_:any,record:any) => {
-        return <i onClick={()=>{
-          setEditWarehouse(true)
-          setRowData(record)
-        }} className="ri-edit-2-fill text-[18px] color_primary cursor-pointer"></i>;
+      render: (_: any, record: any) => {
+        return (
+          <i
+            onClick={() => {
+              setEditWarehouse(true);
+              setRowData(record);
+            }}
+            className="ri-edit-2-fill text-[18px] color_primary cursor-pointer"
+          ></i>
+        );
       },
     },
   ];
@@ -78,6 +120,16 @@ const Page = () => {
       await refetch();
       setLoading(false);
     }, 1000);
+  };
+
+  const handleSetDefault = async (id: string) => {
+    try {
+      await setDefaultWarehouse(id).unwrap();
+      message.success("Default warehouse updated");
+      refetch();
+    } catch (err: any) {
+      message.error(err?.data?.message || "Something went wrong");
+    }
   };
   return (
     <>
