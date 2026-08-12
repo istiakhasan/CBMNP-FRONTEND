@@ -70,7 +70,8 @@ export default function OrderSummaryEdit({
     !!orderDetails.deliveryAddress &&
     orderDetails?.orderSource?.length > 0
   const missingRequirements = [];
-
+ if (!orderDetails?.warehouse?.label)
+    missingRequirements.push("Select a warehouse");
   if (cartItems.length === 0) missingRequirements.push("Add products to cart");
   if (!orderDetails.deliveryAddress)
     missingRequirements.push("Select Delivery address(s)");

@@ -73,8 +73,6 @@ export default function OrderDetailsPanelEdit({
     }));
   };
 
-
-
   const getShippingInfo = () => {
     if (!orderDetails.deliveryAddress) {
       return {
@@ -128,11 +126,32 @@ export default function OrderDetailsPanelEdit({
       }
       style={{ borderRadius: 10, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}
     >
- 
-
       {/* Order Type & Shipping */}
-      <Row  gutter={16}>
-        
+      <Row gutter={16}>
+        <Col xs={24} md={12}>
+          <label>Warehouse Selection *</label>
+          <Select
+            value={orderDetails.warehouse}
+            labelInValue
+            onChange={(value) => updateField("warehouse", value)}
+            style={{ width: "100%" }}
+            placeholder="Select warehouse"
+          >
+            {warehouses?.data?.map((w: any, i: any) => (
+              <Option key={w.value} value={w.value}>
+                <div>
+                  <div style={{ fontSize: 12 }}>{w.label}</div>
+                </div>
+              </Option>
+            ))}
+          </Select>
+          {selectedCustomer && orderDetails.warehouse && (
+            <p style={{ fontSize: 12, color: "green", marginTop: 4 }}>
+              ✓ Suggested based on customer location:{" "}
+              {selectedCustomer?.location?.mapLocation}
+            </p>
+          )}
+        </Col>
         <Col xs={24} md={12}>
           <label className="text-[12px]">Order Source *</label>
           <Select
@@ -211,14 +230,13 @@ export default function OrderDetailsPanelEdit({
             ))}
           </Select>
         </Col>
-        <Col  xs={24} md={12}>
-          <label className="text-[12px]">Shipping Method</label> 
-          <Select 
-            
+        <Col xs={24} md={12}>
+          <label className="text-[12px]">Shipping Method</label>
+          <Select
             placeholder="Select shipping method"
             value={orderDetails?.currier}
-            onChange={(value,options) => updateField("currier", options)}
-            style={{ width: "100%"}}
+            onChange={(value, options) => updateField("currier", options)}
+            style={{ width: "100%" }}
             options={deliveryPartner?.data}
           />
         </Col>
@@ -259,8 +277,6 @@ export default function OrderDetailsPanelEdit({
           </p>
         )}
       </div>
-
- 
 
       {/* Delivery Notes */}
       <div style={{ marginTop: 16 }}>
