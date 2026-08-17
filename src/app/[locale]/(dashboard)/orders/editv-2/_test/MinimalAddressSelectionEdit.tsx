@@ -19,10 +19,13 @@ import {
   PlusOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
-import { useAddAddressMutation } from "@/redux/api/customerApi";
+import {
+  useAddAddressMutation,
+  useUpdateAddressMutation,
+} from "@/redux/api/customerApi";
 import axios from "axios";
 import { getBaseUrl } from "@/helpers/config/envConfig";
-
+import { EditOutlined } from "@ant-design/icons";
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
@@ -82,8 +85,25 @@ export default function MinimalAddressSelectionEdit({
     return 70;
   };
 
-  const generateAddressId = () => {
-    return "ADDR-" + Math.floor(Math.random() * 900000 + 100000);
+  // ... component এর ভিতরে
+
+  const [updateAddress] = useUpdateAddressMutation();
+  const [editingAddressId, setEditingAddressId] = useState<number | null>(null);
+
+  const handleEditAddress = (addr: any) => {
+    setEditingAddressId(addr.id);
+    form.setFieldsValue({
+      label: addr.label,
+      receiverName: addr.receiverName,
+      receiverPhoneNumber: addr.receiverPhoneNumber,
+      address: addr.address,
+      divisionName: addr.division,
+      districtName: addr.district,
+      thanaName: addr.thana,
+      relationship: addr.relationship,
+      isDefault: addr.isDefault,
+    });
+    setShowAddModal(true);
   };
 
   const handleAddAddress = async () => {
@@ -113,6 +133,56 @@ export default function MinimalAddressSelectionEdit({
       form.resetFields();
       setShowAddModal(false);
     } catch (error) {
+      message.error("Please fill in required fields");
+    }
+  };
+  const handleSaveAddress = async () => {
+    try {
+      const values = await form.validateFields();
+
+      const payload = {
+        label: values.label,
+        receiverName: values.receiverName || customer.customerName,
+        receiverPhoneNumber:
+          values.receiverPhoneNumber || customer.customerPhoneNumber,
+        division: values.divisionName,
+        district: values.districtName,
+        thana: values.thanaName,
+        address: values.address,
+        relationship: values.relationship || null,
+        isDefault: values.isDefault ?? addresses.length === 0,
+        customerId: customer.id,
+      };
+
+      if (editingAddressId) {
+        // ---- EDIT MODE ----
+        const updated = await updateAddress({
+          id: editingAddressId,
+          ...payload,
+        }).unwrap();
+
+        const updatedAddresses = addresses.map((a) =>
+          a.id === editingAddressId ? updated?.data : a,
+        );
+        onAddressUpdate(updatedAddresses);
+        if (selectedDeliveryAddress?.id === editingAddressId) {
+          onDeliveryAddressSelect(updated?.data);
+        }
+        message.success("Address updated successfully!");
+      } else {
+        // ---- CREATE MODE ----
+        const newAddress = await createAddress(payload).unwrap();
+        const updatedAddresses = [...addresses, newAddress?.data];
+        onAddressUpdate(updatedAddresses);
+        onDeliveryAddressSelect(newAddress?.data);
+        message.success("Address added successfully!");
+      }
+
+      form.resetFields();
+      setEditingAddressId(null);
+      setShowAddModal(false);
+    } catch (error) {
+      console.log(error);
       message.error("Please fill in required fields");
     }
   };
@@ -163,24 +233,41 @@ export default function MinimalAddressSelectionEdit({
     });
   };
 
-  const generateDefaultAddress = () => {
-    if (customer?.address) {
-      const defaultAddress: any = {
-        // id: generateAddressId(),
+  const generateDefaultAddress = async () => {
+    if (!customer?.address) {
+      message.warning("Customer এর address তথ্য পাওয়া যায়নি");
+      return;
+    }
+
+    try {
+      const payload = {
         label:
-          customer.type === "Probashi" ? "Receiver Address" : "Main Address",
-        district: customer?.district,
+          customer?.customerType === "PROBASHI"
+            ? "Receiver Address"
+            : "Main Address",
+        receiverName: customer?.customerName,
+        receiverPhoneNumber: customer?.customerPhoneNumber,
         division: customer?.division,
+        district: customer?.district,
         thana: customer?.thana,
         address: customer?.address,
-        receiverName: customer?.location?.receiverName || customer.name,
-        receiverPhone: customer?.location?.receiverPhone || customer.phone,
-        mapLocation: customer?.location?.mapLocation,
-        type: "Home",
+        relationship: null,
+        isDefault: addresses.length === 0,
+        customerId: customer.id,
       };
-      onAddressUpdate([defaultAddress]);
-      onDeliveryAddressSelect(defaultAddress);
+
+      // আগে backend এ address create হবে
+      const newAddress = await createAddress(payload).unwrap();
+
+      // তারপর সেই তৈরি হওয়া address দিয়ে state update + select
+      const updatedAddresses = [...addresses, newAddress?.data];
+      onAddressUpdate(updatedAddresses);
+      onDeliveryAddressSelect(newAddress?.data);
+
       message.success("Default address created");
+    } catch (error) {
+      console.log(error);
+      message.error("Address create করতে সমস্যা হয়েছে");
     }
   };
 
@@ -197,7 +284,7 @@ export default function MinimalAddressSelectionEdit({
 
     message.info("Address removed");
   };
-
+  console.log(customer, "customer");
   return (
     <Card
       title={
@@ -221,7 +308,7 @@ export default function MinimalAddressSelectionEdit({
           <EnvironmentOutlined style={{ fontSize: 40, color: "#d9d9d9" }} />
           <p>No delivery addresses found</p>
           <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-            {/* <Button onClick={generateDefaultAddress}>Use Customer Info</Button> */}
+            <Button onClick={generateDefaultAddress}>Use Customer Info</Button>
             <Button type="primary" onClick={() => setShowAddModal(true)}>
               Add New
             </Button>
@@ -294,6 +381,11 @@ export default function MinimalAddressSelectionEdit({
                           )}
                         </div>
                         <Button
+                          type="link"
+                          icon={<EditOutlined />}
+                          onClick={() => handleEditAddress(addr)}
+                        />
+                        <Button
                           danger
                           type="link"
                           icon={<DeleteOutlined />}
@@ -311,11 +403,19 @@ export default function MinimalAddressSelectionEdit({
 
       {/* Add Address Modal */}
       <Modal
-        title="Add New Delivery Address"
+        title={
+          editingAddressId
+            ? "Edit Delivery Address"
+            : "Add New Delivery Address"
+        }
         open={showAddModal}
-        onCancel={() => setShowAddModal(false)}
-        onOk={handleAddAddress}
-        okText="Add Address"
+        onCancel={() => {
+          setShowAddModal(false);
+          setEditingAddressId(null);
+          form.resetFields();
+        }}
+        onOk={handleSaveAddress}
+        okText={editingAddressId ? "Update Address" : "Add Address"}
       >
         <Form layout="vertical" form={form}>
           <Form.Item name="divisionName" hidden />
@@ -408,7 +508,11 @@ export default function MinimalAddressSelectionEdit({
             name="address"
             rules={[{ required: true, message: "Please enter full address" }]}
           >
-            <TextArea rows={3} placeholder="Enter complete address" />
+            <TextArea
+              defaultValue={customer?.address}
+              rows={3}
+              placeholder="Enter complete address"
+            />
           </Form.Item>
 
           {/* Relationship (only if probashi) */}

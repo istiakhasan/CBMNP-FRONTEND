@@ -59,6 +59,13 @@ export const customerApi = baseApi.injectEndpoints({
       }),
       providesTags: [tagTypes.customer],
     }),
+    updateAddress: build.mutation({
+  query: ({ id, ...data }) => ({
+    url: `/customers/address/${id}`,
+    method: 'PATCH',
+    data: data,
+  }),
+}),
   }),
 });
 
@@ -72,6 +79,7 @@ export const {
     useTopCustomersReportsQuery,
     useLazyTopCustomersReportsQuery,
     useAddAddressMutation,
-    useLazyGetCustomerByIdQuery
+    useLazyGetCustomerByIdQuery,
+    useUpdateAddressMutation
 
 } = customerApi;

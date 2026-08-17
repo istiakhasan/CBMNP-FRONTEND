@@ -235,16 +235,29 @@ const PendingOrders = ({
 
   const contentRef = useRef<HTMLDivElement | null>(null);
 
-  const rowSelection: TableProps<any>["rowSelection"] = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
-      setSelectedOrders(selectedRows);
-    },
-    getCheckboxProps: (record: any) => ({
-      disabled: record.name === "Disabled User",
-      name: record.name,
-    }),
-  };
+  
+const getMissingFields = (record: any) => {
+  const missing: string[] = [];
+  if (!record?.currier) missing.push("Courier");
+  if (!record?.addressId) missing.push("Address");
+  if (!record?.locationId) missing.push("Warehouse");
+  if (!record?.orderType) missing.push("Order Type");
+  if (!record?.shippingType) missing.push("Shipping Type");
+  return missing;
+};
 
+const rowSelection: TableProps<any>["rowSelection"] = {
+  onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
+    setSelectedOrders(selectedRows);
+  },
+  getCheckboxProps: (record: any) => {
+    const missing = getMissingFields(record);
+    return {
+      disabled: missing.length > 0,
+      name: record.orderNumber,
+    };
+  },
+};
   const items: MenuProps["items"] = [
     {
       label: (

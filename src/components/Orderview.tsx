@@ -80,7 +80,7 @@ export function OrderPageView({ orderData , permission}: any) {
                   {/* <Button type="primary" icon={<RiDownloadLine size={16} />}>
                     Export PDF
                   </Button> */}
-                  <Tooltip>
+                {orderData?.status?.label==='Pending-Return' &&  <Tooltip title="Change Status">
                     <Button 
                       type="primary"
                       disabled={
@@ -97,7 +97,7 @@ export function OrderPageView({ orderData , permission}: any) {
                       {orderData?.status?.label || "Pending"}{" "}
                       <i className="ri-arrow-down-s-line text-[18px]"></i>
                     </Button>
-                  </Tooltip>
+                  </Tooltip>}
                 </Space>
               </div>
             </div>
