@@ -41,7 +41,7 @@ export default function OrderSummaryEdit({
 
   const total = getTotalAmount();
   const shipping = orderDetails.shippingCharge;
-  const subtotal = total - shipping;
+  const subtotal = Number(total) - Number(shipping);
   const updateQuantity = (productId: string, change: number) => {
     const item = cartItems.find((item) => item.product.id === productId);
     if (item) {

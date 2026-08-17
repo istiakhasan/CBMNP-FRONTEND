@@ -240,6 +240,25 @@ export default function OrderDetailsPanelEdit({
             options={deliveryPartner?.data}
           />
         </Col>
+        {orderDetails?.statusId === 1 && (
+          <Col xs={24} md={12}>
+            <label className="text-[12px]">Update Status</label>
+            <Select
+              placeholder="Select Status"
+              // value={orderDetails?.currier}
+              onChange={(value, options) =>
+                updateField("statusByAgent", options)
+              }
+              style={{ width: "100%" }}
+              options={[
+                {
+                  label: "Approved",
+                  value: "2",
+                },
+              ]}
+            />
+          </Col>
+        )}
       </Row>
 
       {/* Shipping Info */}

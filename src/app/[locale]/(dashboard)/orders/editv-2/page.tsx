@@ -61,6 +61,7 @@ const Page = () => {
     deliveryAddress: undefined,
     currier: undefined,
     amount: 0,
+    statusByAgent:undefined
   });
 
 
@@ -175,6 +176,7 @@ const Page = () => {
           shippingCharge: orderData?.shippingCharge,
           paymentMethod: orderData?.paymentMethod,
           paymentStatus: orderData?.paymentStatus,
+          statusId: orderData?.statusId,
           amount: orderData?.totalPaidAmount,
           warehouse: {
             label: orderData?.warehouse?.name,
@@ -197,8 +199,8 @@ const Page = () => {
     return cartItems.reduce(
       (total, item) =>
         total +
-        item.product.salePrice * item.quantity +
-        orderDetails?.shippingCharge,
+        Number(item.product.salePrice) * item.quantity +
+        Number(orderDetails?.shippingCharge),
       0
     );
   };
@@ -249,6 +251,9 @@ const Page = () => {
         };
       }),
     };
+    if(orderDetails?.statusByAgent?.value){
+      order['statusId']=orderDetails?.statusByAgent?.value
+    }
     const res: any = await orderUpdateMutation({data:order,id:orderData?.id}).unwrap()
     console.log(res, "res");
     if (res) {
