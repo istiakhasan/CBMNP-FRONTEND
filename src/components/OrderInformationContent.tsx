@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 
-import { Button, Card, Table, Tag, Input, Space, Typography, Row, Col, Divider, Tabs, Tooltip } from "antd"
+import { Button, Card, Table, Tag, Input, Space, Typography, Row, Col, Divider, Tabs, Tooltip, Image } from "antd"
 import {
   RiFileTextLine,
   RiTruckLine,
@@ -98,7 +98,7 @@ const OrderInformationContent = ({rowData}:any) => {
         console.log(record,"record");
         return (
         <Space>
-          <img
+          <Image
             src={record?.product?.images[0]?.url || "/placeholder.svg"}
             alt={text}
             style={{
