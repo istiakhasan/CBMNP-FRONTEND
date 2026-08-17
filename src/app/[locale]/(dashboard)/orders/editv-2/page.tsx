@@ -249,18 +249,12 @@ const Page = () => {
         };
       }),
     };
-
-
-
-
-
     const res: any = await orderUpdateMutation({data:order,id:orderData?.id}).unwrap()
     console.log(res, "res");
     if (res) {
       message.success("Order Update successfully! 🎉");
     }
   };
-console.log(orderDetails,"==========================",orderData);
   return (
     <div>
       <GbHeader title="Create Order" />

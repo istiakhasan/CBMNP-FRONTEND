@@ -166,7 +166,7 @@ export default function MinimalAddressSelectionEdit({
   const generateDefaultAddress = () => {
     if (customer?.address) {
       const defaultAddress: any = {
-        id: generateAddressId(),
+        // id: generateAddressId(),
         label:
           customer.type === "Probashi" ? "Receiver Address" : "Main Address",
         district: customer?.district,
