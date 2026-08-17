@@ -221,7 +221,7 @@ export default function MinimalAddressSelectionEdit({
           <EnvironmentOutlined style={{ fontSize: 40, color: "#d9d9d9" }} />
           <p>No delivery addresses found</p>
           <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-            <Button onClick={generateDefaultAddress}>Use Customer Info</Button>
+            {/* <Button onClick={generateDefaultAddress}>Use Customer Info</Button> */}
             <Button type="primary" onClick={() => setShowAddModal(true)}>
               Add New
             </Button>
