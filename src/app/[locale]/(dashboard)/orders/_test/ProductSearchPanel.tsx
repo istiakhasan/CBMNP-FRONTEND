@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
@@ -12,6 +13,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useGetAllProductQuery } from "@/redux/api/productApi";
+import { Image } from "antd";
 
 interface ProductSearchPanelProps {
   onAddToCart: (product: any, quantity: number) => void;
@@ -22,7 +24,7 @@ export default function ProductSearchPanel({
 }: ProductSearchPanelProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [quantities, setQuantities] = useState<{ [productId: string]: number }>(
-    {}
+    {},
   );
   const { data: mockProducts, isLoading } = useGetAllProductQuery({
     searchTerm: searchTerm,
@@ -122,7 +124,7 @@ export default function ProductSearchPanel({
             ?.slice()
             .sort(
               (a: any, b: any) =>
-                (b?.inventories?.stock || 0) - (a?.inventories?.stock || 0)
+                (b?.inventories?.stock || 0) - (a?.inventories?.stock || 0),
             ) // descending by stock
             .map((product: any) => {
               const quantity = quantities[product.id] || 1;
@@ -138,12 +140,13 @@ export default function ProductSearchPanel({
                   className={`p-4 border-2 rounded-xl space-y-4 transition-all duration-300 hover:shadow-lg ${
                     stockStatus.color
                   } ${
-                    isOutOfStock
+                    false
                       ? "opacity-50 bg-gray-50"
                       : "bg-white  hover:from-white  "
                   }`}
                 >
-                  <div className="flex justify-between items-start">
+                  {/* Top row: Info (left) + Image (right) */}
+                  <div className="flex justify-between items-start gap-3">
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-900">
                         {product?.name}
@@ -154,46 +157,62 @@ export default function ProductSearchPanel({
                       <p className="font-semibold text-[#4F8A6D] mt-1">
                         {formatPrice(product?.salePrice)}
                       </p>
-                    </div>
-                    <div className="flex flex-col items-end gap-1">
-                      <Badge
-                        variant={stockStatus.variant}
-                        className="font-medium"
-                      >
-                        {stockStatus.text}
-                      </Badge>
-                      <span className="px-3 text-[10px]">
-                        BS:
-                        {(() => {
-                          const stock = Number(
-                            product?.inventories?.stock ?? 0
-                          );
-                          const processing = Number(
-                            product?.inventories?.processing ?? 0
-                          );
-                          const orderQue = Number(
-                            product?.inventories?.orderQue ?? 0
-                          );
-                          const hoildQue = Number(
-                            product?.inventories?.hoildQue ?? 0
-                          );
 
-                          return stock - (processing + orderQue + hoildQue);
-                        })()}
-                      </span>
-                      {isLowStock && !isOutOfStock && (
-                        <div
-                          className="flex items-center gap-1 text-amber-600"
-                          title="Low stock warning!"
+                      <div className="flex flex-col items-start gap-1 mt-2">
+                        <Badge
+                          variant={stockStatus.variant}
+                          className="font-medium"
                         >
-                          <AlertTriangle className="w-4 h-4" />
-                          <span className="text-xs font-medium">Low Stock</span>
-                        </div>
+                          {stockStatus.text}
+                        </Badge>
+                        <span className="text-[10px]">
+                          BS:
+                          {(() => {
+                            const stock = Number(
+                              product?.inventories?.stock ?? 0,
+                            );
+                            const processing = Number(
+                              product?.inventories?.processing ?? 0,
+                            );
+                            const orderQue = Number(
+                              product?.inventories?.orderQue ?? 0,
+                            );
+                            const hoildQue = Number(
+                              product?.inventories?.hoildQue ?? 0,
+                            );
+
+                            return stock - (processing + orderQue + hoildQue);
+                          })()}
+                        </span>
+                        {isLowStock && !isOutOfStock && (
+                          <div
+                            className="flex items-center gap-1 text-amber-600"
+                            title="Low stock warning!"
+                          >
+                            <AlertTriangle className="w-4 h-4" />
+                            <span className="text-xs font-medium">
+                              Low Stock
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Product Image - right side, full image (no crop) */}
+                    <div className="w-32 h-32 shrink-0 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                      {product?.images?.[0]?.url || product?.thumbnail ? (
+                        <Image
+                          src={product?.images?.[0]?.url || product?.thumbnail}
+                          alt={product?.name}
+                          className="w-full h-full object-contain"
+                        />
+                      ) : (
+                        <Package className="w-10 h-10 text-gray-300" />
                       )}
                     </div>
                   </div>
 
-                  {!isOutOfStock && (
+                  {true && (
                     <div className="space-y-3">
                       {/* Quantity Selector */}
                       <div className="flex items-center gap-3">
@@ -218,7 +237,7 @@ export default function ProductSearchPanel({
                             onChange={(e) =>
                               setQuantity(
                                 product.id,
-                                parseInt(e.target.value) || 1
+                                parseInt(e.target.value) || 1,
                               )
                             }
                             className="w-16 h-9 text-center border-0 rounded-none focus:ring-0 font-medium"
@@ -265,10 +284,7 @@ export default function ProductSearchPanel({
                   )}
 
                   {isOutOfStock && (
-                    <Badge
-                      // variant="outline"
-                      className="w-full justify-center py-2 font-medium"
-                    >
+                    <Badge className="w-full justify-center py-2 font-medium">
                       Out of Stock
                     </Badge>
                   )}

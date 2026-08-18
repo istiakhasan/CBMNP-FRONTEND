@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { Card, Select, Checkbox, Badge, Input, Row, Col, Radio } from "antd";
+import { Card, Select, Checkbox, Badge, Input, Row, Col, Radio, Switch } from "antd";
 import {
   TruckOutlined,
   ShopOutlined,
@@ -91,6 +91,13 @@ export default function OrderDetailsPanel({
   };
 
   const getShippingInfo = () => {
+      if (orderDetails.manualShippingCharge) {
+    return {
+      message: `Manual shipping charge: ৳${orderDetails.shippingCharge || 0}`,
+      charge: orderDetails.shippingCharge || 0,
+      color: "purple",
+    };
+  }
     if (!orderDetails.deliveryAddress) {
       return {
         message: "Please select a delivery address to see shipping information",
@@ -124,14 +131,16 @@ export default function OrderDetailsPanel({
   // address or shippingType changes, and written back to orderDetails.
   // Nothing else in the app should set orderDetails.shippingCharge directly.
   useEffect(() => {
+    if (orderDetails.manualShippingCharge) return;
     if (orderDetails.shippingCharge !== shippingInfo.charge) {
       updateField("shippingCharge", shippingInfo.charge);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    orderDetails.deliveryAddress?.division,
-    orderDetails.deliveryAddress?.district,
-    orderDetails.shippingType,
+     orderDetails.deliveryAddress?.division,
+  orderDetails.deliveryAddress?.district,
+  orderDetails.shippingType,
+  orderDetails.manualShippingCharge,
   ]);
 
   return (
@@ -238,6 +247,42 @@ export default function OrderDetailsPanel({
             options={deliveryPartner?.data}
           />
         </Col>
+        {/* Manual Shipping Charge Override */}
+<Col className="mt-[12px]" xs={24} md={12}>
+  <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+    <TruckOutlined style={{ marginRight: 4 }} />
+    Manual Delivery Charge
+    <Switch
+      size="small"
+      checked={!!orderDetails.manualShippingCharge}
+      onChange={(checked) => {
+        updateField("manualShippingCharge", checked);
+        if (checked) {
+          // switch করার সময় current calculated charge দিয়ে শুরু করি
+          updateField("shippingCharge", shippingInfo.charge);
+        }
+      }}
+    />
+  </label>
+  <Input
+    type="number"
+    min={0}
+    placeholder="0"
+    disabled={!orderDetails.manualShippingCharge}
+    value={
+      orderDetails.manualShippingCharge
+        ? orderDetails.shippingCharge ?? 0
+        : shippingInfo.charge
+    }
+    onChange={(e) => {
+      const raw = e.target.value;
+      const value = raw === "" ? 0 : Number(raw);
+      if (isNaN(value) || value < 0) return;
+      updateField("shippingCharge", value);
+    }}
+    style={{ marginTop: 8 }}
+  />
+</Col>
 
         {/* Discount Amount */}
         <Col className="mt-[12px]" xs={24} md={12}>

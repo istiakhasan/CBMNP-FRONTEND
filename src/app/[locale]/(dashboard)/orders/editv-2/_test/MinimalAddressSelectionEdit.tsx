@@ -40,6 +40,10 @@ interface MinimalAddressSelectionProps {
   isFreeDelivery?: boolean;
   /** Called whenever admin toggles the "Free Delivery" checkbox. Use this to zero-out shipping in the order total. */
   onFreeDeliveryChange?: (isFree: boolean) => void;
+    /** Real shipping charge from order state (orderDetails.shippingCharge). Used to detect manual overrides. */
+  shippingCharge?: number;
+  /** Order's shippingType (e.g. "Free" | "Regular"). When "Free", shipping always shows ৳0. */
+  shippingType?: string;
 }
 
 export default function MinimalAddressSelectionEdit({
@@ -50,6 +54,8 @@ export default function MinimalAddressSelectionEdit({
   onDeliveryAddressSelect,
   isFreeDelivery: isFreeDeliveryProp,
   onFreeDeliveryChange,
+  shippingCharge,
+  shippingType,
 }: MinimalAddressSelectionProps) {
   const [divisionData, setDivisionData] = useState<any[]>([]);
   const [districtData, setDistrictData] = useState<any[]>([]);
@@ -92,6 +98,28 @@ export default function MinimalAddressSelectionEdit({
     const normalized = division?.trim().toLowerCase();
     if (normalized === "dhaka") return 70;
     return 130;
+  };
+
+  // Resolves the shipping cost to DISPLAY on the address card, taking into
+  // account the real order state instead of always recalculating.
+  // 1) shippingType === "Free" -> always ৳0 (not treated as manual).
+  // 2) if shippingCharge matches the standard division formula -> show standard.
+  // 3) if shippingCharge differs from standard (and not Free) -> it's a
+  //    manual override, so show the actual shippingCharge.
+  const resolveShippingCost = (division?: string) => {
+    if (shippingType === "Free") return 0;
+
+    const standard = getShippingCost(division);
+
+    if (
+      shippingCharge !== undefined &&
+      shippingCharge !== null &&
+      shippingCharge !== standard
+    ) {
+      return shippingCharge; // manual charge
+    }
+
+    return standard;
   };
 
   const [updateAddress] = useUpdateAddressMutation();
@@ -312,8 +340,8 @@ export default function MinimalAddressSelectionEdit({
             </Text>
             <div style={{ marginTop: 8 }}>
               {addresses?.map((addr: any) => {
-                if (selectedDeliveryAddress?.id === addr.id) {
-                  const shippingCost = getShippingCost(addr.division);
+                            if (selectedDeliveryAddress?.id === addr.id) {
+                  const shippingCost = resolveShippingCost(addr.division);
                   return (
                     <Card
                       size="small"

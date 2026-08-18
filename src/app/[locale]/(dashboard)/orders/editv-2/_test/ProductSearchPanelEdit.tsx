@@ -12,6 +12,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useGetAllProductQuery } from "@/redux/api/productApi";
+import { Image } from "antd";
 
 interface ProductSearchPanelProps {
   onAddToCart: (product: any, quantity: number) => void;
@@ -119,7 +120,7 @@ export default function ProductSearchPanelEdit({
         {/* Product Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
           {mockProducts?.data
-            ?.slice() 
+            ?.slice()
             .sort(
               (a: any, b: any) =>
                 (b?.inventories?.stock || 0) - (a?.inventories?.stock || 0)
@@ -138,12 +139,13 @@ export default function ProductSearchPanelEdit({
                   className={`p-4 border-2 rounded-xl space-y-4 transition-all duration-300 hover:shadow-lg ${
                     stockStatus.color
                   } ${
-                    isOutOfStock
+                    // isOutOfStock
+                    false
                       ? "opacity-50 bg-gray-50"
                       : "bg-white  hover:from-white  "
                   }`}
                 >
-                  <div className="flex justify-between items-start">
+                  <div className="flex justify-between items-start gap-3">
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-900">
                         {product?.name}
@@ -154,27 +156,45 @@ export default function ProductSearchPanelEdit({
                       <p className="font-semibold text-[#4F8A6D] mt-1">
                         {formatPrice(product?.salePrice)}
                       </p>
-                    </div>
-                    <div className="flex flex-col items-end gap-1">
-                      <Badge
-                        variant={stockStatus.variant}
-                        className="font-medium"
-                      >
-                        {stockStatus.text}
-                      </Badge>
-                      {isLowStock && !isOutOfStock && (
-                        <div
-                          className="flex items-center gap-1 text-amber-600"
-                          title="Low stock warning!"
+
+                      <div className="flex flex-col items-start gap-1 mt-2">
+                        <Badge
+                          variant={stockStatus.variant}
+                          className="font-medium"
                         >
-                          <AlertTriangle className="w-4 h-4" />
-                          <span className="text-xs font-medium">Low Stock</span>
-                        </div>
+                          {stockStatus.text}
+                        </Badge>
+                        {isLowStock && !isOutOfStock && (
+                          <div
+                            className="flex items-center gap-1 text-amber-600"
+                            title="Low stock warning!"
+                          >
+                            <AlertTriangle className="w-4 h-4" />
+                            <span className="text-xs font-medium">
+                              Low Stock
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Product Image - right side, larger, full image (no crop) */}
+                    <div className="w-32 h-32 shrink-0 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                      {product?.images?.[0]?.url || product?.thumbnail ? (
+                        <Image
+                          src={product?.images?.[0]?.url || product?.thumbnail}
+                          alt={product?.name}
+                          className="w-full h-full object-contain"
+                          // preview={false}
+                        />
+                      ) : (
+                        <Package className="w-10 h-10 text-gray-300" />
                       )}
                     </div>
                   </div>
 
-                  {!isOutOfStock && (
+                  {/* {!isOutOfStock && ( */}
+                  {true && (
                     <div className="space-y-3">
                       {/* Quantity Selector */}
                       <div className="flex items-center gap-3">

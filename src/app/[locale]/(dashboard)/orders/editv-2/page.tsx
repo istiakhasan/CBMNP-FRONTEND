@@ -292,6 +292,8 @@ const Page = () => {
                     onAddressUpdate={setCustomerAddresses}
                     selectedDeliveryAddress={orderDetails.deliveryAddress}
                     onDeliveryAddressSelect={handleDeliveryAddressChange}
+                    shippingCharge={orderDetails?.shippingCharge}
+                    shippingType={orderDetails?.shippingType}
                   />
                 )}
 

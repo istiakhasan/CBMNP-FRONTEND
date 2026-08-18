@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { Card, Select, Badge, Input, Row, Col, Radio } from "antd";
+import React, { useEffect, useRef } from "react";
+import { Card, Select, Badge, Input, Row, Col, Radio, Switch } from "antd";
 import {
   TruckOutlined,
   MessageOutlined,
@@ -48,7 +48,6 @@ export default function OrderDetailsPanelEdit({
 }: OrderDetailsPanelProps) {
   const { data: deliveryPartner } =
     useGetDeliveryPartnerOptionsQuery(undefined);
-
   const total = getTotalAmount();
 
   const { data: warehouses } = useLoadAllWarehouseOptionsQuery(undefined);
@@ -68,6 +67,14 @@ export default function OrderDetailsPanelEdit({
   };
 
   const getShippingInfo = () => {
+    if (orderDetails.manualShippingCharge) {
+      return {
+        message: `Manual shipping charge: ৳${orderDetails.shippingCharge || 0}`,
+        charge: orderDetails.shippingCharge || 0,
+        color: "purple",
+      };
+    }
+
     if (!orderDetails.deliveryAddress) {
       return {
         message: "Please select a delivery address to see shipping information",
@@ -97,20 +104,58 @@ export default function OrderDetailsPanelEdit({
 
   const shippingInfo = getShippingInfo();
 
-  // Single source of truth for shippingCharge: recalculated here whenever the
-  // address or shippingType changes, and written back to orderDetails.
-  // Nothing else (page-level handleDeliveryAddressChange included) should
-  // set orderDetails.shippingCharge directly.
+  // One-time init check (runs once per order load, guarded by the ref below):
+  // if the order already has a shippingCharge that doesn't match the standard
+  // 70 (Dhaka) / 130 (outside Dhaka) formula — and it's not the Free-delivery
+  // 0 case — it must have been set manually before, so flip manualShippingCharge
+  // on automatically instead of letting the auto-calc effect stomp over it.
+  const didInitCheck = useRef(false);
+
+  // Combined effect — init-detection and auto-calc must happen atomically
+  // in the SAME pass, otherwise a stale `manualShippingCharge` read in a
+  // second effect can overwrite a correctly-detected manual charge before
+  // React commits the flag (this caused e.g. 200 -> 70 on order load).
   useEffect(() => {
-    if (orderDetails.shippingCharge !== shippingInfo.charge) {
-      updateField("shippingCharge", shippingInfo.charge);
+    if (!orderDetails.deliveryAddress) return; // wait until address data is loaded
+
+    const standardCharge =
+      orderDetails.shippingType === "Free"
+        ? 0
+        : calculateBaseShippingCharge(orderDetails.deliveryAddress.division);
+
+    // One-time init check: if the order already has a shippingCharge that
+    // doesn't match the standard 70/130 formula, it was set manually before —
+    // flip the flag and STOP, so we don't also overwrite the value below.
+    if (!didInitCheck.current) {
+      didInitCheck.current = true;
+
+      const hasExistingCharge =
+        orderDetails.shippingCharge !== undefined &&
+        orderDetails.shippingCharge !== null;
+
+      if (
+        !orderDetails.manualShippingCharge &&
+        hasExistingCharge &&
+        Number(orderDetails.shippingCharge) !== standardCharge
+      ) {
+        updateField("manualShippingCharge", true);
+        return; // preserve the existing manual charge this pass
+      }
+    }
+
+    // Skip auto-calc entirely while manual override is on.
+    if (orderDetails.manualShippingCharge) return;
+
+    if (Number(orderDetails.shippingCharge) !== standardCharge) {
+      updateField("shippingCharge", standardCharge);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    orderDetails.deliveryAddress?.division,
-    orderDetails.deliveryAddress?.district,
+    orderDetails.deliveryAddress,
     orderDetails.shippingType,
+    orderDetails.manualShippingCharge,
   ]);
+
 
   return (
     <Card
@@ -229,6 +274,50 @@ export default function OrderDetailsPanelEdit({
               if (isNaN(value) || value < 0) return;
               updateField("discountAmount", value);
             }}
+          />
+        </Col>
+
+        {/* Manual Delivery Charge Override */}
+        <Col className="mt-[12px]" xs={24} md={12}>
+          <label
+            className="text-[12px]"
+            style={{ display: "flex", alignItems: "center", gap: 8 }}
+          >
+            <TruckOutlined style={{ marginRight: 4 }} />
+            Manual Delivery Charge
+            <Switch
+              size="small"
+              checked={!!orderDetails.manualShippingCharge}
+              onChange={(checked) => {
+                updateField("manualShippingCharge", checked);
+                if (checked) {
+                  // Switch on কারার সময় বর্তমান calculated/existing charge দিয়ে শুরু করি
+                  // যাতে edit mode এ পুরনো order এর charge হঠাৎ ০ না হয়ে যায়।
+                  updateField(
+                    "shippingCharge",
+                    orderDetails.shippingCharge ?? shippingInfo.charge
+                  );
+                }
+              }}
+            />
+          </label>
+          <Input
+            type="number"
+            min={0}
+            placeholder="0"
+            disabled={!orderDetails.manualShippingCharge}
+            value={
+              orderDetails.manualShippingCharge
+                ? orderDetails.shippingCharge ?? 0
+                : shippingInfo.charge
+            }
+            onChange={(e) => {
+              const raw = e.target.value;
+              const value = raw === "" ? 0 : Number(raw);
+              if (isNaN(value) || value < 0) return;
+              updateField("shippingCharge", value);
+            }}
+            style={{ marginTop: 8 }}
           />
         </Col>
 
