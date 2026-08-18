@@ -26,6 +26,8 @@ import { getBaseUrl } from "@/helpers/config/envConfig";
 import { instance } from "@/helpers/axios/axiosInstance";
 import MinimalAddressSelectionEdit from "./_test/MinimalAddressSelectionEdit";
 import ProductSearchPanelEdit from "./_test/ProductSearchPanelEdit";
+import OrderInvoiceModal from "@/components/order/OrderInvoiceModal";
+import { buildInvoiceText } from "@/util/buildInvoiceText";
 
 const Page = () => {
   const userInfo: any = getUserInfo();
@@ -44,68 +46,32 @@ const Page = () => {
     id: editAbleCustomerId,
   });
   const [selectedCustomer, setSelectedCustomer] = useState<any | null>(null);
-  const [selectedCustomerOrdersCount, setSelectedCustomerOrderCount] = useState<
-    any | null
-  >(orderCount?.data);
+  const [selectedCustomerOrdersCount, setSelectedCustomerOrderCount] = useState(orderCount?.data);
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [customerAddresses, setCustomerAddresses] = useState<any[]>([]);
+  const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
+  const [invoiceText, setInvoiceText] = useState("");
   const [orderDetails, setOrderDetails] = useState<any>({
     warehouse: "",
     orderSource: "",
     orderType: "",
     shippingType: "",
     shippingCharge: 0,
+    discountAmount: 0,
     paymentStatus: "",
     paymentMethod: "",
     deliveryNote: "",
     deliveryAddress: undefined,
     currier: undefined,
     amount: 0,
-    statusByAgent:undefined
+    statusByAgent: undefined,
   });
 
 
-  const handleCustomerSelect = (customer: any | null) => {
-    if (customer?.id !== selectedCustomer?.id) {
-      setCustomerAddresses([]);
-      setOrderDetails((prev: any) => ({
-        ...prev,
-        deliveryAddress: undefined,
-        shippingCharge: 0,
-      }));
-    }
-    setSelectedCustomer(customer);
-  };
-
-  const calculateShippingCharge = (address?: any) => {
-    if (!address) return 0;
-
-    const dhakaDistricts = ["Dhaka"];
-    const otherDistricts = [
-      "Rajshahi",
-      "Barishal",
-      "Khulna",
-      "Sylhet",
-      "Chittagong",
-      "Rangpur",
-      "Mymensingh",
-    ];
-
-    if (address.district && dhakaDistricts.includes(address.district)) {
-      return 70;
-    } else if (address.district && otherDistricts.includes(address.district)) {
-      return 120;
-    }
-
-    return 70;
-  };
-
   const handleDeliveryAddressChange = (address: any) => {
-    const shippingCharge = calculateShippingCharge(address);
     setOrderDetails((prev: any) => ({
       ...prev,
       deliveryAddress: address,
-      shippingCharge,
     }));
   };
 
@@ -156,14 +122,17 @@ const Page = () => {
       toast.info("Cart cleared");
     }
   };
+
   useEffect(() => {
     if (customer?.data && orderData) {
-      setCartItems(orderData?.products?.map((ab:any)=>{
-        return {
-            product:ab?.product,
-            quantity:ab?.productQuantity
-        }
-      }))
+      setCartItems(
+        orderData?.products?.map((ab: any) => {
+          return {
+            product: ab?.product,
+            quantity: ab?.productQuantity,
+          };
+        })
+      );
       setSelectedCustomer(customer?.data);
       setCustomerAddresses(customer?.data?.addresses);
       setOrderDetails((prev: any) => {
@@ -174,6 +143,7 @@ const Page = () => {
           orderType: orderData?.orderType,
           shippingType: orderData?.shippingType,
           shippingCharge: orderData?.shippingCharge,
+          discountAmount: orderData?.discount || 0,
           paymentMethod: orderData?.paymentMethod,
           paymentStatus: orderData?.paymentStatus,
           statusId: orderData?.statusId,
@@ -190,22 +160,31 @@ const Page = () => {
       });
     }
   }, [customer, orderData]);
-  useEffect(()=>{
-    instance.get(`${getBaseUrl()}/customers/orders-count/${editAbleCustomerId}`)
-    .then(res=>setSelectedCustomerOrderCount(res?.data?.data))
-    .catch(err=>console.log(err))
-  },[editAbleCustomerId])
-  const getTotalAmount = () => {
+
+  useEffect(() => {
+    instance
+      .get(`${getBaseUrl()}/customers/orders-count/${editAbleCustomerId}`)
+      .then((res) => setSelectedCustomerOrderCount(res?.data?.data))
+      .catch((err) => console.log(err));
+  }, [editAbleCustomerId]);
+
+  // Sum of product prices only — no shipping, no discount.
+  const getItemsSubtotal = () => {
     return cartItems.reduce(
       (total, item) =>
-        total +
-        Number(item.product.salePrice) * item.quantity +
-        Number(orderDetails?.shippingCharge),
+        total + Number(item?.product?.salePrice || 0) * item.quantity,
       0
     );
   };
 
-
+  // Final payable total = items subtotal + shipping charge - discount.
+  // Shipping/discount are applied ONCE here — nowhere else should re-add them.
+  const getTotalAmount = () => {
+    const itemsSubtotal = getItemsSubtotal();
+    const shippingCharge = Number(orderDetails?.shippingCharge) || 0;
+    const discountAmount = Number(orderDetails?.discountAmount) || 0;
+    return Math.max(itemsSubtotal + shippingCharge - discountAmount, 0);
+  };
 
   const handleUpdateOrder = async () => {
     if (!selectedCustomer || cartItems.length === 0) {
@@ -239,11 +218,12 @@ const Page = () => {
       currier: orderDetails?.currier?.value,
       shippingCharge: orderDetails?.shippingCharge,
       shippingType: orderDetails?.shippingType,
+      discount: orderDetails?.discountAmount || 0,
       orderType: orderDetails?.orderType,
       agentId: userInfo?.userId,
       totalPaidAmount: orderData?.totalPaidAmount,
       deliveryNote: orderDetails?.deliveryNote,
-      addressId: orderDetails?.deliveryAddress?.id, 
+      addressId: orderDetails?.deliveryAddress?.id,
       products: cartItems?.map((item: any) => {
         return {
           productId: item?.product?.id,
@@ -251,18 +231,32 @@ const Page = () => {
         };
       }),
     };
-    if(orderDetails?.statusByAgent?.value){
-      order['statusId']=orderDetails?.statusByAgent?.value
+    if (orderDetails?.statusByAgent?.value) {
+      order["statusId"] = orderDetails?.statusByAgent?.value;
     }
-    const res: any = await orderUpdateMutation({data:order,id:orderData?.id}).unwrap()
+    const res: any = await orderUpdateMutation({
+      data: order,
+      id: orderData?.id,
+    }).unwrap();
     console.log(res, "res");
     if (res) {
+      const invoice = buildInvoiceText({
+        customer: selectedCustomer,
+        cartItems,
+        orderDetails,
+        itemsSubtotal: getItemsSubtotal(),
+        totalAmount: getTotalAmount(),
+        orderId: orderData?.id,
+      });
+      setInvoiceText(invoice);
       message.success("Order Update successfully! 🎉");
+      setInvoiceModalOpen(true);
     }
   };
+
   return (
     <div>
-      <GbHeader title="Create Order" />
+      <GbHeader title="Edit Order" />
       <div className="px-[16px] h-[90vh] overflow-scroll custom_scroll">
         <div className=" bg-gray-50 sticky top-[200px] p-4">
           <div>
@@ -273,6 +267,7 @@ const Page = () => {
                   selectedCustomer={selectedCustomer}
                   selectedDeliveryAddress={orderDetails.deliveryAddress}
                   selectedCustomerOrdersCount={selectedCustomerOrdersCount}
+                  shippingCharge={orderDetails?.shippingCharge}
                 />
               </div>
 
@@ -317,6 +312,7 @@ const Page = () => {
                   onConfirmOrder={handleUpdateOrder}
                   onClearCart={clearCart}
                   getTotalAmount={getTotalAmount}
+                  getItemsSubtotal={getItemsSubtotal}
                 />
               </div>
             </div>
@@ -326,6 +322,13 @@ const Page = () => {
           {/* <ToastContainer position="top-right" closeButton /> */}
         </div>
       </div>
+
+      <OrderInvoiceModal
+        open={invoiceModalOpen}
+        onClose={() => setInvoiceModalOpen(false)}
+        title="Order Updated — Invoice"
+        invoiceText={invoiceText}
+      />
     </div>
   );
 };

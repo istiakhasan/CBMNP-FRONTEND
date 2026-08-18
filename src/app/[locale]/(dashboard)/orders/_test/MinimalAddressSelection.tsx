@@ -33,10 +33,6 @@ interface MinimalAddressSelectionProps {
   onAddressUpdate: (addresses: any[]) => void;
   selectedDeliveryAddress?: any;
   onDeliveryAddressSelect: (address: any) => void;
-  /** Optional controlled free-delivery state. If omitted, component manages it internally. */
-  isFreeDelivery?: boolean;
-  /** Called whenever admin toggles the "Free Delivery" checkbox. Use this to zero-out shipping in the order total. */
-  onFreeDeliveryChange?: (isFree: boolean) => void;
 }
 
 export default function MinimalAddressSelection({
@@ -45,8 +41,6 @@ export default function MinimalAddressSelection({
   onAddressUpdate,
   selectedDeliveryAddress,
   onDeliveryAddressSelect,
-  isFreeDelivery: isFreeDeliveryProp,
-  onFreeDeliveryChange,
 }: MinimalAddressSelectionProps) {
   const [divisionData, setDivisionData] = useState<any[]>([]);
   const [districtData, setDistrictData] = useState<any[]>([]);
@@ -54,18 +48,6 @@ export default function MinimalAddressSelection({
   const [showAddModal, setShowAddModal] = useState(false);
   const [form] = Form.useForm();
   const [createAddress] = useAddAddressMutation();
-
-  // Local fallback state so this component still works if parent doesn't control free delivery
-  const [isFreeDeliveryLocal, setIsFreeDeliveryLocal] = useState(false);
-  const isFreeDelivery = isFreeDeliveryProp ?? isFreeDeliveryLocal;
-
-  const handleFreeDeliveryToggle = (checked: boolean) => {
-    setIsFreeDeliveryLocal(checked);
-    onFreeDeliveryChange?.(checked);
-    message.success(
-      checked ? "ফ্রি ডেলিভারি চালু করা হয়েছে" : "ফ্রি ডেলিভারি বন্ধ করা হয়েছে"
-    );
-  };
 
   const getAddressIcon = (type: string) => {
     switch (type) {
@@ -84,7 +66,10 @@ export default function MinimalAddressSelection({
       .catch((error) => console.log(error));
   }, []);
 
-  // NOTE: this checks DIVISION, not district. Make sure you call it with addr.division.
+  // Informational only — shown on the card so admin can see the base rate for
+  // this address. This is NOT the value used for the actual order total; that
+  // is calculated and owned exclusively by OrderDetailsPanel (based on this
+  // same division + the "Shipping Type" dropdown, including "Free").
   const getShippingCost = (division?: string) => {
     const normalized = division?.trim().toLowerCase();
     if (normalized === "dhaka") return 70;
@@ -292,36 +277,13 @@ export default function MinimalAddressSelection({
                           <br />
                           {(addr.district || addr.division) && (
                             <Text type="success">
-                              📍 {addr.district}
-                              {" - "}
-                              {isFreeDelivery ? (
-                                <>
-                                  <span
-                                    style={{
-                                      textDecoration: "line-through",
-                                      color: "#999",
-                                      marginRight: 6,
-                                    }}
-                                  >
-                                    ৳{shippingCost}
-                                  </span>
-                                  <Tag color="gold">ফ্রি ডেলিভারি</Tag>
-                                </>
-                              ) : (
-                                <>৳{shippingCost} shipping</>
-                              )}
+                              📍 {addr.district} - ৳{shippingCost} shipping
                             </Text>
                           )}
-                          <div style={{ marginTop: 8 }}>
-                            <Checkbox
-                              checked={isFreeDelivery}
-                              onChange={(e) =>
-                                handleFreeDeliveryToggle(e.target.checked)
-                              }
-                            >
-                              ফ্রি ডেলিভারি
-                            </Checkbox>
-                          </div>
+                          <p style={{ fontSize: 11, color: "#aaa", margin: "4px 0 0" }}>
+                            Set Free delivery from the Shipping Type field
+                            below.
+                          </p>
                         </div>
                         <Button
                           danger

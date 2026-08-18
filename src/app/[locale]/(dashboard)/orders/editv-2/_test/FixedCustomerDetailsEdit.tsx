@@ -11,12 +11,21 @@ interface FixedCustomerDetailsProps {
   selectedCustomer: any | null;
   selectedDeliveryAddress?: any;
   selectedCustomerOrdersCount?: any;
+  /** Actual shipping charge for the order — single source of truth,
+   *  computed in OrderDetailsPanelEdit. Pass this in instead of
+   *  recalculating district/division based rates here, or this card
+   *  will show a different number than the rest of the page. */
+  shippingCharge?: number;
+  /** "Regular" | "Free" | "Express" — used only to label a Free delivery correctly. */
+  shippingType?: string;
 }
 
 export default function FixedCustomerDetailsEdit({ 
   selectedCustomer, 
   selectedDeliveryAddress,
-  selectedCustomerOrdersCount
+  selectedCustomerOrdersCount,
+  shippingCharge,
+  shippingType,
 }: FixedCustomerDetailsProps) {
   const [showOngoingOrders, setShowOngoingOrders] = useState(false);
   const [showDeliveryStats, setShowDeliveryStats] = useState(false);
@@ -48,26 +57,6 @@ export default function FixedCustomerDetailsEdit({
       currency: 'BDT',
       minimumFractionDigits: 2
     }).format(price);
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Approved': return 'bg-green-100 text-green-800 border-green-200';
-      case 'Pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Processing': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'Shipped': return 'bg-purple-100 text-purple-800 border-purple-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'Approved': return <CheckCircle className="w-3 h-3" />;
-      case 'Pending': return <Clock className="w-3 h-3" />;
-      case 'Processing': return <AlertCircle className="w-3 h-3" />;
-      case 'Shipped': return <TrendingUp className="w-3 h-3" />;
-      default: return <Clock className="w-3 h-3" />;
-    }
   };
 
   const getAddressIcon = (type: string) => {
@@ -298,7 +287,12 @@ export default function FixedCustomerDetailsEdit({
                   {selectedDeliveryAddress.district && (
                     <p className="text-xs text-primary">
                       📍 {selectedDeliveryAddress?.district}
-                      {selectedDeliveryAddress?.district === 'Dhaka' ? ' - ৳70' : ' - ৳120'}
+                      {" - "}
+                      {shippingType === "Free" ? (
+                        <span className="text-amber-600 font-medium">Free (ফ্রি ডেলিভারি)</span>
+                      ) : (
+                        <>৳{shippingCharge ?? 0}</>
+                      )}
                     </p>
                   )}
                 </div>

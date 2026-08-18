@@ -21,6 +21,8 @@ interface OrderSummaryProps {
   onConfirmOrder: () => void;
   onClearCart?: () => void;
   getTotalAmount: () => number;
+  /** Sum of product price * quantity only — no shipping, no discount. */
+  getItemsSubtotal?: () => number;
 }
 
 export default function OrderSummary({
@@ -30,6 +32,7 @@ export default function OrderSummary({
   onConfirmOrder,
   onClearCart,
   getTotalAmount,
+  getItemsSubtotal,
 }: OrderSummaryProps) {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("bd-BD", {
@@ -40,8 +43,18 @@ export default function OrderSummary({
   };
 
   const total = getTotalAmount();
-  const shipping = orderDetails.shippingCharge;
-  const subTotal = total - shipping;
+  const shipping = orderDetails.shippingCharge || 0;
+  const discount = orderDetails.discountAmount || 0;
+
+  // Prefer the dedicated subtotal calculator (no shipping/discount baked in).
+  // Fall back to computing it locally if the parent hasn't been updated to pass it.
+  const subTotal = getItemsSubtotal
+    ? getItemsSubtotal()
+    : cartItems.reduce(
+        (sum, item) => sum + item.product.salePrice * item.quantity,
+        0
+      );
+
   const updateQuantity = (productId: string, change: number) => {
     const item = cartItems.find((item) => item.product.id === productId);
     if (item) {
@@ -79,7 +92,7 @@ export default function OrderSummary({
     !(
       (orderDetails.paymentStatus === "Partial" ||
         orderDetails.paymentStatus === "Paid") &&
-        (!orderDetails?.transactionId || orderDetails?.transactionId?.length < 1)
+      (!orderDetails?.transactionId || orderDetails?.transactionId?.length < 1)
     );
   const missingRequirements = [];
 
@@ -106,13 +119,6 @@ export default function OrderSummary({
   )
     missingRequirements.push("Paid Amount");
 
-console.log(orderDetails,"hi");
-console.log("orderDetails.currier:", orderDetails.currier);
-console.log("cartItems.length > 0:", cartItems.length > 0);
-console.log("warehouse label exists:", !!orderDetails?.warehouse?.label);
-console.log("paymentMethod exists:", orderDetails?.paymentMethod?.length > 0);
-console.log("deliveryAddress exists:", !!orderDetails.deliveryAddress);
-console.log("orderSource exists:", orderDetails?.orderSource?.length > 0);
   return (
     <div className="lg:sticky lg:top-4 space-y-4 ">
       <Card className="shadow-xl border-0 overflow-hidden">
@@ -171,7 +177,6 @@ console.log("orderSource exists:", orderDetails?.orderSource?.length > 0);
                         <h4 className="font-semibold text-gray-900 text-sm">
                           {item.product.name}
                         </h4>
-                        {/* <p className="text-xs text-muted-foreground">ID: {item.product.id}</p> */}
                         <p className="text-sm font-semibold text-primary mt-1">
                           {formatPrice(item?.product?.salePrice)}
                         </p>
@@ -270,15 +275,9 @@ console.log("orderSource exists:", orderDetails?.orderSource?.length > 0);
                     <div className="flex justify-between items-start">
                       <span className="text-muted-foreground">Payment Status:</span>
                       <div className="flex flex-wrap gap-1 max-w-32">
-                       
-                          <Badge
-                      
-                            variant="outline"
-                            className="text-xs"
-                          >
-                            {orderDetails?.paymentStatus}
-                          </Badge>
-                   
+                        <Badge variant="outline" className="text-xs">
+                          {orderDetails?.paymentStatus}
+                        </Badge>
                       </div>
                     </div>
                   )}
@@ -302,11 +301,15 @@ console.log("orderSource exists:", orderDetails?.orderSource?.length > 0);
                     {shipping > 0 ? shipping : "Free"} ৳
                   </span>
                 </div>
-                   <div className="flex justify-between text-sm font-medium">
+                {discount > 0 && (
+                  <div className="flex justify-between text-sm font-medium">
+                    <span className="text-gray-700">Discount:</span>
+                    <span className="text-pink-600">-{discount} ৳</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-sm font-medium">
                   <span className="text-gray-700">Total:</span>
-                  <span className="text-gray-900">
-                    {total} ৳
-                  </span>
+                  <span className="text-gray-900">{total} ৳</span>
                 </div>
                 <div className="flex justify-between text-sm font-medium">
                   <span className="text-gray-700">Paid:</span>
@@ -314,11 +317,13 @@ console.log("orderSource exists:", orderDetails?.orderSource?.length > 0);
                     {orderDetails?.amount > 0 ? orderDetails?.amount : 0} ৳
                   </span>
                 </div>
-             
+
                 <Separator className="bg-gray-200" />
                 <div className="flex justify-between font-semibold text-[12px]">
                   <span className="text-gray-900">Total Receivable:</span>
-                  <span className="">{Number(total || 0) - Number(orderDetails?.amount || 0)} ৳</span>
+                  <span className="">
+                    {Number(total || 0) - Number(orderDetails?.amount || 0)} ৳
+                  </span>
                 </div>
               </div>
             </>

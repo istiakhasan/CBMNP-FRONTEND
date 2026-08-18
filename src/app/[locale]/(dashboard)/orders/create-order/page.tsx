@@ -1,19 +1,3 @@
-// import React from 'react';
-// import OrderCreate from './_component/OrderCreate';
-// import { Metadata } from 'next';
-// export const metadata: Metadata = {
-//     title: "Create Order",
-//   };
-// const page = () => {
-//     return (
-//         <div>
-//             <OrderCreate />
-//         </div>
-//     );
-// };
-
-// export default page;
-
 "use client";
 
 import React, { useState } from "react";
@@ -31,22 +15,26 @@ import { getUserInfo } from "@/service/authService";
 import { useCreateOrderMutation } from "@/redux/api/orderApi";
 import OrderCreate from "./_component/OrderCreate";
 import GbModal from "@/components/ui/GbModal";
+import { CopyOutlined, CheckCircleOutlined } from "@ant-design/icons";
+import { buildInvoiceText } from "@/util/buildInvoiceText";
 
 const Page = () => {
   const [togglePage, setTogglePage] = useState(false);
   const userInfo: any = getUserInfo();
   const [selectedCustomer, setSelectedCustomer] = useState<any | null>(null);
-  const [selectedCustomerOrdersCount, setSelectedCustomerOrderCount] = useState<
-    any | null
-  >(null);
+  const [selectedCustomerOrdersCount, setSelectedCustomerOrderCount] =
+    useState(null);
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [customerAddresses, setCustomerAddresses] = useState<any[]>([]);
   const [orderSuccessModal, setOrderSuccessModal] = useState(false);
+  const [invoiceText, setInvoiceText] = useState("");
+  const [invoiceCopied, setInvoiceCopied] = useState(false);
   const [orderDetails, setOrderDetails] = useState<any>({
     orderSource: "Facebook",
     orderType: "Regular",
     shippingType: "Regular",
     shippingCharge: 0,
+    discountAmount: 0,
     paymentStatus: "Pending",
     paymentMethod: "Cash on Delivery",
     deliveryNote: "",
@@ -68,35 +56,15 @@ const Page = () => {
     setSelectedCustomer(customer);
   };
 
-  const calculateShippingCharge = (address?: any) => {
-    if (!address) return 0;
-
-    const dhakaDistricts = ["Dhaka"];
-    const otherDistricts = [
-      "Rajshahi",
-      "Barishal",
-      "Khulna",
-      "Sylhet",
-      "Chittagong",
-      "Rangpur",
-      "Mymensingh",
-    ];
-
-    if (address.district && dhakaDistricts.includes(address.district)) {
-      return 70;
-    } else if (address.district && otherDistricts.includes(address.district)) {
-      return 120;
-    }
-
-    return 70;
-  };
-
+  // NOTE: Actual shipping charge (based on division + free/regular shippingType)
+  // is calculated and kept in sync by OrderDetailsPanel's internal useEffect.
+  // This handler ONLY updates the selected address — it must NOT set shippingCharge
+  // itself, otherwise it fights with OrderDetailsPanel and overwrites "Free" delivery
+  // with a stale 70/130 value.
   const handleDeliveryAddressChange = (address: any) => {
-    const shippingCharge = calculateShippingCharge(address);
     setOrderDetails((prev: any) => ({
       ...prev,
       deliveryAddress: address,
-      shippingCharge,
     }));
   };
 
@@ -107,14 +75,14 @@ const Page = () => {
         return prev.map((item) =>
           item.product.id === product.id
             ? { ...item, quantity: item.quantity + quantity }
-            : item
+            : item,
         );
       }
       return [...prev, { product, quantity }];
     });
 
     const existingItem = cartItems.find(
-      (item) => item.product.id === product.id
+      (item) => item.product.id === product.id,
     );
     if (existingItem) {
       message.success(`Updated ${product.name} quantity in cart`);
@@ -130,13 +98,13 @@ const Page = () => {
         toast.info(`Removed ${item.product.name} from cart`);
       }
       setCartItems((prev) =>
-        prev.filter((item) => item.product.id !== productId)
+        prev.filter((item) => item.product.id !== productId),
       );
     } else {
       setCartItems((prev) =>
         prev.map((item) =>
-          item.product.id === productId ? { ...item, quantity } : item
-        )
+          item.product.id === productId ? { ...item, quantity } : item,
+        ),
       );
     }
   };
@@ -147,14 +115,22 @@ const Page = () => {
       toast.info("Cart cleared");
     }
   };
-  const getTotalAmount = () => {
+
+  // Sum of product prices only — no shipping, no discount.
+  const getItemsSubtotal = () => {
     return cartItems.reduce(
-      (total, item) =>
-        total +
-        item.product.salePrice * item.quantity +
-        orderDetails?.shippingCharge,
-      0
+      (total, item) => total + item.product.salePrice * item.quantity,
+      0,
     );
+  };
+
+  // Final payable total = items subtotal + shipping charge - discount.
+  // Shipping is added ONCE (not per cart item), and discount is subtracted once.
+  const getTotalAmount = () => {
+    const itemsSubtotal = getItemsSubtotal();
+    const shippingCharge = orderDetails?.shippingCharge || 0;
+    const discountAmount = orderDetails?.discountAmount || 0;
+    return Math.max(itemsSubtotal + shippingCharge - discountAmount, 0);
   };
 
   const resetForm = () => {
@@ -165,6 +141,7 @@ const Page = () => {
       orderType: "Regular",
       shippingType: "Regular",
       shippingCharge: 0,
+      discountAmount: 0,
       paymentStatus: "Pending",
       paymentMethod: "Cash on Delivery",
       deliveryNote: "",
@@ -172,6 +149,17 @@ const Page = () => {
       currier: undefined,
       warehouse: undefined,
     });
+  };
+
+  const handleCopyInvoice = async () => {
+    try {
+      await navigator.clipboard.writeText(invoiceText);
+      setInvoiceCopied(true);
+      message.success("Invoice copied! এখন কাস্টমারকে পাঠাতে পারেন।");
+      setTimeout(() => setInvoiceCopied(false), 2000);
+    } catch {
+      message.error("Copy করতে সমস্যা হয়েছে");
+    }
   };
 
   const handleConfirmOrder = async () => {
@@ -207,11 +195,11 @@ const Page = () => {
       receiverDistrict: orderDetails?.deliveryAddress?.district,
       receiverThana: orderDetails?.deliveryAddress?.thana,
       receiverAddress: orderDetails?.deliveryAddress?.address,
-      // deliveryDate: orderDetails?.details?.deliveryAddress?.address,
       orderSource: orderDetails?.orderSource,
       currier: orderDetails?.currier,
       shippingCharge: orderDetails?.shippingCharge,
       shippingType: orderDetails?.shippingType,
+      discountAmount: orderDetails?.discountAmount || 0,
       orderType: orderDetails?.orderType,
       agentId: userInfo?.userId,
       deliveryNote: orderDetails?.deliveryNote,
@@ -241,6 +229,17 @@ const Page = () => {
 
     const res = await handleSubmitOrder(order).unwrap();
     if (res) {
+      // Build a copy-ready invoice BEFORE resetting the form, since resetForm()
+      // clears cartItems/orderDetails that the invoice needs.
+      const invoice = buildInvoiceText({
+        customer: selectedCustomer,
+        cartItems,
+        orderDetails,
+        itemsSubtotal: getItemsSubtotal(),
+        totalAmount: getTotalAmount(),
+        orderId: res?.data?.id || res?.data?.orderId,
+      });
+      setInvoiceText(invoice);
       message.success("Order created successfully! 🎉");
       resetForm();
       setOrderSuccessModal(true);
@@ -263,6 +262,8 @@ const Page = () => {
                     selectedCustomer={selectedCustomer}
                     selectedDeliveryAddress={orderDetails.deliveryAddress}
                     selectedCustomerOrdersCount={selectedCustomerOrdersCount}
+                    shippingCharge={orderDetails.shippingCharge} // 👈 নতুন
+                    shippingType={orderDetails.shippingType} // 👈 নতুন
                   />
                 </div>
 
@@ -309,6 +310,7 @@ const Page = () => {
                     onConfirmOrder={handleConfirmOrder}
                     onClearCart={clearCart}
                     getTotalAmount={getTotalAmount}
+                    getItemsSubtotal={getItemsSubtotal}
                   />
                 </div>
               </div>
@@ -327,20 +329,47 @@ const Page = () => {
                   status="success"
                   title="Order Created Successfully!"
                   subTitle="Your order has been placed successfully. You can track it in the orders section."
-                  extra={[
-                    <Button
-                      type="primary"
-                      key="ok"
-                      onClick={() => setOrderSuccessModal(false)}
-                    >
-                      OK
-                    </Button>,
-                  ]}
                 />
+                <pre
+                  style={{
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
+                    background: "#fafafa",
+                    border: "1px solid #f0f0f0",
+                    borderRadius: 8,
+                    padding: 16,
+                    fontFamily: "inherit",
+                    fontSize: 13,
+                    lineHeight: 1.6,
+                    maxHeight: "40vh",
+                    overflowY: "auto",
+                  }}
+                >
+                  {invoiceText}
+                </pre>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    justifyContent: "center",
+                    marginTop: 12,
+                  }}
+                >
+                  <Button onClick={() => setOrderSuccessModal(false)}>
+                    Close
+                  </Button>
+                  <Button
+                    type="primary"
+                    icon={
+                      invoiceCopied ? <CheckCircleOutlined /> : <CopyOutlined />
+                    }
+                    onClick={handleCopyInvoice}
+                  >
+                    {invoiceCopied ? "Copied!" : "Copy Invoice"}
+                  </Button>
+                </div>
               </div>
             </GbModal>
-            {/* Toast Notifications */}
-            {/* <ToastContainer position="top-right" closeButton /> */}
           </div>
         </div>
       </div>

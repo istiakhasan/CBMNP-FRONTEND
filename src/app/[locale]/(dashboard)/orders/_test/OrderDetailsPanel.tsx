@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Card, Select, Checkbox, Badge, Input, Row, Col, Radio } from "antd";
 import {
   TruckOutlined,
@@ -11,6 +11,7 @@ import {
   FacebookOutlined,
   TeamOutlined,
   HomeOutlined,
+  TagOutlined,
 } from "@ant-design/icons";
 import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
 import { useGetDeliveryPartnerOptionsQuery } from "@/redux/api/partnerApi";
@@ -27,24 +28,21 @@ const orderSources = [
 ];
 
 const paymentStatuses = [
-  {
-    label: "Pending",
-    value: "Pending",
-  },
-  {
-    label: "Partial",
-    value: "Partial",
-  },
-  {
-    label: "Paid",
-    value: "Paid",
-  },
+  { label: "Pending", value: "Pending" },
+  { label: "Partial", value: "Partial" },
+  { label: "Paid", value: "Paid" },
 ];
 const paymentMethods = [
   "Cash on Delivery",
   "Bank Transfer",
   "Mobile Banking",
   "Card Payment",
+];
+
+const shippingTypeOptions = [
+  { label: "Regular", value: "Regular" },
+  // { label: "Express", value: "Express" },
+  { label: "Free", value: "Free" },
 ];
 
 interface OrderDetailsPanelProps {
@@ -62,10 +60,13 @@ export default function OrderDetailsPanel({
 }: OrderDetailsPanelProps) {
   const { data: deliveryPartner } =
     useGetDeliveryPartnerOptionsQuery(undefined);
-  const subtotal = getTotalAmount();
-  const shipping = orderDetails.shippingCharge;
-  const total = subtotal + shipping;
+
+  // getTotalAmount() already returns the FINAL total: items + shipping - discount.
+  // Do NOT add shipping again here, or you'll double-count it.
+  const total = getTotalAmount();
+
   const { data: warehouses } = useLoadAllWarehouseOptionsQuery(undefined);
+
   const updateField = (field: keyof any, value: any) => {
     onOrderDetailsChange((prev: any) => ({
       ...prev,
@@ -82,6 +83,13 @@ export default function OrderDetailsPanel({
     updateField("paymentMethods", updatedMethods);
   };
 
+  // Base shipping rate purely based on DIVISION (not district)
+  const calculateBaseShippingCharge = (division?: string) => {
+    const normalized = division?.trim().toLowerCase();
+    if (normalized === "dhaka") return 70;
+    return 130;
+  };
+
   const getShippingInfo = () => {
     if (!orderDetails.deliveryAddress) {
       return {
@@ -91,39 +99,40 @@ export default function OrderDetailsPanel({
       };
     }
 
-    const district = orderDetails.deliveryAddress.district;
-    if (district === "Dhaka") {
+    if (orderDetails.shippingType === "Free") {
       return {
-        message: `Shipping to ${district}: ৳70`,
-        charge: 70,
-        color: "green",
-      };
-    } else if (
-      [
-        "Rajshahi",
-        "Barishal",
-        "Khulna",
-        "Sylhet",
-        "Chittagong",
-        "Rangpur",
-        "Mymensingh",
-      ].includes(district || "")
-    ) {
-      return {
-        message: `Shipping to ${district}: ৳120`,
-        charge: 120,
-        color: "blue",
-      };
-    } else {
-      return {
-        message: `Shipping to ${district}: ৳70 (Default rate)`,
-        charge: 70,
-        color: "orange",
+        message: `Free delivery to ${orderDetails.deliveryAddress.district}: ৳0`,
+        charge: 0,
+        color: "gold",
       };
     }
+
+    const division = orderDetails.deliveryAddress.division;
+    const district = orderDetails.deliveryAddress.district;
+    const charge = calculateBaseShippingCharge(division);
+
+    return {
+      message: `Shipping to ${district || division}: ৳${charge}`,
+      charge,
+      color: division?.trim().toLowerCase() === "dhaka" ? "green" : "blue",
+    };
   };
 
   const shippingInfo = getShippingInfo();
+
+  // Single source of truth for shippingCharge: recalculated here whenever the
+  // address or shippingType changes, and written back to orderDetails.
+  // Nothing else in the app should set orderDetails.shippingCharge directly.
+  useEffect(() => {
+    if (orderDetails.shippingCharge !== shippingInfo.charge) {
+      updateField("shippingCharge", shippingInfo.charge);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    orderDetails.deliveryAddress?.division,
+    orderDetails.deliveryAddress?.district,
+    orderDetails.shippingType,
+  ]);
 
   return (
     <Card
@@ -193,22 +202,10 @@ export default function OrderDetailsPanel({
             style={{ width: "100%" }}
           >
             {[
-              {
-                label: "Regular",
-                value: "Regular",
-              },
-              {
-                label: "Pre Order",
-                value: "Pre Order",
-              },
-              {
-                label: "Exchange",
-                value: "Exchange",
-              },
-              {
-                label: "Re-book",
-                value: "Re-book",
-              },
+              { label: "Regular", value: "Regular" },
+              { label: "Pre Order", value: "Pre Order" },
+              { label: "Exchange", value: "Exchange" },
+              { label: "Re-book", value: "Re-book" },
             ].map((type) => (
               <Option key={type.value} value={type.label}>
                 {type.label}
@@ -220,26 +217,13 @@ export default function OrderDetailsPanel({
         <Col xs={24} md={12}>
           <label>Shipping Type</label>
           <Select
-            value={"Regular"}
+            value={orderDetails?.shippingType || "Regular"}
             onChange={(value) => updateField("shippingType", value)}
             style={{ width: "100%" }}
           >
-            {[
-              {
-                label: "Regular",
-                value: "Regular",
-              },
-              {
-                label: "Express",
-                value: "Express",
-              },
-              // {
-              //   label:"Free",
-              //   value:"Free",
-              // },
-            ].map((type) => (
+            {shippingTypeOptions.map((type) => (
               <Option key={type.value} value={type.value}>
-                {type.value}
+                {type.value === "Free" ? "Free (ফ্রি ডেলিভারি)" : type.label}
               </Option>
             ))}
           </Select>
@@ -252,6 +236,26 @@ export default function OrderDetailsPanel({
             onChange={(value) => updateField("currier", value)}
             style={{ width: "100%" }}
             options={deliveryPartner?.data}
+          />
+        </Col>
+
+        {/* Discount Amount */}
+        <Col className="mt-[12px]" xs={24} md={12}>
+          <label>
+            <TagOutlined style={{ marginRight: 4 }} />
+            Discount Amount (৳)
+          </label>
+          <Input
+            type="number"
+            min={0}
+            placeholder="0"
+            value={orderDetails?.discountAmount ?? 0}
+            onChange={(e) => {
+              const raw = e.target.value;
+              const value = raw === "" ? 0 : Number(raw);
+              if (isNaN(value) || value < 0) return;
+              updateField("discountAmount", value);
+            }}
           />
         </Col>
       </Row>
@@ -285,6 +289,11 @@ export default function OrderDetailsPanel({
           )}
         </div>
         <p style={{ color: shippingInfo.color }}>{shippingInfo.message}</p>
+        {!!orderDetails?.discountAmount && orderDetails.discountAmount > 0 && (
+          <p style={{ color: "#eb2f96" }}>
+            Discount applied: -৳{orderDetails.discountAmount}
+          </p>
+        )}
         {orderDetails.deliveryAddress && (
           <p style={{ fontSize: 12, color: "#888" }}>
             Delivery to: {orderDetails.deliveryAddress.address}
@@ -300,7 +309,6 @@ export default function OrderDetailsPanel({
           <Select
             value={orderDetails.paymentStatus || "Pending"}
             onChange={(value) => {
-              // Reset amount when changing status
               updateField("amount", 0);
               updateField("paymentStatus", value);
               if (value === "Pending") {
@@ -313,8 +321,6 @@ export default function OrderDetailsPanel({
               if (value === "Partial") {
                 updateField("paymentMethod", undefined);
               }
-
-              // Clear transactionId when Pending
               if (value === "Pending") {
                 updateField("transactionId", "");
               }
@@ -323,7 +329,6 @@ export default function OrderDetailsPanel({
             options={paymentStatuses}
           />
 
-          {/* Show transactionId & amount if status is Partial or Paid */}
           {["Paid", "Partial"].includes(orderDetails.paymentStatus) && (
             <Row gutter={16} style={{ marginTop: 16 }}>
               <Col xs={24} md={24}>
@@ -341,11 +346,10 @@ export default function OrderDetailsPanel({
                   placeholder="Enter Amount"
                   value={orderDetails.amount || ""}
                   required
-                  disabled={orderDetails.paymentStatus === "Paid"} // Auto-filled
+                  disabled={orderDetails.paymentStatus === "Paid"}
                   onChange={(e) => {
                     const value = Number(e.target.value);
                     if (!isNaN(value)) {
-                      // Prevent amount > total
                       updateField("amount", value > total ? total : value);
                     }
                   }}
@@ -373,7 +377,6 @@ export default function OrderDetailsPanel({
               const isPending = status === "Pending";
               const isPaidOrPartial = ["Paid", "Partial"].includes(status);
 
-              // Disable rules
               let disabled = false;
               if (isPending && method !== "Cash on Delivery") disabled = true;
               if (isPaidOrPartial && method === "Cash on Delivery")

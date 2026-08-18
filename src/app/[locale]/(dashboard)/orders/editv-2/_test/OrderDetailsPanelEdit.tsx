@@ -1,16 +1,15 @@
 "use client";
 
-import React from "react";
-import { Card, Select, Checkbox, Badge, Input, Row, Col, Radio } from "antd";
+import React, { useEffect } from "react";
+import { Card, Select, Badge, Input, Row, Col, Radio } from "antd";
 import {
   TruckOutlined,
-  ShopOutlined,
-  CreditCardOutlined,
   MessageOutlined,
   PhoneOutlined,
   FacebookOutlined,
   TeamOutlined,
   HomeOutlined,
+  TagOutlined,
 } from "@ant-design/icons";
 import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
 import { useGetDeliveryPartnerOptionsQuery } from "@/redux/api/partnerApi";
@@ -26,25 +25,12 @@ const orderSources = [
   { value: "Employee", label: "Employee", icon: HomeOutlined },
 ];
 
-const paymentStatuses = [
-  {
-    label: "Pending",
-    value: "Pending",
-  },
-  {
-    label: "Partial",
-    value: "Partial",
-  },
-  {
-    label: "Paid",
-    value: "Paid",
-  },
-];
-const paymentMethods = [
-  "Cash on Delivery",
-  "Bank Transfer",
-  "Mobile Banking",
-  "Card Payment",
+
+
+const shippingTypeOptions = [
+  { label: "Regular", value: "Regular" },
+  // { label: "Express", value: "Express" },
+  { label: "Free", value: "Free" },
 ];
 
 interface OrderDetailsPanelProps {
@@ -62,15 +48,23 @@ export default function OrderDetailsPanelEdit({
 }: OrderDetailsPanelProps) {
   const { data: deliveryPartner } =
     useGetDeliveryPartnerOptionsQuery(undefined);
-  const subtotal = getTotalAmount();
-  const shipping = orderDetails.shippingCharge;
-  const total = subtotal + shipping;
+
+  const total = getTotalAmount();
+
   const { data: warehouses } = useLoadAllWarehouseOptionsQuery(undefined);
+
   const updateField = (field: keyof any, value: any) => {
     onOrderDetailsChange((prev: any) => ({
       ...prev,
       [field]: value,
     }));
+  };
+
+  // Base shipping rate purely based on DIVISION (not district)
+  const calculateBaseShippingCharge = (division?: string) => {
+    const normalized = division?.trim().toLowerCase();
+    if (normalized === "dhaka") return 70;
+    return 130;
   };
 
   const getShippingInfo = () => {
@@ -82,39 +76,41 @@ export default function OrderDetailsPanelEdit({
       };
     }
 
-    const district = orderDetails.deliveryAddress.district;
-    if (district === "Dhaka") {
+    if (orderDetails.shippingType === "Free") {
       return {
-        message: `Shipping to ${district}: ৳70`,
-        charge: 70,
-        color: "green",
-      };
-    } else if (
-      [
-        "Rajshahi",
-        "Barishal",
-        "Khulna",
-        "Sylhet",
-        "Chittagong",
-        "Rangpur",
-        "Mymensingh",
-      ].includes(district || "")
-    ) {
-      return {
-        message: `Shipping to ${district}: ৳120`,
-        charge: 120,
-        color: "blue",
-      };
-    } else {
-      return {
-        message: `Shipping to ${district}: ৳70 (Default rate)`,
-        charge: 70,
-        color: "orange",
+        message: `Free delivery to ${orderDetails.deliveryAddress.district}: ৳0`,
+        charge: 0,
+        color: "gold",
       };
     }
+
+    const division = orderDetails.deliveryAddress.division;
+    const district = orderDetails.deliveryAddress.district;
+    const charge = calculateBaseShippingCharge(division);
+
+    return {
+      message: `Shipping to ${district || division}: ৳${charge}`,
+      charge,
+      color: division?.trim().toLowerCase() === "dhaka" ? "green" : "blue",
+    };
   };
 
   const shippingInfo = getShippingInfo();
+
+  // Single source of truth for shippingCharge: recalculated here whenever the
+  // address or shippingType changes, and written back to orderDetails.
+  // Nothing else (page-level handleDeliveryAddressChange included) should
+  // set orderDetails.shippingCharge directly.
+  useEffect(() => {
+    if (orderDetails.shippingCharge !== shippingInfo.charge) {
+      updateField("shippingCharge", shippingInfo.charge);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    orderDetails.deliveryAddress?.division,
+    orderDetails.deliveryAddress?.district,
+    orderDetails.shippingType,
+  ]);
 
   return (
     <Card
@@ -179,22 +175,10 @@ export default function OrderDetailsPanelEdit({
             style={{ width: "100%" }}
           >
             {[
-              {
-                label: "Regular",
-                value: "Regular",
-              },
-              {
-                label: "Pre Order",
-                value: "Pre Order",
-              },
-              {
-                label: "Exchange",
-                value: "Exchange",
-              },
-              {
-                label: "Re-book",
-                value: "Re-book",
-              },
+              { label: "Regular", value: "Regular" },
+              { label: "Pre Order", value: "Pre Order" },
+              { label: "Exchange", value: "Exchange" },
+              { label: "Re-book", value: "Re-book" },
             ].map((type) => (
               <Option key={type.value} value={type.label}>
                 {type.label}
@@ -206,26 +190,13 @@ export default function OrderDetailsPanelEdit({
         <Col xs={24} md={12}>
           <label className="text-[12px]">Shipping Type</label>
           <Select
-            value={orderDetails?.shippingType}
+            value={orderDetails?.shippingType || "Regular"}
             onChange={(value) => updateField("shippingType", value)}
             style={{ width: "100%" }}
           >
-            {[
-              {
-                label: "Regular",
-                value: "Regular",
-              },
-              {
-                label: "Express",
-                value: "Express",
-              },
-              // {
-              //   label:"Free",
-              //   value:"Free",
-              // },
-            ].map((type) => (
+            {shippingTypeOptions.map((type) => (
               <Option key={type.value} value={type.value}>
-                {type.value}
+                {type.value === "Free" ? "Free (ফ্রি ডেলিভারি)" : type.label}
               </Option>
             ))}
           </Select>
@@ -240,12 +211,32 @@ export default function OrderDetailsPanelEdit({
             options={deliveryPartner?.data}
           />
         </Col>
+
+        {/* Discount Amount */}
+        <Col className="mt-[12px]" xs={24} md={12}>
+          <label className="text-[12px]">
+            <TagOutlined style={{ marginRight: 4 }} />
+            Discount Amount (৳)
+          </label>
+          <Input
+            type="number"
+            min={0}
+            placeholder="0"
+            value={orderDetails?.discountAmount ?? 0}
+            onChange={(e) => {
+              const raw = e.target.value;
+              const value = raw === "" ? 0 : Number(raw);
+              if (isNaN(value) || value < 0) return;
+              updateField("discountAmount", value);
+            }}
+          />
+        </Col>
+
         {orderDetails?.statusId === 1 && (
-          <Col xs={24} md={12}>
+          <Col className="mt-[12px]" xs={24} md={12}>
             <label className="text-[12px]">Update Status</label>
             <Select
               placeholder="Select Status"
-              // value={orderDetails?.currier}
               onChange={(value, options) =>
                 updateField("statusByAgent", options)
               }
@@ -290,6 +281,11 @@ export default function OrderDetailsPanelEdit({
           )}
         </div>
         <p style={{ color: shippingInfo.color }}>{shippingInfo.message}</p>
+        {!!orderDetails?.discountAmount && orderDetails.discountAmount > 0 && (
+          <p style={{ color: "#eb2f96" }}>
+            Discount applied: -৳{orderDetails.discountAmount}
+          </p>
+        )}
         {orderDetails.deliveryAddress && (
           <p style={{ fontSize: 12, color: "#888" }}>
             Delivery to: {orderDetails.deliveryAddress.address}

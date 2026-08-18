@@ -10,12 +10,21 @@ interface FixedCustomerDetailsProps {
   selectedCustomer: any | null;
   selectedDeliveryAddress?: any;
   selectedCustomerOrdersCount?: any;
+  /** Actual shipping charge for the order — single source of truth,
+   *  computed in OrderDetailsPanel. Pass this in instead of
+   *  recalculating district-based rates here, or this card will show
+   *  a different number than the rest of the page. */
+  shippingCharge?: number;
+  /** "Regular" | "Free" — used only to label a Free delivery correctly. */
+  shippingType?: string;
 }
 
 export default function FixedCustomerDetails({ 
   selectedCustomer, 
   selectedDeliveryAddress,
-  selectedCustomerOrdersCount
+  selectedCustomerOrdersCount,
+  shippingCharge,
+  shippingType,
 }: FixedCustomerDetailsProps) {
   const [showOngoingOrders, setShowOngoingOrders] = useState(false);
   const [showDeliveryStats, setShowDeliveryStats] = useState(false);
@@ -297,7 +306,12 @@ export default function FixedCustomerDetails({
                   {selectedDeliveryAddress.district && (
                     <p className="text-xs text-green-600">
                       📍 {selectedDeliveryAddress?.district}
-                      {selectedDeliveryAddress?.district === 'Dhaka' ? ' - ৳70' : ' - ৳120'}
+                      {" - "}
+                      {shippingType === "Free" ? (
+                        <span className="text-amber-600 font-medium">Free (ফ্রি ডেলিভারি)</span>
+                      ) : (
+                        <>৳{shippingCharge ?? 0}</>
+                      )}
                     </p>
                   )}
                 </div>

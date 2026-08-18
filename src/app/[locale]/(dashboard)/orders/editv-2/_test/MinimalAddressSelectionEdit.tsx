@@ -369,7 +369,7 @@ export default function MinimalAddressSelectionEdit({
                               )}
                             </Text>
                           )}
-                          <div style={{ marginTop: 8 }}>
+                          {/* <div style={{ marginTop: 8 }}>
                             <Checkbox
                               checked={isFreeDelivery}
                               onChange={(e) =>
@@ -378,7 +378,7 @@ export default function MinimalAddressSelectionEdit({
                             >
                               ফ্রি ডেলিভারি
                             </Checkbox>
-                          </div>
+                          </div> */}
                         </div>
                         <Button
                           type="link"

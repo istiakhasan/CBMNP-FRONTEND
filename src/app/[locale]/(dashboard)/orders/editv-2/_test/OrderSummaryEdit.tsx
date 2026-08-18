@@ -21,6 +21,8 @@ interface OrderSummaryProps {
   onConfirmOrder: () => void;
   onClearCart?: () => void;
   getTotalAmount: () => number;
+  /** Sum of product price * quantity only — no shipping, no discount. */
+  getItemsSubtotal?: () => number;
 }
 
 export default function OrderSummaryEdit({
@@ -30,6 +32,7 @@ export default function OrderSummaryEdit({
   onConfirmOrder,
   onClearCart,
   getTotalAmount,
+  getItemsSubtotal,
 }: OrderSummaryProps) {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("bd-BD", {
@@ -40,8 +43,19 @@ export default function OrderSummaryEdit({
   };
 
   const total = getTotalAmount();
-  const shipping = orderDetails.shippingCharge;
-  const subtotal = Number(total) - Number(shipping);
+  const shipping = orderDetails.shippingCharge || 0;
+  const discount = orderDetails.discountAmount || 0;
+
+  // Prefer the dedicated subtotal calculator (no shipping/discount baked in).
+  // Previously this was computed as `total - shipping`, which was wrong once
+  // discount and the double-add bug were involved. Now matches Create flow.
+  const subtotal = getItemsSubtotal
+    ? getItemsSubtotal()
+    : cartItems.reduce(
+        (sum, item) => sum + item.product.salePrice * item.quantity,
+        0
+      );
+
   const updateQuantity = (productId: string, change: number) => {
     const item = cartItems.find((item) => item.product.id === productId);
     if (item) {
@@ -66,11 +80,11 @@ export default function OrderSummaryEdit({
 
   const canConfirmOrder =
     orderDetails.currier &&
-    cartItems.length > 0  &&
+    cartItems.length > 0 &&
     !!orderDetails.deliveryAddress &&
-    orderDetails?.orderSource?.length > 0
+    orderDetails?.orderSource?.length > 0;
   const missingRequirements = [];
- if (!orderDetails?.warehouse?.label)
+  if (!orderDetails?.warehouse?.label)
     missingRequirements.push("Select a warehouse");
   if (cartItems.length === 0) missingRequirements.push("Add products to cart");
   if (!orderDetails.deliveryAddress)
@@ -78,7 +92,7 @@ export default function OrderSummaryEdit({
   if (!orderDetails.orderSource)
     missingRequirements.push("Select Order source");
   if (!orderDetails.currier) missingRequirements.push("Select courier");
-  console.log(cartItems,"abcd");
+
   return (
     <div className="lg:sticky lg:top-4 space-y-4">
       <Card className=" border-0 overflow-hidden">
@@ -137,7 +151,6 @@ export default function OrderSummaryEdit({
                         <h4 className="font-semibold text-gray-900 text-sm">
                           {item.product.name}
                         </h4>
-                        {/* <p className="text-xs text-muted-foreground">ID: {item.product.id}</p> */}
                         <p className="text-sm font-semibold text-green-600 mt-1">
                           {formatPrice(item?.product?.salePrice)}
                         </p>
@@ -210,7 +223,7 @@ export default function OrderSummaryEdit({
                 <h4 className="font-medium text-gray-900 flex items-center gap-2">
                   <Package className="w-4 h-4 text-indigo-600" />
                   Order Configuration
-                </h4> 
+                </h4>
                 <div className="space-y-2 text-sm">
                   {orderDetails?.warehouse?.label && (
                     <div className="flex justify-between items-center">
@@ -253,7 +266,7 @@ export default function OrderSummaryEdit({
             </>
           )}
 
-               {cartItems.length > 0 && (
+          {cartItems.length > 0 && (
             <>
               <Separator className="bg-gray-200" />
               <div className="space-y-3  p-4 rounded-lg border ">
@@ -267,11 +280,15 @@ export default function OrderSummaryEdit({
                     {shipping > 0 ? shipping : "Free"} ৳
                   </span>
                 </div>
-                   <div className="flex justify-between text-sm font-medium">
+                {discount > 0 && (
+                  <div className="flex justify-between text-sm font-medium">
+                    <span className="text-gray-700">Discount:</span>
+                    <span className="text-pink-600">-{discount} ৳</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-sm font-medium">
                   <span className="text-gray-700">Total:</span>
-                  <span className="text-gray-900">
-                    {total} ৳
-                  </span>
+                  <span className="text-gray-900">{total} ৳</span>
                 </div>
                 <div className="flex justify-between text-sm font-medium">
                   <span className="text-gray-700">Paid:</span>
@@ -279,11 +296,13 @@ export default function OrderSummaryEdit({
                     {orderDetails?.amount > 0 ? orderDetails?.amount : 0} ৳
                   </span>
                 </div>
-             
+
                 <Separator className="bg-gray-200" />
                 <div className="flex justify-between font-semibold text-[12px]">
                   <span className="text-gray-900">Total Receivable:</span>
-                  <span className="">{Number(total || 0) - Number(orderDetails?.amount || 0)} ৳</span>
+                  <span className="">
+                    {Number(total || 0) - Number(orderDetails?.amount || 0)} ৳
+                  </span>
                 </div>
               </div>
             </>
@@ -324,7 +343,8 @@ export default function OrderSummaryEdit({
               size="lg"
             >
               <Check className="w-5 h-5 mr-2" />
-              Update Order {Number(total || 0) - Number(orderDetails?.amount || 0)}
+              Update Order{" "}
+              {Number(total || 0) - Number(orderDetails?.amount || 0)}
             </Button>
 
             {cartItems.length > 0 && (
