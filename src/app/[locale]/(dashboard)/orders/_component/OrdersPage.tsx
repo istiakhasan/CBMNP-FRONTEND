@@ -196,12 +196,12 @@ const OrdersPage = () => {
         refetch={refetch}
         countData={countData}
         searchTerm={searchTerm}
-        // warehosueIds={warehosueIds}
+        warehosueIds={warehosueIds}
         currierIds={partnerIds}
         rangeValue={rangeValue}
         orderStatus={orderStatus}
         productIds={productIds}
-        // locationId={selectedWarehouse}
+        locationId={selectedWarehouse}
       />
     ),
     "4": (

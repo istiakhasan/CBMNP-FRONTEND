@@ -33,6 +33,10 @@ interface MinimalAddressSelectionProps {
   onAddressUpdate: (addresses: any[]) => void;
   selectedDeliveryAddress?: any;
   onDeliveryAddressSelect: (address: any) => void;
+  /** Optional controlled free-delivery state. If omitted, component manages it internally. */
+  isFreeDelivery?: boolean;
+  /** Called whenever admin toggles the "Free Delivery" checkbox. Use this to zero-out shipping in the order total. */
+  onFreeDeliveryChange?: (isFree: boolean) => void;
 }
 
 export default function MinimalAddressSelection({
@@ -41,6 +45,8 @@ export default function MinimalAddressSelection({
   onAddressUpdate,
   selectedDeliveryAddress,
   onDeliveryAddressSelect,
+  isFreeDelivery: isFreeDeliveryProp,
+  onFreeDeliveryChange,
 }: MinimalAddressSelectionProps) {
   const [divisionData, setDivisionData] = useState<any[]>([]);
   const [districtData, setDistrictData] = useState<any[]>([]);
@@ -48,6 +54,19 @@ export default function MinimalAddressSelection({
   const [showAddModal, setShowAddModal] = useState(false);
   const [form] = Form.useForm();
   const [createAddress] = useAddAddressMutation();
+
+  // Local fallback state so this component still works if parent doesn't control free delivery
+  const [isFreeDeliveryLocal, setIsFreeDeliveryLocal] = useState(false);
+  const isFreeDelivery = isFreeDeliveryProp ?? isFreeDeliveryLocal;
+
+  const handleFreeDeliveryToggle = (checked: boolean) => {
+    setIsFreeDeliveryLocal(checked);
+    onFreeDeliveryChange?.(checked);
+    message.success(
+      checked ? "ফ্রি ডেলিভারি চালু করা হয়েছে" : "ফ্রি ডেলিভারি বন্ধ করা হয়েছে"
+    );
+  };
+
   const getAddressIcon = (type: string) => {
     switch (type) {
       case "Home":
@@ -64,26 +83,16 @@ export default function MinimalAddressSelection({
       .then((res) => setDivisionData(res?.data))
       .catch((error) => console.log(error));
   }, []);
-  const getShippingCost = (district?: string) => {
-    if (district === "Dhaka") return 70;
-    if (
-      [
-        "Rajshahi",
-        "Barishal",
-        "Khulna",
-        "Sylhet",
-        "Chittagong",
-        "Rangpur",
-        "Mymensingh",
-      ].includes(district || "")
-    )
-      return 120;
-    return 120;
+
+  // NOTE: this checks DIVISION, not district. Make sure you call it with addr.division.
+  const getShippingCost = (division?: string) => {
+    const normalized = division?.trim().toLowerCase();
+    if (normalized === "dhaka") return 70;
+    return 130;
   };
 
   const handleDivisionChange = (divisionId: any) => {
     const divisionObj = divisionData.find((d) => d.id === divisionId);
-    console.log(divisionObj, "asdfasdf");
     form.setFieldsValue({
       divisionId,
       divisionName: divisionObj?.name_en,
@@ -106,7 +115,6 @@ export default function MinimalAddressSelection({
     try {
       const values = await form.validateFields();
 
-      // Build payload according to AddressBook entity
       const payload = {
         label: values.label,
         receiverName: values.receiverName || customer.customerName,
@@ -149,7 +157,6 @@ export default function MinimalAddressSelection({
   };
 
   const generateDefaultAddress = () => {
-    // return console.log(customer);
     if (customer?.address) {
       const defaultAddress: any = {
         label:
@@ -161,7 +168,6 @@ export default function MinimalAddressSelection({
         receiverName: customer?.customerName || customer.customerName,
         receiverPhone:
           customer?.customerPhoneNumber || customer.customerPhoneNumber,
-        // mapLocation: customer?.location?.mapLocation,
         type: "Home",
       };
       onAddressUpdate([defaultAddress]);
@@ -246,6 +252,7 @@ export default function MinimalAddressSelection({
             <div style={{ marginTop: 8 }}>
               {addresses?.map((addr: any) => {
                 if (selectedDeliveryAddress?.id === addr.id) {
+                  const shippingCost = getShippingCost(addr.division);
                   return (
                     <Card
                       size="small"
@@ -283,12 +290,38 @@ export default function MinimalAddressSelection({
                           </Title>
                           <Text type="secondary">{addr.address}</Text>
                           <br />
-                          {addr.district && (
+                          {(addr.district || addr.division) && (
                             <Text type="success">
-                              📍 {addr.district} - ৳
-                              {getShippingCost(addr.district)} shipping
+                              📍 {addr.district}
+                              {" - "}
+                              {isFreeDelivery ? (
+                                <>
+                                  <span
+                                    style={{
+                                      textDecoration: "line-through",
+                                      color: "#999",
+                                      marginRight: 6,
+                                    }}
+                                  >
+                                    ৳{shippingCost}
+                                  </span>
+                                  <Tag color="gold">ফ্রি ডেলিভারি</Tag>
+                                </>
+                              ) : (
+                                <>৳{shippingCost} shipping</>
+                              )}
                             </Text>
                           )}
+                          <div style={{ marginTop: 8 }}>
+                            <Checkbox
+                              checked={isFreeDelivery}
+                              onChange={(e) =>
+                                handleFreeDeliveryToggle(e.target.checked)
+                              }
+                            >
+                              ফ্রি ডেলিভারি
+                            </Checkbox>
+                          </div>
                         </div>
                         <Button
                           danger
@@ -315,7 +348,6 @@ export default function MinimalAddressSelection({
         okText="Add Address"
       >
         <Form layout="vertical" form={form}>
-          {/* Address Label */}
           <Form.Item name="divisionName" hidden />
           <Form.Item name="districtName" hidden />
           <Form.Item name="thanaName" hidden />
@@ -329,7 +361,6 @@ export default function MinimalAddressSelection({
             <Input placeholder="e.g., Home, Office, Warehouse" />
           </Form.Item>
 
-          {/* Receiver Name */}
           <Form.Item
             label="Receiver Name"
             name="receiverName"
@@ -340,7 +371,6 @@ export default function MinimalAddressSelection({
             <Input placeholder={customer?.customerName} />
           </Form.Item>
 
-          {/* Receiver Phone Number */}
           <Form.Item
             label="Receiver Phone Number"
             name="receiverPhoneNumber"
@@ -367,7 +397,6 @@ export default function MinimalAddressSelection({
               ))}
             </Select>
           </Form.Item>
-          {/* District */}
           <Form.Item
             name="district"
             label="District"
@@ -385,7 +414,6 @@ export default function MinimalAddressSelection({
             </Select>
           </Form.Item>
 
-          {/* Thana */}
           <Form.Item
             name="thana"
             label="Thana"
@@ -400,7 +428,6 @@ export default function MinimalAddressSelection({
             </Select>
           </Form.Item>
 
-          {/* Full Address */}
           <Form.Item
             label="Full Address"
             name="address"
@@ -409,14 +436,12 @@ export default function MinimalAddressSelection({
             <TextArea rows={3} placeholder="Enter complete address" />
           </Form.Item>
 
-          {/* Relationship (only if probashi) */}
           {customer?.customerType === "PROBASHI" && (
             <Form.Item label="Relationship" name="relationship">
               <Input placeholder="e.g., Brother, Father, Friend" />
             </Form.Item>
           )}
 
-          {/* Default Address Toggle */}
           <Form.Item name="isDefault" valuePropName="checked">
             <Checkbox>Set as Default Address</Checkbox>
           </Form.Item>
