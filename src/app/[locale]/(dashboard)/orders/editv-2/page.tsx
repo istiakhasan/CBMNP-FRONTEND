@@ -224,6 +224,7 @@ const Page = () => {
       totalPaidAmount: orderData?.totalPaidAmount,
       deliveryNote: orderDetails?.deliveryNote,
       addressId: orderDetails?.deliveryAddress?.id,
+      locationId: orderDetails?.warehouse?.value,
       products: cartItems?.map((item: any) => {
         return {
           productId: item?.product?.id,
