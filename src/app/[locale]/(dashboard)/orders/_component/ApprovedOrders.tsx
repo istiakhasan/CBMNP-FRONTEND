@@ -45,6 +45,7 @@ const ApprovedOrders = ({
   orderStatus,
   productIds,
   locationId,
+  creationRangeValue,
 }: any) => {
   // all states
   const [statuschangedModal, setStatusChangeModal] = useState(false);
@@ -71,6 +72,7 @@ const ApprovedOrders = ({
     currier: currierIds,
     productId: productIds,
     ...rangeValue,
+    ...creationRangeValue,
     statusId:
       orderStatus?.length > 0 ? (orderStatus?.includes(2) ? 2 : "112") : "2",
   });

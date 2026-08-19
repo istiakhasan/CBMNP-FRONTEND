@@ -39,6 +39,7 @@ const InTransitOrders = ({
   rangeValue,
   productIds,
   orderStatus,
+  creationRangeValue
 }: any) => {
   const [openModal, setOpenModal] = useState(false);
   const [location, setLocationId] = useState<any>([]);
@@ -63,6 +64,7 @@ const InTransitOrders = ({
     locationId: warehosueIds,
     currier: currierIds,
     ...rangeValue,
+    ...creationRangeValue,
     productId: productIds,
   });
   const { data: rowData, isLoading: rowDataLoading } = useGetOrderByIdQuery({

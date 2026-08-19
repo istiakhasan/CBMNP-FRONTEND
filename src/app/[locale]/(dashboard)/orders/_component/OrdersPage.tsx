@@ -2,7 +2,7 @@
 import GbHeader from "@/components/ui/dashboard/GbHeader";
 import { useGetUserByIdQuery } from "@/redux/api/usersApi";
 import convertNumberToShorthand from "@/util/convertNumberToShorthand";
-import { DatePicker, Divider, Modal, Select, Spin, Tooltip } from "antd";
+import { DatePicker, Divider, Input, Modal, Select, Spin, Tooltip } from "antd";
 import React, { useState } from "react";
 import { useLocale } from "next-intl";
 import AllOrders from "./AllOrders";
@@ -13,6 +13,7 @@ import StoreOrders from "./StoreOrders";
 import PackingOrders from "./PackingOrders";
 import InTransitOrders from "./InTransitOrders";
 import Delivered from "./Delivered";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import UnreachableOrders from "./UnreachableOrders";
 import CancelOrders from "./CancelOrders";
 import {
@@ -20,7 +21,6 @@ import {
   useGetOrdersCountQuery,
 } from "@/redux/api/statusApi";
 import { getUserInfo } from "@/service/authService";
-import { useRouter } from "next/navigation";
 import OrderSearch from "@/components/OrderSearch";
 import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
 import { useGetDeliveryPartnerOptionsQuery } from "@/redux/api/partnerApi";
@@ -31,13 +31,23 @@ import ScanOrderToIntransit from "./ScanOrderToIntransit";
 const { RangePicker } = DatePicker;
 const OrdersPage = () => {
   const [rangeValue, setRangeValue] = useState<any>(null);
+  const [creationRangeValue, setCreationRangeValue] = useState<any>(null);
   const [orderStatus, setOrderStatus] = useState<any>([]);
   const [warehosueIds, setWarehouseIds] = useState<any>([]);
   const [productIds, setProductsIds] = useState<any>([]);
   const [partnerIds, setPartnerIds] = useState<any>([]);
-  const [activeTab, setActiveTab] = useState<string>("1");
-  // Modal visibility
-  
+  const searchParams = useSearchParams();
+  const [productSearchTerm, setProductSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState<string>(
+  searchParams.get("tab") || "1"
+);
+const pathname = usePathname();
+const handleTabChange = (tabId: string) => {
+  setActiveTab(tabId);
+  const params = new URLSearchParams(searchParams.toString());
+  params.set("tab", tabId);
+  router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+};
   const [selectedWarehouse, setSelectedWarehouse] = useState<
     string | undefined
   >();
@@ -69,6 +79,7 @@ const OrdersPage = () => {
     productIds: productIds,
     currier: partnerIds,
     ...rangeValue,
+    ...creationRangeValue
   });
 
   const permission = userData?.permission?.map((item: any) => item?.label);
@@ -187,6 +198,7 @@ const OrdersPage = () => {
         warehosueIds={warehosueIds}
         currierIds={partnerIds}
         rangeValue={rangeValue}
+        creationRangeValue={creationRangeValue}
         orderStatus={orderStatus}
         productIds={productIds}
       />
@@ -199,6 +211,7 @@ const OrdersPage = () => {
         warehosueIds={warehosueIds}
         currierIds={partnerIds}
         rangeValue={rangeValue}
+        creationRangeValue={creationRangeValue}
         orderStatus={orderStatus}
         productIds={productIds}
         locationId={selectedWarehouse}
@@ -210,6 +223,7 @@ const OrdersPage = () => {
         warehosueIds={warehosueIds}
         currierIds={partnerIds}
         rangeValue={rangeValue}
+        creationRangeValue={creationRangeValue}
         orderStatus={orderStatus}
         productIds={productIds}
       />
@@ -221,6 +235,7 @@ const OrdersPage = () => {
         warehosueIds={warehosueIds}
         currierIds={partnerIds}
         rangeValue={rangeValue}
+        creationRangeValue={creationRangeValue}
         orderStatus={orderStatus}
         productIds={productIds}
       />
@@ -231,6 +246,7 @@ const OrdersPage = () => {
         warehosueIds={warehosueIds}
         currierIds={partnerIds}
         rangeValue={rangeValue}
+        creationRangeValue={creationRangeValue}
         orderStatus={orderStatus}
         productIds={productIds}
       />
@@ -238,6 +254,7 @@ const OrdersPage = () => {
     "6": (
       <PackingOrders
         rangeValue={rangeValue}
+        creationRangeValue={creationRangeValue}
         searchTerm={searchTerm}
         warehosueIds={warehosueIds}
         currierIds={partnerIds}
@@ -251,6 +268,7 @@ const OrdersPage = () => {
         warehosueIds={warehosueIds}
         currierIds={partnerIds}
         rangeValue={rangeValue}
+        creationRangeValue={creationRangeValue}
         productIds={productIds}
         orderStatus={orderStatus}
       />
@@ -261,6 +279,7 @@ const OrdersPage = () => {
         warehosueIds={warehosueIds}
         currierIds={partnerIds}
         rangeValue={rangeValue}
+        creationRangeValue={creationRangeValue}
         orderStatus={orderStatus}
         productIds={productIds}
       />
@@ -271,6 +290,7 @@ const OrdersPage = () => {
         warehosueIds={warehosueIds}
         currierIds={partnerIds}
         rangeValue={rangeValue}
+        creationRangeValue={creationRangeValue}
         orderStatus={orderStatus}
         productIds={productIds}
         status={10}
@@ -283,6 +303,7 @@ const OrdersPage = () => {
         warehosueIds={warehosueIds}
         currierIds={partnerIds}
         rangeValue={rangeValue}
+        creationRangeValue={creationRangeValue}
         orderStatus={orderStatus}
         productIds={productIds}
       />
@@ -352,6 +373,36 @@ const OrdersPage = () => {
                     placement="rightBottom"
                     title={
                       <div className="h-[500px] overflow-y-scroll">
+                        <h1>Creation Date Range</h1>
+                        <div className="flex gap-2 flex-wrap">
+                          <RangePicker
+                            style={{
+                              width: "100%",
+                              height: "36px",
+                              borderRadius: "0px",
+                            }}
+                            format="YYYY-MM-DD HH:mm:ss"
+                            showTime
+                            onChange={(dates) => {
+                              if (dates) {
+                                const [start, end] = dates;
+                                const formattedStart = dayjs(start).format(
+                                  "YYYY-MM-DD HH:mm:ss"
+                                );
+                                const formattedEnd = dayjs(end).format(
+                                  "YYYY-MM-DD HH:mm:ss"
+                                );
+                                setCreationRangeValue({
+                                  createdAtStart: formattedStart,
+                                  createdAtEnd: formattedEnd,
+                                });
+                              } else {
+                                setCreationRangeValue(null);
+                              }
+                            }}
+                          />
+                        </div>
+                        <Divider />
                         <h1>Filter by status</h1>
                         <div className="flex gap-2 flex-wrap">
                           {statusOptions?.data?.map((item: any, i: any) => (
@@ -414,8 +465,19 @@ const OrdersPage = () => {
                         <Divider />
                         {/* Filter by products Id */}
                         <h1>Filter by products</h1>
+                        <Input
+  placeholder="Search product..."
+  value={productSearchTerm}
+  onChange={(e) => setProductSearchTerm(e.target.value)}
+  style={{ marginBottom: "10px" }}
+  allowClear
+/>
                         <div className="flex gap-2 flex-wrap">
-                          {productsData?.data?.map((item: any, i: any) => (
+                           {productsData?.data
+    ?.filter((item: any) =>
+      item?.name?.toLowerCase().includes(productSearchTerm.toLowerCase())
+    )
+    ?.map((item: any, i: any) => (
                             <span
                               className="text-black flex items-center gap-2"
                               key={i}
@@ -533,7 +595,7 @@ const OrdersPage = () => {
               {tabs?.map((tab: any) => (
                 <p
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => handleTabChange(tab.id)}
                   className={`text-[10px]  py-[5px] px-[10px] font-semibold relative hover:text-[#000000] whitespace-nowrap ${
                     activeTab === tab.id
                       ? " color_primary  bg-[#F2F8FA]"

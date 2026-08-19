@@ -349,6 +349,12 @@ export default function MinimalAddressSelection({
             rules={[{ required: true, message: "Please select division" }]}
           >
             <Select
+             showSearch
+                      filterOption={(input, option) =>
+                        (option?.children as unknown as string)
+                          ?.toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
               placeholder="Select division"
               onChange={handleDivisionChange}
             >
@@ -367,6 +373,12 @@ export default function MinimalAddressSelection({
             <Select
               placeholder="Select district"
               onChange={handleDistrictChange}
+               showSearch
+                      filterOption={(input, option) =>
+                        (option?.children as unknown as string)
+                          ?.toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
             >
               {districtData?.map((d) => (
                 <Option key={d.id} value={d.id}>
@@ -381,7 +393,12 @@ export default function MinimalAddressSelection({
             label="Thana"
             rules={[{ required: true, message: "Please select thana" }]}
           >
-            <Select placeholder="Select thana" onChange={handleThanaChange}>
+            <Select  showSearch
+                      filterOption={(input, option) =>
+                        (option?.children as unknown as string)
+                          ?.toLowerCase()
+                          .includes(input.toLowerCase())
+                      } placeholder="Select thana" onChange={handleThanaChange}>
               {thanaData?.map((d) => (
                 <Option key={d.id} value={d.id}>
                   {d.name_en}

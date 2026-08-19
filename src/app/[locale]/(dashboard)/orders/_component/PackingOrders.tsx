@@ -42,6 +42,7 @@ const PackingOrders = ({
   searchTerm,
   currierIds,
   orderStatus,
+  creationRangeValue
 }: any) => {
   // all states
   const [page, setPage] = useState<number>(1);
@@ -63,6 +64,7 @@ const PackingOrders = ({
     locationId: warehosueIds,
     productId: productIds,
     ...rangeValue,
+    ...creationRangeValue,
     currier: currierIds,
   });
   const [selectedOrders, setSelectedOrders] = useState<any>([]);

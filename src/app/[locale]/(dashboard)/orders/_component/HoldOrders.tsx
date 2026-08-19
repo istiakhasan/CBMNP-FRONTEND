@@ -21,7 +21,7 @@ import GbDropdown from "@/components/ui/dashboard/GbDropdown";
 import { useLocale } from "next-intl";
 import copyToClipboard from "@/components/ui/GbCopyToClipBoard";
 
-const HoldOrders = ({warehosueIds,currierIds,productIds,searchTerm,rangeValue,orderStatus}: any) => {
+const HoldOrders = ({warehosueIds,currierIds,productIds,searchTerm,rangeValue,orderStatus,creationRangeValue}: any) => {
   // all states
  const [statuschangedModal,setStatusChangeModal]=useState(false)
   const [page, setPage] = useState<number>(1);
@@ -35,6 +35,7 @@ const HoldOrders = ({warehosueIds,currierIds,productIds,searchTerm,rangeValue,or
     productId:productIds,
     currier:currierIds,
     ...rangeValue,
+    ...creationRangeValue,
     statusId:orderStatus?.length>0  ?( orderStatus?.includes(3) ? 3 : "112") : '3',
   });
   const local=useLocale()

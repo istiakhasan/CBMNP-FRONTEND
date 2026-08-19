@@ -22,7 +22,7 @@ import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-const CancelOrders = ({searchTerm,productIds,warehosueIds,currierIds,rangeValue,orderStatus}: any) => {
+const CancelOrders = ({searchTerm,productIds,warehosueIds,currierIds,rangeValue,orderStatus,creationRangeValue}: any) => {
   // all states
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
@@ -35,6 +35,7 @@ const CancelOrders = ({searchTerm,productIds,warehosueIds,currierIds,rangeValue,
     productId:productIds,
     currier:currierIds,
     ...rangeValue,
+    ...creationRangeValue,
   });
   const local=useLocale()
   const router = useRouter();

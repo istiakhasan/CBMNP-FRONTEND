@@ -10,16 +10,11 @@ import {
   Col,
   message,
 } from "antd";
-import {
-  UserOutlined,
-  GlobalOutlined,
-  PhoneOutlined,
-} from "@ant-design/icons";
+import { UserOutlined, GlobalOutlined, PhoneOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { useCreateCustomerMutation } from "@/redux/api/customerApi";
 import { getBaseUrl } from "@/helpers/config/envConfig";
 import { countryData } from "../create-order/_component/countryCode";
-
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -39,7 +34,7 @@ export default function CustomerRegistrationForm({
 }: CustomerRegistrationFormProps) {
   const [form] = Form.useForm();
   const [customerType, setCustomerType] = useState<"NON_PROBASHI" | "PROBASHI">(
-    "NON_PROBASHI"
+    "NON_PROBASHI",
   );
 
   const [divisionData, setDivisionData] = useState<any[]>([]);
@@ -109,20 +104,19 @@ export default function CustomerRegistrationForm({
 
       // For local customer
       if (customerType === "NON_PROBASHI") {
-       payload.division =data?.divisionName;
-       payload.district=data?.districtName;
-       payload.thana=data?.thanaName;
-       delete payload['divisionName']
-       delete payload['districtName']
-       delete payload['thanaName']
-       
+        payload.division = data?.divisionName;
+        payload.district = data?.districtName;
+        payload.thana = data?.thanaName;
+        delete payload["divisionName"];
+        delete payload["districtName"];
+        delete payload["thanaName"];
       }
-  
+
       // For probashi customer
       if (customerType === "PROBASHI") {
         payload.country = data.country;
       }
-       
+
       const res = await handleCreateCustomer({
         data: payload,
         params: { addressBook: true },
@@ -214,7 +208,12 @@ export default function CustomerRegistrationForm({
                   label="Current Country"
                   rules={[{ required: true, message: "Please select country" }]}
                 >
-                  <Select placeholder="Select country">
+                  <Select  showSearch
+                      filterOption={(input, option) =>
+                        (option?.children as unknown as string)
+                          ?.toLowerCase()
+                          .includes(input.toLowerCase())
+                      } placeholder="Select country">
                     {countryData.map((c) => (
                       <Option key={c.value} value={c.value}>
                         {c.label}
@@ -253,6 +252,12 @@ export default function CustomerRegistrationForm({
                     ]}
                   >
                     <Select
+                      showSearch
+                      filterOption={(input, option) =>
+                        (option?.children as unknown as string)
+                          ?.toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
                       placeholder="Select division"
                       onChange={handleDivisionChange}
                     >
@@ -274,6 +279,12 @@ export default function CustomerRegistrationForm({
                     ]}
                   >
                     <Select
+                     showSearch
+                      filterOption={(input, option) =>
+                        (option?.children as unknown as string)
+                          ?.toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
                       placeholder="Select district"
                       onChange={handleDistrictChange}
                     >
@@ -292,7 +303,12 @@ export default function CustomerRegistrationForm({
                 label="Thana"
                 rules={[{ required: true, message: "Please select thana" }]}
               >
-                <Select placeholder="Select thana" onChange={handleThanaChange}>
+                <Select  showSearch
+                      filterOption={(input, option) =>
+                        (option?.children as unknown as string)
+                          ?.toLowerCase()
+                          .includes(input.toLowerCase())
+                      } placeholder="Select thana" onChange={handleThanaChange}>
                   {thanaData?.map((d) => (
                     <Option key={d.id} value={d.id}>
                       {d.name_en}

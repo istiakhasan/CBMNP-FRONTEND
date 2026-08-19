@@ -25,7 +25,8 @@ const ReturnOrders = ({
   status,
   orderStatus,
   productIds,
-  countData
+  countData,
+  creationRangeValue
 }: any) => {
   console.log(countData,'countData');
   // all states
@@ -46,6 +47,7 @@ const ReturnOrders = ({
     locationId: warehosueIds,
     currier: currierIds,
     ...rangeValue,
+    ...creationRangeValue,
   });
   const local = useLocale();
   const router = useRouter();

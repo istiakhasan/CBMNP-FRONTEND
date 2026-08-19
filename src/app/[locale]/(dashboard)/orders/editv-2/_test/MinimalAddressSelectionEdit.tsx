@@ -40,7 +40,7 @@ interface MinimalAddressSelectionProps {
   isFreeDelivery?: boolean;
   /** Called whenever admin toggles the "Free Delivery" checkbox. Use this to zero-out shipping in the order total. */
   onFreeDeliveryChange?: (isFree: boolean) => void;
-    /** Real shipping charge from order state (orderDetails.shippingCharge). Used to detect manual overrides. */
+  /** Real shipping charge from order state (orderDetails.shippingCharge). Used to detect manual overrides. */
   shippingCharge?: number;
   /** Order's shippingType (e.g. "Free" | "Regular"). When "Free", shipping always shows ৳0. */
   shippingType?: string;
@@ -72,7 +72,9 @@ export default function MinimalAddressSelectionEdit({
     setIsFreeDeliveryLocal(checked);
     onFreeDeliveryChange?.(checked);
     message.success(
-      checked ? "ফ্রি ডেলিভারি চালু করা হয়েছে" : "ফ্রি ডেলিভারি বন্ধ করা হয়েছে"
+      checked
+        ? "ফ্রি ডেলিভারি চালু করা হয়েছে"
+        : "ফ্রি ডেলিভারি বন্ধ করা হয়েছে",
     );
   };
 
@@ -123,9 +125,7 @@ export default function MinimalAddressSelectionEdit({
   };
 
   const [updateAddress] = useUpdateAddressMutation();
-  const [editingAddressId, setEditingAddressId] = useState<number | null>(
-    null
-  );
+  const [editingAddressId, setEditingAddressId] = useState<number | null>(null);
 
   const handleEditAddress = (addr: any) => {
     setEditingAddressId(addr.id);
@@ -168,7 +168,7 @@ export default function MinimalAddressSelectionEdit({
         }).unwrap();
 
         const updatedAddresses = addresses.map((a) =>
-          a.id === editingAddressId ? updated?.data : a
+          a.id === editingAddressId ? updated?.data : a,
         );
         onAddressUpdate(updatedAddresses);
         if (selectedDeliveryAddress?.id === editingAddressId) {
@@ -340,7 +340,7 @@ export default function MinimalAddressSelectionEdit({
             </Text>
             <div style={{ marginTop: 8 }}>
               {addresses?.map((addr: any) => {
-                            if (selectedDeliveryAddress?.id === addr.id) {
+                if (selectedDeliveryAddress?.id === addr.id) {
                   const shippingCost = resolveShippingCost(addr.division);
                   return (
                     <Card
@@ -484,6 +484,12 @@ export default function MinimalAddressSelectionEdit({
             rules={[{ required: true, message: "Please select division" }]}
           >
             <Select
+              showSearch
+              filterOption={(input, option) =>
+                (option?.children as unknown as string)
+                  ?.toLowerCase()
+                  .includes(input.toLowerCase())
+              }
               placeholder="Select division"
               onChange={handleDivisionChange}
             >
@@ -500,6 +506,12 @@ export default function MinimalAddressSelectionEdit({
             rules={[{ required: true, message: "Please select district" }]}
           >
             <Select
+              showSearch
+              filterOption={(input, option) =>
+                (option?.children as unknown as string)
+                  ?.toLowerCase()
+                  .includes(input.toLowerCase())
+              }
               placeholder="Select district"
               onChange={handleDistrictChange}
             >
@@ -516,7 +528,16 @@ export default function MinimalAddressSelectionEdit({
             label="Thana"
             rules={[{ required: true, message: "Please select thana" }]}
           >
-            <Select placeholder="Select thana" onChange={handleThanaChange}>
+            <Select
+              showSearch
+              filterOption={(input, option) =>
+                (option?.children as unknown as string)
+                  ?.toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+              placeholder="Select thana"
+              onChange={handleThanaChange}
+            >
               {thanaData?.map((d) => (
                 <Option key={d.id} value={d.id}>
                   {d.name_en}

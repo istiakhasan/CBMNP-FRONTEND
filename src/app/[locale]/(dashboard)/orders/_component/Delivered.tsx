@@ -17,7 +17,7 @@ import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import React, {  useState } from "react";
 
-const Delivered = ({warehosueIds,productIds,searchTerm,currierIds,rangeValue,orderStatus,countData}: any) => {
+const Delivered = ({warehosueIds,productIds,searchTerm,currierIds,rangeValue,orderStatus,countData,creationRangeValue}: any) => {
   // all states
   const [paymentStatus, setPaymentStatus] = useState<any>('Pending');
   const [page, setPage] = useState<number>(1);
@@ -32,6 +32,7 @@ const Delivered = ({warehosueIds,productIds,searchTerm,currierIds,rangeValue,ord
     currier:currierIds,
     paymentStatus:paymentStatus,
     ...rangeValue,
+    ...creationRangeValue,
   });
   const local=useLocale()
   const router = useRouter();

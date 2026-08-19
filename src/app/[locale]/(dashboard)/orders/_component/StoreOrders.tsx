@@ -36,6 +36,7 @@ const StoreOrders = ({
   searchTerm,
   rangeValue,
   orderStatus,
+  creationRangeValue
 }: any) => {
   // all states
   const [page, setPage] = useState<number>(1);
@@ -59,6 +60,7 @@ const StoreOrders = ({
     currier: currierIds,
     includeProducts:true,
     ...rangeValue,
+    ...creationRangeValue,
   });
 
   const { data: warehouseOptions } = useLoadAllWarehouseOptionsQuery(undefined);

@@ -32,6 +32,7 @@ const PendingOrders = ({
   rangeValue,
   orderStatus,
   productIds,
+  creationRangeValue
 }: any) => {
   // all states
   const [selectedOrders, setSelectedOrders] = useState<any>([]);
@@ -53,6 +54,7 @@ const PendingOrders = ({
     currier: currierIds,
     productId: productIds,
     ...rangeValue,
+    ...creationRangeValue,
   });
   const local = useLocale();
   const router = useRouter();
