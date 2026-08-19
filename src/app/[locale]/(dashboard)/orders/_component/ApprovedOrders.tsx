@@ -47,6 +47,8 @@ const ApprovedOrders = ({
   locationId,
   creationRangeValue,
 }: any) => {
+  const [bulkPrintData, setBulkPrintData] = useState<any[]>([]);
+  const [bulkPrintLoading, setBulkPrintLoading] = useState(false);
   // all states
   const [statuschangedModal, setStatusChangeModal] = useState(false);
   const [loadOrdersById] = useLazyGetOrderByIdQuery();
@@ -269,7 +271,31 @@ const ApprovedOrders = ({
   const handlePrintAll = useReactToPrint({
     content: () => bulkPrintRef.current,
   });
-
+  const handleBulkPrintClick = async () => {
+    if (!selectedOrders?.length) {
+      message.warning("Please select at least one order to print");
+      return;
+    }
+    try {
+      setBulkPrintLoading(true);
+      const fullOrdersData = await Promise.all(
+        selectedOrders.map((order: any) =>
+          loadOrdersById({ id: order?.id }).unwrap(),
+        ),
+      );
+      setBulkPrintData(fullOrdersData);
+      // state update হয়ে render complete হওয়া পর্যন্ত অপেক্ষা করা,
+      // নাহলে পুরনো/ফাঁকা bulkPrintRef content নিয়ে print dialog খুলে যাবে
+      setTimeout(() => {
+        handlePrintAll();
+        setBulkPrintLoading(false);
+      }, 300);
+    } catch (error) {
+      console.log(error, "bulk print fetch error");
+      message.error("Failed to load order details for printing");
+      setBulkPrintLoading(false);
+    }
+  };
   const items: MenuProps["items"] = [
     {
       label: (
@@ -297,7 +323,11 @@ const ApprovedOrders = ({
       key: "1",
     },
     {
-      label: <span onClick={handlePrintAll}>🖨 Print Selected Orders</span>,
+      label: (
+        <span onClick={handleBulkPrintClick}>
+          🖨 {bulkPrintLoading ? "Preparing..." : "Print Selected Orders"}
+        </span>
+      ),
       key: "2",
     },
   ];
@@ -415,7 +445,7 @@ const ApprovedOrders = ({
               {reqPreviewData?.map((product: any) => {
                 const totalQuantity = product.orders.reduce(
                   (sum: any, order: any) => sum + order.qty,
-                  0
+                  0,
                 );
                 return (
                   <React.Fragment key={product.productId}>
@@ -517,9 +547,10 @@ const ApprovedOrders = ({
       </GbModal>
 
       {/* Hidden Component Only for Printing */}
+      {/* Hidden Component Only for Printing */}
       <div style={{ display: "none" }}>
         <div ref={bulkPrintRef}>
-          <BulkInvoice orders={selectedOrders} />
+          <BulkInvoice orders={bulkPrintData} />
         </div>
       </div>
     </div>

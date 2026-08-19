@@ -7,6 +7,7 @@ import {
   useUpdateOrderMutation,
 } from "@/redux/api/orderApi";
 import { useGetAllStatusQuery } from "@/redux/api/statusApi";
+import { useGetUserByIdQuery } from "@/redux/api/usersApi";
 import { getUserInfo } from "@/service/authService";
 import { message } from "antd";
 import { useRouter } from "next/navigation";
@@ -19,12 +20,30 @@ const BulkChangeOrders = ({ setModalOpen, selectedOrders, status }: any) => {
   const userInfo: any = getUserInfo();
   const router = useRouter();
 
+  const { data: userData } = useGetUserByIdQuery({ id: userInfo?.userId });
+  const userPermissionLabels =
+    userData?.permission?.map((item: any) => item?.label) || [];
+
   const { data: orderStatus } = useGetAllStatusQuery({
     label: status,
   });
   const { watch, handleSubmit } = useFormContext();
+
   const onsubmit = async (data: any) => {
     try {
+      const fromLabel = status?.toUpperCase().replace(/[\s-]/g, "_");
+      const toLabel = data?.orderStatus?.label
+        ?.toUpperCase()
+        .replace(/[\s-]/g, "_");
+      const requiredPermission = `${fromLabel}_TO_${toLabel}`;
+
+      if (!userPermissionLabels.includes(requiredPermission)) {
+        message.error(
+          `${status} থেকে ${data?.orderStatus?.label} এ পরিবর্তন করার অনুমতি আপনার নেই`
+        );
+        return; // API call হবে না
+      }
+
       let res: any = null;
       if (status === "Hold") {
         res = await handleHoldUpdateOrderStatus({

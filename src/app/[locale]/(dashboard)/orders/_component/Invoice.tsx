@@ -124,7 +124,7 @@ const Invoice = ({ rowData }: any) => {
           <div style={{ fontSize: "7.5px", color: "#444", marginBottom: "1mm" }}>
             {rowData?.receiverPhoneNumber}
           </div>
-          <div
+          {/* <div
             style={{
               display: "flex",
               justifyContent: "space-between",
@@ -144,7 +144,7 @@ const Invoice = ({ rowData }: any) => {
             >
               {rowData?.status?.label || "-"}
             </span>
-          </div>
+          </div> */}
         </div>
 
         {/* Item Table */}

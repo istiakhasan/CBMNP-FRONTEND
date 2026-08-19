@@ -3,6 +3,7 @@ import GbTable from "@/components/GbTable";
 import {
   useGetAllOrdersQuery,
   useGetOrderByIdQuery,
+  useLazyGetOrderByIdQuery,
 } from "@/redux/api/orderApi";
 import StatusBadge from "@/util/StatusBadge";
 
@@ -10,6 +11,7 @@ import {
   Checkbox,
   CheckboxOptionType,
   MenuProps,
+  message,
   Pagination,
   Popover,
   Select,
@@ -36,8 +38,10 @@ const StoreOrders = ({
   searchTerm,
   rangeValue,
   orderStatus,
-  creationRangeValue
 }: any) => {
+  const [loadOrdersById] = useLazyGetOrderByIdQuery();
+const [bulkPrintData, setBulkPrintData] = useState<any[]>([]);
+const [bulkPrintLoading, setBulkPrintLoading] = useState(false);
   // all states
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
@@ -60,7 +64,6 @@ const StoreOrders = ({
     currier: currierIds,
     includeProducts:true,
     ...rangeValue,
-    ...creationRangeValue,
   });
 
   const { data: warehouseOptions } = useLoadAllWarehouseOptionsQuery(undefined);
@@ -254,7 +257,29 @@ const StoreOrders = ({
       name: record.name,
     }),
   };
-
+const handleBulkPrintClick = async () => {
+  if (!selectedOrders?.length) {
+    message.warning("Please select at least one order to print");
+    return;
+  }
+  try {
+    setBulkPrintLoading(true);
+    const fullOrdersData = await Promise.all(
+      selectedOrders.map((order: any) =>
+        loadOrdersById({ id: order?.id }).unwrap()
+      )
+    );
+    setBulkPrintData(fullOrdersData);
+    setTimeout(() => {
+      handlePrintAll();
+      setBulkPrintLoading(false);
+    }, 300);
+  } catch (error) {
+    console.log(error, "bulk print fetch error");
+    message.error("Failed to load order details for printing");
+    setBulkPrintLoading(false);
+  }
+};
   // dropdown options
   const items: MenuProps["items"] = [
     {
@@ -269,9 +294,9 @@ const StoreOrders = ({
       key: "1",
     },
      {
-      label: <span onClick={handlePrintAll}>🖨 Print Selected Orders</span>,
-      key: "2",
-    },
+  label: <span onClick={handleBulkPrintClick}>🖨 {bulkPrintLoading ? "Preparing..." : "Print Selected Orders"}</span>,
+  key: "2",
+},
   ];
 
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -382,11 +407,12 @@ const StoreOrders = ({
       </GbModal>
 
        {/* Hidden Component Only for Printing */}
-      <div style={{ display: "none" }}>
-        <div ref={bulkPrintRef}>
-          <BulkInvoice orders={selectedOrders} />
-        </div>
-      </div>
+     {/* Hidden Component Only for Printing */}
+<div style={{ display: "none" }}>
+  <div ref={bulkPrintRef}>
+    <BulkInvoice orders={bulkPrintData} />
+  </div>
+</div>
     </div>
   );
 };

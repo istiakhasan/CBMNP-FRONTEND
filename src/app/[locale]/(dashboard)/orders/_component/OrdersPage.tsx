@@ -39,15 +39,15 @@ const OrdersPage = () => {
   const searchParams = useSearchParams();
   const [productSearchTerm, setProductSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<string>(
-  searchParams.get("tab") || "1"
-);
-const pathname = usePathname();
-const handleTabChange = (tabId: string) => {
-  setActiveTab(tabId);
-  const params = new URLSearchParams(searchParams.toString());
-  params.set("tab", tabId);
-  router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-};
+    searchParams.get("tab") || "1",
+  );
+  const pathname = usePathname();
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", tabId);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
   const [selectedWarehouse, setSelectedWarehouse] = useState<
     string | undefined
   >();
@@ -79,7 +79,7 @@ const handleTabChange = (tabId: string) => {
     productIds: productIds,
     currier: partnerIds,
     ...rangeValue,
-    ...creationRangeValue
+    ...creationRangeValue,
   });
 
   const permission = userData?.permission?.map((item: any) => item?.label);
@@ -170,14 +170,14 @@ const handleTabChange = (tabId: string) => {
         const returnedLabels = ["returned", "pending-return", "partial-return"];
         const sum = countData?.data
           ?.filter((od: any) =>
-            returnedLabels.includes(od?.label?.toLowerCase())
+            returnedLabels.includes(od?.label?.toLowerCase()),
           )
           ?.reduce((acc: number, od: any) => acc + Number(od?.count || 0), 0);
 
         count = String(sum);
       } else {
         const found = countData?.data?.find(
-          (od: any) => od?.label?.toLowerCase() === item?.name?.toLowerCase()
+          (od: any) => od?.label?.toLowerCase() === item?.name?.toLowerCase(),
         );
         count = found?.count || "0";
         statusId = found?.id || "0";
@@ -312,10 +312,11 @@ const handleTabChange = (tabId: string) => {
 
   React.useEffect(() => {
     if (warehouseOptions?.data?.length && !selectedWarehouse) {
-     const defaultWarehouse = warehouseOptions.data.find(
-      (item: any) => item?.isDefault
-    );
-    const warehouseToSelect = defaultWarehouse?.value || warehouseOptions.data[0]?.value;
+      const defaultWarehouse = warehouseOptions.data.find(
+        (item: any) => item?.isDefault,
+      );
+      const warehouseToSelect =
+        defaultWarehouse?.value || warehouseOptions.data[0]?.value;
 
       setSelectedWarehouse(warehouseToSelect);
       setWarehouseIds([warehouseToSelect]); // Load orders for default warehouse
@@ -387,10 +388,10 @@ const handleTabChange = (tabId: string) => {
                               if (dates) {
                                 const [start, end] = dates;
                                 const formattedStart = dayjs(start).format(
-                                  "YYYY-MM-DD HH:mm:ss"
+                                  "YYYY-MM-DD HH:mm:ss",
                                 );
                                 const formattedEnd = dayjs(end).format(
-                                  "YYYY-MM-DD HH:mm:ss"
+                                  "YYYY-MM-DD HH:mm:ss",
                                 );
                                 setCreationRangeValue({
                                   createdAtStart: formattedStart,
@@ -422,8 +423,8 @@ const handleTabChange = (tabId: string) => {
                                   } else {
                                     setOrderStatus(
                                       orderStatus?.filter(
-                                        (ab: any) => ab !== item?.value
-                                      )
+                                        (ab: any) => ab !== item?.value,
+                                      ),
                                     );
                                   }
                                 }}
@@ -452,8 +453,8 @@ const handleTabChange = (tabId: string) => {
                                   } else {
                                     setWarehouseIds(
                                       warehosueIds?.filter(
-                                        (ab: any) => ab !== item?.value
-                                      )
+                                        (ab: any) => ab !== item?.value,
+                                      ),
                                     );
                                   }
                                 }}
@@ -466,40 +467,42 @@ const handleTabChange = (tabId: string) => {
                         {/* Filter by products Id */}
                         <h1>Filter by products</h1>
                         <Input
-  placeholder="Search product..."
-  value={productSearchTerm}
-  onChange={(e) => setProductSearchTerm(e.target.value)}
-  style={{ marginBottom: "10px" }}
-  allowClear
-/>
+                          placeholder="Search product..."
+                          value={productSearchTerm}
+                          onChange={(e) => setProductSearchTerm(e.target.value)}
+                          style={{ marginBottom: "10px" }}
+                          allowClear
+                        />
                         <div className="flex gap-2 flex-wrap">
-                           {productsData?.data
-    ?.filter((item: any) =>
-      item?.name?.toLowerCase().includes(productSearchTerm.toLowerCase())
-    )
-    ?.map((item: any, i: any) => (
-                            <span
-                              className="text-black flex items-center gap-2"
-                              key={i}
-                            >
-                              <input
-                                type="checkbox"
-                                value={item?.id}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setProductsIds([...productIds, item?.id]);
-                                  } else {
-                                    setProductsIds(
-                                      productIds?.filter(
-                                        (ab: any) => ab !== item?.id
-                                      )
-                                    );
-                                  }
-                                }}
-                              />
-                              {item?.name}
-                            </span>
-                          ))}
+                          {productsData?.data
+                            ?.filter((item: any) =>
+                              item?.name
+                                ?.toLowerCase()
+                                .includes(productSearchTerm.toLowerCase()),
+                            )
+                            ?.map((item: any, i: any) => (
+                              <span
+                                className="text-black flex items-center gap-2"
+                                key={i}
+                              >
+                                <input
+                                  type="checkbox"
+                                  value={item?.id}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setProductsIds([...productIds, item?.id]);
+                                    } else {
+                                      setProductsIds(
+                                        productIds?.filter(
+                                          (ab: any) => ab !== item?.id,
+                                        ),
+                                      );
+                                    }
+                                  }}
+                                />
+                                {item?.name}
+                              </span>
+                            ))}
                         </div>
                         <Divider />
                         <h1>Delivery Partner</h1>
@@ -522,15 +525,15 @@ const handleTabChange = (tabId: string) => {
                                     } else {
                                       setPartnerIds(
                                         partnerIds?.filter(
-                                          (ab: any) => ab !== item?.value
-                                        )
+                                          (ab: any) => ab !== item?.value,
+                                        ),
                                       );
                                     }
                                   }}
                                 />
                                 {item?.label}
                               </span>
-                            )
+                            ),
                           )}
                         </div>
                         <Divider />
@@ -548,10 +551,10 @@ const handleTabChange = (tabId: string) => {
                               if (dates) {
                                 const [start, end] = dates;
                                 const formattedStart = dayjs(start).format(
-                                  "YYYY-MM-DD HH:mm:ss"
+                                  "YYYY-MM-DD HH:mm:ss",
                                 );
                                 const formattedEnd = dayjs(end).format(
-                                  "YYYY-MM-DD HH:mm:ss"
+                                  "YYYY-MM-DD HH:mm:ss",
                                 );
                                 setRangeValue({
                                   startDate: formattedStart,
@@ -581,7 +584,7 @@ const handleTabChange = (tabId: string) => {
                     </div>
                   </Tooltip>
 
-                <ScanOrderToIntransit />
+                  <ScanOrderToIntransit />
                 </div>
                 <button
                   onClick={() => router.push(`/${local}/orders/create-order`)}
@@ -616,7 +619,6 @@ const handleTabChange = (tabId: string) => {
           </>
         )}
       </div>
-     
     </div>
   );
 };

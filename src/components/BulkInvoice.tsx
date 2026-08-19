@@ -1,5 +1,6 @@
 import Invoice from "@/app/[locale]/(dashboard)/orders/_component/Invoice";
 const BulkInvoice = ({ orders }: { orders: any[] }) => {
+  console.log(orders,"orders");
   return (
     <div>
       {orders.map((order, index) => (
