@@ -262,7 +262,7 @@ export default function ProductSearchPanel({
                       {/* Add to Cart Button */}
                       <Button
                         onClick={() => addToCart(product)}
-                        disabled={isQuantityExceeded}
+                        // disabled={isQuantityExceeded}
                         className="w-full h-10 bg-[#4F8A6D]  text-white font-medium transition-all duration-200 hover:scale-105 shadow-md"
                         title={
                           isQuantityExceeded
