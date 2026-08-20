@@ -152,10 +152,12 @@ const Page = () => {
             label: orderData?.warehouse?.name,
             value: orderData?.warehouse?.id,
           },
-          currier: {
-            label: orderData?.partner?.partnerName,
-            value: orderData?.partner?.id,
-          },
+           currier: orderData?.currier
+      ? {
+          label: orderData?.partner?.partnerName,
+          value: orderData?.partner?.id,
+        }
+      : undefined,
         };
       });
     }
