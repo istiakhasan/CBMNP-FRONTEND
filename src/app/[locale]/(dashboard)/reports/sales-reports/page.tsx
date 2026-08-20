@@ -11,6 +11,15 @@ import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
 import DownloadOrders from "./_component/DownloadButton";
 import { useGetDeliveryPartnerOptionsQuery } from "@/redux/api/partnerApi";
 
+// ✅ NEW: options for which date field the report should filter by.
+// Values must match the `allowedDateFields` list in the backend's getOrdersReports.
+const DATE_FIELD_OPTIONS = [
+  { label: "Order Date", value: "createdAt" },
+  { label: "In-transit Date", value: "intransitTime" },
+  { label: "Store Date", value: "storeTime" },
+  { label: "Packing Date", value: "packingTime" },
+];
+
 const Page = () => {
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
@@ -18,6 +27,8 @@ const Page = () => {
   const [agentIds, setAgentId] = useState<any>([]);
   const [warehosueIds, setWarehouseId] = useState<any>([]);
   const [courierIds, setCourierId] = useState<any>([]);
+  // ✅ NEW: defaults to "createdAt" so existing behaviour is unchanged
+  const [dateField, setDateField] = useState<string>("createdAt");
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -53,6 +64,7 @@ const Page = () => {
         agentIds: agentIds,
         locationId: warehosueIds,
         currier: courierIds,
+        dateField, // ✅ NEW
       }).unwrap();
       setData(result);
     } catch (error) {
@@ -73,6 +85,15 @@ const Page = () => {
       <div className="p-[16px] overflow-scroll max-h-[90vh] custom_scroll">
         <div className="mb-3">
           <div className="flex flex-wrap gap-4">
+            {/* ✅ NEW: lets the user choose what the date range actually filters by */}
+            <Select
+              className="border_less_select"
+              placeholder="Date type"
+              value={dateField}
+              onChange={(e) => setDateField(e)}
+              style={{ width: 200, borderRadius: 0 }}
+              options={DATE_FIELD_OPTIONS}
+            />
             <DatePicker
               className="w-[250px] rounded-none"
               placeholder="From Date"
@@ -140,6 +161,7 @@ const Page = () => {
                 agentIds: agentIds,
                 locationId: warehosueIds,
                 currier: courierIds,
+                dateField, // ✅ NEW — DownloadOrders.tsx needs no change, it spreads filters already
               }}
             />
             <button className="bg-primary text-white font-bold text-[12px] px-[20px] py-[3px]">
