@@ -79,10 +79,10 @@ const GbFileUpload: React.FC<GbFileUploadProps> = ({ name, defaultValue }) => {
   };
 
   const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
-    if (newFileList.length > 6) {
-      message.error('You can only upload up to 6 images!');
-      return;
-    }
+    // if (newFileList.length > 6) {
+    //   message.error('You can only upload up to 6 images!');
+    //   return;
+    // }
 
     setFileList(newFileList);
     setValue(name, newFileList);
