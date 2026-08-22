@@ -17,6 +17,7 @@ const OrderReportTable = ({
   courierIds,
   paymentMethodIds,
   productIds,
+  dateField
 }: any) => {
   const [loadProcurement] = useLazyGetOrdersReportsQuery();
   const [page, setPage] = useState<number>(1);
@@ -112,6 +113,7 @@ const OrderReportTable = ({
             const result = await loadProcurement({
               startDate: startDate ? dayjs(startDate).toISOString() : null,
               endDate: endDate ? dayjs(endDate).toISOString() : null,
+              dateField,
               page: p,
               limit: s,
               statusId: status,

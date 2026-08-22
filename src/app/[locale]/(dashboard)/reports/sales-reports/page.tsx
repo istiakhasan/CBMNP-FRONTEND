@@ -182,6 +182,7 @@ const Page = () => {
             agentIds={agentIds}
             warehosueIds={warehosueIds}
             courierIds={courierIds}
+            dateField={dateField}
           />
         )}
       </div>
