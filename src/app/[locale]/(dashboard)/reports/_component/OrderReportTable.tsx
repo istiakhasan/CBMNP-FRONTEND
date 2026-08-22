@@ -77,7 +77,7 @@ const OrderReportTable = ({
                   <td className="px-2 py-1">{dayjs(row?.createdAt).format("DD-MM-YYYY")}</td>
                   <td className="px-2 py-1"><StatusBadge status={{label:row?.status?.label}} /></td>
                   <td className="px-2 py-1">
-                    <Tag color="blue">{row?.orderNumber}</Tag>
+                    <Tag color="blue">{row?.invoiceNumber}</Tag>
                   </td>
                   <td className="px-2 py-1">{row?.orderSource || "-"}</td>
                   <td className="px-2 py-1">{row?.partner?.partnerName || "-"}</td>

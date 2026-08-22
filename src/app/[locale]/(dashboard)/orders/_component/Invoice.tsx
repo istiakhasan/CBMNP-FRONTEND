@@ -64,25 +64,25 @@ const Invoice = ({ rowData }: any) => {
         style={{
           width: "102mm",
           maxHeight: "148mm",
-          padding: "4mm",
+          padding: "3.5mm",
           background: "#fff",
           boxSizing: "border-box",
           fontFamily: "'Helvetica Neue', Arial, sans-serif",
-          fontSize: "8.5px",
+          fontSize: "9.5px",
           color: "#1a1a1a",
           margin: "0 auto",
           overflow: "hidden",
         }}
       >
         {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: "1.5mm" }}>
-          <div style={{ fontSize: "13px", fontWeight: 800, letterSpacing: "0.3px" }}>
+        <div style={{ textAlign: "center", marginBottom: "1.2mm" }}>
+          <div style={{ fontSize: "15px", fontWeight: 800, letterSpacing: "0.3px" }}>
             {organization?.name}
           </div>
-          <div style={{ fontSize: "7px", color: "#666", marginTop: "0.5px" }}>
+          <div style={{ fontSize: "8px", color: "#666", marginTop: "0.5px" }}>
             {organization?.address}
           </div>
-          <div style={{ fontSize: "7px", color: "#666" }}>
+          <div style={{ fontSize: "8px", color: "#666" }}>
             +88{organization?.phone}
           </div>
         </div>
@@ -92,15 +92,28 @@ const Invoice = ({ rowData }: any) => {
           style={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "flex-start",
-            marginBottom: "1.5mm",
+            alignItems: "center",
+            marginBottom: "1.2mm",
           }}
         >
-          <div style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "0.5px" }}>
+          <div style={{ fontSize: "13px", fontWeight: 800, letterSpacing: "0.5px" }}>
             INVOICE
           </div>
-          <div style={{ textAlign: "right", fontSize: "7.5px", color: "#333", lineHeight: 1.4 }}>
-            <div>INV# {rowData?.invoiceNumber || "-"}</div>
+          <div style={{ textAlign: "right", fontSize: "8.5px", color: "#333", lineHeight: 1.35 }}>
+            <div
+              style={{
+                display: "inline-block",
+                background: "#fef3c7",
+                color: "#92400e",
+                fontWeight: 800,
+                padding: "0.5mm 2mm",
+                borderRadius: "2px",
+                fontSize: "9.5px",
+                marginBottom: "0.5mm",
+              }}
+            >
+              {rowData?.invoiceNumber || "-"}
+            </div>
             <div>{formatDate(rowData?.deliveryDate || rowData?.createdAt)}</div>
           </div>
         </div>
@@ -110,18 +123,18 @@ const Invoice = ({ rowData }: any) => {
           style={{
             background: "#f7f7f7",
             borderRadius: "2px",
-            padding: "1.5mm 2.5mm",
-            marginBottom: "1.5mm",
+            padding: "1.3mm 2.5mm",
+            marginBottom: "1.2mm",
           }}
         >
-          <div style={{ fontSize: "7px", fontWeight: 700, color: "#888", textTransform: "uppercase", marginBottom: "0.5px" }}>
+          <div style={{ fontSize: "7.5px", fontWeight: 700, color: "#888", textTransform: "uppercase", marginBottom: "0.5px" }}>
             Bill To
           </div>
-          <div style={{ fontSize: "8.5px", fontWeight: 700 }}>
+          <div style={{ fontSize: "9.5px", fontWeight: 700 }}>
             {rowData?.customer?.customerName || rowData?.receiverName}
           </div>
-          <div style={{ fontSize: "7.5px", color: "#444" }}>{rowData?.receiverAddress || "-"}</div>
-          <div style={{ fontSize: "7.5px", color: "#444", marginBottom: "1mm" }}>
+          <div style={{ fontSize: "8.5px", color: "#444" }}>{rowData?.receiverAddress || "-"}</div>
+          <div style={{ fontSize: "8.5px", color: "#444" }}>
             {rowData?.receiverPhoneNumber}
           </div>
           {/* <div
@@ -148,31 +161,31 @@ const Invoice = ({ rowData }: any) => {
         </div>
 
         {/* Item Table */}
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "8px" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "9px" }}>
           <thead>
             <tr>
-              <th style={{ textAlign: "left", padding: "0.8mm 0", width: "7%", fontSize: "7px", borderBottom: "1px solid #000" }}>SL</th>
-              <th style={{ textAlign: "left", padding: "0.8mm 1mm", fontSize: "7px", borderBottom: "1px solid #000" }}>Product</th>
-              <th style={{ textAlign: "center", padding: "0.8mm 0", width: "10%", fontSize: "7px", borderBottom: "1px solid #000" }}>Qty</th>
-              <th style={{ textAlign: "right", padding: "0.8mm 0", width: "17%", fontSize: "7px", borderBottom: "1px solid #000" }}>Price</th>
-              <th style={{ textAlign: "right", padding: "0.8mm 0", width: "17%", fontSize: "7px", borderBottom: "1px solid #000" }}>Total</th>
+              <th style={{ textAlign: "left", padding: "0.7mm 0", width: "7%", fontSize: "8px", borderBottom: "1px solid #000" }}>SL</th>
+              <th style={{ textAlign: "left", padding: "0.7mm 1mm", fontSize: "8px", borderBottom: "1px solid #000" }}>Product</th>
+              <th style={{ textAlign: "center", padding: "0.7mm 0", width: "10%", fontSize: "8px", borderBottom: "1px solid #000" }}>Qty</th>
+              <th style={{ textAlign: "right", padding: "0.7mm 0", width: "17%", fontSize: "8px", borderBottom: "1px solid #000" }}>Price</th>
+              <th style={{ textAlign: "right", padding: "0.7mm 0", width: "17%", fontSize: "8px", borderBottom: "1px solid #000" }}>Total</th>
             </tr>
           </thead>
           <tbody>
             {rowData?.products?.map((item: any, index: number) => (
               <tr key={index} style={{ borderBottom: "1px dotted #ddd" }}>
-                <td style={{ padding: "0.9mm 0", verticalAlign: "top" }}>{index + 1}</td>
-                <td style={{ padding: "0.9mm 1mm", verticalAlign: "top", lineHeight: 1.3 }}>
+                <td style={{ padding: "0.7mm 0", verticalAlign: "top" }}>{index + 1}</td>
+                <td style={{ padding: "0.7mm 1mm", verticalAlign: "top", lineHeight: 1.25 }}>
                   {item?.product?.name}{" "}
-                  {item?.product?.weight ? `${item.product.weight}${item.product.unit}` : ""}
+                  {/* {item?.product?.weight ? `${item.product.weight}${item.product.unit}` : ""} */}
                 </td>
-                <td style={{ textAlign: "center", padding: "0.9mm 0", verticalAlign: "top" }}>
+                <td style={{ textAlign: "center", padding: "0.7mm 0", verticalAlign: "top" }}>
                   {item?.productQuantity}
                 </td>
-                <td style={{ textAlign: "right", padding: "0.9mm 0", verticalAlign: "top" }}>
+                <td style={{ textAlign: "right", padding: "0.7mm 0", verticalAlign: "top" }}>
                   ৳{item?.productPrice}
                 </td>
-                <td style={{ textAlign: "right", padding: "0.9mm 0", verticalAlign: "top", fontWeight: 700 }}>
+                <td style={{ textAlign: "right", padding: "0.7mm 0", verticalAlign: "top", fontWeight: 700 }}>
                   ৳{item?.subtotal}
                 </td>
               </tr>
@@ -181,12 +194,12 @@ const Invoice = ({ rowData }: any) => {
         </table>
 
         {/* Totals */}
-        <div style={{ marginTop: "1.5mm", paddingTop: "1mm" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", padding: "0.4mm 0", fontSize: "7.5px", color: "#444" }}>
+        <div style={{ marginTop: "1.2mm", paddingTop: "0.8mm" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", padding: "0.3mm 0", fontSize: "8.5px", color: "#444" }}>
             <span>Subtotal</span>
             <span>৳{rowData?.productValue}</span>
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", padding: "0.4mm 0", fontSize: "7.5px", color: "#444" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", padding: "0.3mm 0", fontSize: "8.5px", color: "#444" }}>
             <span>Delivery Charge</span>
             <span>৳{rowData?.shippingCharge}</span>
           </div>
@@ -194,8 +207,8 @@ const Invoice = ({ rowData }: any) => {
             style={{
               display: "flex",
               justifyContent: "space-between",
-              padding: "0.6mm 0",
-              fontSize: "10px",
+              padding: "0.5mm 0",
+              fontSize: "11px",
               fontWeight: 800,
             }}
           >
@@ -206,13 +219,13 @@ const Invoice = ({ rowData }: any) => {
             style={{
               display: "flex",
               justifyContent: "space-between",
-              padding: "0.8mm 1.5mm",
-              fontSize: "8.5px",
+              padding: "0.7mm 1.5mm",
+              fontSize: "9.5px",
               fontWeight: 700,
               background: "#fef2f2",
               color: "#b91c1c",
               borderRadius: "2px",
-              marginTop: "0.5mm",
+              marginTop: "0.4mm",
             }}
           >
             <span>Due</span>
@@ -223,12 +236,12 @@ const Invoice = ({ rowData }: any) => {
         {/* Footer */}
         <div
           style={{
-            marginTop: "1.5mm",
+            marginTop: "1.2mm",
             textAlign: "center",
-            fontSize: "6.5px",
+            fontSize: "7px",
             color: "#999",
             borderTop: "1px dashed #ddd",
-            paddingTop: "1mm",
+            paddingTop: "0.8mm",
           }}
         >
           Thank you for your business!
