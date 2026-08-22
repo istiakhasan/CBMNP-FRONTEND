@@ -55,11 +55,15 @@ export default function CustomerSearchPanel({
   );
 
   // Update allCustomers when API data changes
-  useEffect(() => {
-    if (response?.data) {
-      setAllCustomers(response.data);
-    }
-  }, [response]);
+useEffect(() => {
+  if (response?.data) {
+    setAllCustomers(response.data);
+    setSearchResults(response.data);
+  } else {
+    setAllCustomers([]);
+    setSearchResults([]);
+  }
+}, [response]);
 
   // Handle search input
   const handleSearch = (term: string) => {
