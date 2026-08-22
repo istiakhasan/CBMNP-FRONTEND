@@ -98,12 +98,12 @@ const ApprovedOrders = ({
         );
       },
     },
-    {
-      title: "Order ID",
+      {
+      title: "Order ID(INV-N0)",
       key: "orderId",
       render: (text: string, record: any) => (
         <>
-          <span className="mt-[2px] block">{record?.orderNumber}</span>
+          <span className="mt-[2px] block">{record?.invoiceNumber}</span>
         </>
       ),
     },

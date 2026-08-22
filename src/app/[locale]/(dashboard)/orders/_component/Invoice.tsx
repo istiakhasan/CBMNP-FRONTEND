@@ -100,7 +100,7 @@ const Invoice = ({ rowData }: any) => {
             INVOICE
           </div>
           <div style={{ textAlign: "right", fontSize: "7.5px", color: "#333", lineHeight: 1.4 }}>
-            <div>Order# {rowData?.orderNumber || rowData?.invoiceNumber || "-"}</div>
+            <div>INV# {rowData?.invoiceNumber || "-"}</div>
             <div>{formatDate(rowData?.deliveryDate || rowData?.createdAt)}</div>
           </div>
         </div>

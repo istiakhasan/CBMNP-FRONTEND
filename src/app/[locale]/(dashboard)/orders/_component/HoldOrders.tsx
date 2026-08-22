@@ -55,18 +55,12 @@ const HoldOrders = ({warehosueIds,currierIds,productIds,searchTerm,rangeValue,or
         );
       },
     },
-    {
-      title: "Order ID",
+     {
+      title: "Order ID(INV-N0)",
       key: "orderId",
       render: (text: string, record: any) => (
         <>
-          <span className="color_primary font-[500] cursor-pointer">
-            {record?.orderNumber}
-          </span>
-          <i
-            onClick={() => copyToClipboard(record?.orderNumber)}
-            className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[4px]"
-          ></i>
+          <span className="mt-[2px] block">{record?.invoiceNumber}</span>
         </>
       ),
     },
