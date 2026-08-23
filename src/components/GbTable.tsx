@@ -15,6 +15,9 @@ type DTableProps = {
   id?: string;
   rowSelection?: any;
   subscriber_table?: any;
+  stickey?:any;
+    scrollX?:any,
+  scrollY?:any
 };
 
 const GbTable = ({
@@ -29,7 +32,10 @@ const GbTable = ({
   showPagination,
   id,
   rowSelection,
-  subscriber_table
+  subscriber_table,
+  stickey,
+  scrollX = "max-content",
+  scrollY,
 }: DTableProps) => {
   const paginationConfig = showPagination
     ? {
@@ -40,7 +46,7 @@ const GbTable = ({
         onChange: onPaginationChange,
       }
     : false;
-
+const sticky = stickey ? { offsetHeader: 0 } : false;
   return (
     <div>
   
@@ -53,6 +59,8 @@ const GbTable = ({
           onChange={onTableChange}
           rowKey={id?id:'id'}
           rowSelection={rowSelection}
+          sticky={sticky}
+          scroll={{ x: scrollX, y: scrollY }}
         />
   
     </div>
