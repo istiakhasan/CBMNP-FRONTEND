@@ -21,10 +21,18 @@ import ProductSalesReportTable from "./_component/ProductSalesReportTable";
 
 const { RangePicker } = DatePicker;
 
+const DATE_FIELD_OPTIONS = [
+  { label: "Order Date", value: "createdAt" },
+  { label: "In-transit Date", value: "intransitTime" },
+  { label: "Store Date", value: "storeTime" },
+  { label: "Packing Date", value: "packingTime" },
+];
+
 const Page = () => {
   const today = dayjs();
   const [startDate, setStartDate] = useState<Dayjs | null>(today);
   const [endDate, setEndDate] = useState<Dayjs | null>(today);
+  const [dateField, setDateField] = useState<string>("intransitTime");
   const [status, setStatus] = useState<any>([]);
   const [orderSources, setOrderSources] = useState<any>([]);
   const [agentIds, setAgentId] = useState<any>([]);
@@ -81,10 +89,12 @@ const Page = () => {
     startDate?: Dayjs | null;
     endDate?: Dayjs | null;
     status?: any[];
+    dateField?: string;
   }) => {
     const selectedStartDate = filters?.startDate ?? startDate;
     const selectedEndDate = filters?.endDate ?? endDate;
     const selectedStatus = filters?.status ?? status;
+    const selectedDateField = filters?.dateField ?? dateField;
     setLoading(true);
     try {
       const result = await loadProcurement({
@@ -97,6 +107,7 @@ const Page = () => {
         paymentMethodIds: paymentMethodIds,
         orderSources,
         productId: productIds,
+        dateField: selectedDateField,
       }).unwrap();
       setData(result);
       setIsFilterOpen(false);
@@ -132,6 +143,7 @@ const Page = () => {
 
     setStartDate(today);
     setEndDate(today);
+    setDateField("intransitTime");
     setStatus(defaultStatus);
     setOrderSources([]);
     setAgentId([]);
@@ -164,6 +176,11 @@ const Page = () => {
     handleApplyFilter({ status: selectedStatus });
   };
 
+  const handleDateFieldChange = (value: string) => {
+    setDateField(value);
+    handleApplyFilter({ dateField: value });
+  };
+
   return (
     <div>
       <GbHeader title="Product Sales report" />
@@ -171,6 +188,14 @@ const Page = () => {
         {/* Action Buttons */}
         <div className="flex gap-2 justify-between items-center flex-wrap my-4">
           <div className="flex gap-2 flex-wrap">
+            <Select
+              className="border_less_select"
+              placeholder="Date type"
+              value={dateField}
+              onChange={handleDateFieldChange}
+              style={{ width: 200, borderRadius: 0 }}
+              options={DATE_FIELD_OPTIONS}
+            />
             <RangePicker
               value={startDate && endDate ? [startDate, endDate] : null}
               onChange={handleRangeChange}
