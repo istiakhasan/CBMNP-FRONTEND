@@ -1,6 +1,7 @@
 "use client";
+
 import React from "react";
-import { Table, Skeleton } from "antd";
+import { Table } from "antd";
 
 type DTableProps = {
   loading?: boolean;
@@ -15,9 +16,9 @@ type DTableProps = {
   id?: string;
   rowSelection?: any;
   subscriber_table?: any;
-  stickey?:any;
-    scrollX?:any,
-  scrollY?:any
+  stickey?: boolean;
+  scrollX?: any;
+  scrollY?: any;
 };
 
 const GbTable = ({
@@ -32,37 +33,39 @@ const GbTable = ({
   showPagination,
   id,
   rowSelection,
-  subscriber_table,
   stickey,
   scrollX = "max-content",
   scrollY,
 }: DTableProps) => {
   const paginationConfig = showPagination
     ? {
-        pageSize: pageSize,
+        pageSize,
         total: totalPages,
         pageSizeOptions: [5, 10, 20],
-        showSizeChanger: showSizeChanger,
+        showSizeChanger,
         onChange: onPaginationChange,
       }
     : false;
-const sticky = stickey ? { offsetHeader: 0 } : false;
+
+  const sticky = stickey ? { offsetHeader: 0 } : false;
+
   return (
-    <div>
-  
-        <Table
-          // className={`custom_table ${subscriber_table}`}
-          loading={loading}
-          columns={columns}
-          dataSource={dataSource}
-          pagination={paginationConfig}
-          onChange={onTableChange}
-          rowKey={id?id:'id'}
-          rowSelection={rowSelection}
-          sticky={sticky}
-          scroll={{ x: scrollX, y: scrollY }}
-        />
-  
+    <div className="w-full">
+      <Table
+        className="gb-table"
+        loading={loading}
+        columns={columns}
+        dataSource={dataSource}
+        pagination={paginationConfig}
+        onChange={onTableChange}
+        rowKey={id || "id"}
+        rowSelection={rowSelection}
+        sticky={sticky}
+        scroll={{
+          x: scrollX,
+          y: scrollY,
+        }}
+      />
     </div>
   );
 };

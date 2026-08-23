@@ -792,3 +792,21 @@ aside.gb_sidebar {
   .requistion_form_table{}
   .requistion_form_table{}
   
+.gb-table .ant-table-thead > tr > th {
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+}
+
+.gb-table .ant-table-thead > tr > th .ant-table-column-title {
+  white-space: nowrap !important;
+}
+
+.gb-table .ant-table-thead > tr > th {
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+.gb-table .ant-table-column-title {
+  white-space: nowrap !important;
+}

@@ -39,13 +39,13 @@ const InTransitOrders = ({
   rangeValue,
   productIds,
   orderStatus,
-  creationRangeValue
+  creationRangeValue,
 }: any) => {
   const [openModal, setOpenModal] = useState(false);
   const [location, setLocationId] = useState<any>([]);
   const [statuschangedModal, setStatusChangeModal] = useState(false);
   const [selecteddeliveryPartner, setSelectedDeliveryPartner] = useState<any>(
-    []
+    [],
   );
   const { data: warehouseOptions } = useLoadAllWarehouseOptionsQuery(undefined);
   const [page, setPage] = useState<number>(1);
@@ -77,9 +77,9 @@ const InTransitOrders = ({
     {
       title: "SL",
       key: "sl",
+      width: 60,
       render: (text: string, record: any, i: any) => {
         const slNumber = page * size + (i + 1) - size;
-        // 1*10+(0+1)-10
         return (
           <span className="font-[500]">
             {String(slNumber).padStart(2, "0")}
@@ -87,81 +87,79 @@ const InTransitOrders = ({
         );
       },
     },
-     {
+    {
       title: "Order ID(INV-N0)",
       key: "orderId",
+      width: 130,
       render: (text: string, record: any) => (
-        <>
-          <span className="mt-[2px] block">{record?.invoiceNumber}</span>
-        </>
+        <span className="mt-[2px] block ">{record?.invoiceNumber}</span>
       ),
     },
     {
-      title: "Customer Name",
+      title: "Customer",
       key: "customerName",
+      width: 150,
       render: (text: string, record: any) => (
-        <>
-          <span className=" font-[500] cursor-pointer">
+        <div className="flex flex-col gap-0.5">
+          <span className="font-[500]  cursor-pointer truncate max-w-[140px]">
             {record?.customer?.customerName}
           </span>
-        </>
-      ),
-    },
-    {
-      title: "Phone Number",
-      key: "phone_number",
-      render: (text: string, record: any) => (
-        <>
-          <span className="color_primary font-[500]">
+          <span className="flex items-center gap-1  color_primary font-[500]">
             {record?.receiverPhoneNumber}
+            <i
+              onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
+              className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[2px]"
+            ></i>
           </span>
-          <i
-            onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
-            className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[4px]"
-          ></i>
-        </>
+        </div>
       ),
     },
     {
       title: "Order Status",
       key: "orderStatus",
       align: "start",
-      render: (_: any, record: any) => (
-        <>
-          <StatusBadge status={record?.status} />
-        </>
-      ),
+      width: 110,
+      render: (_: any, record: any) => <StatusBadge status={record?.status} />,
     },
     {
-      title: "Product Value",
-      key: "productValue",
+      title: "Amount",
+      key: "amount",
       align: "center",
+      width: 110,
       render: (_: any, record: any) => (
-        <span className=" px-0">{record?.productValue}</span>
-      ),
-    },
-    {
-      title: "Shipping Charge",
-      key: "shippingCharge",
-      align: "center",
-      render: (_: any, record: any) => (
-        <span className=" capitalize px-0">{record?.shippingCharge}</span>
-      ),
-    },
-    {
-      title: "Total",
-      key: "totalCharge",
-      align: "center",
-      render: (_: any, record: any) => (
-        <span className=" capitalize px-0">{record?.totalPrice}</span>
+        <Popover
+          content={
+            <div className=" flex flex-col gap-1 min-w-[160px]">
+              <div className="flex justify-between gap-4">
+                <span className="text-[#7D7D7D]">Product Value</span>
+                <span className="font-medium">৳{record?.productValue}</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-[#7D7D7D]">Shipping</span>
+                <span className="font-medium">৳{record?.shippingCharge}</span>
+              </div>
+              <Divider className="my-1" />
+              <div className="flex justify-between gap-4">
+                <span className="text-[#7D7D7D]">Total</span>
+                <span className="font-semibold">৳{record?.totalPrice}</span>
+              </div>
+            </div>
+          }
+          trigger="hover"
+        >
+          <span className="font-semibold cursor-pointer border-b border-dashed border-gray-400">
+            ৳{record?.totalPrice}
+          </span>
+        </Popover>
       ),
     },
     {
       title: "Order Source",
       key: "orderSource",
       align: "start",
+      width: 100,
       render: (text: string, record: any) => (
-        <span className="text-[#7D7D7D] font-[500] px-0">
+        <span className="text-[#7D7D7D] font-[500] ">
           {record?.orderSource || "N/A"}
         </span>
       ),
@@ -170,74 +168,119 @@ const InTransitOrders = ({
       title: "Courier",
       key: "Courier",
       align: "start",
-      render: (text: string, record: any) => (
-        <span className="text-[#7D7D7D] font-[500] px-0">
-          {record?.partner?.partnerName ? record?.partner?.partnerName : "-"}
-        </span>
-      ),
-    },
-    {
-      title: "Order date",
-      key: "Order date",
-      align: "start",
-      render: (text: string, record: any, i: any) => {
+      width: 200,
+      render: (_text: string, record: any) => {
+        const courierName = record?.partner?.partnerName || "-";
+        const courierStatus = record?.courierStatus || "-";
+        const trackingCode = record?.trackingCode || "-";
+        const consignmentId = record?.consignmentId || "-";
+        const deliveryCharge = record?.deliveryCharge ?? "-";
+        const codAmount = record?.codAmount ?? "-";
+        const trackingMessage = record?.trackingMessage || "-";
+        const courierUpdatedAt = record?.courierUpdatedAt
+          ? dayjs(record.courierUpdatedAt).format("DD MMM YYYY, hh:mm A")
+          : "-";
+
         return (
-          <span className="font-[500]">
-            {moment(record?.createdAt).format("DD MMM YY, h:mma")}
-          </span>
+          <Popover
+            trigger="click"
+            placement="left"
+            content={
+              <div className=" flex flex-col gap-1.5 min-w-[220px]">
+                <div className="flex justify-between gap-4">
+                  <span className="text-[#7D7D7D]">Consignment</span>
+                  <span className="font-medium">{consignmentId}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-[#7D7D7D]">COD</span>
+                  <span className="font-semibold">৳{codAmount}</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span className="text-[#7D7D7D]">Delivery Charge</span>
+                  <span className="font-medium">৳{deliveryCharge}</span>
+                </div>
+                <Divider className="my-1" />
+                <div>
+                  <span className="text-[#7D7D7D]">Message: </span>
+                  <span>{trackingMessage}</span>
+                </div>
+                <div>
+                  <span className="text-[#7D7D7D]">Updated: </span>
+                  <span>{courierUpdatedAt}</span>
+                </div>
+              </div>
+            }
+          >
+            <div className="flex flex-col gap-0.5  cursor-pointer">
+              <div className="flex items-center gap-1.5">
+                <span className="font-semibold text-[#333]">{courierName}</span>
+                {courierStatus !== "-" && (
+                  <StatusBadge status={{ label: courierStatus }} />
+                )}
+              </div>
+              <span
+                className="text-[#7D7D7D] truncate max-w-[180px]"
+                title={trackingCode}
+              >
+                {trackingCode}
+              </span>
+            </div>
+          </Popover>
         );
       },
     },
     {
-      title: "Order Age",
-      key: "orderAge",
+      title: "Order Info",
+      key: "orderInfo",
+      align: "start",
+      width: 150,
       render: (text: string, record: any) => (
-        <span className="text-[#7D7D7D]  color_primary font-[500]">
-          {moment(record?.createdAt).fromNow()}
-        </span>
-      ),
-    },
-    {
-      title: "In-transit Time",
-      key: "In-transit Time",
-      render: (text: string, record: any) => (
-        <span className="text-[#7D7D7D]  color_primary font-[500]">
-          {moment(record?.intransitTime).format("hh:m A DD-MM-YYYY")}
-        </span>
+        <Tooltip
+          title={
+            <div className=" flex flex-col gap-1">
+              <span>
+                Created: {moment(record?.createdAt).format("DD MMM YY, h:mma")}
+              </span>
+              <span>
+                In-transit:{" "}
+                {record?.intransitTime
+                  ? moment(record?.intransitTime).format("hh:mm A DD-MM-YYYY")
+                  : "-"}
+              </span>
+            </div>
+          }
+        >
+          <span className="text-[#7D7D7D] font-[500]  cursor-pointer border-b border-dashed border-gray-400">
+            {moment(record?.createdAt).fromNow()}
+          </span>
+        </Tooltip>
       ),
     },
     {
       title: "Action",
       key: "action",
-      render: (text: string, record: any) => {
-        return (
-          <>
-            <div>
-              <i className="ri-information-2-line text-[18px]  text-primary cursor-pointer"></i>
-              <i
-                onClick={() => {
-                  setPrintModal(true);
-                  setRowId(record?.id);
-                }}
-                className="ri-printer-line text-[18px]  text-primary ml-[4px] cursor-pointer"
-              ></i>
-              <i
-                onClick={() => copyToClipboard(record?.orderNumber)}
-                className="ri-file-copy-line text-primary cursor-pointer ml-[4px] text-[18px] "
-              ></i>
-              <span
-                onClick={() => router.push(`/${local}/orders/${record?.id}`)}
-                className=" text-white text-[10px] py-[2px] px-[10px] cursor-pointer"
-              >
-                <i
-                  style={{ fontSize: "18px" }}
-                  className="ri-eye-fill color_primary"
-                ></i>
-              </span>
-            </div>
-          </>
-        );
-      },
+      fixed: "right",
+      width: 100,
+      render: (text: string, record: any) => (
+        <div className="flex items-center gap-2">
+          <i
+            onClick={() => {
+              setPrintModal(true);
+              setRowId(record?.id);
+            }}
+            className="ri-printer-line text-[16px] text-primary cursor-pointer"
+          ></i>
+          <i
+            onClick={() => copyToClipboard(record?.orderNumber)}
+            className="ri-file-copy-line text-primary cursor-pointer text-[16px]"
+          ></i>
+          <i
+            onClick={() => router.push(`/${local}/orders/${record?.id}`)}
+            style={{ fontSize: "16px" }}
+            className="ri-eye-fill color_primary cursor-pointer"
+          ></i>
+        </div>
+      ),
     },
   ];
 
@@ -470,12 +513,15 @@ const InTransitOrders = ({
           </div>
         </div>
       </div>
-      <div className="custom_scroll overflow-scroll h-[400px]">
+      <div className="w-full">
         <GbTable
+          stickey={true}
           loading={isLoading}
           columns={newColumns}
           dataSource={data?.data}
           rowSelection={rowSelection}
+          // scrollX="1800px"
+          scrollY={400}
         />
       </div>
       <div className="my-4 flex justify-end ">
@@ -486,7 +532,7 @@ const InTransitOrders = ({
             setPage(v);
             setSize(d);
           }}
-          pageSizeOptions={[10,20,50,100,500]}
+          pageSizeOptions={[10, 20, 50, 100, 500]}
           showSizeChanger={true}
         />
       </div>
