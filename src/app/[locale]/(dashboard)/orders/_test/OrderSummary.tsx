@@ -19,6 +19,7 @@ interface OrderSummaryProps {
   orderDetails: any;
   onUpdateCartItem: (productId: string, quantity: number) => void;
   onConfirmOrder: () => void;
+  isConfirming?: boolean;
   onClearCart?: () => void;
   getTotalAmount: () => number;
   /** Sum of product price * quantity only — no shipping, no discount. */
@@ -30,6 +31,7 @@ export default function OrderSummary({
   orderDetails,
   onUpdateCartItem,
   onConfirmOrder,
+  isConfirming = false,
   onClearCart,
   getTotalAmount,
   getItemsSubtotal,
@@ -359,12 +361,14 @@ export default function OrderSummary({
           <div className="space-y-3">
             <Button
               onClick={onConfirmOrder}
-              disabled={!canConfirmOrder}
+              disabled={!canConfirmOrder || isConfirming}
               className="w-full h-12 bg-primary text-white font-semibold text-lg transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
               size="lg"
             >
               <Check className="w-5 h-5 mr-2" />
-              Confirm Order {cartItems.length > 0 && `• ${formatPrice(total)}`}
+              {isConfirming
+                ? "Confirming..."
+                : `Confirm Order ${cartItems.length > 0 ? `• ${formatPrice(total)}` : ""}`}
             </Button>
 
             {cartItems.length > 0 && (

@@ -11,12 +11,14 @@ import { useGetUserByIdQuery } from "@/redux/api/usersApi";
 import { getUserInfo } from "@/service/authService";
 import { message } from "antd";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 const BulkChangeOrders = ({ setModalOpen, selectedOrders, status }: any) => {
   const [handleUpdateOrder] = useChangeOrderStatusMutation();
   const [handleHoldUpdateOrderStatus] = useChangeHoldOrderStatusMutation();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
   const userInfo: any = getUserInfo();
   const router = useRouter();
 
@@ -30,6 +32,11 @@ const BulkChangeOrders = ({ setModalOpen, selectedOrders, status }: any) => {
   const { watch, handleSubmit } = useFormContext();
 
   const onsubmit = async (data: any) => {
+    if (isSubmittingRef.current) {
+      return;
+    }
+   isSubmittingRef.current = true;
+    setIsSubmitting(true);
     try {
       const fromLabel = status?.toUpperCase().replace(/[\s-]/g, "_");
       const toLabel = data?.orderStatus?.label
@@ -44,6 +51,9 @@ const BulkChangeOrders = ({ setModalOpen, selectedOrders, status }: any) => {
         return; // API call হবে না
       }
 
+      isSubmittingRef.current = true;
+      setIsSubmitting(true);
+
       let res: any = null;
       if (status === "Hold") {
         res = await handleHoldUpdateOrderStatus({
@@ -54,7 +64,7 @@ const BulkChangeOrders = ({ setModalOpen, selectedOrders, status }: any) => {
             onHoldReason: data?.reason?.value,
           }),
           currentStatus: selectedOrders[0]?.statusId,
-        });
+        }).unwrap();
       } else {
         res = await handleUpdateOrder({
           orderIds: selectedOrders.map((item: any) => item?.id),
@@ -64,7 +74,7 @@ const BulkChangeOrders = ({ setModalOpen, selectedOrders, status }: any) => {
             onCancelReason: data?.reason?.value,
           }),
           currentStatus: selectedOrders[0]?.statusId,
-        });
+        }).unwrap();
       }
 
       if (res) {
@@ -74,6 +84,9 @@ const BulkChangeOrders = ({ setModalOpen, selectedOrders, status }: any) => {
     } catch (error) {
       message.error("Something went wrong");
       setModalOpen(false);
+    } finally {
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
     }
   };
 
@@ -168,12 +181,13 @@ const BulkChangeOrders = ({ setModalOpen, selectedOrders, status }: any) => {
           Cancel
         </button>
         <button
+         disabled={isSubmitting}
           onClick={handleSubmit(onsubmit)}
           className={` ${
             true ? "bg-[#4F8A6D]" : "bg-[#CACACA]"
           } text-white border-[rgba(0,0,0,.2)]  font-bold px-[30px] py-[5px]`}
         >
-          Confirm
+          {isSubmitting ? "Updating..." : "Confirm"}
         </button>
       </div>
     </div>

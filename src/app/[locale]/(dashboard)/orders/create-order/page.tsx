@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 import { toast, ToastContainer } from "react-toastify";
 import FixedCustomerDetails from "../_test/FixedCustomerDetails";
@@ -29,6 +29,8 @@ const Page = () => {
   const [orderSuccessModal, setOrderSuccessModal] = useState(false);
   const [invoiceText, setInvoiceText] = useState("");
   const [invoiceCopied, setInvoiceCopied] = useState(false);
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+  const isSubmittingOrderRef = useRef(false);
   const [orderDetails, setOrderDetails] = useState<any>({
     orderSource: "Facebook",
     orderType: "Regular",
@@ -163,6 +165,10 @@ const Page = () => {
   };
 
   const handleConfirmOrder = async () => {
+    if (isSubmittingOrderRef.current) {
+      return;
+    }
+
     if (!selectedCustomer || cartItems.length === 0) {
       message.error("Cannot place order");
       return;
@@ -227,22 +233,33 @@ const Page = () => {
       ];
     }
 
-    const res = await handleSubmitOrder(order).unwrap();
-    if (res) {
-      // Build a copy-ready invoice BEFORE resetting the form, since resetForm()
-      // clears cartItems/orderDetails that the invoice needs.
-      const invoice = buildInvoiceText({
-        customer: selectedCustomer,
-        cartItems,
-        orderDetails,
-        itemsSubtotal: getItemsSubtotal(),
-        totalAmount: getTotalAmount(),
-        orderId: res?.data?.id || res?.data?.orderId,
-      });
-      setInvoiceText(invoice);
-      message.success("Order created successfully! 🎉");
-      resetForm();
-      setOrderSuccessModal(true);
+    isSubmittingOrderRef.current = true;
+    setIsSubmittingOrder(true);
+
+    try {
+      const res = await handleSubmitOrder(order).unwrap();
+      if (res) {
+        // Build a copy-ready invoice BEFORE resetting the form, since resetForm()
+        // clears cartItems/orderDetails that the invoice needs.
+        const invoice = buildInvoiceText({
+          customer: selectedCustomer,
+          cartItems,
+          orderDetails,
+          itemsSubtotal: getItemsSubtotal(),
+          totalAmount: getTotalAmount(),
+          orderId: res?.data?.id || res?.data?.orderId,
+        });
+        setInvoiceText(invoice);
+        message.success("Order created successfully! 🎉");
+        resetForm();
+        setOrderSuccessModal(true);
+      }
+    } catch (error) {
+      console.log(error);
+      message.error("Failed to create order");
+    } finally {
+      isSubmittingOrderRef.current = false;
+      setIsSubmittingOrder(false);
     }
   };
 
@@ -308,6 +325,7 @@ const Page = () => {
                     orderDetails={orderDetails}
                     onUpdateCartItem={updateCartItem}
                     onConfirmOrder={handleConfirmOrder}
+                    isConfirming={isSubmittingOrder}
                     onClearCart={clearCart}
                     getTotalAmount={getTotalAmount}
                     getItemsSubtotal={getItemsSubtotal}

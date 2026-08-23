@@ -27,6 +27,7 @@ import moment from "moment"
 import GbModal from "./ui/GbModal"
 import GbForm from "./forms/GbForm"
 import AddPaymentModal from "@/app/[locale]/(dashboard)/orders/[orderid]/_component/AddPaymentModal"
+import StatusBadge from "@/util/StatusBadge"
 const { TextArea } = Input
 const { Title, Text, Paragraph } = Typography
 
@@ -245,7 +246,8 @@ const OrderInformationContent = ({rowData}:any) => {
         title={
           <Space>
             <RiFileTextLine size={20} className="text-blue-600" />
-            <span>Order Information</span>
+            <span>Order Information</span> <span>
+              <StatusBadge status={rowData?.status} /></span>
           </Space>
         }
         bordered={false}
@@ -399,25 +401,25 @@ const OrderInformationContent = ({rowData}:any) => {
           <div className="flex justify-between">
             <Text className="text-sm">Sub Total</Text>
             <Text strong className="text-sm">
-              {rowData?.productValue}
+              BDT: {rowData?.productValue}
             </Text>
           </div>
           <div className="flex justify-between">
             <Text className="text-sm">Discount</Text>
             <Text strong className="text-sm text-red-600">
-              -{rowData?.discount}
+             BDT:  -{rowData?.discount}
             </Text>
           </div>
           <div className="flex justify-between">
             <Text className="text-sm">Delivery Fee</Text>
             <Text strong className="text-sm">
-              {rowData?.shippingCharge}
+              BDT: {rowData?.shippingCharge}
             </Text>
           </div>
           <div className="flex justify-between">
             <Text className="text-sm">Advance</Text>
             <Text strong className="text-sm text-green-600">
-              ${rowData?.totalPaidAmount}
+              BDT: {rowData?.totalPaidAmount}
             </Text>
           </div>
           {/* <div className="flex justify-between">
@@ -429,7 +431,7 @@ const OrderInformationContent = ({rowData}:any) => {
           <div className="flex justify-between">
             <Text className="text-sm">Due</Text>
             <Text strong className="text-sm">
-              ${rowData?.totalPrice - rowData?.totalPaidAmount}
+              BDT: {rowData?.totalPrice - rowData?.totalPaidAmount}
             </Text>
           </div>
           <div className="flex justify-between p-3 rounded-lg bg-blue-50 mt-2">
@@ -437,7 +439,7 @@ const OrderInformationContent = ({rowData}:any) => {
               Total Receivable
             </Text>
             <Text strong className="text-base text-blue-600">
-              ${rowData?.totalReceiveAbleAmount}
+              BDT: {rowData?.totalReceiveAbleAmount}
             </Text>
           </div>
         </Space>
