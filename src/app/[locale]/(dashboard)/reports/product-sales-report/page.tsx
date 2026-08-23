@@ -56,6 +56,11 @@ const Page = () => {
     );
   }, [productsData, productSearch]);
 
+  const statusSelectOptions = useMemo(
+    () => [{ label: "All", value: "all" }, ...(statusOptions?.data || [])],
+    [statusOptions?.data]
+  );
+
   const handleStartChange = (date: Dayjs | null) => {
     if (endDate && date && endDate.diff(date, "month", true) > 1) {
       message.error("Date range cannot be more than 1 month");
@@ -154,7 +159,7 @@ const Page = () => {
   };
 
   const handleStatusChange = (value: any) => {
-    const selectedStatus = value ? [value] : [];
+    const selectedStatus = value && value !== "all" ? [value] : [];
     setStatus(selectedStatus);
     handleApplyFilter({ status: selectedStatus });
   };
@@ -174,10 +179,10 @@ const Page = () => {
             <Select
               className="border_less_select"
               placeholder="Select status"
-              value={status?.[0]}
+              value={status?.[0] || "all"}
               onChange={handleStatusChange}
               style={{ width: 250, borderRadius: 0 }}
-              options={statusOptions?.data}
+              options={statusSelectOptions}
               loading={statusLoading}
               allowClear
             />
