@@ -65,6 +65,8 @@ const Page = () => {
     currier: undefined,
     amount: 0,
     statusByAgent: undefined,
+    onHoldReason: undefined,
+    onCancelReason: undefined,
   });
 
 
@@ -227,6 +229,8 @@ const Page = () => {
       deliveryNote: orderDetails?.deliveryNote,
       addressId: orderDetails?.deliveryAddress?.id,
       locationId: orderDetails?.warehouse?.value,
+      onHoldReason: orderDetails?.onHoldReason,
+      onCancelReason: orderDetails?.onCancelReason, 
       products: cartItems?.map((item: any) => {
         return {
           productId: item?.product?.id,

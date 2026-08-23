@@ -321,24 +321,82 @@ export default function OrderDetailsPanelEdit({
           />
         </Col>
 
-        {orderDetails?.statusId === 1 && (
-          <Col className="mt-[12px]" xs={24} md={12}>
-            <label className="text-[12px]">Update Status</label>
-            <Select
-              placeholder="Select Status"
-              onChange={(value, options) =>
-                updateField("statusByAgent", options)
-              }
-              style={{ width: "100%" }}
-              options={[
-                {
-                  label: "Approved",
-                  value: "2",
-                },
-              ]}
-            />
-          </Col>
-        )}
+       {orderDetails?.statusId === 1 && (
+  <>
+    <Col className="mt-[12px]" xs={24} md={12}>
+      <label className="text-[12px]">Update Status</label>
+
+      <Select
+        placeholder="Select Status"
+        value={orderDetails?.statusByAgent?.value}
+        onChange={(value, options) => {
+          updateField("statusByAgent", options);
+
+          // Status change হলে আগের reason clear করে দিচ্ছি
+          if (value === "4") {
+            updateField("onHoldReason", null);
+          } else if (value === "3") {
+            updateField("onCancelReason", null);
+          } else {
+            updateField("onCancelReason", null);
+            updateField("onHoldReason", null);
+          }
+        }}
+        style={{ width: "100%" }}
+        options={[
+          {
+            label: "Approved",
+            value: "2",
+          },
+          {
+            label: "Cancel",
+            value: "4",
+          },
+          {
+            label: "Hold",
+            value: "3",
+          },
+        ]}
+      />
+    </Col>
+
+    {/* Cancel Reason */}
+    {orderDetails?.statusByAgent?.value === "4" && (
+      <Col className="mt-[12px]" xs={24} md={12}>
+        <label className="text-[12px]">
+          Cancel Reason <span style={{ color: "red" }}>*</span>
+        </label>
+
+        <TextArea
+          rows={3}
+          value={orderDetails?.onCancelReason || ""}
+          onChange={(e) =>
+            updateField("onCancelReason", e.target.value)
+          }
+          placeholder="Enter cancel reason..."
+        />
+      </Col>
+    )}
+
+    {/* Hold Reason */}
+    {orderDetails?.statusByAgent?.value === "3" && (
+      <Col className="mt-[12px]" xs={24} md={12}>
+        <label className="text-[12px]">
+          Hold Reason <span style={{ color: "red" }}>*</span>
+        </label>
+
+        <TextArea
+          rows={3}
+          value={orderDetails?.onHoldReason || ""}
+          onChange={(e) =>
+            updateField("onHoldReason", e.target.value)
+          }
+          placeholder="Enter hold reason..."
+        />
+      </Col>
+    )}
+  </>
+)}
       </Row>
 
       {/* Shipping Info */}
