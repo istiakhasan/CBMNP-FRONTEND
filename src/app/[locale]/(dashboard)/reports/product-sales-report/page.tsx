@@ -8,6 +8,7 @@ import {
   Checkbox,
   Spin,
   Input,
+  Select,
 } from "antd";
 import React, { useEffect, useState, useMemo } from "react";
 import dayjs, { Dayjs } from "dayjs";
@@ -71,15 +72,20 @@ const Page = () => {
     setEndDate(date);
   };
 
-  const handleApplyFilter = async (dateRange?: { startDate: Dayjs | null; endDate: Dayjs | null }) => {
-    const selectedStartDate = dateRange?.startDate ?? startDate;
-    const selectedEndDate = dateRange?.endDate ?? endDate;
+  const handleApplyFilter = async (filters?: {
+    startDate?: Dayjs | null;
+    endDate?: Dayjs | null;
+    status?: any[];
+  }) => {
+    const selectedStartDate = filters?.startDate ?? startDate;
+    const selectedEndDate = filters?.endDate ?? endDate;
+    const selectedStatus = filters?.status ?? status;
     setLoading(true);
     try {
       const result = await loadProcurement({
         startDate: selectedStartDate ? dayjs(selectedStartDate).toISOString() : today.toISOString(),
         endDate: selectedEndDate ? dayjs(selectedEndDate).toISOString() : today.toISOString(),
-        statusId: status,
+        statusId: selectedStatus,
         agentIds,
         locationId: warehosueIds,
         currier: courierIds,
@@ -97,14 +103,31 @@ const Page = () => {
   };
 
   useEffect(() => {
-    handleApplyFilter({ startDate: today, endDate: today });
+    const inTransitStatus = statusOptions?.data?.find(
+      (item: any) => item?.label === "In-transit"
+    );
+
+    if (!inTransitStatus || status.length) return;
+
+    const defaultStatus = [inTransitStatus.value];
+    setStatus(defaultStatus);
+    handleApplyFilter({
+      startDate: today,
+      endDate: today,
+      status: defaultStatus,
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [statusOptions?.data]);
 
   const handleResetFilters = () => {
+    const inTransitStatus = statusOptions?.data?.find(
+      (item: any) => item?.label === "In-transit"
+    );
+    const defaultStatus = inTransitStatus ? [inTransitStatus.value] : [];
+
     setStartDate(today);
     setEndDate(today);
-    setStatus([]);
+    setStatus(defaultStatus);
     setOrderSources([]);
     setAgentId([]);
     setWarehouseId([]);
@@ -130,17 +153,35 @@ const Page = () => {
     }
   };
 
+  const handleStatusChange = (value: any) => {
+    const selectedStatus = value ? [value] : [];
+    setStatus(selectedStatus);
+    handleApplyFilter({ status: selectedStatus });
+  };
+
   return (
     <div>
       <GbHeader title="Product Sales report" />
       <div className="p-[16px]">
         {/* Action Buttons */}
         <div className="flex gap-2 justify-between items-center flex-wrap my-4">
-          <RangePicker
-            value={startDate && endDate ? [startDate, endDate] : null}
-            onChange={handleRangeChange}
-            className="min-w-[260px]"
-          />
+          <div className="flex gap-2 flex-wrap">
+            <RangePicker
+              value={startDate && endDate ? [startDate, endDate] : null}
+              onChange={handleRangeChange}
+              className="min-w-[260px]"
+            />
+            <Select
+              className="border_less_select"
+              placeholder="Select status"
+              value={status?.[0]}
+              onChange={handleStatusChange}
+              style={{ width: 250, borderRadius: 0 }}
+              options={statusOptions?.data}
+              loading={statusLoading}
+              allowClear
+            />
+          </div>
           <div className="flex gap-2">
             <Button
               onClick={() => setIsFilterOpen(true)}
