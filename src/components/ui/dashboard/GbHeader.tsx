@@ -1,19 +1,24 @@
 /* eslint-disable @next/next/no-img-element */
+"use client";
 
 import { Avatar, MenuProps, Space } from "antd";
 import GbDropdown from "./GbDropdown";
-import Link from "next/link";
-import { removeUserInfo } from "@/service/authService";
+import { getUserInfo, removeUserInfo } from "@/service/authService";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleSidebar } from "@/redux/feature/menuSlice";
 import { RootState } from "@/redux/store";
+import { useState } from "react";
+import GbModal from "../GbModal";
+import UserPasswordChangeForm from "@/components/UserPasswordChangeForm";
 const GbHeader = ({ title }: { title?: string }) => {
   const rstate=useSelector((state:RootState)=>state.menu)
   const dispatch = useDispatch();
   const router = useRouter();
   const local = useLocale();
+  const userInfo: any = getUserInfo();
+  const [openPasswordModal, setOpenPasswordModal] = useState(false);
   const items: MenuProps["items"] = [
     // {
     //   label: (
@@ -74,6 +79,23 @@ const GbHeader = ({ title }: { title?: string }) => {
       label: (
         <>
           <span
+            onClick={() => setOpenPasswordModal(true)}
+            className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center"
+          >
+            <i
+              style={{ fontSize: "20px" }}
+              className="ri-lock-password-line"
+            ></i>
+            <span>Change Password</span>
+          </span>
+        </>
+      ),
+      key: "change-password",
+    },
+    {
+      label: (
+        <>
+          <span
             onClick={() => {
               removeUserInfo("token");
               router.push(`/${local}/login`);
@@ -88,15 +110,16 @@ const GbHeader = ({ title }: { title?: string }) => {
           </span>
         </>
       ),
-      key: "5",
+      key: "logout",
     },
   ];
 
   return (
-    <div
-      style={{ zIndex: "1000" }}
-      className="bg-[#FFFFFF] gb-header h-[65px] px-[16px] flex items-center sticky top-0 z-50"
-    >
+    <>
+      <div
+        style={{ zIndex: "1000" }}
+        className="bg-[#FFFFFF] gb-header h-[65px] px-[16px] flex items-center sticky top-0 z-50"
+      >
      {!rstate?.toggle && <div className="toggle_btn md:hidden">
         <i
           onClick={() => dispatch(toggleSidebar({ show: true }))}
@@ -139,7 +162,32 @@ const GbHeader = ({ title }: { title?: string }) => {
           </GbDropdown>
         </div>
       </div>
-    </div>
+      </div>
+      <GbModal
+        isModalOpen={openPasswordModal}
+        openModal={() => setOpenPasswordModal(true)}
+        closeModal={() => setOpenPasswordModal(false)}
+        clseTab={false}
+        width="500px"
+        cls="custom_ant_modal"
+      >
+        <div className="pt-[20px] px-[20px]">
+          <div className="flex justify-between items-center">
+            <h1 className="text-[20px]">Change Password</h1>
+            <i
+              onClick={() => setOpenPasswordModal(false)}
+              style={{ fontSize: "18px" }}
+              className="ri-close-large-fill cursor-pointer"
+            ></i>
+          </div>
+          <div style={{ background: "rgba(0,0,0,.1)" }} className="mb-4 h-[1px]"></div>
+          <UserPasswordChangeForm
+            userId={userInfo?.id}
+            onClose={() => setOpenPasswordModal(false)}
+          />
+        </div>
+      </GbModal>
+    </>
   );
 };
 

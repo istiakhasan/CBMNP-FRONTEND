@@ -254,11 +254,11 @@ const OrderInformationContent = ({rowData}:any) => {
         <Row gutter={[32, 16]}>
           <Col xs={12} md={8}>
             <Text type="secondary" className="text-xs font-medium">
-              Order ID
+              Order ID(INV)
             </Text>
             <div>
               <Text strong className="text-sm">
-                {rowData?.orderNumber}
+                {rowData?.invoiceNumber}
               </Text>
             </div>
           </Col>

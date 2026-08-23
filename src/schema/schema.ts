@@ -211,6 +211,13 @@ export const updateUserSchema = yup.object().shape({
   address: yup.string().required("Phone number is required"),
   role: yup.object().required("Phone number is required"),
 });
+export const changeUserPasswordSchema = yup.object().shape({
+  password: yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref("password")], "Passwords must match")
+    .required("Confirm password is required"),
+});
 export const createCategorySchema = yup.object().shape({
   label: yup.string().required(),
 });

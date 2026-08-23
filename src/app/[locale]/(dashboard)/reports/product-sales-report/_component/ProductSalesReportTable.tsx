@@ -1,17 +1,71 @@
 "use client";
-import CircleChar from "@/components/CircleChar";
-import {
-  useLazyGetOrdersReportsQuery,
-  useLazyGetProductWiseSalesReportQuery,
-} from "@/redux/api/orderApi";
-import { Pagination } from "antd";
 import moment from "moment";
-import dayjs from "dayjs";
 import React from "react";
 
 const ProductSalesReportTable = ({ reports }: any) => {
+  const summary = reports?.summary || {};
+  const formatAmount = (value: any) =>
+    Number(value || 0).toLocaleString("en-BD", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    });
+
+  const summaryItems = [
+    { label: "Products Sold", value: summary?.totalProductQuantity || 0 },
+    { label: "Orders", value: summary?.totalOrders || 0 },
+    { label: "Courier Orders", value: summary?.courierOrderCount || 0 },
+    { label: "Paid Amount", value: formatAmount(summary?.paidAmount) },
+    { label: "Sales Amount", value: formatAmount(summary?.salesAmount) },
+    { label: "Order Amount", value: formatAmount(summary?.totalOrderAmount) },
+  ];
+
   return (
-    <div>
+    <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+        {summaryItems.map((item) => (
+          <div key={item.label} className="border bg-white p-3">
+            <p className="text-[12px] text-gray-500">{item.label}</p>
+            <p className="text-[20px] font-semibold color_primary">{item.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="border bg-white">
+        <div className="bg-[#eeeeee] h-[34px] flex px-3 items-center">
+          <strong>Courier Breakdown</strong>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="report-table">
+            <thead>
+              <tr>
+                <th>Courier</th>
+                <th style={{ textAlign: "center" }}>Order Qty</th>
+                <th style={{ textAlign: "center" }}>Product Qty</th>
+                <th style={{ textAlign: "end" }}>Sales Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {summary?.courierBreakdown?.length ? (
+                summary.courierBreakdown.map((row: any, i: number) => (
+                  <tr key={`${row?.courierId || "unassigned"}-${i}`}>
+                    <td align="center">{row?.courierName || "Unassigned"}</td>
+                    <td style={{ textAlign: "center" }}>{row?.orderCount || 0}</td>
+                    <td style={{ textAlign: "center" }}>{row?.productQuantity || 0}</td>
+                    <td style={{ textAlign: "end" }}>{formatAmount(row?.saleAmount)}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={4} align="center">
+                    No courier data found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div className="table_wrapper custom_scroll">
         <div className="bg-[#eeeeee] h-[30px] sticky bottom-0 flex  px-3 justify-between items-center mb-1 gap-[10px]">
           {reports?.data?.length > 0 && (
@@ -47,11 +101,18 @@ const ProductSalesReportTable = ({ reports }: any) => {
                   {row?.totalOrderQuantity || "N/A"}
                 </td>
                 <td style={{ textAlign: "end" }}>
-                  {row?.totalSaleAmount || "N/A"}
+                  {formatAmount(row?.totalSaleAmount)}
                 </td>
                 <td style={{ textAlign: "end" }}>{row?.orderCount || "N/A"}</td>
               </tr>
             ))}
+            {!reports?.data?.length && (
+              <tr>
+                <td colSpan={5} align="center">
+                  No product sales found
+                </td>
+              </tr>
+            )}
           </tbody>
           <tfoot style={{ position: "sticky", bottom: "0" }}>
             <tr>

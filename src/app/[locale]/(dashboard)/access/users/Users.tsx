@@ -21,6 +21,7 @@ import AddUsers from "./AddUsers";
 import moment from "moment";
 import { useLocale } from "next-intl";
 import EditUser from "./_component/EditUser";
+import ChangeUserPassword from "./_component/ChangeUserPassword";
 const Users = () => {
   //Add user modal
   const [openAddUserModal, setOpenAddUserModal] = useState(false);
@@ -37,6 +38,7 @@ const Users = () => {
   const [open, setOpen] = useState(false);
   const [rowData,setRowData]=useState<any>(null)
   const [editUser, setEditUser] = useState(false);
+  const [openPasswordModal, setOpenPasswordModal] = useState(false);
   const local=useLocale()
   const tableColumn = [
     {
@@ -155,10 +157,22 @@ const Users = () => {
       key: 17,
       align: "end",
       render: (_:any,record:any) => {
-        return <i onClick={()=>{
-          setEditUser(true)
-          setRowData(record)
-        }} className="ri-edit-2-fill text-[18px] color_primary cursor-pointer"></i>;
+        return (
+          <div className="flex justify-end gap-3">
+            <Tooltip title="Edit user">
+              <i onClick={()=>{
+                setEditUser(true)
+                setRowData(record)
+              }} className="ri-edit-2-fill text-[18px] color_primary cursor-pointer"></i>
+            </Tooltip>
+            <Tooltip title="Change password">
+              <i onClick={()=>{
+                setOpenPasswordModal(true)
+                setRowData(record)
+              }} className="ri-lock-password-fill text-[18px] color_primary cursor-pointer"></i>
+            </Tooltip>
+          </div>
+        );
       },
     },
   ];
@@ -269,6 +283,17 @@ const Users = () => {
         cls="custom_ant_modal"
       >
         <EditUser rowData={rowData} setOpenAddUserModal={setEditUser} />
+      </GbModal>
+      {/*Change password modal  */}
+      <GbModal
+        isModalOpen={openPasswordModal}
+        openModal={() => setOpenPasswordModal(true)}
+        closeModal={() => setOpenPasswordModal(false)}
+        clseTab={false}
+        width="500px"
+        cls="custom_ant_modal"
+      >
+        <ChangeUserPassword rowData={rowData} setOpenPasswordModal={setOpenPasswordModal} />
       </GbModal>
     </>
   );

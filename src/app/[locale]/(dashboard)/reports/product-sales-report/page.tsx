@@ -9,21 +9,21 @@ import {
   Spin,
   Input,
 } from "antd";
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import dayjs, { Dayjs } from "dayjs";
-import { useLazyGetOrdersReportsQuery, useLazyGetProductWiseSalesReportQuery } from "@/redux/api/orderApi";
-import OrderReportTable from "../_component/OrderReportTable";
+import { useLazyGetProductWiseSalesReportQuery } from "@/redux/api/orderApi";
 import { useGetAllStatusQuery } from "@/redux/api/statusApi";
-import { useGetAllUsersOptionsQuery } from "@/redux/api/usersApi";
 import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
 import { useGetDeliveryPartnerOptionsQuery } from "@/redux/api/partnerApi";
-import DownloadOrders from "../sales-reports/_component/DownloadButton";
 import { useGetAllProductQuery } from "@/redux/api/productApi";
 import ProductSalesReportTable from "./_component/ProductSalesReportTable";
 
+const { RangePicker } = DatePicker;
+
 const Page = () => {
-  const [startDate, setStartDate] = useState<any>("");
-  const [endDate, setEndDate] = useState<any>("");
+  const today = dayjs();
+  const [startDate, setStartDate] = useState<Dayjs | null>(today);
+  const [endDate, setEndDate] = useState<Dayjs | null>(today);
   const [status, setStatus] = useState<any>([]);
   const [orderSources, setOrderSources] = useState<any>([]);
   const [agentIds, setAgentId] = useState<any>([]);
@@ -43,7 +43,7 @@ const Page = () => {
     useLoadAllWarehouseOptionsQuery(undefined);
   const [loadProcurement, { isLoading: reportLoading }] =
     useLazyGetProductWiseSalesReportQuery();
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<any>(null);
   const { data: statusOptions, isLoading: statusLoading } =
     useGetAllStatusQuery({ label: "all" });
 
@@ -71,12 +71,14 @@ const Page = () => {
     setEndDate(date);
   };
 
-  const handleApplyFilter = async () => {
+  const handleApplyFilter = async (dateRange?: { startDate: Dayjs | null; endDate: Dayjs | null }) => {
+    const selectedStartDate = dateRange?.startDate ?? startDate;
+    const selectedEndDate = dateRange?.endDate ?? endDate;
     setLoading(true);
     try {
       const result = await loadProcurement({
-        startDate: startDate ? dayjs(startDate).toISOString() : dayjs(new Date()).toISOString(),
-        endDate: endDate ? dayjs(endDate).toISOString() : dayjs(new Date()).toISOString(),
+        startDate: selectedStartDate ? dayjs(selectedStartDate).toISOString() : today.toISOString(),
+        endDate: selectedEndDate ? dayjs(selectedEndDate).toISOString() : today.toISOString(),
         statusId: status,
         agentIds,
         locationId: warehosueIds,
@@ -94,9 +96,14 @@ const Page = () => {
     }
   };
 
+  useEffect(() => {
+    handleApplyFilter({ startDate: today, endDate: today });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleResetFilters = () => {
-    setStartDate("");
-    setEndDate("");
+    setStartDate(today);
+    setEndDate(today);
     setStatus([]);
     setOrderSources([]);
     setAgentId([]);
@@ -106,21 +113,45 @@ const Page = () => {
     setProductSearch("");
   };
 
+  const handleRangeChange = (dates: null | [Dayjs | null, Dayjs | null]) => {
+    const from = dates?.[0] || null;
+    const to = dates?.[1] || null;
+
+    if (from && to && to.diff(from, "month", true) > 1) {
+      message.error("Date range cannot be more than 1 month");
+      return;
+    }
+
+    setStartDate(from);
+    setEndDate(to);
+
+    if (from && to) {
+      handleApplyFilter({ startDate: from, endDate: to });
+    }
+  };
+
   return (
     <div>
       <GbHeader title="Product Sales report" />
       <div className="p-[16px]">
         {/* Action Buttons */}
-        <div className="flex gap-2 justify-end my-4">
-          <Button
-            onClick={() => setIsFilterOpen(true)}
-            className="bg-primary text-white"
-          >
-            Filter
-          </Button>
-          <Button loading={reportLoading} className="bg-primary text-white">
-            Print
-          </Button>
+        <div className="flex gap-2 justify-between items-center flex-wrap my-4">
+          <RangePicker
+            value={startDate && endDate ? [startDate, endDate] : null}
+            onChange={handleRangeChange}
+            className="min-w-[260px]"
+          />
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setIsFilterOpen(true)}
+              className="bg-primary text-white"
+            >
+              Filter
+            </Button>
+            <Button loading={reportLoading} className="bg-primary text-white">
+              Print
+            </Button>
+          </div>
         </div>
 
         {/* Filter Modal */}
@@ -139,7 +170,7 @@ const Page = () => {
             <Button
               key="apply"
               type="primary"
-              onClick={handleApplyFilter}
+              onClick={() => handleApplyFilter()}
               loading={loading}
             >
               Apply Filters
