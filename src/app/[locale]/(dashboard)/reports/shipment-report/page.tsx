@@ -156,11 +156,11 @@ const Page = () => {
             reports={data}
             startDate={startDate}
             endDate={endDate}
-            setData={setData}
-            status={status}
-            agentIds={agentIds}
+            // setData={setData}
+            // status={status}
+            // agentIds={agentIds}
             warehosueIds={warehosueIds}
-            courierIds={courierIds}
+            // courierIds={courierIds}
           />
         )}
       </div>
