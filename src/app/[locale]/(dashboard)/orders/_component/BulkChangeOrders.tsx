@@ -113,7 +113,7 @@ const BulkChangeOrders = ({ setModalOpen, selectedOrders, status }: any) => {
       <div>
         <GbFormSelect
           name="orderStatus"
-          options={orderStatus?.data}
+          options={status==="Pending"?orderStatus?.data?.filter((ab:any)=>ab?.label !=="Approved"):orderStatus?.data}
           label="Select Status"
         />
       </div>

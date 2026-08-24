@@ -94,7 +94,8 @@ const ChangeStatusModal = ({ setModalOpen, rowData }: any) => {
       <div className="mb-4">
         <GbFormSelect
           name="orderStatus"
-          options={orderStatus?.data}
+          // options={orderStatus?.data}
+          options={rowData?.status?.label==="Pending"?orderStatus?.data?.filter((ab:any)=>ab?.label !=="Approved"):orderStatus?.data}
           label="Select Status"
         />
       </div>
