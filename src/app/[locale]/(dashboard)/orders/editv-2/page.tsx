@@ -190,63 +190,88 @@ const Page = () => {
     return Math.max(itemsSubtotal + shippingCharge - discountAmount, 0);
   };
 
-  const handleUpdateOrder = async () => {
-    if (!selectedCustomer || cartItems.length === 0) {
+ const handleUpdateOrder = async () => {
+  const isCancel = orderDetails?.statusByAgent?.value === "4";
+  const isHold = orderDetails?.statusByAgent?.value === "3";
+  const isCancelOrHold = isCancel || isHold;
+
+  if (!selectedCustomer) {
+    message.error("Cannot place order");
+    return;
+  }
+
+  if (isCancelOrHold) {
+    if (isCancel && !orderDetails?.onCancelReason?.trim()) {
+      message.error("Cancel reason is required");
+      return;
+    }
+    if (isHold && !orderDetails?.onHoldReason?.trim()) {
+      message.error("Hold reason is required");
+      return;
+    }
+  } else {
+    if (cartItems.length === 0) {
       message.error("Cannot place order");
       return;
     }
-
     if (!orderDetails.warehouse) {
       message.error("Missing warehouse selection");
       return;
     }
-
     if (!orderDetails.orderSource) {
       message.error("Missing order source");
       return;
     }
-
     if (!orderDetails.deliveryAddress) {
       message.error("Missing delivery address");
       return;
     }
-    const order: any = {
-      customerId: selectedCustomer?.customer_Id,
-      receiverName: orderDetails?.deliveryAddress?.receiverName,
-      receiverPhoneNumber: orderDetails?.deliveryAddress?.receiverPhoneNumber,
-      receiverDivision: orderDetails?.deliveryAddress?.division,
-      receiverDistrict: orderDetails?.deliveryAddress?.district,
-      receiverThana: orderDetails?.deliveryAddress?.thana,
-      receiverAddress: orderDetails?.deliveryAddress?.address,
-      orderSource: orderDetails?.orderSource,
-      currier: orderDetails?.currier?.value,
-      shippingCharge: orderDetails?.shippingCharge,
-      shippingType: orderDetails?.shippingType,
-      discount: orderDetails?.discountAmount || 0,
-      orderType: orderDetails?.orderType,
-      agentId: userInfo?.userId,
-      totalPaidAmount: orderData?.totalPaidAmount,
-      deliveryNote: orderDetails?.deliveryNote,
-      addressId: orderDetails?.deliveryAddress?.id,
-      locationId: orderDetails?.warehouse?.value,
-      onHoldReason: orderDetails?.onHoldReason,
-      onCancelReason: orderDetails?.onCancelReason, 
-      products: cartItems?.map((item: any) => {
-        return {
-          productId: item?.product?.id,
-          productQuantity: item?.quantity,
-        };
-      }),
-    };
-    if (orderDetails?.statusByAgent?.value) {
-      order["statusId"] = orderDetails?.statusByAgent?.value;
-    }
-    const res: any = await orderUpdateMutation({
-      data: order,
-      id: orderData?.id,
-    }).unwrap();
-    console.log(res, "res");
-    if (res) {
+  }
+
+  const order: any = {
+    customerId: selectedCustomer?.customer_Id,
+    receiverName: orderDetails?.deliveryAddress?.receiverName,
+    receiverPhoneNumber: orderDetails?.deliveryAddress?.receiverPhoneNumber,
+    receiverDivision: orderDetails?.deliveryAddress?.division,
+    receiverDistrict: orderDetails?.deliveryAddress?.district,
+    receiverThana: orderDetails?.deliveryAddress?.thana,
+    receiverAddress: orderDetails?.deliveryAddress?.address,
+    orderSource: orderDetails?.orderSource,
+    currier: orderDetails?.currier?.value,
+    shippingCharge: orderDetails?.shippingCharge,
+    shippingType: orderDetails?.shippingType,
+    discount: orderDetails?.discountAmount || 0,
+    orderType: orderDetails?.orderType,
+    agentId: userInfo?.userId,
+    totalPaidAmount: orderData?.totalPaidAmount,
+    deliveryNote: orderDetails?.deliveryNote,
+    addressId: orderDetails?.deliveryAddress?.id,
+    locationId: orderDetails?.warehouse?.value,
+    onHoldReason: orderDetails?.onHoldReason,
+    onCancelReason: orderDetails?.onCancelReason,
+    products: cartItems?.map((item: any) => {
+      return {
+        productId: item?.product?.id,
+        productQuantity: item?.quantity,
+      };
+    }),
+  };
+  if (orderDetails?.statusByAgent?.value) {
+    order["statusId"] = orderDetails?.statusByAgent?.value;
+  }
+
+  const res: any = await orderUpdateMutation({
+    data: order,
+    id: orderData?.id,
+  }).unwrap();
+  console.log(res, "res");
+
+  if (res) {
+    message.success(
+      isCancel ? "Order Cancelled successfully!" : "Order Update successfully! 🎉"
+    );
+
+    if (!isCancel) {
       const invoice = buildInvoiceText({
         customer: selectedCustomer,
         cartItems,
@@ -256,10 +281,10 @@ const Page = () => {
         orderId: orderData?.id,
       });
       setInvoiceText(invoice);
-      message.success("Order Update successfully! 🎉");
       setInvoiceModalOpen(true);
     }
-  };
+  }
+};
 
   return (
     <div>

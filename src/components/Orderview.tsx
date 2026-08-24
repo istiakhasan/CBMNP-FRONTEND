@@ -80,7 +80,7 @@ export function OrderPageView({ orderData , permission}: any) {
                   {/* <Button type="primary" icon={<RiDownloadLine size={16} />}>
                     Export PDF
                   </Button> */}
-                {orderData?.status?.label==='Pending-Return' || orderData?.status?.label==="Pending" &&  <Tooltip title="Change Status">
+                {orderData?.status?.label==='Pending-Return' &&  <Tooltip title="Change Status">
                     <Button 
                       type="primary"
                       disabled={

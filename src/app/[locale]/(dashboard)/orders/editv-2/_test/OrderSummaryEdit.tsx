@@ -78,12 +78,45 @@ export default function OrderSummaryEdit({
     }
   };
 
-  const canConfirmOrder =
-    orderDetails.currier &&
+  // const canConfirmOrder =
+  //   orderDetails.currier &&
+  //   cartItems.length > 0 &&
+  //   !!orderDetails.deliveryAddress &&
+  //   orderDetails?.orderSource?.length > 0;
+  // const missingRequirements = [];
+  // if (!orderDetails?.warehouse?.label)
+  //   missingRequirements.push("Select a warehouse");
+  // if (cartItems.length === 0) missingRequirements.push("Add products to cart");
+  // if (!orderDetails.deliveryAddress)
+  //   missingRequirements.push("Select Delivery address(s)");
+  // if (!orderDetails.orderSource)
+  //   missingRequirements.push("Select Order source");
+  // if (!orderDetails.currier) missingRequirements.push("Select courier");
+const isCancel = orderDetails?.statusByAgent?.value === "4";
+const isHold = orderDetails?.statusByAgent?.value === "3";
+const isCancelOrHold = isCancel || isHold;
+
+const hasReason = isCancel
+  ? !!orderDetails?.onCancelReason?.trim()
+  : isHold
+  ? !!orderDetails?.onHoldReason?.trim()
+  : true;
+
+const canConfirmOrder = isCancelOrHold
+  ? hasReason
+  : orderDetails.currier &&
     cartItems.length > 0 &&
     !!orderDetails.deliveryAddress &&
     orderDetails?.orderSource?.length > 0;
-  const missingRequirements = [];
+
+const missingRequirements = [];
+if (isCancelOrHold) {
+  if (!hasReason) {
+    missingRequirements.push(
+      isCancel ? "Enter cancel reason" : "Enter hold reason"
+    );
+  }
+} else {
   if (!orderDetails?.warehouse?.label)
     missingRequirements.push("Select a warehouse");
   if (cartItems.length === 0) missingRequirements.push("Add products to cart");
@@ -92,7 +125,7 @@ export default function OrderSummaryEdit({
   if (!orderDetails.orderSource)
     missingRequirements.push("Select Order source");
   if (!orderDetails.currier) missingRequirements.push("Select courier");
-
+}
   return (
     <div className="lg:sticky lg:top-4 space-y-4">
       <Card className=" border-0 overflow-hidden">
