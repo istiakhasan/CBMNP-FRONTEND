@@ -20,7 +20,7 @@ const AgentDashboard = () => {
 
   if (isLoading) return null;
 
-  const summary:any = summaryRes?.data;
+  const summary:any = summaryRes;
 
   const statusColorMap: any = {
     Pending: "orange",
