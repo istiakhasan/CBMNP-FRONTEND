@@ -1081,8 +1081,8 @@ const ShipmentReportTable = ({
                 textAlign:
                   "center",
 
-                borderBottom:
-                  "2px solid #222",
+                // borderBottom:
+                //   "2px solid #222",
 
                 paddingBottom:
                   "15px",
@@ -1772,8 +1772,8 @@ const ShipmentReportTable = ({
                               padding:
                                 "12px 10px",
 
-                              borderTop:
-                                "2px solid #222",
+                              // borderTop:
+                              //   "2px solid #222",
 
                               textAlign:
                                 "right",
@@ -1790,8 +1790,8 @@ const ShipmentReportTable = ({
                               padding:
                                 "12px 10px",
 
-                              borderTop:
-                                "2px solid #222",
+                              // borderTop:
+                              //   "2px solid #222",
 
                               textAlign:
                                 "right",
@@ -1837,8 +1837,7 @@ const ShipmentReportTable = ({
                     paddingTop:
                       "20px",
 
-                    borderTop:
-                      "1px solid #ddd",
+              
                   }}
                 >
 

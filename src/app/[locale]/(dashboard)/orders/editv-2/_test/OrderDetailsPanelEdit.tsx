@@ -13,6 +13,7 @@ import {
 } from "@ant-design/icons";
 import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
 import { useGetDeliveryPartnerOptionsQuery } from "@/redux/api/partnerApi";
+import GbFormSelect from "@/components/forms/GbFormSelect";
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -24,8 +25,6 @@ const orderSources = [
   { value: "Telemarketing", label: "Telemarketing", icon: TeamOutlined },
   { value: "Employee", label: "Employee", icon: HomeOutlined },
 ];
-
-
 
 const shippingTypeOptions = [
   { label: "Regular", value: "Regular" },
@@ -156,7 +155,123 @@ export default function OrderDetailsPanelEdit({
     orderDetails.manualShippingCharge,
   ]);
 
+  const cancelReasonOptions = [
+    {
+      label: "Customer Not interested",
+      value: "Customer Not interested",
+    },
+    {
+      label: "Multiple order",
+      value: "Multiple order",
+    },
+    {
+      label: "Product Stock-out",
+      value: "Product Stock-out",
+    },
+    {
+      label: "Customer Unreachable",
+      value: "Customer Unreachable",
+    },
+    {
+      label: "Delay Delivery",
+      value: "Delay Delivery",
+    },
+    {
+      label: "Urgent delivery (Out-side Dhaka)",
+      value: "Urgent delivery (Out-side Dhaka)",
+    },
+    {
+      label: "Urgent delivery (In Dhaka)",
+      value: "Urgent delivery (In Dhaka)",
+    },
+    {
+      label: "Fake Order",
+      value: "Fake Order",
+    },
+    {
+      label: "Financial Crisis",
+      value: "Financial Crisis",
+    },
+    {
+      label: "Mistakenly placed order by customer",
+      value: "Mistakenly placed order by customer",
+    },
+    {
+      label: "Not interested to pay in advance",
+      value: "Not interested to pay in advance",
+    },
+    {
+      label: "Out of Coverage",
+      value: "Out of Coverage",
+    },
+    {
+      label: "Price Issue",
+      value: "Price Issue",
+    },
+    {
+      label: "Customer Wants to cancel",
+      value: "Customer Wants to cancel",
+    },
+    {
+      label: "Will not available on delivery time",
+      value: "Will not available on delivery time",
+    },
+    {
+      label: "Will order later",
+      value: "Will order later",
+    },
+    {
+      label: "Test Order",
+      value: "Test Order",
+    },
+  ];
 
+  const holdReasonOptions = [
+    {
+      label: "Customer Not interested",
+      value: "Customer Not interested",
+    },
+    {
+      label: "Customer Unreachable",
+      value: "Customer Unreachable",
+    },
+    {
+      label: "Delay Delivery",
+      value: "Delay Delivery",
+    },
+    {
+      label: "Urgent delivery (Out-side Dhaka)",
+      value: "Urgent delivery (Out-side Dhaka)",
+    },
+    {
+      label: "Urgent delivery (In Dhaka)",
+      value: "Urgent delivery (In Dhaka)",
+    },
+    {
+      label: "Financial Crisis",
+      value: "Financial Crisis",
+    },
+    {
+      label: "Not interested to pay in advance",
+      value: "Not interested to pay in advance",
+    },
+    {
+      label: "Out of Coverage",
+      value: "Out of Coverage",
+    },
+    {
+      label: "Price Issue",
+      value: "Price Issue",
+    },
+    {
+      label: "Will not available on delivery time",
+      value: "Will not available on delivery time",
+    },
+    {
+      label: "Will order later",
+      value: "Will order later",
+    },
+  ];
   return (
     <Card
       title={
@@ -295,7 +410,7 @@ export default function OrderDetailsPanelEdit({
                   // যাতে edit mode এ পুরনো order এর charge হঠাৎ ০ না হয়ে যায়।
                   updateField(
                     "shippingCharge",
-                    orderDetails.shippingCharge ?? shippingInfo.charge
+                    orderDetails.shippingCharge ?? shippingInfo.charge,
                   );
                 }
               }}
@@ -308,7 +423,7 @@ export default function OrderDetailsPanelEdit({
             disabled={!orderDetails.manualShippingCharge}
             value={
               orderDetails.manualShippingCharge
-                ? orderDetails.shippingCharge ?? 0
+                ? (orderDetails.shippingCharge ?? 0)
                 : shippingInfo.charge
             }
             onChange={(e) => {
@@ -321,47 +436,47 @@ export default function OrderDetailsPanelEdit({
           />
         </Col>
 
-       {orderDetails?.statusId === 1 && (
-  <>
-    <Col className="mt-[12px]" xs={24} md={12}>
-      <label className="text-[12px]">Update Status</label>
+        {orderDetails?.statusId === 1 && (
+          <>
+            <Col className="mt-[12px]" xs={24} md={12}>
+              <label className="text-[12px]">Update Status</label>
 
-      <Select
-        placeholder="Select Status"
-        value={orderDetails?.statusByAgent?.value}
-        onChange={(value, options) => {
-          updateField("statusByAgent", options);
+              <Select
+                placeholder="Select Status"
+                value={orderDetails?.statusByAgent?.value}
+                onChange={(value, options) => {
+                  updateField("statusByAgent", options);
 
-          // Status change হলে আগের reason clear করে দিচ্ছি
-          if (value === "4") {
-            updateField("onHoldReason", null);
-          } else if (value === "3") {
-            updateField("onCancelReason", null);
-          } else {
-            updateField("onCancelReason", null);
-            updateField("onHoldReason", null);
-          }
-        }}
-        style={{ width: "100%" }}
-        options={[
-          {
-            label: "Approved",
-            value: "2",
-          },
-          {
-            label: "Cancel",
-            value: "4",
-          },
-          {
-            label: "Hold",
-            value: "3",
-          },
-        ]}
-      />
-    </Col>
+                  // Status change হলে আগের reason clear করে দিচ্ছি
+                  if (value === "4") {
+                    updateField("onHoldReason", null);
+                  } else if (value === "3") {
+                    updateField("onCancelReason", null);
+                  } else {
+                    updateField("onCancelReason", null);
+                    updateField("onHoldReason", null);
+                  }
+                }}
+                style={{ width: "100%" }}
+                options={[
+                  {
+                    label: "Approved",
+                    value: "2",
+                  },
+                  {
+                    label: "Cancel",
+                    value: "4",
+                  },
+                  {
+                    label: "Hold",
+                    value: "3",
+                  },
+                ]}
+              />
+            </Col>
 
-    {/* Cancel Reason */}
-    {orderDetails?.statusByAgent?.value === "4" && (
+            {/* Cancel Reason */}
+            {/* {orderDetails?.statusByAgent?.value === "4" && (
       <Col className="mt-[12px]" xs={24} md={12}>
         <label className="text-[12px]">
           Cancel Reason <span style={{ color: "red" }}>*</span>
@@ -376,10 +491,23 @@ export default function OrderDetailsPanelEdit({
           placeholder="Enter cancel reason..."
         />
       </Col>
-    )}
-
-    {/* Hold Reason */}
-    {orderDetails?.statusByAgent?.value === "3" && (
+    )} */}
+            {orderDetails?.statusByAgent?.value === "4" && (
+              <Col className="mt-[12px]" xs={24} md={12}>
+                <label className="text-[12px]">Cancel Reason*</label>
+                <Select
+                  options={cancelReasonOptions}
+                  value={orderDetails?.onCancelReason || undefined}
+                  onChange={(value: any) =>
+                    updateField("onCancelReason", value)
+                  }
+                  className="w-full"
+                  placeholder="Select cancel reason"
+                />
+              </Col>
+            )}
+            {/* Hold Reason */}
+            {/* {orderDetails?.statusByAgent?.value === "3" && (
       <Col className="mt-[12px]" xs={24} md={12}>
         <label className="text-[12px]">
           Hold Reason <span style={{ color: "red" }}>*</span>
@@ -394,9 +522,21 @@ export default function OrderDetailsPanelEdit({
           placeholder="Enter hold reason..."
         />
       </Col>
-    )}
-  </>
-)}
+    )} */}
+            {orderDetails?.statusByAgent?.value === "3" && (
+              <Col className="mt-[12px]" xs={24} md={12}>
+                <label className="text-[12px]">Hold Reason*</label>
+                <Select
+                  className="w-full"
+                  options={holdReasonOptions}
+                  value={orderDetails?.onHoldReason || undefined}
+                  onChange={(value: any) => updateField("onHoldReason", value)}
+                  placeholder="Select hold reason"
+                />
+              </Col>
+            )}
+          </>
+        )}
       </Row>
 
       {/* Shipping Info */}
