@@ -12,12 +12,21 @@ const GeneratePreviewButton = ({
   loadStockByWarehouseProduct,
   locationId,
   setReqPreviewData,
+  setPreviewGenerated,
 }: any) => {
   const [loading, setLoading] = useState(false);
   const { data } = useGetOrganizationByIdQuery(undefined);
   const organization = data?.data;
+
   const handleGeneratePreview = async () => {
+    if (!selectedOrders?.length) {
+      return;
+    }
+
     setLoading(true);
+    // নতুন করে generate করার সময় আগের flag/data reset করা, যাতে
+    // request চলাকালীন Create button ভুলবশত enabled না দেখায়
+    setPreviewGenerated(false);
     try {
       const res = await instance.get(`${getBaseUrl()}/requisition/preview`, {
         params: {
@@ -27,7 +36,10 @@ const GeneratePreviewButton = ({
       });
 
       setReqPreviewData(res.data.products);
-    
+      // preview সফলভাবে generate হয়েছে — এখন Create button enable হতে পারবে
+      // (stock shortage check আলাদাভাবে parent component-এ হয়)
+      setPreviewGenerated(true);
+
       // const array = selectedOrders;
       // for (let i = 0; i < selectedOrders.length; i++) {
       //   const element = selectedOrders[i];
@@ -86,6 +98,8 @@ const GeneratePreviewButton = ({
       // setReqPreviewData(finalData);
     } catch (error) {
       console.error("Error generating preview:", error);
+      setReqPreviewData([]);
+      setPreviewGenerated(false);
     }
     setLoading(false);
   };
@@ -96,6 +110,7 @@ const GeneratePreviewButton = ({
         type="primary"
         icon={<ReloadOutlined />}
         loading={loading}
+        disabled={!selectedOrders?.length}
         onClick={handleGeneratePreview}
         style={{
           fontSize: "16px",

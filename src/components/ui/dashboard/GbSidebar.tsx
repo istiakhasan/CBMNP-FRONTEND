@@ -164,6 +164,11 @@ const GbSidebar = () => {
         },
       ],
     },
+    // {
+    //   href: "/TbTest",
+    //   title: "TbTest",
+    //   icon: "ri-folder-chart-line",
+    // },
   ].filter(
     (mi: any) => permission?.includes(mi.title) || userInfo?.role === "admin"
   );

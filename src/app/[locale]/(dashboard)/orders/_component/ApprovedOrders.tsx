@@ -58,6 +58,9 @@ const ApprovedOrders = ({
   const [size, setSize] = useState<number>(10);
   const [printModal, setPrintModal] = useState(false);
   const [selectedOrders, setSelectedOrders] = useState<any>([]);
+  // rowSelection-কে controlled রাখার জন্য — preview থেকে remove করলে এখান
+  // থেকেও key বাদ দিলে তবেই main table-এর checkbox visually uncheck হবে
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const [rowId, setRowId] = useState<any>(null);
   const { data: rowData, isLoading: rowDataLoading } = useGetOrderByIdQuery({
     id: rowId,
@@ -79,10 +82,51 @@ const ApprovedOrders = ({
       orderStatus?.length > 0 ? (orderStatus?.includes(2) ? 2 : "112") : "2",
   });
 
-  const [handleCreateRequisition] = useCreateRequisitionMutation();
+  const [handleCreateRequisition, { isLoading: creatingRequisition }] =
+    useCreateRequisitionMutation();
   const [reqPreviewData, setReqPreviewData] = useState<any>([]);
+  // preview generate হয়েছে কিনা — না হলে Create button block থাকবে
+  const [previewGenerated, setPreviewGenerated] = useState(false);
   const router = useRouter();
   const [open, setOpen] = useState(false);
+
+  // ---------------------------------------------------------------------
+  // Preview data-র field name backend যাই পাঠাক (qty / orderQuantity,
+  // id / orderId / orderNumber) সেটা consistently handle করার জন্য
+  // helper গুলো এক জায়গায় রাখা — table display আর calculation দুটোই
+  // এখান থেকেই value নেবে, যাতে mismatch (Qty column blank হওয়ার মতো
+  // bug) আর না হয়।
+  // ---------------------------------------------------------------------
+  const getOrderQty = (order: any) =>
+    order?.qty ?? order?.orderQuantity ?? 0;
+
+  const getOrderIdentifier = (order: any) =>
+    order?.id ?? order?.orderId ?? order?.orderNumber;
+
+  // preview API-এর order.orderId আসলে real DB `id` নাও হতে পারে — অনেক সময়
+  // এটা display-এর জন্য orderNumber/invoiceNumber পাঠানো হয়। কিন্তু main
+  // table-এর checkbox key (selectedRowKeys) সবসময় real record.id ব্যবহার
+  // করে। তাই remove করার সময় শুধু preview-এর identifier দিয়ে
+  // selectedRowKeys/selectedOrders filter করলে match নাও হতে পারে —
+  // checkbox uncheck হয় না।
+  //
+  // এই helper preview-এর identifier (id বা orderNumber বা invoiceNumber,
+  // যেটাই হোক) কে selectedOrders (যেখানে real id + orderNumber +
+  // invoiceNumber তিনটাই আছে) এর সাথে মিলিয়ে real record.id বের করে।
+  // কোনোভাবেই না মিললে fallback হিসেবে identifier-টাই ফেরত দেয়।
+  const resolveRealOrderId = (identifier: any) => {
+    const match = (selectedOrders ?? []).find(
+      (o: any) =>
+        o.id === identifier ||
+        o.orderNumber === identifier ||
+        o.invoiceNumber === identifier ||
+        String(o.id) === String(identifier) ||
+        String(o.orderNumber) === String(identifier) ||
+        String(o.invoiceNumber) === String(identifier),
+    );
+    return match?.id ?? identifier;
+  };
+
   const tableColumn = [
     {
       title: "SL",
@@ -98,7 +142,7 @@ const ApprovedOrders = ({
         );
       },
     },
-      {
+    {
       title: "Order ID(INV-N0)",
       key: "orderId",
       render: (text: string, record: any) => (
@@ -259,8 +303,16 @@ const ApprovedOrders = ({
   }));
 
   const rowSelection: TableProps<any>["rowSelection"] = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
+    // ✅ controlled — এখন checkbox state সবসময় selectedRowKeys অনুসরণ করবে,
+    // তাই preview থেকে remove করার পর key সরিয়ে দিলে main table-এও
+    // checkbox আনচেক হয়ে যাবে
+    selectedRowKeys,
+    onChange: (keys: React.Key[], selectedRows: any[]) => {
+      setSelectedRowKeys(keys);
       setSelectedOrders(selectedRows);
+      // selection পাল্টালে আগের preview আর valid থাকে না, তাই reset
+      setPreviewGenerated(false);
+      setReqPreviewData([]);
     },
     getCheckboxProps: (record: any) => ({
       disabled: record.name === "Disabled User",
@@ -296,12 +348,80 @@ const ApprovedOrders = ({
       setBulkPrintLoading(false);
     }
   };
+
+  // কোনো product-এর requested total quantity, তার available stock-এর
+  // চেয়ে বেশি কিনা — থাকলে Create block করতে হবে
+  const hasStockShortage = reqPreviewData?.some((product: any) => {
+    const totalQuantity = product.orders.reduce(
+      (sum: any, order: any) => sum + getOrderQty(order),
+      0,
+    );
+    return totalQuantity > (product?.stock ?? 0);
+  });
+
+  // preview generate করা হয়েছে + data আছে + কোনো shortage নেই — তবেই
+  // Create করা যাবে
+  const canCreateRequisition =
+    previewGenerated && reqPreviewData?.length > 0 && !hasStockShortage;
+
+  // preview-এ এখনো টিকে থাকা (remove না-করা) সব order-এর real DB id list —
+  // Create-এর সময় এটাই পাঠানো হবে, selectedOrders (আগের পুরো selection)
+  // নয়। ফলে কোনো order remove করা হলে সেটা payload থেকেও বাদ পড়বে।
+  // resolveRealOrderId দিয়ে নিশ্চিত করা হচ্ছে যে preview-এর identifier যাই
+  // হোক (orderNumber/invoiceNumber/id), backend-কে সবসময় real id-ই যাবে।
+  const remainingOrderIds: any[] = Array.from(
+    new Set(
+      (reqPreviewData ?? []).flatMap((product: any) =>
+        product.orders.map((o: any) =>
+          resolveRealOrderId(getOrderIdentifier(o)),
+        ),
+      ),
+    ),
+  );
+
+  // একটা order সম্পূর্ণভাবে preview থেকে বাদ দেওয়া — তার আওতায় থাকা
+  // প্রতিটা product entry থেকেই এই orderId বাদ যাবে (order-এর under-এ
+  // যত product ছিল, সব বাদ যাবে), এবং কোনো product-এর আর কোনো order না
+  // থাকলে সেই product row-ও preview থেকে সরে যাবে।
+  const handleRemoveOrderFromPreview = (orderIdentifier: any) => {
+    setReqPreviewData((prev: any) =>
+      (prev ?? [])
+        .map((product: any) => ({
+          ...product,
+          orders: product.orders.filter(
+            (o: any) => getOrderIdentifier(o) !== orderIdentifier,
+          ),
+        }))
+        .filter((product: any) => product.orders.length > 0),
+    );
+
+    // preview-এর identifier আর table-এর real id আলাদা হতে পারে — তাই
+    // আগে real id বের করে নিয়ে সেটা দিয়েই selectedOrders/selectedRowKeys
+    // থেকে বাদ দেওয়া হচ্ছে
+    const realId = resolveRealOrderId(orderIdentifier);
+
+    setSelectedOrders((prev: any) =>
+      (prev ?? []).filter((o: any) => o.id !== realId),
+    );
+    // ✅ main table-এর checkbox (rowSelection) থেকেও এই order-এর real key
+    // বাদ দেওয়া — নাহলে state থেকে বাদ গেলেও checkbox visually টিক থেকে
+    // যাবে, যেহেতু GbTable এখন controlled selectedRowKeys ব্যবহার করছে
+    setSelectedRowKeys((prev) =>
+      prev.filter((key) => String(key) !== String(realId)),
+    );
+    message.info("Order টি preview থেকে বাদ দেওয়া হয়েছে");
+  };
+
   const items: MenuProps["items"] = [
     {
       label: (
         <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
           <span
             onClick={async () => {
+              // modal নতুন করে খোলার সময় আগের preview state clear করা,
+              // যাতে পুরনো preview দেখিয়ে ভুলবশত Create না হয়ে যায়
+              setPreviewGenerated(false);
+              setReqPreviewData([]);
               setOpenModal(true);
             }}
           >
@@ -311,17 +431,17 @@ const ApprovedOrders = ({
       ),
       key: "0",
     },
-    {
-      label: (
-        <span
-          onClick={() => setStatusChangeModal(true)}
-          className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center"
-        >
-          <span>Change Status</span>
-        </span>
-      ),
-      key: "1",
-    },
+    // {
+    //   label: (
+    //     <span
+    //       onClick={() => setStatusChangeModal(true)}
+    //       className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center"
+    //     >
+    //       <span>Change Status</span>
+    //     </span>
+    //   ),
+    //   key: "1",
+    // },
     {
       label: (
         <span onClick={handleBulkPrintClick}>
@@ -422,9 +542,23 @@ const ApprovedOrders = ({
           loadStockByWarehouseProduct={loadStockByWarehouseProduct}
           locationId={locationId}
           setReqPreviewData={setReqPreviewData}
+          setPreviewGenerated={setPreviewGenerated}
         />
 
         <div className="responsive_order_details_view_table mt-[10px]">
+          {previewGenerated && reqPreviewData?.length === 0 && (
+            <div className="text-gray-500 text-sm font-[500] mb-2">
+              কোনো product অবশিষ্ট নেই — সব order remove করা হয়েছে অথবা
+              কোনো valid product পাওয়া যায়নি।
+            </div>
+          )}
+          {previewGenerated && hasStockShortage && (
+            <div className="text-red-500 text-sm font-[500] mb-2">
+              কিছু প্রোডাক্টের stock পর্যাপ্ত নেই (নিচে হাইলাইট করা রো)।
+              Requisition create করার আগে ওই order গুলো 🗑 দিয়ে remove করুন
+              অথবা stock ঠিক করুন।
+            </div>
+          )}
           <table>
             <thead>
               <tr>
@@ -434,61 +568,67 @@ const ApprovedOrders = ({
                 <th style={{ width: "230px" }} className="">
                   Product Name
                 </th>
-                <th className="text-start">Pack Size</th>
                 <th className="text-center">Qty</th>
                 <th className="text-start">Order Number</th>
                 <th className="text-center">Total Qty</th>
                 <th className="text-center">Available Qty</th>
+                <th className="text-center">Action</th>
               </tr>
             </thead>
             <tbody>
               {reqPreviewData?.map((product: any) => {
                 const totalQuantity = product.orders.reduce(
-                  (sum: any, order: any) => sum + order.qty,
+                  (sum: any, order: any) => sum + getOrderQty(order),
                   0,
                 );
+                const isShortage = totalQuantity > product?.stock;
                 return (
                   <React.Fragment key={product.productId}>
-                    {product.orders.map((order: any, index: any) => (
-                      <tr
-                        style={
-                          totalQuantity > product?.stock
-                            ? { background: "#F7BB81" }
-                            : {}
-                        }
-                        key={order.orderId}
-                      >
-                        {index === 0 && (
-                          <>
-                            {/* <td rowSpan={product.orders.length}>{product.productId}</td> */}
-                            <td rowSpan={product.orders.length}>
-                              {product.name}
+                    {product.orders.map((order: any, index: any) => {
+                      const orderIdentifier = getOrderIdentifier(order);
+                      return (
+                        <tr
+                          style={isShortage ? { background: "#F7BB81" } : {}}
+                          key={`${product.productId}-${orderIdentifier}`}
+                        >
+                          {index === 0 && (
+                            <>
+                              {/* <td rowSpan={product.orders.length}>{product.productId}</td> */}
+                              <td rowSpan={product.orders.length}>
+                                {product.name}
+                              </td>
+                            </>
+                          )}
+                          <td align="center">{getOrderQty(order)}</td>
+                          <td>{order.orderId ?? order.orderNumber}</td>
+                          {index === 0 && (
+                            <td
+                              className="text-center"
+                              rowSpan={product.orders.length}
+                            >
+                              {totalQuantity}
                             </td>
-                            <td rowSpan={product.orders.length}>
-                              {product.packSize}
+                          )}
+                          {index === 0 && (
+                            <td
+                              className="text-center"
+                              rowSpan={product.orders.length}
+                            >
+                              {product?.stock}
                             </td>
-                          </>
-                        )}
-                        <td align="center">{order.orderQuantity}</td>
-                        <td>{order.orderId}</td>
-                        {index === 0 && (
-                          <td
-                            className="text-center"
-                            rowSpan={product.orders.length}
-                          >
-                            {totalQuantity}
+                          )}
+                          <td align="center">
+                            <i
+                              onClick={() =>
+                                handleRemoveOrderFromPreview(orderIdentifier)
+                              }
+                              title="এই order-টা requisition থেকে বাদ দিন (এর সব product সহ)"
+                              className="ri-delete-bin-line text-red-500 cursor-pointer text-[16px]"
+                            ></i>
                           </td>
-                        )}
-                        {index === 0 && (
-                          <td
-                            className="text-center"
-                            rowSpan={product.orders.length}
-                          >
-                            {product?.stock}
-                          </td>
-                        )}
-                      </tr>
-                    ))}
+                        </tr>
+                      );
+                    })}
                   </React.Fragment>
                 );
               })}
@@ -496,19 +636,42 @@ const ApprovedOrders = ({
           </table>
           <div className="flex justify-end  mt-3">
             <button
-              className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]"
+              disabled={!canCreateRequisition || creatingRequisition}
+              className={`text-[#fff] font-bold text-[12px] px-[20px] py-[5px] ${
+                canCreateRequisition
+                  ? "bg-primary cursor-pointer"
+                  : "bg-gray-400 cursor-not-allowed"
+              }`}
               onClick={async () => {
+                if (!previewGenerated) {
+                  message.warning(
+                    "Requisition create করার আগে অবশ্যই Preview generate করুন",
+                  );
+                  return;
+                }
+                if (hasStockShortage) {
+                  message.warning(
+                    "কিছু প্রোডাক্টের stock নেই। ওই order গুলো remove করুন অথবা stock ঠিক করুন",
+                  );
+                  return;
+                }
+                if (!remainingOrderIds.length) {
+                  message.warning("কোনো valid order অবশিষ্ট নেই");
+                  return;
+                }
                 try {
-                  const payload = selectedOrders.map((item: any) => item?.id);
-
                   const res = await handleCreateRequisition({
-                    orderIds: payload,
+                    orderIds: remainingOrderIds,
                     userId: userInfo?.userId,
                   }).unwrap();
                   refetch();
                   countRefetch();
                   message.success("Requisition create successfully..");
                   setOpenModal(false);
+                  setPreviewGenerated(false);
+                  setReqPreviewData([]);
+                  setSelectedOrders([]);
+                  setSelectedRowKeys([]);
                 } catch (error) {
                   console.log(error, "selected orders");
                 }

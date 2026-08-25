@@ -72,11 +72,11 @@ export function OrderPageView({ orderData , permission}: any) {
             <div className=" mx-auto px-6 py-4">
               <div className="flex items-center justify-end flex-wrap gap-4">
                 <Space wrap>
-                  <Button   onClick={() =>
+                {(orderData?.status?.label==="Pending" || orderData?.status?.label==="Approved" || orderData?.status?.label==="Hold") && <Button   onClick={() =>
                       router.push(
                         `/${local}/orders/edit?orderId=${orderData?.id}&customerId=${orderData?.customerId}`
                       )
-                    } icon={<RiEditLine size={16} />}>Edit</Button>
+                    } icon={<RiEditLine size={16} />}>Edit</Button>}
                   {/* <Button type="primary" icon={<RiDownloadLine size={16} />}>
                     Export PDF
                   </Button> */}
