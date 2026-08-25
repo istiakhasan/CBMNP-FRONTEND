@@ -569,7 +569,7 @@ const ApprovedOrders = ({
                   Product Name
                 </th>
                 <th className="text-center">Qty</th>
-                <th className="text-start">Order Number</th>
+                <th className="text-start">Order Number(Inv)</th>
                 <th className="text-center">Total Qty</th>
                 <th className="text-center">Available Qty</th>
                 <th className="text-center">Action</th>
@@ -600,7 +600,7 @@ const ApprovedOrders = ({
                             </>
                           )}
                           <td align="center">{getOrderQty(order)}</td>
-                          <td>{order.orderId ?? order.orderNumber}</td>
+                          <td>{order.invoiceNumber ?? order.invoiceNumber}</td>
                           {index === 0 && (
                             <td
                               className="text-center"
