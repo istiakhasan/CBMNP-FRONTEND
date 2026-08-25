@@ -85,6 +85,7 @@ const ApprovedOrders = ({
   const [handleCreateRequisition, { isLoading: creatingRequisition }] =
     useCreateRequisitionMutation();
   const [reqPreviewData, setReqPreviewData] = useState<any>([]);
+  console.log(reqPreviewData,"abcd");
   // preview generate হয়েছে কিনা — না হলে Create button block থাকবে
   const [previewGenerated, setPreviewGenerated] = useState(false);
   const router = useRouter();
