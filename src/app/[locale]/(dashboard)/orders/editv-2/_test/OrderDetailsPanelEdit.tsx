@@ -28,7 +28,7 @@ const orderSources = [
 
 const shippingTypeOptions = [
   { label: "Regular", value: "Regular" },
-  // { label: "Express", value: "Express" },
+  { label: "Express", value: "Express" },
   { label: "Free", value: "Free" },
 ];
 
