@@ -100,7 +100,6 @@ const ApprovedOrders = ({
   // ---------------------------------------------------------------------
   const getOrderQty = (order: any) =>
     order?.qty ?? order?.orderQuantity ?? 0;
-
   const getOrderIdentifier = (order: any) =>
     order?.id ?? order?.orderId ?? order?.orderNumber;
 
@@ -595,9 +594,14 @@ const ApprovedOrders = ({
                           {index === 0 && (
                             <>
                               {/* <td rowSpan={product.orders.length}>{product.productId}</td> */}
-                              <td rowSpan={product.orders.length}>
-                                {product.name}
-                              </td>
+                                <td rowSpan={product.orders.length}>
+      <span className="block">{product.name}</span>
+      {product?.sku && (
+        <span className="block text-[11px] text-[#7D7D7D]">
+          SKU: {product.sku}
+        </span>
+      )}
+    </td>
                             </>
                           )}
                           <td align="center">{getOrderQty(order)}</td>
