@@ -13,7 +13,7 @@ import GbModal from "@/components/ui/GbModal";
 import SupplierForm from "./SupplierForm";
 
 const CreatePurchaseOrder = () => {
-  const [submitLoading,setSubmitLoading]=useState(false)
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [handleCreateProcurement] = useCreateProcurementMutation();
   const [rowDto, setRowDto] = useState<any>([]);
@@ -33,11 +33,27 @@ const CreatePurchaseOrder = () => {
     };
   });
 
+  // ✅ label now includes SKU, so products that share the same name are
+  // still distinguishable in the dropdown and in the selected-value pill.
+  // `name`/`sku` are kept as separate fields too (via ...item) for the
+  // custom renderer below and for anywhere else that reads them directly.
   const productOptions = data?.data?.map((item: any) => ({
-    label: item?.name,
+    label: `${item?.name}${item?.sku ? ` (${item.sku})` : ""}`,
     value: item?.id,
     ...item,
   }));
+
+  // ✅ NEW: richer option rendering — product name on top, SKU as a
+  // smaller sub-line underneath, both in the open dropdown list AND in
+  // the collapsed selected-value box.
+  const formatProductOptionLabel = (option: any) => (
+    <div className="flex flex-col leading-tight">
+      <span>{option?.name}</span>
+      {option?.sku && (
+        <span className="text-[11px] text-gray-500">SKU: {option.sku}</span>
+      )}
+    </div>
+  );
 
   const total = rowDto?.reduce((pre: any, next: any) => {
     const itemTotal =
@@ -80,6 +96,16 @@ const CreatePurchaseOrder = () => {
               options={productOptions}
               placeholder="Select Product"
               name="product"
+              // ✅ NEW: shows name + SKU inside the dropdown list and in the selected value
+              formatOptionLabel={formatProductOptionLabel}
+              // ✅ NEW: so typing a SKU also filters/matches, not just the name
+              filterOption={(candidate, input) => {
+                if (!input) return true;
+                const search = input.toLowerCase();
+                const name = candidate?.data?.name?.toLowerCase() || "";
+                const sku = candidate?.data?.sku?.toLowerCase() || "";
+                return name.includes(search) || sku.includes(search);
+              }}
               onChange={(valueOption: any) => {
                 if (
                   rowDto.some(
@@ -120,7 +146,17 @@ const CreatePurchaseOrder = () => {
                 {rowDto?.map((item: any, i: any) => (
                   <tr key={i} className="border-t">
                     <td className="p-2">{i + 1}</td>
-                    <td className="p-2">{item?.product?.label}</td>
+                    {/* ✅ NEW: SKU shown under the product name in the table row too */}
+                    <td className="p-2">
+                      <div className="flex flex-col leading-tight">
+                        <span>{item?.product?.name}</span>
+                        {item?.product?.sku && (
+                          <span className="text-[11px] text-gray-500">
+                            SKU: {item.product.sku}
+                          </span>
+                        )}
+                      </div>
+                    </td>
                     <td className="p-2 w-24">
                       <div className="floating-label-input">
                         <Input
@@ -241,7 +277,7 @@ const CreatePurchaseOrder = () => {
           type="button"
           onClick={async () => {
             try {
-               setSubmitLoading(true)
+              setSubmitLoading(true);
               if (rowDto?.length < 1) {
                 return message.error("Please select at least one product");
               }
@@ -282,13 +318,12 @@ const CreatePurchaseOrder = () => {
                 console.log(error);
                 message.error("Something went wrong");
               }
-            }finally{
-              setSubmitLoading(false)
+            } finally {
+              setSubmitLoading(false);
             }
           }}
         >
-          {submitLoading?"Loading...":"Checkout"}
-          
+          {submitLoading ? "Loading..." : "Checkout"}
         </button>
       </div>
       <GbModal
