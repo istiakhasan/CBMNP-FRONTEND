@@ -431,17 +431,17 @@ const ApprovedOrders = ({
       ),
       key: "0",
     },
-    // {
-    //   label: (
-    //     <span
-    //       onClick={() => setStatusChangeModal(true)}
-    //       className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center"
-    //     >
-    //       <span>Change Status</span>
-    //     </span>
-    //   ),
-    //   key: "1",
-    // },
+    {
+      label: (
+        <span
+          onClick={() => setStatusChangeModal(true)}
+          className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center"
+        >
+          <span>Change Status</span>
+        </span>
+      ),
+      key: "1",
+    },
     {
       label: (
         <span onClick={handleBulkPrintClick}>

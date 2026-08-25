@@ -35,7 +35,7 @@ const BulkChangeOrders = ({ setModalOpen, selectedOrders, status }: any) => {
     if (isSubmittingRef.current) {
       return;
     }
-   isSubmittingRef.current = true;
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
     try {
       const fromLabel = status?.toUpperCase().replace(/[\s-]/g, "_");
@@ -46,7 +46,7 @@ const BulkChangeOrders = ({ setModalOpen, selectedOrders, status }: any) => {
 
       if (!userPermissionLabels.includes(requiredPermission)) {
         message.error(
-          `${status} থেকে ${data?.orderStatus?.label} এ পরিবর্তন করার অনুমতি আপনার নেই`
+          `${status} থেকে ${data?.orderStatus?.label} এ পরিবর্তন করার অনুমতি আপনার নেই`,
         );
         return; // API call হবে না
       }
@@ -113,7 +113,11 @@ const BulkChangeOrders = ({ setModalOpen, selectedOrders, status }: any) => {
       <div>
         <GbFormSelect
           name="orderStatus"
-          options={status==="Pending"?orderStatus?.data?.filter((ab:any)=>ab?.label !=="Approved"):orderStatus?.data}
+          options={
+            status === "Pending"
+              ? orderStatus?.data?.filter((ab: any) => ab?.label !== "Approved")
+              : orderStatus?.data
+          }
           label="Select Status"
         />
       </div>
@@ -181,7 +185,7 @@ const BulkChangeOrders = ({ setModalOpen, selectedOrders, status }: any) => {
           Cancel
         </button>
         <button
-         disabled={isSubmitting}
+          disabled={isSubmitting}
           onClick={handleSubmit(onsubmit)}
           className={` ${
             true ? "bg-[#4F8A6D]" : "bg-[#CACACA]"
