@@ -156,26 +156,11 @@ export default function OrderDetailsPanelEdit({
   ]);
 
   const cancelReasonOptions = [
-    {
-      label: "Customer Not interested",
-      value: "Customer Not interested",
-    },
-    {
-      label: "Multiple order",
-      value: "Multiple order",
-    },
-    {
-      label: "Product Stock-out",
-      value: "Product Stock-out",
-    },
-    {
-      label: "Customer Unreachable",
-      value: "Customer Unreachable",
-    },
-    {
-      label: "Delay Delivery",
-      value: "Delay Delivery",
-    },
+    { label: "Customer Not interested", value: "Customer Not interested" },
+    { label: "Multiple order", value: "Multiple order" },
+    { label: "Product Stock-out", value: "Product Stock-out" },
+    { label: "Customer Unreachable", value: "Customer Unreachable" },
+    { label: "Delay Delivery", value: "Delay Delivery" },
     {
       label: "Urgent delivery (Out-side Dhaka)",
       value: "Urgent delivery (Out-side Dhaka)",
@@ -184,14 +169,8 @@ export default function OrderDetailsPanelEdit({
       label: "Urgent delivery (In Dhaka)",
       value: "Urgent delivery (In Dhaka)",
     },
-    {
-      label: "Fake Order",
-      value: "Fake Order",
-    },
-    {
-      label: "Financial Crisis",
-      value: "Financial Crisis",
-    },
+    { label: "Fake Order", value: "Fake Order" },
+    { label: "Financial Crisis", value: "Financial Crisis" },
     {
       label: "Mistakenly placed order by customer",
       value: "Mistakenly placed order by customer",
@@ -200,77 +179,40 @@ export default function OrderDetailsPanelEdit({
       label: "Not interested to pay in advance",
       value: "Not interested to pay in advance",
     },
-    {
-      label: "Out of Coverage",
-      value: "Out of Coverage",
-    },
-    {
-      label: "Price Issue",
-      value: "Price Issue",
-    },
-    {
-      label: "Customer Wants to cancel",
-      value: "Customer Wants to cancel",
-    },
+    { label: "Out of Coverage", value: "Out of Coverage" },
+    { label: "Price Issue", value: "Price Issue" },
+    { label: "Customer Wants to cancel", value: "Customer Wants to cancel" },
     {
       label: "Will not available on delivery time",
       value: "Will not available on delivery time",
     },
-    {
-      label: "Will order later",
-      value: "Will order later",
-    },
-    {
-      label: "Test Order",
-      value: "Test Order",
-    },
+    { label: "Will order later", value: "Will order later" },
+    { label: "Test Order", value: "Test Order" },
+    { label: "Exchange parcel", value: "Exchange parcel" },
+    { label: "Damage", value: "Damage" },
+    { label: "Other", value: "Other" },
   ];
 
   const holdReasonOptions = [
+    { label: "Customer Unreachable.", value: "Customer Unreachable." },
+    { label: "Number Switched off.", value: "Number Switched off." },
+    { label: "Waiting for payment", value: "Waiting for payment" },
     {
-      label: "Customer Not interested",
-      value: "Customer Not interested",
+      label: "Customer want to add more products",
+      value: "Customer want to add more products",
     },
+    { label: "Address will be changed", value: "Address will be changed" },
     {
-      label: "Customer Unreachable",
-      value: "Customer Unreachable",
+      label: "Expected delivery date will be change",
+      value: "Expected delivery date will be change",
     },
+    { label: "Product Stock-out", value: "Product Stock-out" },
+    { label: "Advance Order", value: "Advance Order" },
     {
-      label: "Delay Delivery",
-      value: "Delay Delivery",
+      label: "Awaiting customer decision",
+      value: "Awaiting customer decision",
     },
-    {
-      label: "Urgent delivery (Out-side Dhaka)",
-      value: "Urgent delivery (Out-side Dhaka)",
-    },
-    {
-      label: "Urgent delivery (In Dhaka)",
-      value: "Urgent delivery (In Dhaka)",
-    },
-    {
-      label: "Financial Crisis",
-      value: "Financial Crisis",
-    },
-    {
-      label: "Not interested to pay in advance",
-      value: "Not interested to pay in advance",
-    },
-    {
-      label: "Out of Coverage",
-      value: "Out of Coverage",
-    },
-    {
-      label: "Price Issue",
-      value: "Price Issue",
-    },
-    {
-      label: "Will not available on delivery time",
-      value: "Will not available on delivery time",
-    },
-    {
-      label: "Will order later",
-      value: "Will order later",
-    },
+    { label: "Other", value: "Other" },
   ];
   return (
     <Card
@@ -476,53 +418,35 @@ export default function OrderDetailsPanelEdit({
             </Col>
 
             {/* Cancel Reason */}
-            {/* {orderDetails?.statusByAgent?.value === "4" && (
-      <Col className="mt-[12px]" xs={24} md={12}>
-        <label className="text-[12px]">
-          Cancel Reason <span style={{ color: "red" }}>*</span>
-        </label>
-
-        <TextArea
-          rows={3}
-          value={orderDetails?.onCancelReason || ""}
-          onChange={(e) =>
-            updateField("onCancelReason", e.target.value)
-          }
-          placeholder="Enter cancel reason..."
-        />
-      </Col>
-    )} */}
-            {orderDetails?.statusByAgent?.value === "4" && (
+          
+                      {orderDetails?.statusByAgent?.value === "4" && (
               <Col className="mt-[12px]" xs={24} md={12}>
                 <label className="text-[12px]">Cancel Reason*</label>
                 <Select
                   options={cancelReasonOptions}
                   value={orderDetails?.onCancelReason || undefined}
-                  onChange={(value: any) =>
-                    updateField("onCancelReason", value)
-                  }
+                  onChange={(value: any) => {
+                    updateField("onCancelReason", value);
+                    if (value !== "Other") {
+                      updateField("onCancelReasonOther", "");
+                    }
+                  }}
                   className="w-full"
                   placeholder="Select cancel reason"
                 />
+                {orderDetails?.onCancelReason === "Other" && (
+                  <Input
+                    className="mt-2"
+                    placeholder="Cancel reason লিখুন..."
+                    value={orderDetails?.onCancelReasonOther || ""}
+                    onChange={(e) =>
+                      updateField("onCancelReasonOther", e.target.value)
+                    }
+                  />
+                )}
               </Col>
             )}
-            {/* Hold Reason */}
-            {/* {orderDetails?.statusByAgent?.value === "3" && (
-      <Col className="mt-[12px]" xs={24} md={12}>
-        <label className="text-[12px]">
-          Hold Reason <span style={{ color: "red" }}>*</span>
-        </label>
 
-        <TextArea
-          rows={3}
-          value={orderDetails?.onHoldReason || ""}
-          onChange={(e) =>
-            updateField("onHoldReason", e.target.value)
-          }
-          placeholder="Enter hold reason..."
-        />
-      </Col>
-    )} */}
             {orderDetails?.statusByAgent?.value === "3" && (
               <Col className="mt-[12px]" xs={24} md={12}>
                 <label className="text-[12px]">Hold Reason*</label>
@@ -530,9 +454,24 @@ export default function OrderDetailsPanelEdit({
                   className="w-full"
                   options={holdReasonOptions}
                   value={orderDetails?.onHoldReason || undefined}
-                  onChange={(value: any) => updateField("onHoldReason", value)}
+                  onChange={(value: any) => {
+                    updateField("onHoldReason", value);
+                    if (value !== "Other") {
+                      updateField("onHoldReasonOther", "");
+                    }
+                  }}
                   placeholder="Select hold reason"
                 />
+                {orderDetails?.onHoldReason === "Other" && (
+                  <Input
+                    className="mt-2"
+                    placeholder="Hold reason লিখুন..."
+                    value={orderDetails?.onHoldReasonOther || ""}
+                    onChange={(e) =>
+                      updateField("onHoldReasonOther", e.target.value)
+                    }
+                  />
+                )}
               </Col>
             )}
           </>

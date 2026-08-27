@@ -85,7 +85,7 @@ const ApprovedOrders = ({
   const [handleCreateRequisition, { isLoading: creatingRequisition }] =
     useCreateRequisitionMutation();
   const [reqPreviewData, setReqPreviewData] = useState<any>([]);
-  console.log(reqPreviewData,"abcd");
+  console.log(reqPreviewData, "abcd");
   // preview generate হয়েছে কিনা — না হলে Create button block থাকবে
   const [previewGenerated, setPreviewGenerated] = useState(false);
   const router = useRouter();
@@ -98,8 +98,7 @@ const ApprovedOrders = ({
   // এখান থেকেই value নেবে, যাতে mismatch (Qty column blank হওয়ার মতো
   // bug) আর না হয়।
   // ---------------------------------------------------------------------
-  const getOrderQty = (order: any) =>
-    order?.qty ?? order?.orderQuantity ?? 0;
+  const getOrderQty = (order: any) => order?.qty ?? order?.orderQuantity ?? 0;
   const getOrderIdentifier = (order: any) =>
     order?.id ?? order?.orderId ?? order?.orderNumber;
 
@@ -548,8 +547,8 @@ const ApprovedOrders = ({
         <div className="responsive_order_details_view_table mt-[10px]">
           {previewGenerated && reqPreviewData?.length === 0 && (
             <div className="text-gray-500 text-sm font-[500] mb-2">
-              কোনো product অবশিষ্ট নেই — সব order remove করা হয়েছে অথবা
-              কোনো valid product পাওয়া যায়নি।
+              কোনো product অবশিষ্ট নেই — সব order remove করা হয়েছে অথবা কোনো
+              valid product পাওয়া যায়নি।
             </div>
           )}
           {previewGenerated && hasStockShortage && (
@@ -594,14 +593,14 @@ const ApprovedOrders = ({
                           {index === 0 && (
                             <>
                               {/* <td rowSpan={product.orders.length}>{product.productId}</td> */}
-                                <td rowSpan={product.orders.length}>
-      <span className="block">{product.name}</span>
-      {product?.sku && (
-        <span className="block text-[11px] text-[#7D7D7D]">
-          SKU: {product.sku}
-        </span>
-      )}
-    </td>
+                              <td rowSpan={product.orders.length}>
+                                <span className="block">{product.name}</span>
+                                {product?.sku && (
+                                  <span className="block text-[11px] text-[#7D7D7D]">
+                                    SKU: {product.sku}
+                                  </span>
+                                )}
+                              </td>
                             </>
                           )}
                           <td align="center">{getOrderQty(order)}</td>
