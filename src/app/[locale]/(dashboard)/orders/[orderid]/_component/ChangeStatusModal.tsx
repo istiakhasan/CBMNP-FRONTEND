@@ -42,7 +42,8 @@ const ChangeStatusModal = ({ setModalOpen, rowData }: any) => {
         });
       } else if (
         rowData?.status?.label === "In-transit" ||
-        rowData?.status?.label === "Pending-Return"
+        rowData?.status?.label === "Pending-Return" ||
+        rowData?.status?.label === "Delivered" 
       ) {
         res = await returnBulkOrders({
           orderIds: [rowData?.id],
