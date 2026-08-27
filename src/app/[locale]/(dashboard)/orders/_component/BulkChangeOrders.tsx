@@ -9,10 +9,70 @@ import {
 import { useGetAllStatusQuery } from "@/redux/api/statusApi";
 import { useGetUserByIdQuery } from "@/redux/api/usersApi";
 import { getUserInfo } from "@/service/authService";
-import { message } from "antd";
+import { message, Input } from "antd";
 import { useRouter } from "next/navigation";
 import React, { useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
+
+const cancelReasonOptions = [
+  { label: "Customer Not interested", value: "Customer Not interested" },
+  { label: "Multiple order", value: "Multiple order" },
+  { label: "Product Stock-out", value: "Product Stock-out" },
+  { label: "Customer Unreachable", value: "Customer Unreachable" },
+  { label: "Delay Delivery", value: "Delay Delivery" },
+  {
+    label: "Urgent delivery (Out-side Dhaka)",
+    value: "Urgent delivery (Out-side Dhaka)",
+  },
+  {
+    label: "Urgent delivery (In Dhaka)",
+    value: "Urgent delivery (In Dhaka)",
+  },
+  { label: "Fake Order", value: "Fake Order" },
+  { label: "Financial Crisis", value: "Financial Crisis" },
+  {
+    label: "Mistakenly placed order by customer",
+    value: "Mistakenly placed order by customer",
+  },
+  {
+    label: "Not interested to pay in advance",
+    value: "Not interested to pay in advance",
+  },
+  { label: "Out of Coverage", value: "Out of Coverage" },
+  { label: "Price Issue", value: "Price Issue" },
+  { label: "Customer Wants to cancel", value: "Customer Wants to cancel" },
+  {
+    label: "Will not available on delivery time",
+    value: "Will not available on delivery time",
+  },
+  { label: "Will order later", value: "Will order later" },
+  { label: "Test Order", value: "Test Order" },
+  { label: "Exchange parcel", value: "Exchange parcel" },
+  { label: "Damage", value: "Damage" },
+  { label: "Other", value: "Other" },
+];
+
+const holdReasonOptions = [
+  { label: "Customer Unreachable.", value: "Customer Unreachable." },
+  { label: "Number Switched off.", value: "Number Switched off." },
+  { label: "Waiting for payment", value: "Waiting for payment" },
+  {
+    label: "Customer want to add more products",
+    value: "Customer want to add more products",
+  },
+  { label: "Address will be changed", value: "Address will be changed" },
+  {
+    label: "Expected delivery date will be change",
+    value: "Expected delivery date will be change",
+  },
+  { label: "Product Stock-out", value: "Product Stock-out" },
+  { label: "Advance Order", value: "Advance Order" },
+  {
+    label: "Awaiting customer decision",
+    value: "Awaiting customer decision",
+  },
+  { label: "Other", value: "Other" },
+];
 
 const BulkChangeOrders = ({ setModalOpen, selectedOrders, status }: any) => {
   const [handleUpdateOrder] = useChangeOrderStatusMutation();
@@ -29,12 +89,13 @@ const BulkChangeOrders = ({ setModalOpen, selectedOrders, status }: any) => {
   const { data: orderStatus } = useGetAllStatusQuery({
     label: status,
   });
-  const { watch, handleSubmit } = useFormContext();
+  const { watch, handleSubmit, setValue } = useFormContext();
+
+  const selectedTargetStatus = watch()?.orderStatus?.label;
+  const selectedReason = watch()?.reason?.value;
 
   const onsubmit = async (data: any) => {
-    if (isSubmittingRef.current) {
-      return;
-    }
+    if (isSubmittingRef.current) return;
     isSubmittingRef.current = true;
     setIsSubmitting(true);
     try {
@@ -48,30 +109,35 @@ const BulkChangeOrders = ({ setModalOpen, selectedOrders, status }: any) => {
         message.error(
           `${status} থেকে ${data?.orderStatus?.label} এ পরিবর্তন করার অনুমতি আপনার নেই`,
         );
-        return; // API call হবে না
+        return;
       }
 
-      isSubmittingRef.current = true;
-      setIsSubmitting(true);
+      const finalReason =
+        data?.reason?.value === "Other"
+          ? data?.reasonOther
+          : data?.reason?.value;
 
       let res: any = null;
+
+      // ✅ শুধু তখনই hold-release endpoint, যখন অর্ডার আগে থেকেই Hold-এ ছিল
       if (status === "Hold") {
         res = await handleHoldUpdateOrderStatus({
           orderIds: selectedOrders.map((item: any) => item?.id),
           statusId: data?.orderStatus?.value,
           agentId: userInfo.userId,
-          ...(data?.orderStatus?.label === "Hold" && {
-            onHoldReason: data?.reason?.value,
-          }),
           currentStatus: selectedOrders[0]?.statusId,
         }).unwrap();
       } else {
+        // ✅ Hold সহ বাকি সব normal transition এখানেই — reason ঠিকমতো save হবে
         res = await handleUpdateOrder({
           orderIds: selectedOrders.map((item: any) => item?.id),
           statusId: data?.orderStatus?.value,
           agentId: userInfo.userId,
           ...(data?.orderStatus?.label === "Cancel" && {
-            onCancelReason: data?.reason?.value,
+            onCancelReason: finalReason,
+          }),
+          ...(data?.orderStatus?.label === "Hold" && {
+            onHoldReason: finalReason,
           }),
           currentStatus: selectedOrders[0]?.statusId,
         }).unwrap();
@@ -121,59 +187,40 @@ const BulkChangeOrders = ({ setModalOpen, selectedOrders, status }: any) => {
           label="Select Status"
         />
       </div>
-      {(watch()?.orderStatus?.label === "Hold" ||
-        watch()?.orderStatus?.label === "Cancel") &&
-        !!watch()?.orderStatus?.label && (
-          <div className="mt-3">
-            <GbFormSelect
-              name="reason"
-              options={[
-                {
-                  label: "Customer Not interested",
-                  value: "Customer Not interested",
-                },
-                { label: "Multiple order", value: "Multiple order" },
-                { label: "Product Stock-out", value: "Product Stock-out" },
-                {
-                  label: "Customer Unreachable",
-                  value: "Customer Unreachable",
-                },
-                { label: "Delay Delivery", value: "Delay Delivery" },
-                {
-                  label: "Urgent delivery (Out-side Dhaka)",
-                  value: "Urgent delivery (Out-side Dhaka)",
-                },
-                {
-                  label: "Urgent delivery (In Dhaka)",
-                  value: "Urgent delivery (In Dhaka)",
-                },
-                { label: "Fake Order", value: "Fake Order" },
-                { label: "Financial Crisis", value: "Financial Crisis" },
-                {
-                  label: "Mistakenly placed order by customer",
-                  value: "Mistakenly placed order by customer",
-                },
-                {
-                  label: "Not interested to pay in advance",
-                  value: "Not interested to pay in advance",
-                },
-                { label: "Out of Coverage", value: "Out of Coverage" },
-                { label: "Price Issue", value: "Price Issue" },
-                {
-                  label: "Customer Wants to cancel",
-                  value: "Customer Wants to cancel",
-                },
-                {
-                  label: "Will not available on delivery time",
-                  value: "Will not available on delivery time",
-                },
-                { label: "Will order later", value: "Will order later" },
-                { label: "Test Order", value: "Test Order" },
-              ]}
-              label="Select Reason"
+
+      {selectedTargetStatus === "Cancel" && (
+        <div className="mt-3">
+          <GbFormSelect
+            name="reason"
+            options={cancelReasonOptions}
+            label="Select Reason"
+          />
+          {selectedReason === "Other" && (
+            <Input
+              className="mt-2"
+              placeholder="Cancel reason লিখুন..."
+              onChange={(e) => setValue("reasonOther", e.target.value)}
             />
-          </div>
-        )}
+          )}
+        </div>
+      )}
+
+      {selectedTargetStatus === "Hold" && (
+        <div className="mt-3">
+          <GbFormSelect
+            name="reason"
+            options={holdReasonOptions}
+            label="Select Reason"
+          />
+          {selectedReason === "Other" && (
+            <Input
+              className="mt-2"
+              placeholder="Hold reason লিখুন..."
+              onChange={(e) => setValue("reasonOther", e.target.value)}
+            />
+          )}
+        </div>
+      )}
 
       <div className="mt-6 flex justify-end gap-3">
         <button

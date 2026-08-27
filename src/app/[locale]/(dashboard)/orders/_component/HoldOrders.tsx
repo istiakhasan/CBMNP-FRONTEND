@@ -15,174 +15,230 @@ import {
 } from "antd";
 import moment from "moment";
 import { useRouter } from "next/navigation";
-import React, {  useState } from "react";
+import React, { useState } from "react";
 import BulkChangeOrders from "./BulkChangeOrders";
 import GbDropdown from "@/components/ui/dashboard/GbDropdown";
 import { useLocale } from "next-intl";
 import copyToClipboard from "@/components/ui/GbCopyToClipBoard";
 
-const HoldOrders = ({warehosueIds,currierIds,productIds,searchTerm,rangeValue,orderStatus,creationRangeValue}: any) => {
+const HoldOrders = ({
+  warehosueIds,
+  currierIds,
+  productIds,
+  searchTerm,
+  rangeValue,
+  orderStatus,
+  creationRangeValue,
+}: any) => {
   // all states
- const [statuschangedModal,setStatusChangeModal]=useState(false)
+  const [statuschangedModal, setStatusChangeModal] = useState(false);
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
-   const [selectedOrders, setSelectedOrders] = useState<any>([]);
+  const [selectedOrders, setSelectedOrders] = useState<any>([]);
   const { data, isLoading } = useGetAllOrdersQuery({
-     page:searchTerm?1:page,
+    page: searchTerm ? 1 : page,
     limit: size,
     searchTerm,
-    locationId:warehosueIds,
-    productId:productIds,
-    currier:currierIds,
+    locationId: warehosueIds,
+    productId: productIds,
+    currier: currierIds,
     ...rangeValue,
     ...creationRangeValue,
-    statusId:orderStatus?.length>0  ?( orderStatus?.includes(3) ? 3 : "112") : '3',
+    statusId:
+      orderStatus?.length > 0 ? (orderStatus?.includes(3) ? 3 : "112") : "3",
   });
-  const local=useLocale()
+  const local = useLocale();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const tableColumn = [
     {
       title: "SL",
       key: "sl",
-      render: (text: string, record: any, i: any) => {
+      width: 45,
+      render: (_text: string, _record: any, i: number) => {
         const slNumber = page * size + (i + 1) - size;
-        // 1*10+(0+1)-10
+
         return (
-          <span className="font-[500]">
+          <span className="font-[500] text-[12px]">
             {String(slNumber).padStart(2, "0")}
           </span>
         );
       },
     },
-     {
-      title: "Order ID(INV-N0)",
+
+    {
+      title: "Order",
       key: "orderId",
-      render: (text: string, record: any) => (
-        <>
-          <span className="mt-[2px] block">{record?.invoiceNumber}</span>
-        </>
+      width: 115,
+      render: (_text: string, record: any) => (
+        <div className="leading-[16px]">
+          <div
+            className="font-[500] truncate max-w-[105px]"
+            title={record?.invoiceNumber}
+          >
+            {record?.invoiceNumber || "-"}
+          </div>
+
+          <div
+            className="text-[11px] text-[#999] truncate max-w-[105px]"
+            title={record?.customer?.customerName}
+          >
+            {record?.customer?.customerName || "-"}
+          </div>
+        </div>
       ),
     },
+
     {
-      title: "Customer Name",
-      key: "customerName",
-      render: (text: string, record: any) => (
-        <>
-          <span className=" font-[500] cursor-pointer">
-            {record?.customer?.customerName}
-          </span>
-        </>
-      ),
-    },
-    {
-      title: "Phone Number",
+      title: "Phone",
       key: "phone_number",
-      render: (text: string, record: any) => (
-        <>
-          <span className="color_primary font-[500]">
-            {record?.receiverPhoneNumber}
+      width: 125,
+      render: (_text: string, record: any) => (
+        <div className="flex items-center whitespace-nowrap">
+          <span className="color_primary font-[500] text-[12px]">
+            {record?.receiverPhoneNumber || "-"}
           </span>
-          <i
-             onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
-            className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[4px]"
-          ></i>
-        </>
+
+          {record?.receiverPhoneNumber && (
+            <i
+              onClick={() => copyToClipboard(record?.receiverPhoneNumber)}
+              className="ri-file-copy-line text-[#B1B1B1] cursor-pointer ml-[3px] text-[13px]"
+            />
+          )}
+        </div>
       ),
     },
+
     {
-      title: "Order Status",
+      title: "Status",
       key: "orderStatus",
+      width: 95,
       align: "start",
+      render: (_: any, record: any) => <StatusBadge status={record?.status} />,
+    },
+
+    // Product + Shipping + Total একসাথে
+    {
+      title: "Amount",
+      key: "amount",
+      width: 115,
+      align: "left",
       render: (_: any, record: any) => (
-        <>
-       <StatusBadge status={record?.status} />
-        </>
+        <div className="text-[11px] leading-[15px]">
+          <div className="flex justify-between gap-[8px]">
+            <span className="text-[#999]">Product</span>
+            <span className="font-[500]">{record?.productValue ?? "-"}</span>
+          </div>
+
+          <div className="flex justify-between gap-[8px]">
+            <span className="text-[#999]">Shipping</span>
+            <span className="font-[500]">{record?.shippingCharge ?? "-"}</span>
+          </div>
+
+          <div className="flex justify-between gap-[8px] border-t border-[#eee] mt-[2px] pt-[2px]">
+            <span className="font-[600]">Total</span>
+            <span className="font-[600] color_primary">
+              {record?.totalPrice ?? "-"}
+            </span>
+          </div>
+        </div>
       ),
     },
+
+    // Source + Courier + Hold Reason
     {
-      title: "Product Value",
-      key: "productValue",
-      align: "center",
+      title: "Info",
+      key: "info",
+      width: 135,
+      align: "left",
       render: (_: any, record: any) => (
-        <span className=" px-0">{record?.productValue}</span>
-      ),
-    },
-    {
-      title: "Shipping Charge",
-      key: "shippingCharge",
-      align: "center",
-      render: (_: any, record: any) => (
-        <span className=" capitalize px-0">{record?.shippingCharge}</span>
-      ),
-    },
-    {
-      title: "Total",
-      key: "totalCharge",
-      align: "center",
-      render: (_: any, record: any) => (
-        <span className=" capitalize px-0">{record?.totalPrice}</span>
-      ),
-    },
-    {
-      title: "Order Source",
-      key: "orderSource",
-      align: "start",
-      render: (text: string, record: any) => (
-        <span className="text-[#7D7D7D] font-[500] px-0">
-          {record?.orderSource || "N/A"}
-        </span>
-      ),
-    },
-    {
-      title: "Courier",
-      key: "Courier",
-      align: "start",
-      render: (text: string, record: any) => (
-        <span className="text-[#7D7D7D] font-[500] px-0">
-           {record?.partner?.partnerName ? record?.partner?.partnerName : "-"}
-        </span>
-      ),
-    },
-    {
-      title: "Order date",
-      key: "Order date",
-      align: "start",
-      render: (text: string, record: any, i: any) => {
-        return (
-          <span className="font-[500]">
-            {moment(record?.createdAt).format("DD MMM YY, h:mma")}
-          </span>
-        );
-      },
-    },
-    {
-      title: "Order Age",
-      key: "orderAge",
-      render: (text: string, record: any) => (
-        <span className="text-[#7D7D7D]  color_primary font-[500]">
-          {moment(record?.createdAt).fromNow()}
-        </span>
-      ),
-    },
-    {
-      title: "Action",
-      key: "action",
-      width: "60px",
-      render: (text: string, record: any) => {
-        return (
-          <>
-            {
+        <div className="text-[11px] leading-[15px] max-w-[125px]">
+          {/* Source */}
+          <div className="flex gap-[4px]">
+            <span className="text-[#999] shrink-0">Src:</span>
+            <span
+              className="font-[500] truncate"
+              title={record?.orderSource || "N/A"}
+            >
+              {record?.orderSource || "N/A"}
+            </span>
+          </div>
+
+          {/* Courier */}
+          <div className="flex gap-[4px]">
+            <span className="text-[#999] shrink-0">Courier:</span>
+            <span
+              className="font-[500] text-[#666] truncate"
+              title={record?.partner?.partnerName || "-"}
+            >
+              {record?.partner?.partnerName || "-"}
+            </span>
+          </div>
+
+          {/* Hold Reason */}
+          {record?.onHoldReason && (
+            <div className="flex gap-[4px]">
+              <span className="text-orange-500 shrink-0">Hold:</span>
               <span
-                onClick={() => router.push(`/${local}/orders/${record?.id}`)}
-                className=" text-white text-[10px] py-[2px] px-[10px] cursor-pointer"
+                className="text-orange-500 truncate cursor-pointer"
+                title={record?.onHoldReason}
               >
-                <i style={{fontSize:"18px"}} className="ri-eye-fill color_primary"></i>
+                {record?.onHoldReason}
               </span>
-            }
-          </>
-        );
-      },
+            </div>
+          )}
+        </div>
+      ),
+    },
+
+    {
+      title: "Date",
+      key: "orderDate",
+      width: 110,
+      align: "start",
+      render: (_text: string, record: any) => (
+        <div className="leading-[15px]">
+          <div className="font-[500] text-[11px] whitespace-nowrap">
+            {record?.createdAt
+              ? moment(record.createdAt).format("DD MMM YY")
+              : "-"}
+          </div>
+
+          <div className="text-[10px] text-[#999] whitespace-nowrap">
+            {record?.createdAt ? moment(record.createdAt).format("h:mma") : "-"}
+          </div>
+        </div>
+      ),
+    },
+
+    {
+      title: "Age",
+      key: "orderAge",
+      width: 70,
+      render: (_text: string, record: any) => (
+        <span className="text-[#7D7D7D] color_primary font-[500] text-[11px] whitespace-nowrap">
+          {record?.createdAt ? moment(record.createdAt).fromNow() : "-"}
+        </span>
+      ),
+    },
+
+    {
+      title: "",
+      key: "action",
+      width: 45,
+      fixed: "right",
+      align: "center",
+      render: (_text: string, record: any) => (
+        <span
+          onClick={() => router.push(`/${local}/orders/${record?.id}`)}
+          className="cursor-pointer"
+        >
+          <i
+            style={{ fontSize: "17px" }}
+            className="ri-eye-fill color_primary"
+          />
+        </span>
+      ),
     },
   ];
 
@@ -200,68 +256,34 @@ const HoldOrders = ({warehosueIds,currierIds,productIds,searchTerm,rangeValue,or
     value: key,
   }));
 
-    const rowSelection: TableProps<any>["rowSelection"] = {
-      onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
-        setSelectedOrders(selectedRows);
-      },
-      getCheckboxProps: (record: any) => ({
-        disabled: record.name === "Disabled User",
-        name: record.name,
-      }),
-    };
+  const rowSelection: TableProps<any>["rowSelection"] = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
+      setSelectedOrders(selectedRows);
+    },
+    getCheckboxProps: (record: any) => ({
+      disabled: record.name === "Disabled User",
+      name: record.name,
+    }),
+  };
 
-
-      // dropdown options
-         const items: MenuProps["items"] = [
-            {
-              label: (
-                <span onClick={()=>setStatusChangeModal(true)} className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
-                  <span>Change Status</span>
-                </span>
-              ),
-              key: "1",
-            },
-          ];
+  // dropdown options
+  const items: MenuProps["items"] = [
+    {
+      label: (
+        <span
+          onClick={() => setStatusChangeModal(true)}
+          className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center"
+        >
+          <span>Change Status</span>
+        </span>
+      ),
+      key: "1",
+    },
+  ];
   return (
     <div className="gb_border">
       <div className="flex justify-end gap-2 flex-wrap mt-2 p-3">
-        {/* <div className="flex gap-2">
-          <div className="border p-2 h-[35px] w-[35px] flex gap-3 items-center cursor-pointer justify-center">
-            <i
-              style={{ fontSize: "24px" }}
-              className="ri-restart-line text-gray-600"
-            ></i>
-          </div>
-          <Popover
-            placement="bottom"
-            content={
-              <div className=" min-w-[200px]">
-                <Checkbox.Group
-                  className="flex flex-col gap-3"
-                  value={checkedList}
-                  options={options as CheckboxOptionType[]}
-                  onChange={(value) => {
-                    setCheckedList(value as string[]);
-                  }}
-                />
-              </div>
-            }
-            trigger="click"
-            open={open}
-            onOpenChange={handleOpenChange}
-          >
-            <div className="border p-2 h-[35px] flex items-center gap-2 cursor-pointer">
-              <i
-                style={{ fontSize: "24px" }}
-                className="ri-equalizer-line text-gray-600"
-              ></i>{" "}
-              Filter Column
-            </div>
-          </Popover>
-        </div> */}
         <div className="flex gap-3">
-         
-
           <div>
             <GbDropdown items={items}>
               <button
@@ -281,23 +303,32 @@ const HoldOrders = ({warehosueIds,currierIds,productIds,searchTerm,rangeValue,or
           dataSource={data?.data}
           rowSelection={rowSelection}
         />
-     
       </div>
-         <div className="my-4 flex justify-end">
-           <Pagination
-            pageSize={size}
-            total={data?.meta?.total}
-            onChange={(v, d) => {
-              setPage(v);
-              setSize(d);
-            }}
-            pageSizeOptions={[10,20,50,100,500]}
-            showSizeChanger={true}
+      <div className="my-4 flex justify-end">
+        <Pagination
+          pageSize={size}
+          total={data?.meta?.total}
+          onChange={(v, d) => {
+            setPage(v);
+            setSize(d);
+          }}
+          pageSizeOptions={[10, 20, 50, 100, 500]}
+          showSizeChanger={true}
+        />
+      </div>
+      <GbModal
+        width="600px"
+        clseTab={false}
+        isModalOpen={statuschangedModal}
+        openModal={() => setStatusChangeModal(true)}
+        closeModal={() => setStatusChangeModal(false)}
+      >
+        <GbForm submitHandler={(data: any) => console.log(data)}>
+          <BulkChangeOrders
+            status="Hold"
+            setModalOpen={setStatusChangeModal}
+            selectedOrders={selectedOrders}
           />
-        </div>
-      <GbModal width="600px" clseTab={false} isModalOpen={statuschangedModal} openModal={()=>setStatusChangeModal(true)} closeModal={()=>setStatusChangeModal(false)}>
-        <GbForm submitHandler={(data:any)=>console.log(data)}>
-        <BulkChangeOrders status="Hold" setModalOpen={setStatusChangeModal} selectedOrders={selectedOrders}/>
         </GbForm>
       </GbModal>
     </div>

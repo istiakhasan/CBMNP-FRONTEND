@@ -317,23 +317,26 @@ const Delivered = ({warehosueIds,productIds,searchTerm,currierIds,rangeValue,ord
             </div>
           </Popover>
         </div>
-        <Pagination
-          pageSize={size}
-          total={data?.meta?.total}
-          onChange={(v, d) => {
-            setPage(v);
-            setSize(d);
-          }}
-          showSizeChanger={false}
-        />
       </div>
-      <div className="custom_scroll overflow-scroll">
+      <div className="custom_scroll overflow-scroll h-[400px]">
         <GbTable
           loading={isLoading}
           columns={newColumns}
           dataSource={data?.data}
         />
       </div>
+           <div className="my-4 flex justify-end">
+              <Pagination
+                pageSize={size}
+                total={data?.meta?.total}
+                onChange={(v, d) => {
+                  setPage(v);
+                  setSize(d);
+                }}
+                pageSizeOptions={[10, 20, 50, 100, 500]}
+                showSizeChanger={true}
+              />
+            </div>
     </div>
     </>
   );

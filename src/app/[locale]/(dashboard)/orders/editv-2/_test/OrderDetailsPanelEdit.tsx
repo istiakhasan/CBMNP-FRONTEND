@@ -418,8 +418,8 @@ export default function OrderDetailsPanelEdit({
             </Col>
 
             {/* Cancel Reason */}
-          
-                      {orderDetails?.statusByAgent?.value === "4" && (
+
+            {orderDetails?.statusByAgent?.value === "4" && (
               <Col className="mt-[12px]" xs={24} md={12}>
                 <label className="text-[12px]">Cancel Reason*</label>
                 <Select
