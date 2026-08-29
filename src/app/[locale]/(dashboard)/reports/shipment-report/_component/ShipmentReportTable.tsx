@@ -1544,11 +1544,7 @@ const ShipmentReportTable = ({
                 <div
                   className="custom_scroll"
                   style={{
-                    maxHeight:
-                      "55vh",
-
-                    overflowY:
-                      "auto",
+             
 
                     border:
                       "1px solid #ddd",
@@ -1616,6 +1612,13 @@ const ShipmentReportTable = ({
                           }
                         >
                           Mobile No.
+                        </th>
+                        <th
+                          style={
+                            thStyle
+                          }
+                        >
+                          Payment Status
                         </th>
 
                         <th
@@ -1702,6 +1705,14 @@ const ShipmentReportTable = ({
                                 }
                               >
                                 {order?.mobileNo ||
+                                  "N/A"}
+                              </td>
+                              <td
+                                style={
+                                  tdStyle
+                                }
+                              >
+                                {order?.paymentStatus ||
                                   "N/A"}
                               </td>
 

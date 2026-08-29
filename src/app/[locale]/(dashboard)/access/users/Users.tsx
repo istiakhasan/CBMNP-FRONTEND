@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import GbTable from "@/components/GbTable";
 import {
   Checkbox,
@@ -22,16 +22,46 @@ import moment from "moment";
 import { useLocale } from "next-intl";
 import EditUser from "./_component/EditUser";
 import ChangeUserPassword from "./_component/ChangeUserPassword";
+import OrderSearch from "@/components/OrderSearch";
+import { debounce } from "lodash";
+
 const Users = () => {
   //Add user modal
-  const [openAddUserModal, setOpenAddUserModal] = useState(false);
+  const [openAddUserModal, setOpenAddUserModal] = useState(false); 
   const query: Record<string, any> = {};
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
+
+  // searchTerm drives the input's UI (updates immediately as the user types)
   const [searchTerm, setSearchTerm] = useState("");
+  // debouncedSearchTerm is what actually gets sent to the API
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+
+  // Create the debounced setter once and keep it stable across renders
+  const debouncedSetSearch = useMemo(
+    () =>
+      debounce((value: string) => {
+        setDebouncedSearchTerm(value);
+        setPage(1); // reset to first page whenever a new search is made
+      }, 400),
+    []
+  );
+
+  // Whenever searchTerm changes, schedule (or reschedule) the debounced update
+  useEffect(() => {
+    debouncedSetSearch(searchTerm);
+  }, [searchTerm, debouncedSetSearch]);
+
+  // Cancel any pending debounced call when the component unmounts
+  useEffect(() => {
+    return () => {
+      debouncedSetSearch.cancel();
+    };
+  }, [debouncedSetSearch]);
+
   query["page"] = page;
   query["limit"] = size;
-  query["searchProducts"] = searchTerm;
+  query["searchTerm"] = debouncedSearchTerm;
   const { data, isLoading } = useGetAllUsersQuery(query);
   const [updateUser]=useUpdateUserByIdMutation()
   const router = useRouter();
@@ -209,6 +239,11 @@ const Users = () => {
         <div className="gb_border">
           <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
             <div className="flex gap-2">
+                <OrderSearch
+                    placeholder={"Search User"}
+                    setSearchTerm={setSearchTerm}
+                    searchTerm={searchTerm}
+                  />
               <div className="border p-2 h-[35px] w-[35px] flex gap-3 items-center cursor-pointer justify-center">
                 <i
                   style={{ fontSize: "24px" }}
@@ -245,6 +280,7 @@ const Users = () => {
             <Pagination
               pageSize={size}
               total={data?.meta?.total}
+              current={page}
               onChange={(v, d) => {
                 setPage(v);
                 setSize(d);

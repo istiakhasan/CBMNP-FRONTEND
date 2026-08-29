@@ -83,7 +83,7 @@ export function OrderPageView({ orderData , permission}: any) {
                   {/* <Button type="primary" icon={<RiDownloadLine size={16} />}>
                     Export PDF
                   </Button> */}
-                {orderData?.status?.label==='Delivered' && (
+                {/* {orderData?.status?.label==='Delivered' && (
                   <Tooltip title="Exchange Product">
                     <Button
                       disabled={!permission?.includes("UPDATE_ORDERS")}
@@ -93,7 +93,7 @@ export function OrderPageView({ orderData , permission}: any) {
                       Exchange
                     </Button>
                   </Tooltip>
-                )}
+                )} */}
                 {(orderData?.status?.label==='Pending-Return' || orderData?.status?.label==='Delivered') &&  <Tooltip title="Change Status">
                     <Button 
                       type="primary"

@@ -1,26 +1,7 @@
 
-import { Button, Card, Table, Tag, Input, Space, Typography, Row, Col, Divider, Tabs } from "antd"
-import {
-  RiFileTextLine,
-  RiTruckLine,
-  RiDownloadLine,
-  RiEditLine,
-  RiShoppingCartLine,
-  RiMapPinLine,
-  RiCalendarLine,
-  RiPulseLine,
-  RiSendPlaneLine,
-  RiStickyNoteLine,
-  RiMoneyDollarCircleLine,
-  RiSettings4Line,
-} from "@remixicon/react"
-import { useState, useEffect } from "react"
-import { useForm, Controller } from "react-hook-form"
-import './style.css'
-import ActivityLogContent from "./ActivityLogContent"
-import OrderInformationContent from "./OrderInformationContent"
-const { TextArea } = Input
-const { Title, Text, Paragraph } = Typography
+import {  Card, Space, Typography, Row, Col, Divider } from "antd"
+
+const {  Text } = Typography
 const ReturnProductsMobileCard = ({ product }: { product: any }) => (
   <Card className="mb-3 rounded-lg border border-gray-200" bodyStyle={{ padding: 16 }}>
     <Space direction="vertical" size="small" className="w-full">
@@ -41,7 +22,7 @@ const ReturnProductsMobileCard = ({ product }: { product: any }) => (
             Price
           </Text>
           <div>
-            <Text className="text-sm">${product.price.toFixed(2)}</Text>
+            <Text className="text-sm">${product?.price}</Text>
           </div>
         </Col>
         <Col span={12}>
@@ -66,7 +47,7 @@ const ReturnProductsMobileCard = ({ product }: { product: any }) => (
           </Text>
           <div>
             <Text strong className="text-sm text-blue-600">
-              ${product.total.toFixed(2)}
+              ${product?.total}
             </Text>
           </div>
         </Col>

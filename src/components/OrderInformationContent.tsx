@@ -166,7 +166,7 @@ const OrderInformationContent = ({ rowData, local }: any) => {
       dataIndex: "paidAmount",
       key: "amount",
       align: "right" as const,
-      render: (paidAmount: number) => <Text strong>${paidAmount}</Text>,
+      render: (paidAmount: number) => <Text strong>{paidAmount}</Text>,
     },
   ]
 
