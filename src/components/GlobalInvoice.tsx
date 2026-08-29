@@ -7,7 +7,6 @@ import moment from "moment";
 const GlobalInvoice = ({rowDto}:any) => {
   const {data}=useGetOrganizationByIdQuery(undefined)
     const organization=data?.data
-  console.log(rowDto,"row dto",organization);
     return (
       <div className="container mx-auto p-2  rounded-lg bg-white">
         {/* Header */}
@@ -55,7 +54,7 @@ const GlobalInvoice = ({rowDto}:any) => {
           <thead>
             <tr className="border">
               <th align="left" className="border p-2">Sl</th>
-              <th align="left" className="border p-2">Code</th>
+              <th align="left" className="border p-2">SKU</th>
               <th align="left" className="border p-2">Products</th>
               <th className="border p-2">QTY</th>
               <th className="border p-2">Unit Price</th>
@@ -68,7 +67,7 @@ const GlobalInvoice = ({rowDto}:any) => {
               rowDto?.items?.map((item:any,i:any)=>(
                 <tr key={i} className="border">
               <td className="border p-2">{i+1}</td>
-              <td className="border p-2">N/A</td>
+              <td className="border p-2">{item?.product?.sku || 'N/A'}</td>
               <td className="border p-2">{item?.product?.name}</td>
               <td align="center" className="border p-2">{item?.orderedQuantity}</td>
               <td align="center" className="border p-2">{item?.unitPrice}</td>

@@ -36,7 +36,7 @@ export const OrderedProductsMobileCard = ({ product }: { product: any }) => (
             Price
           </Text>
           <div>
-            <Text className="text-sm">${product.price.toFixed(2)}</Text>
+            <Text className="text-sm">${product?.price}</Text>
           </div>
         </Col>
         <Col span={12}>
@@ -44,7 +44,7 @@ export const OrderedProductsMobileCard = ({ product }: { product: any }) => (
             Discount
           </Text>
           <div>
-            <Text className="text-sm text-red-600">-${product.discount.toFixed(2)}</Text>
+            <Text className="text-sm text-red-600">-${product?.discount}</Text>
           </div>
         </Col>
         <Col span={12}>
@@ -64,7 +64,7 @@ export const OrderedProductsMobileCard = ({ product }: { product: any }) => (
           Total
         </Text>
         <Text strong className="text-base text-blue-600">
-          ${product.total.toFixed(2)}
+          ${product?.total}
         </Text>
       </div>
     </Space>

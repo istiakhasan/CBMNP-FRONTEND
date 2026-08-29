@@ -152,7 +152,7 @@ export default function ProductSearchPanel({
                         {product?.name}
                       </h4>
                       <p className="text-sm text-muted-foreground">
-                        ID: {product?.internalId}
+                        sku: {product?.sku}
                       </p>
                       <p className="font-semibold text-[#4F8A6D] mt-1">
                         {formatPrice(product?.salePrice)}

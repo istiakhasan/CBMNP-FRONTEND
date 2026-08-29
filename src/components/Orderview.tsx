@@ -5,6 +5,7 @@ import {
   RiDownloadLine,
   RiEditLine,
   RiPulseLine,
+  RiArrowLeftRightLine,
 } from "@remixicon/react";
 import { useState, useEffect } from "react";
 import "./style.css";
@@ -15,6 +16,7 @@ import { useGetOrdersLogsQuery } from "@/redux/api/orderApi";
 import GbModal from "./ui/GbModal";
 import GbForm from "./forms/GbForm";
 import ChangeStatusModal from "@/app/[locale]/(dashboard)/orders/[orderid]/_component/ChangeStatusModal";
+import ExchangeOrderModal from "@/app/[locale]/(dashboard)/orders/[orderid]/_component/ExchangeOrderModal";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 const { Title, Text } = Typography;
@@ -34,6 +36,7 @@ const useIsMobile = () => {
 
 export function OrderPageView({ orderData , permission}: any) {
   const [openModal, setModalOpen] = useState(false);
+  const [openExchangeModal, setOpenExchangeModal] = useState(false);
   const router=useRouter()
   const local=useLocale()
   const isMobile = useIsMobile();
@@ -80,6 +83,17 @@ export function OrderPageView({ orderData , permission}: any) {
                   {/* <Button type="primary" icon={<RiDownloadLine size={16} />}>
                     Export PDF
                   </Button> */}
+                {orderData?.status?.label==='Delivered' && (
+                  <Tooltip title="Exchange Product">
+                    <Button
+                      disabled={!permission?.includes("UPDATE_ORDERS")}
+                      onClick={() => setOpenExchangeModal(true)}
+                      icon={<RiArrowLeftRightLine size={16} />}
+                    >
+                      Exchange
+                    </Button>
+                  </Tooltip>
+                )}
                 {(orderData?.status?.label==='Pending-Return' || orderData?.status?.label==='Delivered') &&  <Tooltip title="Change Status">
                     <Button 
                       type="primary"
@@ -136,6 +150,19 @@ export function OrderPageView({ orderData , permission}: any) {
                 rowData={orderData}
               />
             </GbForm>
+          </GbModal>
+
+          <GbModal
+            isModalOpen={openExchangeModal}
+            openModal={() => setOpenExchangeModal(true)}
+            closeModal={() => setOpenExchangeModal(false)}
+            clseTab={false}
+            cls="custom_ant_modal"
+          >
+            <ExchangeOrderModal
+              setModalOpen={setOpenExchangeModal}
+              rowData={orderData}
+            />
           </GbModal>
         </div>
       </div>

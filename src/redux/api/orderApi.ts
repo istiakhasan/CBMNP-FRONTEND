@@ -126,6 +126,14 @@ export const orderApi = baseApi.injectEndpoints({
         params: filters,
       }),
     }),
+    exchangeOrderProduct: build.mutation({
+      query: ({ orderId, ...data }) => ({
+        url: `/orders/${orderId}/exchange`,
+        method: "POST",
+        data,
+      }),
+      invalidatesTags: [tagTypes.order],
+    }),
   }),
 });
 
@@ -149,5 +157,6 @@ export const {
   useLazyDeliveryPartnerReportQuery,
   useGetScanOrderByIdQuery,
   useLazyGetScanOrderByIdQuery,
-  useLazyGetDeliveryPartnerOrderDetailsQuery
+  useLazyGetDeliveryPartnerOrderDetailsQuery,
+  useExchangeOrderProductMutation
 } = orderApi;

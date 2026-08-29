@@ -8,7 +8,6 @@ const Invoice = ({ rowData }: any) => {
   const { data } = useGetOrganizationByIdQuery(undefined);
   const organization = data?.data;
   const contentRef = useRef(null);
-
   const formatDate = (dateString?: string) => {
     if (!dateString)
       return new Date().toLocaleDateString("en-US", {
@@ -51,12 +50,12 @@ const Invoice = ({ rowData }: any) => {
   return (
     <div>
       {/* Print Button - hidden on print */}
-      <button
+      {rowData?.status?.label !=="Approved"  &&  <button
         onClick={reactToPrintFn}
         className="print:hidden bg-primary text-white font-bold text-[12px] px-[20px] py-[5px] flex items-center gap-2 rounded-md hover:bg-blue-600 transition"
       >
         <AiOutlinePrinter /> Print Invoice
-      </button>
+      </button>}
 
       {/* Printable Section - 4x6 (102mm x 152mm) */}
       <div

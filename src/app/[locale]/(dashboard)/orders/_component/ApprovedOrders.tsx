@@ -259,7 +259,6 @@ const ApprovedOrders = ({
         return (
           <>
             <div>
-              <i className="ri-information-2-line text-[18px]  text-primary cursor-pointer"></i>
               <i
                 onClick={() => {
                   setPrintModal(true);
