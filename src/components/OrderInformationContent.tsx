@@ -57,18 +57,15 @@ const OrderInformationContent = ({ rowData, local }: any) => {
       title: "Name",
       key: "name",
       width: 250,
-      ellipsis: { showTitle: false },
+      // ellipsis: { showTitle: false },
       render: (_text: any, record: any) => (
-        
           <span>{record.product?.name || "N/A"}</span>
-      
       ),
     },
     {
-      title: "Pack Size",
-      key: "packSize",
-      render: (text: any, record: any) =>
-        record.product?.weight ? `${record.product.weight} ${record.product?.unit || ""}` : "-",
+      title: "Code",
+      key: "code",
+      render: (text: any, record: any) => record.product?.internalId || record.product?.sku || "-",
     },
     {
       title: "Price",
