@@ -59,15 +59,10 @@ const OrderInformationContent = ({ rowData, local }: any) => {
       width: 250,
       ellipsis: { showTitle: false },
       render: (_text: any, record: any) => (
-        <Tooltip title={record.product?.name || "N/A"}>
+        
           <span>{record.product?.name || "N/A"}</span>
-        </Tooltip>
+      
       ),
-    },
-    {
-      title: "Code",
-      key: "code",
-      render: (text: any, record: any) => record.product?.internalId || record.product?.sku || "-",
     },
     {
       title: "Pack Size",
