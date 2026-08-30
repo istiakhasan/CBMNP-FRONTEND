@@ -1,129 +1,476 @@
-'use client'
-import { useGetOrganizationByIdQuery } from "@/redux/api/organizationApi";
-import { useGetSinglerequistionQuery } from "@/redux/api/requisitionApi";
+"use client";
+
 import React, { useRef } from "react";
 import { AiOutlinePrinter } from "react-icons/ai";
 import { useReactToPrint } from "react-to-print";
 
-const ViewRequisition = ({ rowData }: { rowData: any }) => {
-  const contentRef = useRef(null);
+import { useGetOrganizationByIdQuery } from "@/redux/api/organizationApi";
+import { useGetSinglerequistionQuery } from "@/redux/api/requisitionApi";
 
-  const reactToPrintFn = useReactToPrint({
-    content: () => contentRef.current,
-    documentTitle: `Requisition_${rowData?.id}`,
-  });
+interface ViewRequisitionProps {
+  rowData: {
+    id: number | string;
+  };
+}
 
-  const { data, isLoading } = useGetSinglerequistionQuery({
+/* -------------------------------------------
+   Print CSS as a plain string.
+   Passed to react-to-print's `pageStyle` option so it is
+   guaranteed to be injected into the print iframe — it does
+   NOT depend on react-to-print extracting document.styleSheets
+   (which is what breaks with styled-jsx / antd cssinjs).
+-------------------------------------------- */
+const PRINT_STYLES = `
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: #ffffff !important;
+  }
+
+  .rq-document {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+    color: #222222;
+  }
+
+  .rq-header {
+    text-align: center;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #d9d9d9;
+  }
+
+  .rq-header h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #111111;
+  }
+
+  .rq-header p {
+    margin: 3px 0 0;
+    font-size: 11px;
+    color: #555555;
+  }
+
+  .rq-title {
+    text-align: center;
+    margin: 14px 0;
+  }
+
+  .rq-title h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #111111;
+  }
+
+  .rq-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 7px 9px;
+    background: #fafafa;
+    border: 1px solid #e5e5e5;
+  }
+
+  .rq-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .rq-meta-label {
+    font-size: 11px;
+    color: #666666;
+  }
+
+  .rq-meta-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: #222222;
+  }
+
+  .rq-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  .rq-table th,
+  .rq-table td {
+    border: 1px solid #999999 !important;
+  }
+
+  .rq-table th {
+    padding: 7px 6px;
+    background: #f5f5f5 !important;
+    color: #111111 !important;
+    font-size: 10px;
+    font-weight: 600;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  .rq-table td {
+    padding: 7px 6px;
+    font-size: 10px;
+    vertical-align: middle;
+    color: #222222 !important;
+  }
+
+  .rq-col-product { width: 30%; }
+  .rq-col-qty { width: 12%; text-align: center !important; }
+  .rq-col-order { width: 33%; }
+  .rq-col-total { width: 15%; text-align: center !important; }
+
+  .rq-product-name {
+    font-size: 11px;
+    color: #222222 !important;
+  }
+
+  .rq-product-sku,
+  .rq-product-pack {
+    margin-top: 3px;
+    font-size: 8px;
+    color: #666666 !important;
+  }
+
+  .rq-qty-cell {
+    text-align: center;
+    font-weight: 500;
+  }
+
+  .rq-total-cell {
+    text-align: center;
+    font-weight: 600;
+  }
+
+  /* Keeps every row belonging to one product together so a
+     rowSpan'd product/total cell never gets split by a page
+     break — the whole product-group either fits on the page
+     or moves entirely to the next one. */
+  .rq-group {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  .rq-summary {
+    display: flex;
+    justify-content: flex-end;
+    gap: 30px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid #999999;
+  }
+
+  .rq-summary-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #555555;
+  }
+
+  .rq-summary-item strong {
+    font-size: 12px;
+    color: #222222;
+  }
+
+  .rq-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 45px;
+    padding: 0 30px;
+  }
+
+  .rq-signature-box {
+    width: 180px;
+    text-align: center;
+  }
+
+  .rq-signature-line {
+    height: 1px;
+    margin-bottom: 6px;
+    background: #999999;
+  }
+
+  .rq-signature-title {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: #333333;
+  }
+
+  .rq-signature-name {
+    min-height: 16px;
+    margin: 3px 0 0;
+    font-size: 10px;
+    color: #666666;
+  }
+
+  .rq-no-print {
+    display: none !important;
+  }
+`;
+
+const ViewRequisition = ({ rowData }: ViewRequisitionProps) => {
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const { data: requisition, isLoading } = useGetSinglerequistionQuery({
     id: rowData?.id,
   });
-  const { data: organization } = useGetOrganizationByIdQuery(undefined);
 
-  if (isLoading) return <p>Loading requisition...</p>;
-  if (!data) return <p>No requisition data found.</p>;
+  const { data: organization, isLoading: organizationLoading } =
+    useGetOrganizationByIdQuery(undefined);
 
-  const requisition = data;
+const handlePrint = useReactToPrint({
+  content: () => contentRef.current,
+  documentTitle: requisition?.requisitionNumber
+    ? `Requisition_${requisition.requisitionNumber}`
+    : `Requisition_${rowData?.id}`,
+  pageStyle: PRINT_STYLES,
+});
+
+  /* -------------------------------------------
+     Loading
+  -------------------------------------------- */
+  if (isLoading || organizationLoading) {
+    return (
+      <div className="flex min-h-[300px] items-center justify-center">
+        <p className="text-sm text-gray-500">Loading requisition...</p>
+      </div>
+    );
+  }
+
+  /* -------------------------------------------
+     Empty state
+  -------------------------------------------- */
+  if (!requisition) {
+    return (
+      <div className="flex min-h-[300px] items-center justify-center">
+        <p className="text-sm text-gray-500">No requisition data found.</p>
+      </div>
+    );
+  }
+
+  const organizationData = organization?.data;
+
+  /* -------------------------------------------
+     Precompute per-product totals once, so the table rows
+     and the summary section always agree with each other.
+  -------------------------------------------- */
+  const productsWithTotals = (requisition.products || []).map(
+    (product: any) => {
+      const orders = product?.orders?.length
+        ? product.orders
+        : [{ invoiceNumber: "-", qty: 0 }];
+
+      const totalQty =
+        product?.totalQty ??
+        orders.reduce(
+          (sum: number, order: any) => sum + Number(order?.qty || 0),
+          0
+        );
+
+      return { ...product, orders, totalQty };
+    }
+  );
+
+  const grandTotalQty = productsWithTotals.reduce(
+    (total: number, product: any) => total + Number(product.totalQty || 0),
+    0
+  );
 
   return (
-    <div className="py-6 bg-white rounded-lg mx-auto relative">
-      <button
-        onClick={reactToPrintFn}
-        className="bg-primary hover:bg-primary text-white font-bold text-[12px] px-[20px] py-[5px] flex items-center gap-2 absolute left-0 top-[20px] rounded-md transition"
-      >
-        <AiOutlinePrinter /> Print
-      </button>
-
-      <div ref={contentRef} className="print-area">
-        <div >
-
-     
-        {/* Organization Header */}
-        <div className="text-center border-b pb-4 mb-6">
-          <h1 className="text-3xl font-bold">{organization?.data?.name}</h1>
-          <p className="text-base text-gray-700">{organization?.data?.address}</p>
-          <p className="text-base text-gray-700">
-            Phone: +88{organization?.data?.phone}
-          </p>
-        </div>
-
-        {/* Requisition Info */}
-        <div className="flex justify-between mb-6">
-          <h2 className="text-xl font-semibold">
-            Requisition #{requisition.requisitionNumber}
-          </h2>
-          <p className="text-gray-700">
-            Date: {new Date(requisition.createdAt).toLocaleDateString()}
-          </p>
-        </div>
-
-        {/* Table */}
-        <table className="requistion_form_table w-full border-collapse border border-gray-300 mb-8">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="border border-gray-300 py-2 px-4 text-left">Product Name</th>
-              <th className="border border-gray-300 py-2 px-4 text-left">Pack Size</th>
-              <th className="border border-gray-300 py-2 px-4 text-center">Qty</th>
-            </tr>
-          </thead>
-          <tbody>
-            {requisition.products?.map((product: any, idx: number) => {
-              const totalQuantity = product.orders.reduce(
-                (sum: number, order: any) => sum + order.qty,
-                0
-              );
-              return (
-                <tr key={idx}>
-                  <td className="border border-gray-300 py-2 px-4">{product.productName}</td>
-                  <td className="border border-gray-300 py-2 px-4">{product.packSize}</td>
-                  <td className="border border-gray-300 py-2 px-4 text-center">{totalQuantity}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-
-        {/* Footer / Signature */}
-        <div className="flex justify-between mt-12 text-center">
-          <div>
-            <p style={{ color: "rgba(0, 0, 0, .2)" }} className="font-medium mb-1">
-              __________________________
-            </p>
-            <p>Prepared By</p>
-          </div>
-          <div>
-            <p style={{ color: "rgba(0, 0, 0, .2)" }} className="font-medium mb-1">
-              __________________________
-            </p>
-            <p>Approved By</p>
-          </div>
-        </div>
-           </div>
+    <div className="relative w-full bg-white">
+      {/* =====================================================
+          PRINT BUTTON
+      ====================================================== */}
+      <div className="mb-4 flex  ">
+        <button
+          type="button"
+          onClick={() => handlePrint()}
+          className="
+            inline-flex
+            items-center
+            gap-2
+            rounded-md
+            bg-primary
+            px-4
+            py-2
+            text-sm
+            font-medium
+            text-white
+            transition
+            hover:opacity-90
+          "
+        >
+          <AiOutlinePrinter size={17} />
+          Print
+        </button>
       </div>
 
-      {/* Print Styles */}
-      <style jsx>{`
-        @media print {
-          body {
-            -webkit-print-color-adjust: exact;
-          }
-          .print-area {
-            width: 210mm; /* A4 width */
-            min-height: 297mm; /* A4 height */
-            padding: 20mm;
-            margin: auto;
-            background: #fff;
-            color: #000;
-            font-size: 12pt;
-          }
-          .requistion_form_table th,
-          .requistion_form_table td {
-            border: 1px solid #000 !important;
-            padding: 6px 10px;
-          }
-          button {
-            display: none;
-          }
-        }
-      `}</style>
+      {/* =====================================================
+          DOCUMENT — everything inside this ref gets cloned
+          into the print iframe, including the <style> tag
+          below, so styling always travels with it.
+      ====================================================== */}
+      <div ref={contentRef} className="rq-document requisition-document">
+        <style>{PRINT_STYLES}</style>
+
+        {/* ===================================================
+            HEADER
+        ==================================================== */}
+        <header className="rq-header">
+          <div>
+            <h1>{organizationData?.name || "Tabaya"}</h1>
+
+            {organizationData?.address && <p>{organizationData.address}</p>}
+
+            {organizationData?.phone && <p>+88{organizationData.phone}</p>}
+          </div>
+        </header>
+
+        {/* ===================================================
+            DOCUMENT TITLE
+        ==================================================== */}
+        <div className="rq-title">
+          <h2>REQUISITION</h2>
+        </div>
+
+        {/* ===================================================
+            REQUISITION META
+        ==================================================== */}
+        <div className="rq-meta">
+          <div className="rq-meta-item">
+            <span className="rq-meta-label">Requisition No.</span>
+            <span className="rq-meta-value">
+              {requisition.requisitionNumber}
+            </span>
+          </div>
+
+          <div className="rq-meta-item">
+            <span className="rq-meta-label">Date</span>
+            <span className="rq-meta-value">
+              {requisition.createdAt
+                ? new Date(requisition.createdAt).toLocaleDateString(
+                    "en-GB",
+                    { day: "2-digit", month: "short", year: "numeric" }
+                  )
+                : "-"}
+            </span>
+          </div>
+        </div>
+
+        {/* ===================================================
+            PRODUCTS TABLE
+        ==================================================== */}
+        <table className="rq-table">
+          <thead>
+            <tr>
+              <th className="rq-col-product">Product Name</th>
+              <th className="rq-col-qty">Qty</th>
+              <th className="rq-col-order">Order Number (Inv)</th>
+              <th className="rq-col-total">Total Qty</th>
+            </tr>
+          </thead>
+
+          {productsWithTotals.map((product: any, productIndex: number) => (
+            <tbody key={productIndex} className="rq-group">
+              {product.orders.map((order: any, orderIndex: number) => {
+                const isFirstRow = orderIndex === 0;
+
+                return (
+                  <tr key={`${productIndex}-${orderIndex}`}>
+                    {isFirstRow && (
+                      <td rowSpan={product.orders.length}>
+                        <div className="rq-product-name">
+                          {product?.productName || "-"}
+                        </div>
+
+                        {product?.sku && (
+                          <div className="rq-product-sku">
+                            SKU: {product.sku}
+                          </div>
+                        )}
+
+                        {product?.packSize && product.packSize !== "0 g" && (
+                          <div className="rq-product-pack">
+                            Pack Size: {product.packSize}
+                          </div>
+                        )}
+                      </td>
+                    )}
+
+                    <td className="rq-qty-cell">{order?.qty ?? 0}</td>
+
+                    <td>{order?.invoiceNumber || "-"}</td>
+
+                    {isFirstRow && (
+                      <td rowSpan={product.orders.length} className="rq-total-cell">
+                        {product.totalQty}
+                      </td>
+                    )}
+                  </tr>
+                );
+              })}
+            </tbody>
+          ))}
+        </table>
+
+        {/* ===================================================
+            SUMMARY
+        ==================================================== */}
+        <div className="rq-summary">
+          <div className="rq-summary-item">
+            <span>Total Products</span>
+            <strong>{productsWithTotals.length}</strong>
+          </div>
+
+          <div className="rq-summary-item">
+            <span>Total Requested Qty</span>
+            <strong>{grandTotalQty}</strong>
+          </div>
+        </div>
+
+        {/* ===================================================
+            FOOTER / SIGNATURE
+        ==================================================== */}
+        <div className="rq-footer">
+          <div className="rq-signature-box">
+            <div className="rq-signature-line" />
+            <p className="rq-signature-title">Prepared By</p>
+            <p className="rq-signature-name">
+              {requisition?.prepairedBy || "-"}
+            </p>
+          </div>
+
+          <div className="rq-signature-box">
+            <div className="rq-signature-line" />
+            <p className="rq-signature-title">Approved By</p>
+            <p className="rq-signature-name">&nbsp;</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
