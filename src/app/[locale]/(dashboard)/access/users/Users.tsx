@@ -343,7 +343,7 @@ const Users = () => {
         openModal={() => setOpenAssignPermissionModal(true)}
         closeModal={() => setOpenAssignPermissionModal(false)}
         clseTab={false}
-        width="560px"
+        width="760px"
         cls="custom_ant_modal"
       >
         <AssignUserPermission

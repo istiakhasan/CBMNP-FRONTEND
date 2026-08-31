@@ -55,7 +55,7 @@ const AssignUserPermission = ({ selectedUsers, onClose }: Props) => {
   const loading = isLoading;
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col p-[16px]">
       <div className="pb-3">
         <p className="text-[16px] font-semibold m-0">Assign Permission</p>
         <p className="text-[12px] text-gray-500 m-0 mt-1">
