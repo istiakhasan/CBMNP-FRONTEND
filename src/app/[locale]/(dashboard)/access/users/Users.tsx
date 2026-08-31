@@ -24,35 +24,30 @@ import EditUser from "./_component/EditUser";
 import ChangeUserPassword from "./_component/ChangeUserPassword";
 import OrderSearch from "@/components/OrderSearch";
 import { debounce } from "lodash";
+import AssignUserPermission from "./_component/AssignUserPermission";
 
 const Users = () => {
-  //Add user modal
-  const [openAddUserModal, setOpenAddUserModal] = useState(false); 
+  const [openAddUserModal, setOpenAddUserModal] = useState(false);
   const query: Record<string, any> = {};
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
 
-  // searchTerm drives the input's UI (updates immediately as the user types)
   const [searchTerm, setSearchTerm] = useState("");
-  // debouncedSearchTerm is what actually gets sent to the API
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
-  // Create the debounced setter once and keep it stable across renders
   const debouncedSetSearch = useMemo(
     () =>
       debounce((value: string) => {
         setDebouncedSearchTerm(value);
-        setPage(1); // reset to first page whenever a new search is made
+        setPage(1);
       }, 400),
     []
   );
 
-  // Whenever searchTerm changes, schedule (or reschedule) the debounced update
   useEffect(() => {
     debouncedSetSearch(searchTerm);
   }, [searchTerm, debouncedSetSearch]);
 
-  // Cancel any pending debounced call when the component unmounts
   useEffect(() => {
     return () => {
       debouncedSetSearch.cancel();
@@ -63,13 +58,18 @@ const Users = () => {
   query["limit"] = size;
   query["searchTerm"] = debouncedSearchTerm;
   const { data, isLoading } = useGetAllUsersQuery(query);
-  const [updateUser]=useUpdateUserByIdMutation()
+  const [updateUser] = useUpdateUserByIdMutation();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [rowData,setRowData]=useState<any>(null)
+  const [rowData, setRowData] = useState<any>(null);
   const [editUser, setEditUser] = useState(false);
   const [openPasswordModal, setOpenPasswordModal] = useState(false);
-  const local=useLocale()
+  const local = useLocale();
+
+  // ---- Bulk permission assignment state ----
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [openAssignPermissionModal, setOpenAssignPermissionModal] = useState(false);
+
   const tableColumn = [
     {
       title: "Name",
@@ -133,7 +133,7 @@ const Users = () => {
     {
       title: "Locations",
       key: 6,
-      width:"220px",
+      width: "220px",
       //@ts-ignore
       render: (text, record, index) => {
         return <span className=" cursor-pointer">{record?.address}</span>;
@@ -150,12 +150,12 @@ const Users = () => {
             checkedChildren="Active"
             unCheckedChildren="Inactive"
             onChange={async (a) => {
-                const res = await updateUser({
-                  id: record?.id,
-                  data: {
-                    active: a,
-                  },
-                });
+              const res = await updateUser({
+                id: record?.id,
+                data: {
+                  active: a,
+                },
+              });
             }}
             defaultChecked={record?.active}
           />
@@ -169,37 +169,35 @@ const Users = () => {
       align: "end",
       //@ts-ignore
       render: (text, record, index) => {
-        const formattedDate = moment(record?.createdAt).format(
-          "MMM D, YYYY"
-        );
+        const formattedDate = moment(record?.createdAt).format("MMM D, YYYY");
 
-        return (
-          <span
-            className="color_primary"
-          >
-            {formattedDate}
-          </span>
-        );
+        return <span className="color_primary">{formattedDate}</span>;
       },
     },
-     {
+    {
       title: "Action",
       key: 17,
       align: "end",
-      render: (_:any,record:any) => {
+      render: (_: any, record: any) => {
         return (
           <div className="flex justify-end gap-3">
             <Tooltip title="Edit user">
-              <i onClick={()=>{
-                setEditUser(true)
-                setRowData(record)
-              }} className="ri-edit-2-fill text-[18px] color_primary cursor-pointer"></i>
+              <i
+                onClick={() => {
+                  setEditUser(true);
+                  setRowData(record);
+                }}
+                className="ri-edit-2-fill text-[18px] color_primary cursor-pointer"
+              ></i>
             </Tooltip>
             <Tooltip title="Change password">
-              <i onClick={()=>{
-                setOpenPasswordModal(true)
-                setRowData(record)
-              }} className="ri-lock-password-fill text-[18px] color_primary cursor-pointer"></i>
+              <i
+                onClick={() => {
+                  setOpenPasswordModal(true);
+                  setRowData(record);
+                }}
+                className="ri-lock-password-fill text-[18px] color_primary cursor-pointer"
+              ></i>
             </Tooltip>
           </div>
         );
@@ -221,6 +219,11 @@ const Users = () => {
     value: key,
   }));
 
+  const rowSelection = {
+    selectedRowKeys: selectedUserIds,
+    onChange: (keys: React.Key[]) => setSelectedUserIds(keys as string[]),
+  };
+
   return (
     <>
       <GbHeader />
@@ -228,6 +231,14 @@ const Users = () => {
         <div className="flex justify-between items-center py-4 px-2">
           <p className="text-[20px]">Users</p>
           <div className="flex items-center gap-3 flex-wrap">
+            {selectedUserIds.length > 0 && (
+              <button
+                onClick={() => setOpenAssignPermissionModal(true)}
+                className="bg-[#2E6F95] text-[#fff] font-bold text-[12px] px-[20px] py-[5px]"
+              >
+                Assign Permission ({selectedUserIds.length})
+              </button>
+            )}
             <button
               onClick={() => setOpenAddUserModal(true)}
               className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]"
@@ -239,16 +250,13 @@ const Users = () => {
         <div className="gb_border">
           <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
             <div className="flex gap-2">
-                <OrderSearch
-                    placeholder={"Search User"}
-                    setSearchTerm={setSearchTerm}
-                    searchTerm={searchTerm}
-                  />
+              <OrderSearch
+                placeholder={"Search User"}
+                setSearchTerm={setSearchTerm}
+                searchTerm={searchTerm}
+              />
               <div className="border p-2 h-[35px] w-[35px] flex gap-3 items-center cursor-pointer justify-center">
-                <i
-                  style={{ fontSize: "24px" }}
-                  className="ri-restart-line text-gray-600"
-                ></i>
+                <i style={{ fontSize: "24px" }} className="ri-restart-line text-gray-600"></i>
               </div>
               <Popover
                 placement="bottom"
@@ -269,10 +277,7 @@ const Users = () => {
                 onOpenChange={handleOpenChange}
               >
                 <div className="border p-2 h-[35px] flex items-center gap-2 cursor-pointer">
-                  <i
-                    style={{ fontSize: "24px" }}
-                    className="ri-equalizer-line text-gray-600"
-                  ></i>{" "}
+                  <i style={{ fontSize: "24px" }} className="ri-equalizer-line text-gray-600"></i>{" "}
                   Filter Column
                 </div>
               </Popover>
@@ -286,7 +291,6 @@ const Users = () => {
                 setSize(d);
               }}
               showSizeChanger={false}
-              // onShowSizeChange={false}
             />
           </div>
           <div className="max-h-[500px] overflow-scroll">
@@ -294,6 +298,8 @@ const Users = () => {
               loading={isLoading}
               columns={newColumns}
               dataSource={data?.data}
+              id="userId"
+              rowSelection={rowSelection}
             />
           </div>
         </div>
@@ -330,6 +336,20 @@ const Users = () => {
         cls="custom_ant_modal"
       >
         <ChangeUserPassword rowData={rowData} setOpenPasswordModal={setOpenPasswordModal} />
+      </GbModal>
+      {/*Bulk assign permission modal  */}
+      <GbModal
+        isModalOpen={openAssignPermissionModal}
+        openModal={() => setOpenAssignPermissionModal(true)}
+        closeModal={() => setOpenAssignPermissionModal(false)}
+        clseTab={false}
+        width="560px"
+        cls="custom_ant_modal"
+      >
+        <AssignUserPermission
+          selectedUsers={data?.data?.filter((u: any) => selectedUserIds.includes(u.userId)) || []}
+          onClose={() => setOpenAssignPermissionModal(false)}
+        />
       </GbModal>
     </>
   );
