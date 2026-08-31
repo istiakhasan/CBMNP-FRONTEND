@@ -1,8 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState, useMemo } from "react";
-import { Button, Pagination, Select } from "antd";
+import { useEffect, useMemo, useState } from "react";
+import { Button, Input, Pagination, Select } from "antd";
+import { debounce } from "lodash";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
@@ -25,29 +26,54 @@ const Page = () => {
   const [warehouseId, setwarehouseId] = useState("");
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
+  const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
   const query = useMemo(
-    () => ({ page, limit: size, searchProducts: searchTerm }),
-    [page, size, searchTerm]
+    () => ({ page, limit: size, searchProducts: searchTerm, warehouseId }),
+    [page, size, searchTerm, warehouseId],
   );
-  const { data: warehouseOptions,isLoading } = useLoadAllWarehouseOptionsQuery(undefined);
 
+  const { data: warehouseOptions, isLoading } =
+    useLoadAllWarehouseOptionsQuery(undefined);
 
   const { data: inventoryData, isLoading: inventoryLoading } =
     useLoadAllInventoryQuery(query, { skip: tab !== "stock" });
 
   const { data: warehouseData, isLoading: warehouseLoading } =
-    useWarehouseWiseProductStockQuery(
-      { ...query, warehouseId: warehouseId },
-      { skip: tab !== "wws" }
-    );
+    useWarehouseWiseProductStockQuery(query, { skip: tab !== "wws" });
 
   const { data: transactionData, isLoading: transactionLoading } =
     useLoadAllTransactionQuery(query, { skip: tab !== "logs" });
 
   const router = useRouter();
   const local = useLocale();
+
+  const debouncedSetSearch = useMemo(
+    () =>
+      debounce((value: string) => {
+        setPage(1);
+        setSearchTerm(value);
+      }, 400),
+    [],
+  );
+
+  useEffect(() => {
+    return () => debouncedSetSearch.cancel();
+  }, [debouncedSetSearch]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchInput(value);
+    debouncedSetSearch(value);
+  };
+
+  const handleReset = () => {
+    setPage(1);
+    setSearchInput("");
+    setSearchTerm("");
+    setwarehouseId("");
+  };
 
   const { columns, data, loading } = useMemo(() => {
     switch (tab) {
@@ -80,8 +106,8 @@ const Page = () => {
     transactionLoading,
   ]);
 
-  if(warehouseLoading || isLoading){
-    return
+  if (warehouseLoading || isLoading) {
+    return null;
   }
 
   return (
@@ -114,13 +140,10 @@ const Page = () => {
         {/* Table */}
         <div className="gb_border">
           <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
-            <div className="flex gap-2 ">
+            <div className="flex gap-2">
               <div
                 className="border p-2 h-[35px] w-[35px] flex items-center justify-center cursor-pointer"
-                onClick={() => {
-                  setPage(1);
-                  setSearchTerm("");
-                }}
+                onClick={handleReset}
               >
                 <i
                   style={{ fontSize: "24px" }}
@@ -132,15 +155,26 @@ const Page = () => {
                 <Select
                   style={{ width: "200px" }}
                   placeholder="Filter by Warehouse"
+                  value={warehouseId || undefined}
                   options={[
                     { label: "All", value: "" },
                     ...warehouseOptions?.data,
                   ]}
                   onChange={(e) => {
+                    setPage(1);
                     setwarehouseId(e);
                   }}
                 />
               </div>
+              {tab === "stock" && (
+                <Input
+                  placeholder="Search by product name or code"
+                  allowClear
+                  style={{ width: "240px" }}
+                  value={searchInput}
+                  onChange={handleSearchChange}
+                />
+              )}
             </div>
 
             <Pagination
@@ -149,8 +183,8 @@ const Page = () => {
                 tab === "stock"
                   ? inventoryData?.total
                   : tab === "wws"
-                  ? warehouseData?.total
-                  : transactionData?.total
+                    ? warehouseData?.total
+                    : transactionData?.total
               }
               current={page}
               onChange={(p, s) => {
@@ -171,8 +205,8 @@ const Page = () => {
                 tab === "stock"
                   ? inventoryData?.total
                   : tab === "wws"
-                  ? warehouseData?.total
-                  : transactionData?.total
+                    ? warehouseData?.total
+                    : transactionData?.total
               }
               onPaginationChange={(p, s) => {
                 setPage(p);
