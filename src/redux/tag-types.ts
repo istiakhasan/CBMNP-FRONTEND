@@ -21,7 +21,15 @@ export enum tagTypes {
       procurements="procurements",
       deliveryPartner="deliveryPartner",
       dashboard="dashboard",
-
+      accounting="accounting",
+      finance="finance",
+      inventoryOperations="inventoryOperations",
+      purchaseReturns="purchaseReturns",
+      salesOperations="salesOperations",
+      hrPayroll="hrPayroll",
+      logisticsOperations="logisticsOperations",
+      governance="governance",
+      notifications="notifications",
   }
   
   export const tagTypesList = [
@@ -47,4 +55,13 @@ export enum tagTypes {
     tagTypes.procurements,
     tagTypes.deliveryPartner,
     tagTypes.dashboard,
+    tagTypes.accounting,
+    tagTypes.finance,
+    tagTypes.inventoryOperations,
+    tagTypes.purchaseReturns,
+    tagTypes.salesOperations,
+    tagTypes.hrPayroll,
+    tagTypes.logisticsOperations,
+    tagTypes.governance,
+    tagTypes.notifications,
   ];

@@ -138,10 +138,173 @@ const GbSidebar = () => {
       icon: "ri-computer-line",
     },
     {
+      href: "/accounting",
+      title: "Accounting",
+      icon: "ri-money-dollar-circle-line",
+      children: [
+        {
+          href: "/accounting/chart-of-accounts",
+          title: "Chart of Accounts",
+        },
+        {
+          href: "/accounting/journal-entries",
+          title: "Journal Vouchers",
+        },
+        {
+          href: "/accounting/general-ledger",
+          title: "General Ledger",
+        },
+        {
+          href: "/accounting/trial-balance",
+          title: "Trial Balance",
+        },
+        {
+          href: "/accounting/profit-loss",
+          title: "Profit & Loss",
+        },
+        {
+          href: "/accounting/balance-sheet",
+          title: "Balance Sheet",
+        },
+      ],
+    },
+    {
+      href: "/finance",
+      title: "Finance & Banking",
+      icon: "ri-bank-card-line",
+      children: [
+        {
+          href: "/finance/bank-accounts",
+          title: "Bank & MFS Accounts",
+        },
+        {
+          href: "/finance/expenses",
+          title: "Expenses",
+        },
+        {
+          href: "/finance/fund-transfer",
+          title: "Fund Transfers",
+        },
+        {
+          href: "/finance/customer-aging",
+          title: "Customer Aging (AR)",
+        },
+        {
+          href: "/finance/supplier-bills",
+          title: "Supplier Bills (AP)",
+        },
+      ],
+    },
+    {
+      href: "/inventory-ops",
+      title: "Inventory Ops",
+      icon: "ri-store-3-line",
+      children: [
+        {
+          href: "/inventory/transfers",
+          title: "Stock Transfers",
+        },
+        {
+          href: "/inventory/adjustments",
+          title: "Stock Adjustments",
+        },
+        {
+          href: "/inventory/valuation",
+          title: "Valuation & Low Stock",
+        },
+      ],
+    },
+    {
+      title: "Procurement Ops",
+      icon: "ri-shopping-bag-3-line",
+      children: [
+        {
+          href: "/procurement/returns",
+          title: "Purchase Returns",
+        },
+        {
+          href: "/procurement/grn",
+          title: "Goods Receipt (GRN)",
+        },
+      ],
+    },
+    {
+      title: "Sales Ops & POS",
+      icon: "ri-shopping-cart-2-line",
+      children: [
+        {
+          href: "/sales/quotations",
+          title: "Quotations / Estimates",
+        },
+        {
+          href: "/sales/coupons",
+          title: "Coupons & Promos",
+        },
+        {
+          href: "/pos-session",
+          title: "POS Register Shifts",
+        },
+      ],
+    },
+    {
+      title: "HR & Payroll",
+      icon: "ri-user-star-line",
+      children: [
+        {
+          href: "/hr/employees",
+          title: "Employee Directory",
+        },
+        {
+          href: "/hr/attendance",
+          title: "Daily Attendance",
+        },
+        {
+          href: "/hr/payroll",
+          title: "Monthly Payroll",
+        },
+      ],
+    },
+    {
+      title: "Logistics Ops",
+      icon: "ri-truck-line",
+      children: [
+        {
+          href: "/logistics/routing",
+          title: "Courier Routing Rules",
+        },
+        {
+          href: "/logistics/settlements",
+          title: "COD Settlements",
+        },
+      ],
+    },
+    {
+      title: "Governance & Audit",
+      icon: "ri-shield-check-line",
+      children: [
+        {
+          href: "/governance/branches",
+          title: "Branches & Outlets",
+        },
+        {
+          href: "/governance/audit-logs",
+          title: "System Audit Trail",
+        },
+        {
+          href: "/settings/notifications",
+          title: "SMS & Notifications",
+        },
+      ],
+    },
+    {
       href: "/reports",
       title: "Reports",
       icon: "ri-folder-chart-line",
       children: [
+        {
+          href: "/reports",
+          title: "Reports Hub (All)",
+        },
         {
           href: "/reports/sales-reports",
           title: "Sales Reports",
@@ -149,6 +312,30 @@ const GbSidebar = () => {
         {
           href: "/reports/product-sales-report",
           title: "Product Sales Reports",
+        },
+        {
+          href: "/reports/area-sales-report",
+          title: "Area & Regional Sales",
+        },
+        {
+          href: "/reports/inventory-valuation-report",
+          title: "Inventory Valuation & Aging",
+        },
+        {
+          href: "/reports/customer-aging-report",
+          title: "Customer Aging (AR)",
+        },
+        {
+          href: "/reports/supplier-aging-report",
+          title: "Supplier Bills Aging (AP)",
+        },
+        {
+          href: "/reports/expense-analysis-report",
+          title: "Operating Expense Analysis",
+        },
+        {
+          href: "/reports/courier-reconciliation-report",
+          title: "Courier COD Reconciliation",
         },
         {
           href: "/reports/customer-retention-report",
@@ -160,7 +347,7 @@ const GbSidebar = () => {
         },
         {
           href: "/reports/shipment-report",
-          title: "Shipment Report"
+          title: "Shipment Report",
         },
       ],
     },

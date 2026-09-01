@@ -60,7 +60,9 @@ const DonutChart: React.FC = () => {
               show: true,
               label: "Total",
               formatter: function (w: any) {
-                return w.globals.seriesTotals
+                const totals = w?.globals?.seriesTotals;
+                if (!totals || !Array.isArray(totals) || totals.length === 0) return "0";
+                return totals
                   .reduce((a: number, b: number) => a + b, 0)
                   .toLocaleString();
               },
@@ -98,7 +100,6 @@ const DonutChart: React.FC = () => {
     Hold: "#9C27B0",
     Packing: "#3F51B5",
     ["In-transit"]: "#00BCD4",
-    // Add more status-color pairs as needed
   };
 
   useEffect(() => {
@@ -109,10 +110,10 @@ const DonutChart: React.FC = () => {
 
       const chartLabels = filtered.map((item: OrderDataItem) => item.label);
       const chartSeries = filtered.map((item: OrderDataItem) =>
-        parseInt(item.count, 10)
+        parseInt(item.count, 10) || 0
       );
       const chartColors = chartLabels.map(
-        (label:any) => statusColorMap[label] || "#CCCCCC" // fallback color
+        (label: any) => statusColorMap[label] || "#CCCCCC"
       );
 
       setLabels(chartLabels);
@@ -127,7 +128,19 @@ const DonutChart: React.FC = () => {
   }, [statusDistribution, isLoading]);
 
   if (isLoading) {
-    return <p>Loading chart...</p>;
+    return (
+      <div className="h-64 flex items-center justify-center text-gray-400 text-sm">
+        Loading status distribution...
+      </div>
+    );
+  }
+
+  if (!series || series.length === 0) {
+    return (
+      <div className="h-64 flex items-center justify-center text-gray-400 text-sm">
+        No order status data available
+      </div>
+    );
   }
 
   return (

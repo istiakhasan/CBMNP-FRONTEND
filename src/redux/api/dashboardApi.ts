@@ -44,21 +44,30 @@ export const dashboardApi = baseApi.injectEndpoints({
       providesTags: [tagTypes.dashboard],
     }),
     getAgentDashboardSummary: build.query({
-  query: (arg) => ({
-    url: "/dashboard/agent-summary",
-    method: "GET",
-    params: arg,
-  }),
-  providesTags: [tagTypes.dashboard],
-}),
+      query: (arg) => ({
+        url: "/dashboard/agent-summary",
+        method: "GET",
+        params: arg,
+      }),
+      providesTags: [tagTypes.dashboard],
+    }),
+    getAreaDistribution: build.query({
+      query: (params) => ({
+        url: "/dashboard/area-distribution",
+        method: "GET",
+        params,
+      }),
+      providesTags: [tagTypes.dashboard],
+    }),
   }),
 });
 
 export const {
-    useGetMonthlySalesReportQuery,
-    useGetDashboardSummaryQuery,
-    useStatusDistributionQuery,
-    usePartnerDistributionQuery,
-    useTopSellingProductsQuery,
-    useGetAgentDashboardSummaryQuery
+  useGetMonthlySalesReportQuery,
+  useGetDashboardSummaryQuery,
+  useStatusDistributionQuery,
+  usePartnerDistributionQuery,
+  useTopSellingProductsQuery,
+  useGetAgentDashboardSummaryQuery,
+  useGetAreaDistributionQuery,
 } = dashboardApi;

@@ -63,7 +63,9 @@ const DeliveryPartner: React.FC = () => {
               show: false,
               label: "Total",
               formatter: function (w: any) {
-                return w.globals.seriesTotals
+                const totals = w?.globals?.seriesTotals;
+                if (!totals || !Array.isArray(totals) || totals.length === 0) return "0";
+                return totals
                   .reduce((a: number, b: number) => a + b, 0)
                   .toLocaleString();
               },
@@ -94,7 +96,7 @@ const DeliveryPartner: React.FC = () => {
       );
       const chartLabels = filtered.map((item: OrderDataItem) => item.label);
       const chartSeries = filtered.map((item: OrderDataItem) =>
-        parseInt(item.count, 10)
+        parseInt(item.count, 10) || 0
       );
 
       setLabels(chartLabels);
@@ -108,12 +110,27 @@ const DeliveryPartner: React.FC = () => {
   }, [statusDistribution, isLoading]);
 
   if (isLoading) {
-    return <p>Loading chart...</p>;
+    return (
+      <div className="h-64 flex items-center justify-center text-gray-400 text-sm">
+        Loading delivery partners...
+      </div>
+    );
+  }
+
+  if (!series || series.length === 0) {
+    return (
+      <div>
+        <h1 className="text-[16px] font-bold leading-none mb-4">Delivery Partners</h1>
+        <div className="h-64 flex items-center justify-center text-gray-400 text-sm">
+          No courier partner data available
+        </div>
+      </div>
+    );
   }
 
   return (
     <div>
-     <h1 className="text-[16px]  font-bold  leading-none">Delivery Partners</h1>
+      <h1 className="text-[16px] font-bold leading-none">Delivery Partners</h1>
       <ReactApexChart
         options={options}
         series={series}

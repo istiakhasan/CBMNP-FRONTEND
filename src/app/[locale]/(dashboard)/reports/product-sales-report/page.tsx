@@ -9,6 +9,7 @@ import {
   Spin,
   Input,
   Select,
+  Space,
 } from "antd";
 import React, { useEffect, useState, useMemo } from "react";
 import dayjs, { Dayjs } from "dayjs";
@@ -18,6 +19,7 @@ import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
 import { useGetDeliveryPartnerOptionsQuery } from "@/redux/api/partnerApi";
 import { useGetAllProductQuery } from "@/redux/api/productApi";
 import ProductSalesReportTable from "./_component/ProductSalesReportTable";
+import { FilterOutlined, PrinterOutlined, ReloadOutlined } from "@ant-design/icons";
 
 const { RangePicker } = DatePicker;
 
@@ -26,13 +28,14 @@ const DATE_FIELD_OPTIONS = [
   { label: "In-transit Date", value: "intransitTime" },
   { label: "Store Date", value: "storeTime" },
   { label: "Packing Date", value: "packingTime" },
+  { label: "Approved Date", value: "approvedTime" },
 ];
 
 const Page = () => {
   const today = dayjs();
   const [startDate, setStartDate] = useState<Dayjs | null>(today);
   const [endDate, setEndDate] = useState<Dayjs | null>(today);
-  const [dateField, setDateField] = useState<string>("intransitTime");
+  const [dateField, setDateField] = useState<string>("createdAt");
   const [status, setStatus] = useState<any>([]);
   const [orderSources, setOrderSources] = useState<any>([]);
   const [agentIds, setAgentId] = useState<any>([]);
@@ -60,26 +63,27 @@ const Page = () => {
   const filteredProducts = useMemo(() => {
     if (!productsData?.data) return [];
     return productsData.data.filter((p: any) =>
-      p.name.toLowerCase().includes(productSearch.toLowerCase())
+      (p.name || "").toLowerCase().includes(productSearch.toLowerCase()) ||
+      (p.sku || "").toLowerCase().includes(productSearch.toLowerCase())
     );
   }, [productsData, productSearch]);
 
   const statusSelectOptions = useMemo(
-    () => [{ label: "All", value: "all" }, ...(statusOptions?.data || [])],
+    () => [{ label: "All Statuses", value: "all" }, ...(statusOptions?.data || [])],
     [statusOptions?.data]
   );
 
   const handleStartChange = (date: Dayjs | null) => {
-    if (endDate && date && endDate.diff(date, "month", true) > 1) {
-      message.error("Date range cannot be more than 1 month");
+    if (endDate && date && endDate.diff(date, "month", true) > 3) {
+      message.error("Date range cannot be more than 3 months");
       return;
     }
     setStartDate(date);
   };
 
   const handleEndChange = (date: Dayjs | null) => {
-    if (startDate && date && date.diff(startDate, "month", true) > 1) {
-      message.error("Date range cannot be more than 1 month");
+    if (startDate && date && date.diff(startDate, "month", true) > 3) {
+      message.error("Date range cannot be more than 3 months");
       return;
     }
     setEndDate(date);
@@ -98,67 +102,62 @@ const Page = () => {
     setLoading(true);
     try {
       const result = await loadProcurement({
-        startDate: selectedStartDate ? dayjs(selectedStartDate).toISOString() : today.toISOString(),
-        endDate: selectedEndDate ? dayjs(selectedEndDate).toISOString() : today.toISOString(),
-        statusId: selectedStatus,
-        agentIds,
-        locationId: warehosueIds,
-        currier: courierIds,
-        paymentMethodIds: paymentMethodIds,
-        orderSources,
-        productId: productIds,
+        startDate: selectedStartDate ? selectedStartDate.format("YYYY-MM-DD") : today.format("YYYY-MM-DD"),
+        endDate: selectedEndDate ? selectedEndDate.format("YYYY-MM-DD") : today.format("YYYY-MM-DD"),
+        statusId: selectedStatus && selectedStatus.length && selectedStatus[0] !== "all" ? selectedStatus : undefined,
+        agentIds: agentIds?.length ? agentIds : undefined,
+        locationId: warehosueIds?.length ? warehosueIds : undefined,
+        currier: courierIds?.length ? courierIds : undefined,
+        paymentMethodIds: paymentMethodIds?.length ? paymentMethodIds : undefined,
+        orderSources: orderSources?.length ? orderSources : undefined,
+        productId: productIds?.length ? productIds : undefined,
         dateField: selectedDateField,
       }).unwrap();
       setData(result);
       setIsFilterOpen(false);
     } catch (error) {
       console.log(error);
+      message.error("Failed to load product sales report");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    const inTransitStatus = statusOptions?.data?.find(
-      (item: any) => item?.label === "In-transit"
-    );
-
-    if (!inTransitStatus || status.length) return;
-
-    const defaultStatus = [inTransitStatus.value];
-    setStatus(defaultStatus);
     handleApplyFilter({
       startDate: today,
       endDate: today,
-      status: defaultStatus,
+      status: [],
+      dateField: "createdAt",
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusOptions?.data]);
+  }, []);
 
   const handleResetFilters = () => {
-    const inTransitStatus = statusOptions?.data?.find(
-      (item: any) => item?.label === "In-transit"
-    );
-    const defaultStatus = inTransitStatus ? [inTransitStatus.value] : [];
-
     setStartDate(today);
     setEndDate(today);
-    setDateField("intransitTime");
-    setStatus(defaultStatus);
+    setDateField("createdAt");
+    setStatus([]);
     setOrderSources([]);
     setAgentId([]);
     setWarehouseId([]);
     setCourierId([]);
     setProductIds([]);
     setProductSearch("");
+    handleApplyFilter({
+      startDate: today,
+      endDate: today,
+      status: [],
+      dateField: "createdAt",
+    });
   };
 
   const handleRangeChange = (dates: null | [Dayjs | null, Dayjs | null]) => {
     const from = dates?.[0] || null;
     const to = dates?.[1] || null;
 
-    if (from && to && to.diff(from, "month", true) > 1) {
-      message.error("Date range cannot be more than 1 month");
+    if (from && to && to.diff(from, "month", true) > 3) {
+      message.error("Date range cannot be more than 3 months");
       return;
     }
 
@@ -182,18 +181,17 @@ const Page = () => {
   };
 
   return (
-    <div>
-      <GbHeader title="Product Sales report" />
-      <div className="p-[16px]">
-        {/* Action Buttons */}
-        <div className="flex gap-2 justify-between items-center flex-wrap my-4">
-          <div className="flex gap-2 flex-wrap">
+    <div className="custom_scroll">
+      <GbHeader title="Product Sales Analytics Report" />
+      <div className="p-4 md:p-6 space-y-4 max-w-7xl mx-auto">
+        {/* Action Toolbar */}
+        <div className="flex justify-between items-center flex-wrap gap-3 bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+          <div className="flex gap-2 flex-wrap items-center">
             <Select
-              className="border_less_select"
+              className="w-44"
               placeholder="Date type"
               value={dateField}
               onChange={handleDateFieldChange}
-              style={{ width: 200, borderRadius: 0 }}
               options={DATE_FIELD_OPTIONS}
             />
             <RangePicker
@@ -202,35 +200,44 @@ const Page = () => {
               className="min-w-[260px]"
             />
             <Select
-              className="border_less_select"
-              placeholder="Select status"
+              className="w-52"
+              placeholder="Filter status"
               value={status?.[0] || "all"}
               onChange={handleStatusChange}
-              style={{ width: 250, borderRadius: 0 }}
               options={statusSelectOptions}
               loading={statusLoading}
-              allowClear
             />
           </div>
-          <div className="flex gap-2">
+          <Space>
             <Button
-              onClick={() => setIsFilterOpen(true)}
-              className="bg-primary text-white"
+              icon={<ReloadOutlined />}
+              onClick={() => handleApplyFilter()}
+              loading={loading || reportLoading}
             >
-              Filter
+              Refresh
             </Button>
-            <Button loading={reportLoading} className="bg-primary text-white">
-              Print
+            <Button
+              icon={<FilterOutlined />}
+              onClick={() => setIsFilterOpen(true)}
+              type="primary"
+            >
+              Advanced Filters
             </Button>
-          </div>
+            <Button
+              icon={<PrinterOutlined />}
+              onClick={() => window.print()}
+            >
+              Print Report
+            </Button>
+          </Space>
         </div>
 
         {/* Filter Modal */}
         <Modal
-          title="Filter Reports"
+          title="Advanced Product Sales Filters"
           open={isFilterOpen}
           onCancel={() => setIsFilterOpen(false)}
-          width={600}
+          width={650}
           footer={[
             <Button key="reset" onClick={handleResetFilters}>
               Reset
@@ -256,32 +263,37 @@ const Page = () => {
               statusLoading
             }
           >
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 max-h-[500px] overflow-y-auto pr-2">
               {/* Dates */}
-              <div className="flex gap-2">
-                <DatePicker
-                  placeholder="From Date"
-                  value={startDate}
-                  onChange={handleStartChange}
-                  className="w-full"
-                />
-                <DatePicker
-                  placeholder="To Date"
-                  value={endDate}
-                  onChange={handleEndChange}
-                  className="w-full"
-                />
+              <div>
+                <h4 className="mb-2 font-medium text-sm text-gray-700">Date Range</h4>
+                <div className="flex gap-2">
+                  <DatePicker
+                    placeholder="From Date"
+                    value={startDate}
+                    onChange={handleStartChange}
+                    className="w-full"
+                  />
+                  <DatePicker
+                    placeholder="To Date"
+                    value={endDate}
+                    onChange={handleEndChange}
+                    className="w-full"
+                  />
+                </div>
               </div>
 
               {/* Order Sources */}
               <div>
-                <h4 className="mb-2 font-medium">Order Sources</h4>
+                <h4 className="mb-2 font-medium text-sm text-gray-700">Order Sources</h4>
                 <Checkbox.Group
                   options={[
                     { label: "Facebook", value: "Facebook" },
-                    { label: "Whats App", value: "Whats App" },
-                    { label: "In coming call", value: "In coming call" },
+                    { label: "WhatsApp", value: "WhatsApp" },
+                    { label: "Incoming Call", value: "Incoming Call" },
                     { label: "Telesales", value: "Telesales" },
+                    { label: "Website", value: "Website" },
+                    { label: "POS Counter", value: "POS" },
                   ]}
                   value={orderSources}
                   onChange={setOrderSources}
@@ -290,53 +302,41 @@ const Page = () => {
 
               {/* Delivery Partners */}
               <div>
-                <h4 className="mb-2 font-medium">Delivery Partners</h4>
+                <h4 className="mb-2 font-medium text-sm text-gray-700">Delivery Partners</h4>
                 <Checkbox.Group
                   options={deliveryPartner?.data?.map((item: any) => ({
-                    label: item.label,
-                    value: item.value,
+                    label: item.label || item.partnerName || item.name,
+                    value: item.value || item.id,
                   }))}
                   value={courierIds}
                   onChange={setCourierId}
                 />
               </div>
+
+              {/* Warehouses */}
+              <div>
+                <h4 className="mb-2 font-medium text-sm text-gray-700">Warehouse Outlets</h4>
+                <Checkbox.Group
+                  options={warehouseOptions?.data?.map((item: any) => ({
+                    label: item.label || item.name,
+                    value: item.value || item.id,
+                  }))}
+                  value={warehosueIds}
+                  onChange={setWarehouseId}
+                />
+              </div>
+
               {/* Payment Methods */}
               <div>
-                <h4 className="mb-2 font-medium">Payment Methods</h4>
+                <h4 className="mb-2 font-medium text-sm text-gray-700">Payment Methods</h4>
                 <Checkbox.Group
                   options={[
-                    {
-                      label: "COD",
-                      value: "COD",
-                    },
-                    {
-                      label: "Bkash Personal",
-                      value: "Bkash Personal",
-                    },
-                    {
-                      label: "Bkash Agent",
-                      value: "Bkash Agent",
-                    },
-                    {
-                      label: "Bkash Merchant",
-                      value: "Bkash Merchant",
-                    },
-                    {
-                      label: "Bkash GB-Agent",
-                      value: "Bkash GB-Agent",
-                    },
-                    {
-                      label: "sslcommerze",
-                      value: "sslcommerze",
-                    },
-                    {
-                      label: "Nagad(nur)",
-                      value: "Nagad(nur)",
-                    },
-                    {
-                      label: "Bank Payment",
-                      value: "Bank Payment",
-                    },
+                    { label: "COD", value: "COD" },
+                    { label: "bKash", value: "bKash" },
+                    { label: "Nagad", value: "Nagad" },
+                    { label: "Rocket", value: "Rocket" },
+                    { label: "Bank Payment", value: "Bank Payment" },
+                    { label: "POS Cash", value: "Cash" },
                   ]}
                   value={paymentMethodIds}
                   onChange={setPaymentMethodIds}
@@ -344,40 +344,34 @@ const Page = () => {
               </div>
 
               {/* Products with search */}
-              <div className="max-h-[250px] overflow-y-auto border p-2 rounded">
-                <h4 className="mb-2 font-medium">Products</h4>
+              <div className="border border-gray-200 p-3 rounded-lg bg-gray-50">
+                <h4 className="mb-2 font-medium text-sm text-gray-700">Specific Products</h4>
                 <Input
-                  placeholder="Search product..."
+                  placeholder="Search by product name or SKU..."
                   value={productSearch}
                   onChange={(e) => setProductSearch(e.target.value)}
                   className="mb-2"
+                  allowClear
                 />
-                <Checkbox.Group
-                  options={filteredProducts.map((item: any) => ({
-                    label: item.name,
-                    value: item.id,
-                  }))}
-                  value={productIds}
-                  onChange={setProductIds}
-                />
+                <div className="max-h-[160px] overflow-y-auto">
+                  <Checkbox.Group
+                    options={filteredProducts.map((item: any) => ({
+                      label: `${item.name} (${item.sku || "N/A"})`,
+                      value: item.id,
+                    }))}
+                    value={productIds}
+                    onChange={setProductIds}
+                  />
+                </div>
               </div>
             </div>
           </Spin>
         </Modal>
 
-        {/* Table */}
+        {/* Table & Analytics */}
         <ProductSalesReportTable
           reports={data}
-          startDate={startDate}
-          endDate={endDate}
-          setData={setData}
-          status={status}
-          orderSources={orderSources}
-          agentIds={agentIds}
-          warehosueIds={warehosueIds}
-          courierIds={courierIds}
-          paymentMethodIds={paymentMethodIds}
-          productIds={productIds}
+          loading={loading || reportLoading}
         />
       </div>
     </div>

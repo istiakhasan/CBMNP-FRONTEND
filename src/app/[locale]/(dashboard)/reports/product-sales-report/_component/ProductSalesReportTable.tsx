@@ -1,162 +1,309 @@
 "use client";
-import moment from "moment";
 import React from "react";
+import { Card, Table, Tag, Row, Col, Statistic, Spin } from "antd";
+import {
+  ShoppingOutlined,
+  DollarOutlined,
+  CarOutlined,
+  CheckCircleOutlined,
+  BarcodeOutlined,
+} from "@ant-design/icons";
+import dayjs from "dayjs";
 
-const ProductSalesReportTable = ({ reports }: any) => {
+interface ProductSalesReportTableProps {
+  reports: any;
+  loading?: boolean;
+}
+
+const ProductSalesReportTable: React.FC<ProductSalesReportTableProps> = ({
+  reports,
+  loading = false,
+}) => {
   const summary = reports?.summary || {};
+  const data: any[] = reports?.data || [];
+
   const formatAmount = (value: any) =>
     Number(value || 0).toLocaleString("en-BD", {
-      minimumFractionDigits: 0,
+      minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
 
-  const summaryItems = [
-    { label: "Products Sold", value: summary?.totalProductQuantity || 0 },
-    { label: "Orders", value: summary?.totalOrders || 0 },
-    { label: "Courier Orders", value: summary?.courierOrderCount || 0 },
-    { label: "Paid Amount", value: formatAmount(summary?.paidAmount) },
-    { label: "Sales Amount", value: formatAmount(summary?.salesAmount) },
-    { label: "Order Amount", value: formatAmount(summary?.totalOrderAmount) },
+  const totalRevenue = Number(summary?.salesAmount || 0);
+
+  const columns: any = [
+    {
+      title: "Product",
+      dataIndex: "productName",
+      key: "productName",
+      render: (name: string, record: any) => (
+        <div>
+          <span className="font-bold text-gray-900 block">{name || "Product"}</span>
+          {record.sku && (
+            <span className="text-xs text-gray-400 font-mono flex items-center gap-1">
+              <BarcodeOutlined /> SKU: {record.sku}
+            </span>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: "Order Source",
+      dataIndex: "orderSource",
+      key: "orderSource",
+      align: "center" as const,
+      render: (source: string) => {
+        let color = "blue";
+        if (source === "Facebook") color = "geekblue";
+        if (source === "WhatsApp") color = "green";
+        if (source === "POS") color = "purple";
+        if (source === "Website") color = "cyan";
+        return <Tag color={color}>{source || "Direct"}</Tag>;
+      },
+    },
+    {
+      title: "Quantity Sold",
+      dataIndex: "totalOrderQuantity",
+      key: "totalOrderQuantity",
+      align: "center" as const,
+      sorter: (a: any, b: any) =>
+        Number(a.totalOrderQuantity || 0) - Number(b.totalOrderQuantity || 0),
+      render: (qty: number) => (
+        <span className="font-extrabold text-blue-700">{Number(qty || 0).toLocaleString()} pcs</span>
+      ),
+    },
+    {
+      title: "Avg Unit Price",
+      dataIndex: "price",
+      key: "price",
+      align: "right" as const,
+      render: (p: number) => `৳ ${formatAmount(p)}`,
+    },
+    {
+      title: "Total Revenue (Tk)",
+      dataIndex: "totalSaleAmount",
+      key: "totalSaleAmount",
+      align: "right" as const,
+      sorter: (a: any, b: any) =>
+        Number(a.totalSaleAmount || 0) - Number(b.totalSaleAmount || 0),
+      render: (amt: number) => (
+        <span className="font-extrabold text-emerald-700">
+          ৳ {formatAmount(amt)}
+        </span>
+      ),
+    },
+    {
+      title: "Orders Count",
+      dataIndex: "orderCount",
+      key: "orderCount",
+      align: "center" as const,
+      sorter: (a: any, b: any) =>
+        Number(a.orderCount || 0) - Number(b.orderCount || 0),
+      render: (cnt: number) => (
+        <Tag color="default" className="font-semibold">
+          {Number(cnt || 0).toLocaleString()} Orders
+        </Tag>
+      ),
+    },
+    {
+      title: "Revenue Share",
+      key: "share",
+      align: "right" as const,
+      render: (_: any, record: any) => {
+        const val = Number(record.totalSaleAmount || 0);
+        const percent = totalRevenue > 0 ? ((val / totalRevenue) * 100).toFixed(1) : "0.0";
+        return <span className="text-xs font-bold text-gray-500">{percent}%</span>;
+      },
+    },
+  ];
+
+  const courierColumns: any = [
+    {
+      title: "Courier Partner",
+      dataIndex: "courierName",
+      key: "courierName",
+      render: (name: string) => (
+        <div className="flex items-center gap-2">
+          <CarOutlined className="text-orange-500" />
+          <span className="font-bold text-gray-800">{name || "Unassigned"}</span>
+        </div>
+      ),
+    },
+    {
+      title: "Orders Shipped",
+      dataIndex: "orderCount",
+      key: "orderCount",
+      align: "center" as const,
+      render: (cnt: number) => `${Number(cnt || 0).toLocaleString()} Orders`,
+    },
+    {
+      title: "Items Dispatched",
+      dataIndex: "productQuantity",
+      key: "productQuantity",
+      align: "center" as const,
+      render: (qty: number) => `${Number(qty || 0).toLocaleString()} pcs`,
+    },
+    {
+      title: "Sales Dispatched (Tk)",
+      dataIndex: "saleAmount",
+      key: "saleAmount",
+      align: "right" as const,
+      render: (amt: number) => (
+        <span className="font-bold text-emerald-700">৳ {formatAmount(amt)}</span>
+      ),
+    },
   ];
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-        {summaryItems.map((item) => (
-          <div key={item.label} className="border bg-white p-3">
-            <p className="text-[12px] text-gray-500">{item.label}</p>
-            <p className="text-[20px] font-semibold color_primary">{item.value}</p>
-          </div>
-        ))}
-      </div>
+    <Spin spinning={loading}>
+      <div className="space-y-6">
+        {/* KPI Flash Metrics */}
+        <Row gutter={[16, 16]}>
+          <Col xs={24} sm={12} lg={4}>
+            <Card className="rounded-xl border-gray-200 shadow-sm">
+              <Statistic
+                title="Products Sold"
+                value={Number(summary?.totalProductQuantity || 0)}
+                valueStyle={{ fontWeight: 800, color: "#1e40af" }}
+                suffix="pcs"
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} lg={4}>
+            <Card className="rounded-xl border-gray-200 shadow-sm">
+              <Statistic
+                title="Total Orders"
+                value={Number(summary?.totalOrders || 0)}
+                valueStyle={{ fontWeight: 800, color: "#0369a1" }}
+                suffix="orders"
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} lg={4}>
+            <Card className="rounded-xl border-gray-200 shadow-sm bg-emerald-50/30">
+              <Statistic
+                title="Gross Sales"
+                value={Number(summary?.salesAmount || 0)}
+                prefix="৳"
+                precision={2}
+                valueStyle={{ fontWeight: 800, color: "#047857" }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} lg={4}>
+            <Card className="rounded-xl border-gray-200 shadow-sm bg-blue-50/30">
+              <Statistic
+                title="Paid Amount"
+                value={Number(summary?.paidAmount || 0)}
+                prefix="৳"
+                precision={2}
+                valueStyle={{ fontWeight: 800, color: "#1d4ed8" }}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} lg={4}>
+            <Card className="rounded-xl border-gray-200 shadow-sm">
+              <Statistic
+                title="Courier Orders"
+                value={Number(summary?.courierOrderCount || 0)}
+                valueStyle={{ fontWeight: 800, color: "#d97706" }}
+                suffix="orders"
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} lg={4}>
+            <Card className="rounded-xl border-gray-200 shadow-sm">
+              <Statistic
+                title="Distinct Products"
+                value={Number(summary?.totalProducts || data.length)}
+                valueStyle={{ fontWeight: 800, color: "#475569" }}
+                suffix="SKUs"
+              />
+            </Card>
+          </Col>
+        </Row>
 
-      <div className="border bg-white">
-        <div className="bg-[#eeeeee] h-[34px] flex px-3 items-center">
-          <strong>Courier Breakdown</strong>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="report-table">
-            <thead>
-              <tr>
-                <th>Courier</th>
-                <th style={{ textAlign: "center" }}>Order Qty</th>
-                <th style={{ textAlign: "center" }}>Product Qty</th>
-                <th style={{ textAlign: "end" }}>Sales Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {summary?.courierBreakdown?.length ? (
-                summary.courierBreakdown.map((row: any, i: number) => (
-                  <tr key={`${row?.courierId || "unassigned"}-${i}`}>
-                    <td align="center">{row?.courierName || "Unassigned"}</td>
-                    <td style={{ textAlign: "center" }}>{row?.orderCount || 0}</td>
-                    <td style={{ textAlign: "center" }}>{row?.productQuantity || 0}</td>
-                    <td style={{ textAlign: "end" }}>{formatAmount(row?.saleAmount)}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={4} align="center">
-                    No courier data found
-                  </td>
-                </tr>
+        {/* Courier Dispatches Summary */}
+        {summary?.courierBreakdown?.length > 0 && (
+          <Card
+            title={
+              <span className="font-bold text-gray-700 text-sm">
+                Courier Dispatches & Logistics Channel Breakdown
+              </span>
+            }
+            className="rounded-xl border-gray-200 shadow-sm"
+          >
+            <Table
+              dataSource={summary.courierBreakdown}
+              columns={courierColumns}
+              rowKey={(r) => r.courierId || r.courierName || Math.random().toString()}
+              pagination={false}
+              size="small"
+            />
+          </Card>
+        )}
+
+        {/* Product Sales Registry Table */}
+        <Card
+          title={
+            <div className="flex justify-between items-center flex-wrap gap-2">
+              <span className="font-bold text-gray-800 text-base">
+                Itemized Product Sales Breakdown ({data.length} Line Items)
+              </span>
+              {reports?.meta?.startDate && reports?.meta?.endDate && (
+                <span className="text-xs text-gray-500 font-mono">
+                  Period: {dayjs(reports.meta.startDate).format("DD MMM YYYY")} -{" "}
+                  {dayjs(reports.meta.endDate).format("DD MMM YYYY")}
+                </span>
               )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div className="table_wrapper custom_scroll">
-        <div className="bg-[#eeeeee] h-[30px] sticky bottom-0 flex  px-3 justify-between items-center mb-1 gap-[10px]">
-          {reports?.data?.length > 0 && (
-            <div>
-              <strong>
-                {moment(reports?.meta?.startDate).format("DD-MM-YYYY")} To{" "}
-                {moment(reports?.meta?.endDate).format("DD-MM-YYYY")}
-              </strong>
             </div>
-          )}
-          <div>
-            <span>Total Products :</span>
-            <strong>{reports?.meta?.total || 0}</strong>
-          </div>
-        </div>
-        <table className="report-table">
-          <thead>
-            <tr>
-              <th>Product Name</th>
-              <th>Order Source</th>
-              <th style={{ textAlign: "center" }}>Product Qty</th>
-              {/* <th>Product Price</th> */}
-              <th style={{ textAlign: "end" }}>Total Price</th>
-              <th style={{ textAlign: "right" }}>Order Qty</th>
-            </tr>
-          </thead>
-          <tbody>
-            {reports?.data?.map((row: any, i: number) => (
-              <tr key={i}>
-                <td align="center">{row?.productName || "N/A"}</td>
-                <td align="center">{row?.orderSource || "N/A"}</td>
-                <td style={{ textAlign: "center" }}>
-                  {row?.totalOrderQuantity || "N/A"}
-                </td>
-                <td style={{ textAlign: "end" }}>
-                  {formatAmount(row?.totalSaleAmount)}
-                </td>
-                <td style={{ textAlign: "end" }}>{row?.orderCount || "N/A"}</td>
-              </tr>
-            ))}
-            {!reports?.data?.length && (
-              <tr>
-                <td colSpan={5} align="center">
-                  No product sales found
-                </td>
-              </tr>
-            )}
-          </tbody>
-          <tfoot style={{ position: "sticky", bottom: "0" }}>
-            <tr>
-              <th></th>
-              <th></th>
+          }
+          className="rounded-xl border-gray-200 shadow-sm"
+        >
+          <Table
+            dataSource={data}
+            columns={columns}
+            rowKey={(r) => `${r.productId}-${r.orderSource}-${r.sku}`}
+            pagination={{ pageSize: 20, showSizeChanger: true }}
+            scroll={{ x: 800 }}
+            summary={(pageData) => {
+              const totalQty = pageData.reduce(
+                (sum, r) => sum + Number(r.totalOrderQuantity || 0),
+                0
+              );
+              const totalAmount = pageData.reduce(
+                (sum, r) => sum + Number(r.totalSaleAmount || 0),
+                0
+              );
+              const totalOrders = pageData.reduce(
+                (sum, r) => sum + Number(r.orderCount || 0),
+                0
+              );
 
-              <th>
-                <span className="flex justify-center gap-2 font-bold">
-                  <span>Total:</span>
-                  <span>
-                    {reports?.data?.reduce(
-                      (a: any, b: any) => a + b?.totalOrderQuantity,
-                      0
-                    ) || 0}
-                  </span>
-                </span>
-              </th>
-              <th>
-                <span className="flex justify-end gap-2 font-bold">
-                  <span>Total Sales:</span>
-                  <span>
-                    {reports?.data?.reduce(
-                      (a: any, b: any) => a + b?.totalSaleAmount,
-                      0
-                    ) || 0}
-                  </span>
-                </span>
-              </th>
-              <th>
-                <span className="flex justify-end gap-2 font-bold">
-                  <span>Total Orders:</span>
-                  <span>
-                    {reports?.data?.reduce(
-                      (a: any, b: any) => a + b?.orderCount,
-                      0
-                    ) || 0}
-                  </span>
-                </span>
-              </th>
-            </tr>
-          </tfoot>
-        </table>
+              return (
+                <Table.Summary fixed>
+                  <Table.Summary.Row className="bg-gray-50 font-bold">
+                    <Table.Summary.Cell index={0} colSpan={2}>
+                      <span className="text-gray-900 font-bold">Page Total:</span>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={2} align="center">
+                      <span className="text-blue-700 font-bold">{totalQty.toLocaleString()} pcs</span>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={3} />
+                    <Table.Summary.Cell index={4} align="right">
+                      <span className="text-emerald-700 font-bold">৳ {formatAmount(totalAmount)}</span>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={5} align="center">
+                      <span className="text-gray-900 font-bold">{totalOrders.toLocaleString()} Orders</span>
+                    </Table.Summary.Cell>
+                    <Table.Summary.Cell index={6} />
+                  </Table.Summary.Row>
+                </Table.Summary>
+              );
+            }}
+          />
+        </Card>
       </div>
-    </div>
+    </Spin>
   );
 };
 
