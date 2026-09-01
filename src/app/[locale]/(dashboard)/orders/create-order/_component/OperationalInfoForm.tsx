@@ -230,6 +230,10 @@ const totalAmount:number=(cartTotal+deliveryCharge)-paidAmount
                     value: "Bkash GB-Agent",
                   },
                   {
+                    label: "sslcommerze",
+                    value: "sslcommerze",
+                  },
+                  {
                     label: "Nagad(nur)",
                     value: "Nagad(nur)",
                   },

@@ -127,21 +127,105 @@ export default function MinimalAddressSelectionEdit({
   const [updateAddress] = useUpdateAddressMutation();
   const [editingAddressId, setEditingAddressId] = useState<number | null>(null);
 
-  const handleEditAddress = (addr: any) => {
-    setEditingAddressId(addr.id);
+
+const handleEditAddress = async (addr: any) => {
+  setEditingAddressId(addr.id);
+
+  // Basic fields first
+  form.setFieldsValue({
+    label: addr.label,
+    receiverName: addr.receiverName,
+    receiverPhoneNumber: addr.receiverPhoneNumber,
+    address: addr.address,
+    relationship: addr.relationship,
+    isDefault: addr.isDefault,
+  });
+
+  try {
+    // -----------------------------
+    // 1. Find Division
+    // -----------------------------
+    const division = divisionData.find(
+      (d) =>
+        d.name_en?.trim().toLowerCase() ===
+        addr.division?.trim().toLowerCase()
+    );
+
+    if (!division) {
+      console.log("Division not found:", addr.division);
+      return;
+    }
+
+    // Set division
     form.setFieldsValue({
-      label: addr.label,
-      receiverName: addr.receiverName,
-      receiverPhoneNumber: addr.receiverPhoneNumber,
-      address: addr.address,
-      divisionName: addr.division,
-      districtName: addr.district,
-      thanaName: addr.thana,
-      relationship: addr.relationship,
-      isDefault: addr.isDefault,
+      division: division.id,
+      divisionName: division.name_en,
     });
+
+    // -----------------------------
+    // 2. Load Districts
+    // -----------------------------
+    const districtRes = await axios.get(
+      `${getBaseUrl()}/divisions/${division.id}`
+    );
+
+    const districts = districtRes?.data?.district_info || [];
+
+    setDistrictData(districts);
+
+    const district = districts.find(
+      (d: any) =>
+        d.name_en?.trim().toLowerCase() ===
+        addr.district?.trim().toLowerCase()
+    );
+
+    if (!district) {
+      console.log("District not found:", addr.district);
+      setShowAddModal(true);
+      return;
+    }
+
+    // Set district
+    form.setFieldsValue({
+      district: district.id,
+      districtName: district.name_en,
+    });
+
+    // -----------------------------
+    // 3. Load Thanas
+    // -----------------------------
+    const thanaRes = await axios.get(
+      `${getBaseUrl()}/districts/${district.id}`
+    );
+
+    const thanas = thanaRes?.data?.thana_info || [];
+
+    setThanaData(thanas);
+
+    const thana = thanas.find(
+      (t: any) =>
+        t.name_en?.trim().toLowerCase() ===
+        addr.thana?.trim().toLowerCase()
+    );
+
+    if (thana) {
+      form.setFieldsValue({
+        thana: thana.id,
+        thanaName: thana.name_en,
+      });
+    } else {
+      console.log("Thana not found:", addr.thana);
+    }
+
+    // Open modal after all values/options are ready
     setShowAddModal(true);
-  };
+  } catch (error) {
+    console.error("Failed to load address location data:", error);
+    message.error("Location data load করতে সমস্যা হয়েছে");
+    setShowAddModal(true);
+  }
+};
+
 
   const handleSaveAddress = async () => {
     try {
@@ -408,7 +492,8 @@ export default function MinimalAddressSelectionEdit({
                             </Checkbox>
                           </div> */}
                         </div>
-                        <Button
+                       <div>
+                         <Button
                           type="link"
                           icon={<EditOutlined />}
                           onClick={() => handleEditAddress(addr)}
@@ -419,6 +504,7 @@ export default function MinimalAddressSelectionEdit({
                           icon={<DeleteOutlined />}
                           onClick={() => handleDeleteAddress(addr.id)}
                         />
+                       </div>
                       </div>
                     </Card>
                   );

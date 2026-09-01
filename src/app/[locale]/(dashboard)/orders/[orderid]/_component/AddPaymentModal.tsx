@@ -126,6 +126,10 @@ const AddPaymentModal = ({ setModalOpen ,rowData}: any) => {
                     value: "Bkash GB-Agent",
                   },
                   {
+                    label: "sslcommerze",
+                    value: "sslcommerze",
+                  },
+                  {
                     label: "Nagad(nur)",
                     value: "Nagad(nur)",
                   },

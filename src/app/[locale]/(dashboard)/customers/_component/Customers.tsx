@@ -340,6 +340,18 @@ const Customers = () => {
                 label: rowData?.customerType,
                 value: rowData?.customerType,
               },
+              division: {
+                label: rowData?.division,
+                value: rowData?.division,
+              },
+              district: {
+                label: rowData?.district,
+                value: rowData?.district,
+              },
+              thana: {
+                label: rowData?.thana,
+                value: rowData?.thana,
+              },
             }}
           >
             <h1 className="text-[20px]">Edit Customer</h1>

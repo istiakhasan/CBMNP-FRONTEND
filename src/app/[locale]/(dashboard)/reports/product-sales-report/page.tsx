@@ -326,6 +326,10 @@ const Page = () => {
                       value: "Bkash GB-Agent",
                     },
                     {
+                      label: "sslcommerze",
+                      value: "sslcommerze",
+                    },
+                    {
                       label: "Nagad(nur)",
                       value: "Nagad(nur)",
                     },
