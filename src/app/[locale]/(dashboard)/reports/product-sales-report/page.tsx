@@ -181,9 +181,9 @@ const Page = () => {
   };
 
   return (
-    <div className="custom_scroll">
+    <div className="custom_scroll h-screen overflow-auto">
       <GbHeader title="Product Sales Analytics Report" />
-      <div className="p-4 md:p-6 space-y-4 max-w-7xl mx-auto">
+      <div className="p-4 md:p-6 space-y-4  mx-auto">
         {/* Action Toolbar */}
         <div className="flex justify-between items-center flex-wrap gap-3 bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
           <div className="flex gap-2 flex-wrap items-center">

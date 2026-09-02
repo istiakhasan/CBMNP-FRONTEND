@@ -136,7 +136,7 @@ export default function InventoryValuationReport() {
   return (
     <div className="h-screen overflow-auto custom_scroll bg-[#f8fafc]">
       <GbHeader title="Inventory Valuation & Stock Aging Report" />
-      <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+      <div className="p-4 md:p-6 space-y-6  mx-auto">
         {/* Navigation & Controls */}
         <div className="flex flex-wrap justify-between items-center gap-4">
           <Space>

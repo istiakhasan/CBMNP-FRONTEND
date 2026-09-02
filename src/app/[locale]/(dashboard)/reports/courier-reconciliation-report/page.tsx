@@ -197,7 +197,7 @@ export default function CourierReconciliationReport() {
   return (
     <div className="h-screen overflow-auto custom_scroll bg-[#f8fafc]">
       <GbHeader title="Courier COD Remittance & Variance Reconciliation Report" />
-      <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+      <div className="p-4 md:p-6 space-y-6  mx-auto">
         {/* Header with Filters */}
         <div className="flex flex-wrap justify-between items-center gap-4">
           <Space>

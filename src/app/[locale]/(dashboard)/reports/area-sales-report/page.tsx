@@ -48,7 +48,7 @@ export default function AreaSalesReport() {
   }
 
   const { data: areaRes, isLoading } = useGetAreaDistributionQuery(queryParams);
-  const areaData = areaRes?.data || {};
+  const areaData = areaRes || {};
   const areas: any[] = areaData?.areas || [];
 
   const totalOrders = areas.reduce((s, a) => s + Number(a.orders || 0), 0);
@@ -155,7 +155,7 @@ export default function AreaSalesReport() {
   return (
     <div className="h-screen overflow-auto custom_scroll bg-[#f8fafc]">
       <GbHeader title="Geographic & Regional Area-Wise Sales Report" />
-      <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+      <div className="p-4 md:p-6 space-y-6  mx-auto">
         {/* Header */}
         <div className="flex flex-wrap justify-between items-center gap-4">
           <Space>
