@@ -38,7 +38,7 @@ const TopCustomers = ({ summaryData }: { summaryData: any }) => {
               render: (text: string, record: any, i: any) => {
                 return (
                   <span className="font-[500]">
-                    {record?.ordercount || "N/A"}
+                    {record?.orderCount || "N/A"}
                   </span>
                 );
               },
@@ -48,7 +48,7 @@ const TopCustomers = ({ summaryData }: { summaryData: any }) => {
               dataIndex: "sl",
               align: "center",
               render: (text: string, record: any, i: any) => {
-                return <span className="font-[500]">৳ {record?.price}</span>;
+                return <span className="font-[500]">৳ {record?.totalSpent}</span>;
               },
             },
             {
@@ -59,7 +59,7 @@ const TopCustomers = ({ summaryData }: { summaryData: any }) => {
                 return (
                   <span className="font-[500]">
                     {Math.ceil(
-                      Number(record?.price) / +Number(record?.ordercount)
+                      Number(record?.totalSpent) / Number(record?.orderCount || 1)
                     )}
                   </span>
                 );
