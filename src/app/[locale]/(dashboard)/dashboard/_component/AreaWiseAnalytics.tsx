@@ -9,6 +9,7 @@ import {
   Tag,
   Progress,
   Input,
+  Select,
 } from "antd";
 import {
   RiseOutlined,
@@ -27,6 +28,23 @@ interface AreaWiseAnalyticsProps {
   endDate?: string;
 }
 
+// Status list — statusColor ম্যাপিং সহ, UI-তে দেখাতে
+const STATUS_OPTIONS = [
+  { id: 1, label: "Pending", color: "default" },
+  { id: 2, label: "Approved", color: "processing" },
+  { id: 3, label: "Hold", color: "warning" },
+  { id: 4, label: "Cancel", color: "error" },
+  { id: 5, label: "Store", color: "default" },
+  { id: 6, label: "Packing", color: "processing" },
+  { id: 7, label: "In-transit", color: "processing" },
+  { id: 8, label: "Delivered", color: "success" },
+  { id: 9, label: "Unreachable", color: "error" },
+  { id: 10, label: "Returned", color: "error" },
+  { id: 11, label: "Pending-Return", color: "warning" },
+  { id: 12, label: "Partial-Return", color: "warning" },
+  { id: 13, label: "Damage", color: "error" },
+];
+
 export default function AreaWiseAnalytics({
   period = "month",
   startDate,
@@ -34,12 +52,14 @@ export default function AreaWiseAnalytics({
 }: AreaWiseAnalyticsProps) {
   const [level, setLevel] = useState<"division" | "district" | "thana">("division");
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStatuses, setSelectedStatuses] = useState<number[]>([]); // খালি = সব status
 
   const { data: areaRes, isLoading } = useGetAreaDistributionQuery({
     level,
     period,
     startDate,
     endDate,
+    statusId: selectedStatuses.length > 0 ? selectedStatuses.join(",") : undefined,
   });
 
   const areaData = areaRes?.data;
@@ -55,45 +75,21 @@ export default function AreaWiseAnalytics({
   const topGrowingArea = topGrowing[0];
   const topDecliningArea = topDeclining[0];
 
-  // Chart configuration
   const chartAreas = areas.slice(0, 8);
   const chartOptions: any = {
-    chart: {
-      type: "bar",
-      height: 320,
-      toolbar: { show: false },
-    },
+    chart: { type: "bar", height: 320, toolbar: { show: false } },
     plotOptions: {
-      bar: {
-        horizontal: true,
-        borderRadius: 4,
-        barHeight: "60%",
-        distributed: true,
-      },
+      bar: { horizontal: true, borderRadius: 4, barHeight: "60%", distributed: true },
     },
-    colors: [
-      "#3B82F6",
-      "#10B981",
-      "#F59E0B",
-      "#8B5CF6",
-      "#EC4899",
-      "#06B6D4",
-      "#6366F1",
-      "#14B8A6",
-    ],
+    colors: ["#3B82F6", "#10B981", "#F59E0B", "#8B5CF6", "#EC4899", "#06B6D4", "#6366F1", "#14B8A6"],
     dataLabels: {
       enabled: true,
       formatter: (val: number) => `${val} Orders`,
-      style: {
-        fontSize: "11px",
-        fontWeight: "bold",
-      },
+      style: { fontSize: "11px", fontWeight: "bold" },
     },
     xaxis: {
       categories: chartAreas.map((a) => a.area),
-      labels: {
-        formatter: (val: number) => `${val}`,
-      },
+      labels: { formatter: (val: number) => `${val}` },
     },
     tooltip: {
       y: {
@@ -106,12 +102,7 @@ export default function AreaWiseAnalytics({
     legend: { show: false },
   };
 
-  const chartSeries = [
-    {
-      name: "Orders",
-      data: chartAreas.map((a) => a.orders),
-    },
-  ];
+  const chartSeries = [{ name: "Orders", data: chartAreas.map((a) => a.orders) }];
 
   const columns: any = [
     {
@@ -140,12 +131,7 @@ export default function AreaWiseAnalytics({
       render: (orders: number, record: any) => (
         <div>
           <span className="font-bold text-gray-900 block">{orders} Orders</span>
-          <Progress
-            percent={record.sharePercentage}
-            showInfo={false}
-            size="small"
-            strokeColor="#3B82F6"
-          />
+          <Progress percent={record.sharePercentage} showInfo={false} size="small" strokeColor="#3B82F6" />
         </div>
       ),
     },
@@ -155,9 +141,7 @@ export default function AreaWiseAnalytics({
       key: "sales",
       sorter: (a: any, b: any) => a.sales - b.sales,
       render: (sales: number) => (
-        <span className="font-bold text-emerald-700">
-          ৳ {Number(sales || 0).toLocaleString()}
-        </span>
+        <span className="font-bold text-emerald-700">৳ {Number(sales || 0).toLocaleString()}</span>
       ),
     },
     {
@@ -205,7 +189,7 @@ export default function AreaWiseAnalytics({
 
   return (
     <Card className="shadow-sm border-gray-200 rounded-xl" loading={isLoading}>
-      {/* Header with Level Switcher */}
+      {/* Header with Level Switcher + Status Filter */}
       <div className="flex flex-wrap justify-between items-center gap-4 mb-5">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shadow-inner">
@@ -221,7 +205,18 @@ export default function AreaWiseAnalytics({
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <Select
+            mode="multiple"
+            allowClear
+            placeholder="Filter by Status (All)"
+            size="small"
+            className="min-w-[220px]"
+            value={selectedStatuses}
+            onChange={(vals) => setSelectedStatuses(vals)}
+            maxTagCount={2}
+            options={STATUS_OPTIONS.map((s) => ({ value: s.id, label: s.label }))}
+          />
           <Radio.Group
             value={level}
             onChange={(e) => setLevel(e.target.value)}
@@ -235,9 +230,8 @@ export default function AreaWiseAnalytics({
         </div>
       </div>
 
-      {/* KPI Flash Cards: Top Area, Growing Area, Declining Area */}
+      {/* KPI Flash Cards */}
       <Row gutter={[16, 16]} className="mb-5">
-        {/* Highest Volume Area */}
         <Col xs={24} sm={8}>
           <Card size="small" className="bg-blue-50 border-blue-200 rounded-xl">
             <div className="flex justify-between items-start">
@@ -257,7 +251,6 @@ export default function AreaWiseAnalytics({
           </Card>
         </Col>
 
-        {/* Highest Growing Area */}
         <Col xs={24} sm={8}>
           <Card size="small" className="bg-emerald-50 border-emerald-200 rounded-xl">
             <div className="flex justify-between items-start">
@@ -283,7 +276,6 @@ export default function AreaWiseAnalytics({
           </Card>
         </Col>
 
-        {/* Highest Declining Area Alert */}
         <Col xs={24} sm={8}>
           <Card size="small" className="bg-rose-50 border-rose-200 rounded-xl">
             <div className="flex justify-between items-start">
@@ -295,11 +287,9 @@ export default function AreaWiseAnalytics({
                   {topDecliningArea?.area || "No Significant Drop"}
                 </span>
                 <span className="text-xs text-rose-700 font-medium mt-1 block">
-                  {topDecliningArea ? (
-                    `${topDecliningArea.orders} Orders (Down from ${topDecliningArea.previousOrders})`
-                  ) : (
-                    "All regions stable or growing"
-                  )}
+                  {topDecliningArea
+                    ? `${topDecliningArea.orders} Orders (Down from ${topDecliningArea.previousOrders})`
+                    : "All regions stable or growing"}
                 </span>
               </div>
               {topDecliningArea && (
@@ -314,19 +304,13 @@ export default function AreaWiseAnalytics({
 
       {/* Chart & Table Breakdown */}
       <Row gutter={[16, 16]}>
-        {/* Horizontal Bar Chart of Top Areas */}
         <Col xs={24} lg={10}>
           <div className="border border-gray-100 p-3 rounded-xl bg-gray-50/50 h-full">
             <span className="text-xs font-bold uppercase tracking-wider text-gray-500 block mb-2">
               Top 8 {level.toUpperCase()} Order Volume
             </span>
             {chartAreas.length > 0 ? (
-              <ReactApexChart
-                options={chartOptions}
-                series={chartSeries}
-                type="bar"
-                height={300}
-              />
+              <ReactApexChart options={chartOptions} series={chartSeries} type="bar" height={300} />
             ) : (
               <div className="h-64 flex items-center justify-center text-gray-400 text-sm">
                 No geographic data for this period
@@ -335,7 +319,6 @@ export default function AreaWiseAnalytics({
           </div>
         </Col>
 
-        {/* Full Interactive Table */}
         <Col xs={24} lg={14}>
           <div className="space-y-3">
             <div className="flex justify-between items-center">
@@ -359,6 +342,21 @@ export default function AreaWiseAnalytics({
               size="small"
               pagination={{ pageSize: 6 }}
               scroll={{ x: 600 }}
+              expandable={{
+                expandedRowRender: (record: any) => (
+                  <div className="flex flex-wrap gap-2 py-1">
+                    {STATUS_OPTIONS.map((s) => {
+                      const count = record.statusBreakdown?.[s.label] || 0;
+                      if (count === 0) return null;
+                      return (
+                        <Tag key={s.id} color={s.color}>
+                          {s.label}: {count}
+                        </Tag>
+                      );
+                    })}
+                  </div>
+                ),
+              }}
             />
           </div>
         </Col>
