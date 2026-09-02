@@ -23,6 +23,7 @@ interface OrderSummaryProps {
   getTotalAmount: () => number;
   /** Sum of product price * quantity only — no shipping, no discount. */
   getItemsSubtotal?: () => number;
+  loading?: boolean; // FIX: added
 }
 
 export default function OrderSummaryEdit({
@@ -33,6 +34,7 @@ export default function OrderSummaryEdit({
   onClearCart,
   getTotalAmount,
   getItemsSubtotal,
+   loading = false,
 }: OrderSummaryProps) {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("bd-BD", {
@@ -369,15 +371,16 @@ if (isCancelOrHold) {
       <div className="lg:sticky lg:bg-white fixed bottom-0 left-0 right-0 lg:bottom-0 lg:right-auto bg-white lg:bg-transparent p-4 lg:p-0 border-t lg:border-t-0 border-gray-200 lg:border-none shadow-lg lg:shadow-none z-50">
         <div className="max-w-7xl mx-auto lg:max-w-none">
           <div className="space-y-3">
-            <Button
+           <Button
               onClick={onConfirmOrder}
-              disabled={!canConfirmOrder}
+              disabled={!canConfirmOrder || loading} // FIX: also disable while in-flight
               className="w-full h-12  bg-primary text-white font-semibold text-lg transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
               size="lg"
             >
               <Check className="w-5 h-5 mr-2" />
-              Update Order{" "}
-              {Number(total || 0) - Number(orderDetails?.amount || 0)}
+              {loading
+                ? "Updating..."
+                : `Update Order ${Number(total || 0) - Number(orderDetails?.amount || 0)}`}
             </Button>
 
             {cartItems.length > 0 && (

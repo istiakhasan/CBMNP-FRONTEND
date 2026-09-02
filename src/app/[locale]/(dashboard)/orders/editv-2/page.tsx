@@ -32,7 +32,7 @@ import { buildInvoiceText } from "@/util/buildInvoiceText";
 const Page = () => {
   const userInfo: any = getUserInfo();
   const params = useSearchParams();
-  const [orderUpdateMutation] = useUpdateOrderMutation();
+  const [orderUpdateMutation,{ isLoading: isUpdatingOrder }] = useUpdateOrderMutation();
   const editAbleCustomerId = params.get("customerId");
   const editAbleOrderId = params.get("orderId");
   const { data: customer, isLoading: customerLoading } =
@@ -194,7 +194,7 @@ const Page = () => {
   const isCancel = orderDetails?.statusByAgent?.value === "4";
   const isHold = orderDetails?.statusByAgent?.value === "3";
   const isCancelOrHold = isCancel || isHold;
-
+ if (isUpdatingOrder) return;
   if (!selectedCustomer) {
     message.error("Cannot place order");
     return;
@@ -347,6 +347,7 @@ const Page = () => {
                   onClearCart={clearCart}
                   getTotalAmount={getTotalAmount}
                   getItemsSubtotal={getItemsSubtotal}
+                  loading={isUpdatingOrder}
                 />
               </div>
             </div>
