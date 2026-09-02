@@ -365,10 +365,10 @@ export default function JournalEntriesPage() {
               rowKey="id"
               pagination={false}
               size="small"
-              summary={(pageData) => {
+              summary={(pageData:any) => {
                 let totalDebit = 0;
                 let totalCredit = 0;
-                pageData.forEach(({ debit, credit }) => {
+                pageData.forEach(({ debit, credit }:any) => {
                   totalDebit += Number(debit || 0);
                   totalCredit += Number(credit || 0);
                 });
