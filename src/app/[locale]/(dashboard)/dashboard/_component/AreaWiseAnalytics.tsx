@@ -62,7 +62,7 @@ export default function AreaWiseAnalytics({
     statusId: selectedStatuses.length > 0 ? selectedStatuses.join(",") : undefined,
   });
 
-  const areaData = areaRes?.data;
+  const areaData = areaRes;
   const areas: any[] = areaData?.areas || [];
   const topGrowing = areaData?.topGrowingAreas || [];
   const topDeclining = areaData?.topDecliningAreas || [];
