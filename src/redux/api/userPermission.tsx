@@ -11,9 +11,18 @@ export const userPermissionApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [tagTypes.userPermission],
     }),
+    replaceUserPermission: build.mutation({
+      query: ({ userId, permissionIds }) => ({
+        url: `/userpermission/${userId}`,
+        method: "PUT",
+        data: { permissionIds },
+      }),
+      invalidatesTags: [tagTypes.userPermission, tagTypes.users],
+    }),
   }),
 });
 
 export const {
- useCreateUserPermissionMutation
+ useCreateUserPermissionMutation,
+ useReplaceUserPermissionMutation,
 } = userPermissionApi;

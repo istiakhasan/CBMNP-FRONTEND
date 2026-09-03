@@ -2,7 +2,7 @@
 import CustomTree from "@/components/ui/CustomTree";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
 import { useGetAllPermissionLabelQuery } from "@/redux/api/permission.Api";
-import { useCreateUserPermissionMutation } from "@/redux/api/userPermission";
+import { useReplaceUserPermissionMutation } from "@/redux/api/userPermission";
 import { useGetUserByIdQuery } from "@/redux/api/usersApi";
 import { message, Spin } from "antd";
 import { useParams } from "next/navigation";
@@ -12,24 +12,17 @@ const UserPermission = () => {
   const params=useParams()
   const { data, isLoading } = useGetAllPermissionLabelQuery(undefined);
   const {data:userData,isLoading:getUserLoading}=useGetUserByIdQuery({id:params?.userid})
-  const [createUserPermission]=useCreateUserPermissionMutation()
+  const [replaceUserPermission]=useReplaceUserPermissionMutation()
   const [checkedKeys, setCheckedKeys] = useState<React.Key[]>([]);
   const updatePermissionForm=async()=>{
     try {
-      const modifyData=checkedKeys?.filter((item:any)=>typeof item !=='string')
-      if(modifyData?.length<1){
-        return message.error('Please select at least one permission')
-      }
-      const transFormed=Object.values(
-        modifyData.reduce((acc:any,b:any)=>{
-          acc[b]={
-            userId:params?.userid,
-            permissionId:b
-          }
-           return acc
-        },{})
-      )
-      const res=await createUserPermission(transFormed).unwrap()
+      const permissionIds = checkedKeys
+        ?.filter((item: any) => typeof item !== "string")
+        .map((item: any) => Number(item));
+      const res=await replaceUserPermission({
+        userId: params?.userid,
+        permissionIds,
+      }).unwrap()
       if(res?.success){
         message.success(res?.message)
         window.location.reload()
