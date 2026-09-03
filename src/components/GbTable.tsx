@@ -19,6 +19,7 @@ type DTableProps = {
   stickey?: boolean;
   scrollX?: any;
   scrollY?: any;
+  onRow?: any;
 };
 
 const GbTable = ({
@@ -36,6 +37,7 @@ const GbTable = ({
   stickey,
   scrollX = "max-content",
   scrollY,
+  onRow,
 }: DTableProps) => {
   const paginationConfig = showPagination
     ? {
@@ -60,6 +62,7 @@ const GbTable = ({
         onChange={onTableChange}
         rowKey={id || "id"}
         rowSelection={rowSelection}
+        onRow={onRow}
         sticky={sticky}
         scroll={{
           x: scrollX,

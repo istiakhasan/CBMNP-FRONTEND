@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Button, Input, Pagination, Select } from "antd";
+import { Button, Drawer, Input, Pagination, Select, Table, Tag } from "antd";
 import { debounce } from "lodash";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
@@ -10,6 +10,7 @@ import GbHeader from "@/components/ui/dashboard/GbHeader";
 import GbTable from "@/components/GbTable";
 import {
   useLoadAllInventoryQuery,
+  useLazyLoadTransactionByIdQuery,
   useLoadAllTransactionQuery,
   useWarehouseWiseProductStockQuery,
 } from "@/redux/api/inventoryApi";
@@ -28,6 +29,8 @@ const Page = () => {
   const [size, setSize] = useState(10);
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [logDrawerOpen, setLogDrawerOpen] = useState(false);
 
   const query = useMemo(
     () => ({ page, limit: size, searchProducts: searchTerm, warehouseId }),
@@ -45,6 +48,10 @@ const Page = () => {
 
   const { data: transactionData, isLoading: transactionLoading } =
     useLoadAllTransactionQuery(query, { skip: tab !== "logs" });
+  const [
+    loadProductTransactions,
+    { data: productTransactionData, isFetching: productTransactionLoading },
+  ] = useLazyLoadTransactionByIdQuery();
 
   const router = useRouter();
   const local = useLocale();
@@ -75,12 +82,21 @@ const Page = () => {
     setwarehouseId("");
   };
 
+  const openProductLog = (record: any) => {
+    setSelectedProduct(record);
+    setLogDrawerOpen(true);
+    loadProductTransactions({
+      id: record?.productId,
+      params: { page: 1, limit: 100, warehouseId: warehouseId || undefined },
+    });
+  };
+
   const { columns, data, loading } = useMemo(() => {
     switch (tab) {
       case "logs":
         return {
           columns: logsTableColumns,
-          data: transactionData?.data || [],
+          data: transactionData?.data?.data || transactionData?.data || [],
           loading: transactionLoading,
         };
       case "wws":
@@ -180,11 +196,11 @@ const Page = () => {
             <Pagination
               pageSize={size}
               total={
-                tab === "stock"
+              tab === "stock"
                   ? inventoryData?.total
                   : tab === "wws"
                     ? warehouseData?.total
-                    : transactionData?.total
+                    : transactionData?.data?.total || transactionData?.total
               }
               current={page}
               onChange={(p, s) => {
@@ -206,16 +222,87 @@ const Page = () => {
                   ? inventoryData?.total
                   : tab === "wws"
                     ? warehouseData?.total
-                    : transactionData?.total
+                    : transactionData?.data?.total || transactionData?.total
               }
               onPaginationChange={(p, s) => {
                 setPage(p);
                 setSize(s);
               }}
+              onRow={
+                tab === "stock"
+                  ? (record: any) => ({
+                      onClick: () => openProductLog(record),
+                      className: "cursor-pointer",
+                    })
+                  : undefined
+              }
             />
           </div>
         </div>
       </div>
+      <Drawer
+        title={
+          <div>
+            <div>{selectedProduct?.product?.name || "Product"} Inventory Log</div>
+            <div className="text-xs text-gray-500 font-normal">
+              SKU: {selectedProduct?.product?.sku || "N/A"}
+            </div>
+          </div>
+        }
+        open={logDrawerOpen}
+        onClose={() => setLogDrawerOpen(false)}
+        width={980}
+      >
+        <Table
+          columns={[
+            {
+              title: "Time",
+              dataIndex: "transactionDate",
+              key: "transactionDate",
+              render: (value: string) => value ? new Date(value).toLocaleString() : "N/A",
+            },
+            {
+              title: "Warehouse",
+              key: "warehouse",
+              render: (_: any, record: any) => record?.location?.name || "Inventory",
+            },
+            {
+              title: "Movement",
+              key: "movement",
+              align: "right" as const,
+              render: (_: any, record: any) => (
+                <Tag color={record?.type === "IN" ? "green" : "red"}>
+                  {record?.type === "IN" ? "+" : "-"}
+                  {record?.quantity}
+                </Tag>
+              ),
+            },
+            {
+              title: "Reason",
+              dataIndex: "referenceType",
+              key: "referenceType",
+              render: (value: string) => value || "Inventory Update",
+            },
+            {
+              title: "Reference",
+              dataIndex: "referenceNumber",
+              key: "referenceNumber",
+              render: (value: string) => value || "-",
+            },
+            {
+              title: "Remarks",
+              dataIndex: "remarks",
+              key: "remarks",
+              render: (value: string) => value || "-",
+            },
+          ]}
+          dataSource={productTransactionData?.data?.data || productTransactionData?.data || []}
+          rowKey="id"
+          loading={productTransactionLoading}
+          pagination={{ pageSize: 20 }}
+          size="middle"
+        />
+      </Drawer>
     </>
   );
 };

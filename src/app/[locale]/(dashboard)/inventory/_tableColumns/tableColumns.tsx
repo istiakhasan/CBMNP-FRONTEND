@@ -1,5 +1,10 @@
 import { Tooltip } from "antd";
 
+const formatDateTime = (value: string) => {
+  if (!value) return "N/A";
+  return new Date(value).toLocaleString();
+};
+
   // table column
   export const inventoryColumns = [
     {
@@ -214,6 +219,14 @@ import { Tooltip } from "antd";
   ];
   export const logsTableColumns = [
     {
+      title: "Time",
+      key: "transactionDate",
+      //@ts-ignore
+      render: (text, record, index) => {
+        return <span>{formatDateTime(record?.transactionDate)}</span>;
+      },
+    },
+    {
       title: "Warehouse",
       key: 1,
       //@ts-ignore
@@ -244,14 +257,14 @@ import { Tooltip } from "antd";
       },
     },
     {
-      title: "Quantity",
+      title: "Movement",
       key: 4,
       align: "start",
       //@ts-ignore
       render: (text, record, index) => {
         return (
           <>
-            <span>
+            <span className={record?.type === "IN" ? "text-emerald-700 font-semibold" : "text-rose-700 font-semibold"}>
               {`${record?.type==="IN"?"+":"-"}${record?.quantity}`}
             </span>
           </>
@@ -259,7 +272,7 @@ import { Tooltip } from "antd";
       },
     },
     {
-      title: "Updated By",
+      title: "Reference",
       key: 4,
       align: "start",
       //@ts-ignore
@@ -267,14 +280,14 @@ import { Tooltip } from "antd";
         return (
           <>
             <span>
-              Pending
+              {record?.referenceNumber || record?.referenceType || "Manual"}
             </span>
           </>
         );
       },
     },
     {
-      title: "Updated At",
+      title: "Reason",
       key: 4,
       align: "start",
       //@ts-ignore
@@ -282,7 +295,7 @@ import { Tooltip } from "antd";
         return (
           <>
             <span>
-              Pending
+              {record?.referenceType || "Inventory Update"}
             </span>
           </>
         );
@@ -296,8 +309,8 @@ import { Tooltip } from "antd";
       render: (text, record, index) => {
         return (
           <>
-            <span className="block mb-2 color_primary cursor-pointer">
-              Pending
+            <span className="block mb-2">
+              {record?.remarks || "No remarks"}
             </span>
           </>
         );

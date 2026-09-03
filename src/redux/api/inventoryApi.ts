@@ -46,7 +46,8 @@ export const inventoryApi = baseApi.injectEndpoints({
     loadTransactionById: build.query({
       query: (arg) => ({
         url: `/transaction/findById/${arg?.id}`,
-        method: "GET"
+        method: "GET",
+        params: arg?.params
       }),
       providesTags: [tagTypes.warehouse],
     }),
@@ -64,6 +65,7 @@ export const {
     useLoadAllInventoryQuery,
     useLoadAllTransactionQuery,
     useLoadTransactionByIdQuery,
+    useLazyLoadTransactionByIdQuery,
     useLoadStockByProductidQuery,
     useLoadStockByProductIdAndLocationIdQuery,
     useLazyLoadStockByProductIdAndLocationIdQuery,
