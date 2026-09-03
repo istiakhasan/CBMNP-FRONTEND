@@ -30,6 +30,7 @@ export enum tagTypes {
       logisticsOperations="logisticsOperations",
       governance="governance",
       notifications="notifications",
+      activityLogs="activityLogs",
   }
   
   export const tagTypesList = [
@@ -64,4 +65,5 @@ export enum tagTypes {
     tagTypes.logisticsOperations,
     tagTypes.governance,
     tagTypes.notifications,
+    tagTypes.activityLogs,
   ];

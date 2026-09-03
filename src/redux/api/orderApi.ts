@@ -134,6 +134,14 @@ export const orderApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [tagTypes.order],
     }),
+    deleteOrdersByPhone: build.mutation({
+      query: (data) => ({
+        url: "/orders/delete-by-phone",
+        method: "DELETE",
+        data,
+      }),
+      invalidatesTags: [tagTypes.order],
+    }),
   }),
 });
 
@@ -158,5 +166,6 @@ export const {
   useGetScanOrderByIdQuery,
   useLazyGetScanOrderByIdQuery,
   useLazyGetDeliveryPartnerOrderDetailsQuery,
-  useExchangeOrderProductMutation
+  useExchangeOrderProductMutation,
+  useDeleteOrdersByPhoneMutation
 } = orderApi;

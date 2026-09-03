@@ -303,6 +303,10 @@ const GbSidebar = () => {
           title: "System Audit Trail",
         },
         {
+          href: "/activity-logs",
+          title: "Activity Logs",
+        },
+        {
           href: "/settings/notifications",
           title: "SMS & Notifications",
         },
@@ -369,7 +373,10 @@ const GbSidebar = () => {
     //   icon: "ri-folder-chart-line",
     // },
   ].filter(
-    (mi: any) => permission?.includes(mi.title) || userInfo?.role === "admin"
+    (mi: any) =>
+      permission?.includes(mi.title) ||
+      mi.children?.some((child: any) => permission?.includes(child.title)) ||
+      userInfo?.role === "admin"
   );
 
   const pathName = usePathname();

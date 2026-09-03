@@ -1,15 +1,21 @@
 "use client";
 import GbTable from "@/components/GbTable";
 import copyToClipboard from "@/components/ui/GbCopyToClipBoard";
-import { useGetAllOrdersQuery } from "@/redux/api/orderApi";
+import {
+  useDeleteOrdersByPhoneMutation,
+  useGetAllOrdersQuery,
+} from "@/redux/api/orderApi";
 import { useGetUserByIdQuery } from "@/redux/api/usersApi";
 import { getUserInfo } from "@/service/authService";
 import StatusBadge from "@/util/StatusBadge";
 import {
   Checkbox,
   CheckboxOptionType,
+  Input,
+  Modal,
   Pagination,
-  Popover
+  Popover,
+  message
 } from "antd";
 import moment from "moment";
 import { useLocale } from "next-intl";
@@ -20,7 +26,10 @@ const AllOrders = ({searchTerm,warehosueIds,productIds,currierIds,rangeValue,ord
   // all states
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
-  const { data, isLoading } = useGetAllOrdersQuery({
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletePhone, setDeletePhone] = useState("");
+  const [deleteOrder, setDeleteOrder] = useState<any>(null);
+  const { data, isLoading, refetch } = useGetAllOrdersQuery({
     page:searchTerm?1:page,
     limit: size,
     searchTerm,
@@ -39,6 +48,43 @@ const AllOrders = ({searchTerm,warehosueIds,productIds,currierIds,rangeValue,ord
       id: userInfo?.userId,
     });
   const permission = userData?.permission?.map((item: any) => item?.label);
+  const [deleteOrdersByPhone, { isLoading: isDeletingByPhone }] =
+    useDeleteOrdersByPhoneMutation();
+  const canDeleteOrdersByPhone =
+    userInfo?.role === "admin" || permission?.includes("DELETE_ORDERS_BY_PHONE");
+
+  const openDeleteByPhoneModal = (order: any) => {
+    setDeleteOrder(order);
+    setDeletePhone(order?.receiverPhoneNumber || "");
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteByPhone = async () => {
+    if (!canDeleteOrdersByPhone) {
+      message.error("You do not have permission to delete orders by phone");
+      return;
+    }
+
+    if (!deletePhone?.trim()) {
+      message.error("Phone number is required");
+      return;
+    }
+
+    try {
+      const result = await deleteOrdersByPhone({
+        phone: deletePhone.trim(),
+        orderIds: [Number(deleteOrder?.id)],
+        confirm: true,
+      }).unwrap();
+      message.success(result?.message || "Orders deleted successfully");
+      setDeleteModalOpen(false);
+      setDeletePhone("");
+      setDeleteOrder(null);
+      refetch();
+    } catch (err: any) {
+      message.error(err?.data?.message || "Failed to delete orders");
+    }
+  };
   const tableColumn = [
     {
       title: "SL",
@@ -178,6 +224,15 @@ const AllOrders = ({searchTerm,warehosueIds,productIds,currierIds,rangeValue,ord
                 <i style={{fontSize:"18px"}} className="ri-eye-fill color_primary"></i>
               </span>) :"N/A"
             }
+            {canDeleteOrdersByPhone && (
+              <span
+                onClick={() => openDeleteByPhoneModal(record)}
+                className="text-[10px] py-[2px] px-[10px] cursor-pointer"
+                title="Delete this order"
+              >
+                <i style={{ fontSize: "18px" }} className="ri-delete-bin-6-line text-red-500"></i>
+              </span>
+            )}
           </>
         );
       },
@@ -251,6 +306,33 @@ const AllOrders = ({searchTerm,warehosueIds,productIds,currierIds,rangeValue,ord
           dataSource={data?.data}
         />
       </div>
+      <Modal
+        title="Delete Orders By Phone"
+        open={deleteModalOpen}
+        onCancel={() => {
+          setDeleteModalOpen(false);
+          setDeleteOrder(null);
+        }}
+        onOk={handleDeleteByPhone}
+        okText="Delete Orders"
+        okButtonProps={{ danger: true }}
+        confirmLoading={isDeletingByPhone}
+        destroyOnClose
+      >
+        <div className="space-y-3">
+          <p className="text-sm text-gray-600">
+            This will delete only this selected order after verifying the phone number.
+          </p>
+          <div className="text-sm font-semibold">
+            Order: {deleteOrder?.invoiceNumber || deleteOrder?.orderNumber || deleteOrder?.id}
+          </div>
+          <Input
+            value={deletePhone}
+            onChange={(event) => setDeletePhone(event.target.value)}
+            placeholder="Phone number"
+          />
+        </div>
+      </Modal>
     </div>
   );
 };
