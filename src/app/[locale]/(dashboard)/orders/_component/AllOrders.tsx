@@ -50,8 +50,7 @@ const AllOrders = ({searchTerm,warehosueIds,productIds,currierIds,rangeValue,ord
   const permission = userData?.permission?.map((item: any) => item?.label);
   const [deleteOrdersByPhone, { isLoading: isDeletingByPhone }] =
     useDeleteOrdersByPhoneMutation();
-  const canDeleteOrdersByPhone =
-    userInfo?.role === "admin" || permission?.includes("DELETE_ORDERS_BY_PHONE");
+  const canDeleteOrdersByPhone =permission?.includes("DELETE_ORDERS_BY_PHONE");
 
   const openDeleteByPhoneModal = (order: any) => {
     setDeleteOrder(order);
