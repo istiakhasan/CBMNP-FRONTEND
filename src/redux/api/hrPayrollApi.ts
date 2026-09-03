@@ -50,6 +50,10 @@ export const hrPayrollApi = baseApi.injectEndpoints({
       query: () => ({ url: "/hr-payroll/leaves/types", method: "GET" }),
       providesTags: [tagTypes.hrPayroll],
     }),
+    createLeaveType: build.mutation({
+      query: (data) => ({ url: "/hr-payroll/leaves/types", method: "POST", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
     applyLeave: build.mutation({
       query: (data) => ({ url: "/hr-payroll/leaves/apply", method: "POST", data }),
       invalidatesTags: [tagTypes.hrPayroll],
@@ -75,6 +79,10 @@ export const hrPayrollApi = baseApi.injectEndpoints({
     disbursePayroll: build.mutation({
       query: (id) => ({ url: `/hr-payroll/payroll/${id}/disburse`, method: "PATCH" }),
       invalidatesTags: [tagTypes.hrPayroll, tagTypes.accounting, tagTypes.finance],
+    }),
+    setSalaryStructure: build.mutation({
+      query: (data) => ({ url: "/hr-payroll/payroll/structure", method: "POST", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
     }),
 
     // Commissions & Targets
@@ -112,12 +120,14 @@ export const {
   useClockOutMutation,
   useGetAttendanceQuery,
   useGetLeaveTypesQuery,
+  useCreateLeaveTypeMutation,
   useApplyLeaveMutation,
   useApproveLeaveMutation,
   useGetLeaveRequestsQuery,
   useGetPayrollSheetsQuery,
   useGeneratePayrollMutation,
   useDisbursePayrollMutation,
+  useSetSalaryStructureMutation,
   useGetCommissionRulesQuery,
   useCreateCommissionRuleMutation,
   useGetCommissionsQuery,

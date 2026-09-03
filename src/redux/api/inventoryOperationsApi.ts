@@ -58,6 +58,14 @@ export const inventoryOperationsApi = baseApi.injectEndpoints({
       query: () => ({ url: "/inventory-operations/reports/low-stock", method: "GET" }),
       providesTags: [tagTypes.inventoryOperations],
     }),
+    getReorderRules: build.query({
+      query: () => ({ url: "/inventory-operations/reorder-rules", method: "GET" }),
+      providesTags: [tagTypes.inventoryOperations],
+    }),
+    setReorderRule: build.mutation({
+      query: (data) => ({ url: "/inventory-operations/reorder-rules", method: "POST", data }),
+      invalidatesTags: [tagTypes.inventoryOperations],
+    }),
     getInventoryValuation: build.query({
       query: () => ({ url: "/inventory-operations/reports/valuation", method: "GET" }),
       providesTags: [tagTypes.inventoryOperations],
@@ -78,5 +86,7 @@ export const {
   useCreateBatchMutation,
   useGetExpiringBatchesQuery,
   useGetLowStockAlertsQuery,
+  useGetReorderRulesQuery,
+  useSetReorderRuleMutation,
   useGetInventoryValuationQuery,
 } = inventoryOperationsApi;

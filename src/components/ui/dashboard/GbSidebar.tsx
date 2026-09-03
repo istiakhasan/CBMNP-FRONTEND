@@ -251,8 +251,16 @@ const GbSidebar = () => {
       icon: "ri-user-star-line",
       children: [
         {
+          href: "/hr/setup",
+          title: "HR Setup",
+        },
+        {
           href: "/hr/employees",
           title: "Employee Directory",
+        },
+        {
+          href: "/hr/leaves",
+          title: "Leave Management",
         },
         {
           href: "/hr/attendance",
@@ -261,6 +269,10 @@ const GbSidebar = () => {
         {
           href: "/hr/payroll",
           title: "Monthly Payroll",
+        },
+        {
+          href: "/hr/performance",
+          title: "Commissions & Targets",
         },
       ],
     },

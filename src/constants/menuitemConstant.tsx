@@ -356,19 +356,74 @@ export const menuItem: MenuItem[] = [
 					</Link>
 				),
 			},
+			{
+				key: "/inventory/valuation",
+				label: (
+					<Link className=" text-[14px]" href={"/inventory/valuation"}>
+						Reorder Rules
+					</Link>
+				),
+			},
 		],
 	},
 ];
 export const hrMenuList: MenuItem[] = [
 	{
-		key: "/employee/profile",
+		key: "HR & Payroll",
 		label: (
-			<Link href={"/employee/profile"}>
-				{" "}
-				<p>Manage Employee</p>
-			</Link>
+			<p>HR & Payroll</p>
 		),
 		icon: <i style={{ fontSize: "18px" }} className="ri-team-fill"></i>,
+		children: [
+			{
+				key: "/hr/setup",
+				label: (
+					<Link className=" text-[14px]" href={"/hr/setup"}>
+						HR Setup
+					</Link>
+				),
+			},
+			{
+				key: "/hr/employees",
+				label: (
+					<Link className=" text-[14px]" href={"/hr/employees"}>
+						Employee Directory
+					</Link>
+				),
+			},
+			{
+				key: "/hr/leaves",
+				label: (
+					<Link className=" text-[14px]" href={"/hr/leaves"}>
+						Leave Management
+					</Link>
+				),
+			},
+			{
+				key: "/hr/attendance",
+				label: (
+					<Link className=" text-[14px]" href={"/hr/attendance"}>
+						Daily Attendance
+					</Link>
+				),
+			},
+			{
+				key: "/hr/payroll",
+				label: (
+					<Link className=" text-[14px]" href={"/hr/payroll"}>
+						Monthly Payroll
+					</Link>
+				),
+			},
+			{
+				key: "/hr/performance",
+				label: (
+					<Link className=" text-[14px]" href={"/hr/performance"}>
+						Commissions & Targets
+					</Link>
+				),
+			},
+		],
 	},
 ];
 

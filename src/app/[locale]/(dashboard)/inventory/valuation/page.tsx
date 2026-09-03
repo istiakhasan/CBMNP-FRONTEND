@@ -1,16 +1,56 @@
 "use client";
-import React from "react";
-import { Table, Card, Row, Col, Statistic, Button } from "antd";
-import { ReloadOutlined, DollarOutlined } from "@ant-design/icons";
-import { useGetInventoryValuationQuery, useGetLowStockAlertsQuery } from "@/redux/api/inventoryOperationsApi";
+import React, { useState } from "react";
+import { Table, Card, Row, Col, Statistic, Button, Space, Modal, Form, Select, InputNumber, Switch, Tag, message } from "antd";
+import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  useGetInventoryValuationQuery,
+  useGetLowStockAlertsQuery,
+  useGetReorderRulesQuery,
+  useSetReorderRuleMutation,
+} from "@/redux/api/inventoryOperationsApi";
+import { useLoadAllWarehouseQuery } from "@/redux/api/warehouse";
+import { useGetAllProductQuery } from "@/redux/api/productApi";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
 
 export default function InventoryValuationPage() {
+  const [form] = Form.useForm();
+  const [modalOpen, setModalOpen] = useState(false);
+
   const { data: valData, isLoading: valLoading, refetch: refetchVal } = useGetInventoryValuationQuery(undefined);
   const { data: alertsData, isLoading: alertsLoading, refetch: refetchAlerts } = useGetLowStockAlertsQuery(undefined);
+  const { data: rulesData, isLoading: rulesLoading, refetch: refetchRules } = useGetReorderRulesQuery(undefined);
+  const { data: warehousesData } = useLoadAllWarehouseQuery(undefined);
+  const { data: productsData } = useGetAllProductQuery({ limit: "1000" });
+  const [setReorderRule, { isLoading: isSavingRule }] = useSetReorderRuleMutation();
 
   const valuation = valData?.data;
   const lowStock = alertsData?.data || [];
+  const reorderRules = rulesData?.data || [];
+  const warehouses = warehousesData?.data || [];
+  const products = productsData?.data || [];
+
+  const openRuleModal = (record?: any) => {
+    form.setFieldsValue({
+      productId: record?.productId,
+      warehouseId: record?.warehouseId,
+      minStockLevel: record?.minStockLevel ?? 10,
+      maxStockLevel: record?.maxStockLevel ?? 100,
+      reorderQuantity: record?.reorderQuantity ?? 50,
+      isAlertActive: record?.isAlertActive ?? true,
+    });
+    setModalOpen(true);
+  };
+
+  const handleRuleFinish = async (values: any) => {
+    try {
+      await setReorderRule(values).unwrap();
+      message.success("Reorder rule saved");
+      setModalOpen(false);
+      form.resetFields();
+    } catch (err: any) {
+      message.error(err?.data?.message || "Failed to save reorder rule");
+    }
+  };
 
   const warehouseColumns: any = [
     {
@@ -76,10 +116,73 @@ export default function InventoryValuationPage() {
       align: "right" as const,
       render: (def: number) => <span className="text-rose-600 font-semibold">-{def} Units</span>,
     },
+    {
+      title: "Action",
+      key: "action",
+      align: "center" as const,
+      render: (_: any, record: any) => (
+        <Button size="small" onClick={() => openRuleModal(record)}>
+          Update Rule
+        </Button>
+      ),
+    },
+  ];
+
+  const reorderRuleColumns: any = [
+    {
+      title: "Product",
+      key: "product",
+      render: (_: any, record: any) => (
+        <div>
+          <span className="font-semibold text-gray-900">{record?.product?.name || "Product"}</span>
+          <span className="text-xs text-gray-400 block">SKU: {record?.product?.sku || "N/A"}</span>
+        </div>
+      ),
+    },
+    {
+      title: "Warehouse",
+      key: "warehouse",
+      render: (_: any, record: any) => record?.warehouse?.name || "N/A",
+    },
+    {
+      title: "Min",
+      dataIndex: "minStockLevel",
+      key: "minStockLevel",
+      align: "right" as const,
+    },
+    {
+      title: "Max",
+      dataIndex: "maxStockLevel",
+      key: "maxStockLevel",
+      align: "right" as const,
+    },
+    {
+      title: "Reorder Qty",
+      dataIndex: "reorderQuantity",
+      key: "reorderQuantity",
+      align: "right" as const,
+    },
+    {
+      title: "Alert",
+      dataIndex: "isAlertActive",
+      key: "isAlertActive",
+      align: "center" as const,
+      render: (active: boolean) => <Tag color={active ? "green" : "default"}>{active ? "Active" : "Inactive"}</Tag>,
+    },
+    {
+      title: "Action",
+      key: "action",
+      align: "center" as const,
+      render: (_: any, record: any) => (
+        <Button size="small" onClick={() => openRuleModal(record)}>
+          Edit
+        </Button>
+      ),
+    },
   ];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 h-screen">
       <GbHeader title="Inventory Valuation & Low Stock Alerts" />
 
       {/* KPI Cards */}
@@ -133,14 +236,116 @@ export default function InventoryValuationPage() {
       <Card
         title="Low Stock Reorder Alerts"
         extra={
-          <Button icon={<ReloadOutlined />} onClick={() => refetchAlerts()}>
+          <Space>
+            <Button icon={<ReloadOutlined />} onClick={() => refetchAlerts()}>
+              Refresh
+            </Button>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => openRuleModal()}>
+              Add Reorder Rule
+            </Button>
+          </Space>
+        }
+        className="shadow-sm rounded-lg"
+      >
+        <Table columns={lowStockColumns} dataSource={lowStock} rowKey={(record: any) => `${record.productId}-${record.warehouseId}`} loading={alertsLoading} pagination={{ pageSize: 10 }} size="middle" />
+      </Card>
+
+      <Card
+        title="Product Reorder Rules"
+        extra={
+          <Button icon={<ReloadOutlined />} onClick={() => refetchRules()}>
             Refresh
           </Button>
         }
         className="shadow-sm rounded-lg"
       >
-        <Table columns={lowStockColumns} dataSource={lowStock} rowKey="productId" loading={alertsLoading} pagination={{ pageSize: 10 }} size="middle" />
+        <Table columns={reorderRuleColumns} dataSource={reorderRules} rowKey="id" loading={rulesLoading} pagination={{ pageSize: 10 }} size="middle" />
       </Card>
+
+      <Modal
+        title="Reorder Rule"
+        open={modalOpen}
+        onCancel={() => {
+          setModalOpen(false);
+          form.resetFields();
+        }}
+        onOk={() => form.submit()}
+        confirmLoading={isSavingRule}
+        destroyOnClose
+        width={720}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleRuleFinish}
+          initialValues={{
+            minStockLevel: 10,
+            maxStockLevel: 100,
+            reorderQuantity: 50,
+            isAlertActive: true,
+          }}
+        >
+          <div className="grid grid-cols-2 gap-4">
+            <Form.Item name="productId" label="Product" rules={[{ required: true, message: "Select product" }]}>
+              <Select
+                placeholder="Select product"
+                showSearch
+                allowClear
+                optionFilterProp="label"
+                options={products.map((p: any) => ({
+                  label: `${p.name || p.productName || "Unnamed Product"} ${p.sku || p.SKU || ""}`,
+                  value: p.id,
+                }))}
+              />
+            </Form.Item>
+
+            <Form.Item name="warehouseId" label="Warehouse" rules={[{ required: true, message: "Select warehouse" }]}>
+              <Select
+                placeholder="Select warehouse"
+                showSearch
+                allowClear
+                optionFilterProp="label"
+                options={warehouses.map((w: any) => ({
+                  label: w.name || w.warehouseName || w.location || "Warehouse",
+                  value: w.id,
+                }))}
+              />
+            </Form.Item>
+
+            <Form.Item name="minStockLevel" label="Minimum Stock Level" rules={[{ required: true, message: "Enter minimum stock" }]}>
+              <InputNumber min={0} className="w-full" />
+            </Form.Item>
+
+            <Form.Item
+              name="maxStockLevel"
+              label="Maximum Stock Level"
+              dependencies={["minStockLevel"]}
+              rules={[
+                { required: true, message: "Enter maximum stock" },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    const minStockLevel = Number(getFieldValue("minStockLevel") || 0);
+                    if (Number(value || 0) >= minStockLevel) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(new Error("Maximum stock must be greater than or equal to minimum stock"));
+                  },
+                }),
+              ]}
+            >
+              <InputNumber min={0} className="w-full" />
+            </Form.Item>
+
+            <Form.Item name="reorderQuantity" label="Reorder Quantity" rules={[{ required: true, message: "Enter reorder quantity" }]}>
+              <InputNumber min={1} className="w-full" />
+            </Form.Item>
+
+            <Form.Item name="isAlertActive" label="Low Stock Alert" valuePropName="checked">
+              <Switch checkedChildren="Active" unCheckedChildren="Inactive" />
+            </Form.Item>
+          </div>
+        </Form>
+      </Modal>
     </div>
   );
 }

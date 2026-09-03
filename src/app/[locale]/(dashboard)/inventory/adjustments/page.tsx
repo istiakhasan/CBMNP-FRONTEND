@@ -33,7 +33,9 @@ export default function StockAdjustmentsPage() {
 
   const { data, isLoading, refetch } = useGetAdjustmentsQuery(undefined);
   const { data: warehousesData } = useLoadAllWarehouseQuery(undefined);
-  const { data: productsData } = useGetAllProductQuery(undefined);
+  const { data: productsData } = useGetAllProductQuery({
+    limit:"1000"
+  });
 
   const [createAdjustment, { isLoading: isCreating }] = useCreateAdjustmentMutation();
   const [approveAdjustment] = useApproveAdjustmentMutation();
@@ -155,107 +157,291 @@ export default function StockAdjustmentsPage() {
       </Card>
 
       {/* Modal Form */}
-      <Modal
-        title="Record Stock Adjustment"
-        open={modalOpen}
-        onCancel={() => setModalOpen(false)}
-        onOk={() => form.submit()}
-        confirmLoading={isCreating}
-        destroyOnClose
-        width={750}
+
+<Modal
+  title="Record Stock Adjustment"
+  open={modalOpen}
+  onCancel={() => {
+    setModalOpen(false);
+    form.resetFields();
+  }}
+  onOk={() => form.submit()}
+  confirmLoading={isCreating}
+  destroyOnClose
+  width={800}
+>
+  <Form
+    form={form}
+    layout="vertical"
+    onFinish={handleFinish}
+    initialValues={{
+      adjustmentDate: dayjs(),
+      reason: "CountMismatch",
+      items: [
+        {
+          productId: undefined,
+          systemQuantity: 0,
+          countedQuantity: 0,
+          unitCost: 0,
+        },
+      ],
+    }}
+  >
+    {/* Adjustment Information */}
+    <div className="grid grid-cols-3 gap-4">
+      <Form.Item
+        name="warehouseId"
+        label="Warehouse"
+        rules={[
+          {
+            required: true,
+            message: "Please select a warehouse",
+          },
+        ]}
       >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleFinish}
-          initialValues={{
-            adjustmentDate: dayjs(),
-            reason: "CountMismatch",
-            items: [{ productId: undefined, systemQuantity: 0, countedQuantity: 0, unitCost: 0 }],
-          }}
-        >
-          <div className="grid grid-cols-3 gap-4">
-            <Form.Item name="warehouseId" label="Warehouse" rules={[{ required: true }]}>
-              <Select
-                placeholder="Select Warehouse"
-                options={warehouses.map((w: any) => ({
-                  label: w.name || w.warehouseName || w.location || "Warehouse",
-                  value: w.id,
-                }))}
-              />
-            </Form.Item>
+        <Select
+          placeholder="Select a warehouse"
+          allowClear
+          showSearch
+          optionFilterProp="label"
+          options={warehouses.map((w: any) => ({
+            label:
+              w.name ||
+              w.warehouseName ||
+              w.location ||
+              "Warehouse",
+            value: w.id,
+          }))}
+        />
+      </Form.Item>
 
-            <Form.Item name="reason" label="Adjustment Reason" rules={[{ required: true }]}>
-              <Select>
-                <Option value="CountMismatch">Physical Count Mismatch</Option>
-                <Option value="Damage">Damaged Goods</Option>
-                <Option value="Expired">Expired Stock</Option>
-                <Option value="TheftOrLoss">Theft / Loss</Option>
-                <Option value="FoundStock">Found Extra Stock</Option>
-              </Select>
-            </Form.Item>
+      <Form.Item
+        name="reason"
+        label="Adjustment Reason"
+        rules={[
+          {
+            required: true,
+            message: "Please select an adjustment reason",
+          },
+        ]}
+      >
+        <Select placeholder="Select adjustment reason">
+          <Option value="CountMismatch">
+            Physical Count Mismatch
+          </Option>
+          <Option value="Damage">
+            Damaged Goods
+          </Option>
+          <Option value="Expired">
+            Expired Stock
+          </Option>
+          <Option value="TheftOrLoss">
+            Theft / Loss
+          </Option>
+          <Option value="FoundStock">
+            Found Extra Stock
+          </Option>
+        </Select>
+      </Form.Item>
 
-            <Form.Item name="adjustmentDate" label="Audit Date" rules={[{ required: true }]}>
-              <DatePicker className="w-full" />
-            </Form.Item>
+      <Form.Item
+        name="adjustmentDate"
+        label="Audit Date"
+        rules={[
+          {
+            required: true,
+            message: "Please select the audit date",
+          },
+        ]}
+      >
+        <DatePicker
+          className="w-full"
+          placeholder="Select audit date"
+          format="DD-MM-YYYY"
+        />
+      </Form.Item>
+    </div>
+
+    {/* Products */}
+    <Form.List name="items">
+      {(fields, { add, remove }) => (
+        <div className="space-y-3 mt-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-semibold text-sm">
+              Variance Products
+            </span>
+
+            <span className="text-xs text-gray-500">
+              Add products and enter physical count details
+            </span>
           </div>
 
-          <Form.List name="items">
-            {(fields, { add, remove }) => (
-              <div className="space-y-3">
-                <span className="font-semibold text-sm block">Variance Products:</span>
-                {fields.map(({ key, name, ...restField }) => (
-                  <div key={key} className="flex items-center gap-3 bg-gray-50 p-2 rounded">
-                    <div className="flex-1">
-                      <Form.Item
-                        {...restField}
-                        name={[name, "productId"]}
-                        rules={[{ required: true }]}
-                        className="m-0"
-                      >
-                        <Select placeholder="Select Product" showSearch optionFilterProp="children">
-                          {products.map((p: any) => (
-                            <Option key={p.id} value={p.id}>
-                              {p.name || p.productName}
-                            </Option>
-                          ))}
-                        </Select>
-                      </Form.Item>
-                    </div>
+          {fields.map(({ key, name, ...restField }) => (
+            <div
+              key={key}
+              className="grid grid-cols-12 gap-3 items-end bg-gray-50 p-3 rounded-lg border"
+            >
+              {/* Product */}
+        
+{/* Product */}
 
-                    <div className="w-28">
-                      <Form.Item {...restField} name={[name, "systemQuantity"]} className="m-0">
-                        <InputNumber min={0} placeholder="System Qty" className="w-full" />
-                      </Form.Item>
-                    </div>
+{/* Product */}
+<div className="col-span-4">
+  <Form.Item
+    {...restField}
+    name={[name, "productId"]}
+    label="Product"
+    rules={[
+      {
+        required: true,
+        message: "Please select a product",
+      },
+    ]}
+    className="mb-0"
+  >
+    <Select
+      placeholder="Select product"
+      showSearch
+      allowClear
+      optionFilterProp="label"
+      popupMatchSelectWidth={false}
+      className="w-full"
+      options={products.map((p: any) => {
+        const productName =
+          p.name || p.productName || "Unnamed Product";
 
-                    <div className="w-28">
-                      <Form.Item {...restField} name={[name, "countedQuantity"]} className="m-0" rules={[{ required: true }]}>
-                        <InputNumber min={0} placeholder="Counted Qty" className="w-full" />
-                      </Form.Item>
-                    </div>
+        const sku = p.sku || p.SKU || "N/A";
 
-                    <div className="w-28">
-                      <Form.Item {...restField} name={[name, "unitCost"]} className="m-0">
-                        <InputNumber min={0} placeholder="Unit Cost" className="w-full" />
-                      </Form.Item>
-                    </div>
+        return {
+          value: p.id,
 
-                    {fields.length > 1 && (
-                      <Button danger onClick={() => remove(name)}>
-                        Remove
-                      </Button>
-                    )}
-                  </div>
-                ))}
-                <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                  Add Item
-                </Button>
+          // Search করার জন্য Product Name + SKU
+          label: `${productName} ${sku}`,
+
+          // Dropdown-এর ভিতরের সুন্দর UI
+          children: (
+            <div className="py-1">
+              <div className="font-medium text-gray-800 whitespace-normal break-words">
+                {productName}
               </div>
-            )}
-          </Form.List>
-        </Form>
-      </Modal>
+
+              <div className="text-xs text-gray-500 mt-0.5">
+                SKU: {sku}
+              </div>
+            </div>
+          ),
+        };
+      })}
+    />
+  </Form.Item>
+</div>
+
+
+
+
+              {/* System Quantity */}
+              <div className="col-span-2">
+                <Form.Item
+                  {...restField}
+                  name={[name, "systemQuantity"]}
+                  label="System Qty"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Enter system quantity",
+                    },
+                  ]}
+                  className="mb-0"
+                >
+                  <InputNumber
+                    min={0}
+                    className="w-full"
+                    placeholder="System qty"
+                  />
+                </Form.Item>
+              </div>
+
+              {/* Counted Quantity */}
+              <div className="col-span-2">
+                <Form.Item
+                  {...restField}
+                  name={[name, "countedQuantity"]}
+                  label="Counted Qty"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Enter counted quantity",
+                    },
+                  ]}
+                  className="mb-0"
+                >
+                  <InputNumber
+                    min={0}
+                    className="w-full"
+                    placeholder="Physical qty"
+                  />
+                </Form.Item>
+              </div>
+
+              {/* Unit Cost */}
+              <div className="col-span-2">
+                <Form.Item
+                  {...restField}
+                  name={[name, "unitCost"]}
+                  label="Unit Cost"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Enter unit cost",
+                    },
+                  ]}
+                  className="mb-0"
+                >
+                  <InputNumber
+                    min={0}
+                    className="w-full"
+                    placeholder="Unit cost"
+                    precision={2}
+                  />
+                </Form.Item>
+              </div>
+
+              {/* Remove */}
+              <div className="col-span-2">
+                {fields.length > 1 && (
+                  <Button
+                    danger
+                    block
+                    onClick={() => remove(name)}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
+
+          <Button
+            type="dashed"
+            onClick={() =>
+              add({
+                productId: undefined,
+                systemQuantity: 0,
+                countedQuantity: 0,
+                unitCost: 0,
+              })
+            }
+            block
+            icon={<PlusOutlined />}
+          >
+            Add Product
+          </Button>
+        </div>
+      )}
+    </Form.List>
+  </Form>
+</Modal>
+
     </div>
   );
 }
