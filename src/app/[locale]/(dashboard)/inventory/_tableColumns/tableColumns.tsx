@@ -35,7 +35,10 @@ const formatDateTime = (value: string) => {
       //@ts-ignore
       render: (text, record, index) => {
         return (
-          <div className="flex items-center gap-2">
+          <div
+            className="flex items-center gap-2"
+            onClick={(event) => event.stopPropagation()}
+          >
             <span>{record?.inventoryItems?.length || "N/A"}</span>
             <Tooltip
               overlayInnerStyle={{ background: "green", width: "800px" }}
