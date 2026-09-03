@@ -26,10 +26,16 @@ const { RangePicker } = DatePicker;
 const { Text } = Typography;
 
 const actionColors: Record<string, string> = {
-  POST: "green",
-  PUT: "blue",
-  PATCH: "orange",
-  DELETE: "red",
+  Created: "green",
+  Updated: "blue",
+  Deleted: "red",
+  "Changed status": "orange",
+  Approved: "green",
+  Cancelled: "red",
+  Dispatched: "cyan",
+  Received: "geekblue",
+  Returned: "volcano",
+  Voided: "magenta",
   MANUAL: "purple",
 };
 
@@ -75,7 +81,7 @@ export default function ActivityLogsPage() {
       title: "Action",
       dataIndex: "action",
       key: "action",
-      width: 110,
+      width: 150,
       render: (value: string) => (
         <Tag color={actionColors[value] || "default"}>{value}</Tag>
       ),
@@ -89,23 +95,11 @@ export default function ActivityLogsPage() {
         value || record.userId || "System",
     },
     {
-      title: "Path",
-      dataIndex: "path",
-      key: "path",
+      title: "Activity",
+      dataIndex: "description",
+      key: "description",
       ellipsis: true,
-      render: (value: string) => (
-        <span className="font-mono text-xs">{value || "-"}</span>
-      ),
-    },
-    {
-      title: "Status",
-      dataIndex: "statusCode",
-      key: "statusCode",
-      width: 90,
-      align: "center" as const,
-      render: (value: number) => (
-        <Tag color={value >= 400 ? "red" : "green"}>{value || "-"}</Tag>
-      ),
+      render: (value: string) => value || "-",
     },
     {
       title: "Details",
@@ -162,16 +156,16 @@ export default function ActivityLogsPage() {
             }
             className="w-full md:w-[180px]"
             options={[
-              "orders",
-              "inventory",
-              "inventory-operations",
-              "products",
-              "customers",
-              "users",
-              "hr-payroll",
-              "finance",
-              "accounting",
-              "procurement",
+              "Orders",
+              "Inventory",
+              "Inventory Operations",
+              "Products",
+              "Customers",
+              "Users",
+              "Hr Payroll",
+              "Finance",
+              "Accounting",
+              "Procurement",
             ].map((item) => ({ label: item, value: item }))}
           />
           <Select
@@ -182,9 +176,19 @@ export default function ActivityLogsPage() {
               setFilters((prev) => ({ ...prev, page: 1, action: value }))
             }
             className="w-full md:w-[150px]"
-            options={["POST", "PUT", "PATCH", "DELETE", "MANUAL"].map(
-              (item) => ({ label: item, value: item }),
-            )}
+            options={[
+              "Created",
+              "Updated",
+              "Deleted",
+              "Changed status",
+              "Approved",
+              "Cancelled",
+              "Dispatched",
+              "Received",
+              "Returned",
+              "Voided",
+              "MANUAL",
+            ].map((item) => ({ label: item, value: item }))}
           />
           <RangePicker
             className="w-full md:w-[300px]"
@@ -237,9 +241,21 @@ export default function ActivityLogsPage() {
               <div>{selectedLog.userName || selectedLog.userId || "System"}</div>
             </div>
             <div>
-              <Text type="secondary">Path</Text>
+              <Text type="secondary">Module / Action</Text>
+              <div>
+                <Tag color="blue">{selectedLog.module || "-"}</Tag>
+                <Tag color={actionColors[selectedLog.action] || "default"}>
+                  {selectedLog.action || "-"}
+                </Tag>
+              </div>
+            </div>
+            <div>
+              <Text type="secondary">Technical Reference</Text>
               <div className="font-mono text-xs break-all">
-                {selectedLog.path || "-"}
+                {selectedLog.method || "-"} {selectedLog.path || "-"}
+              </div>
+              <div className="text-xs text-gray-500">
+                Status: {selectedLog.statusCode || "-"}
               </div>
             </div>
             <div>
