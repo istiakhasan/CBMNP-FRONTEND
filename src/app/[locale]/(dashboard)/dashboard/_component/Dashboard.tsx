@@ -13,6 +13,7 @@ import {
   Tag,
   Tooltip,
   Divider,
+  Select,
 } from "antd";
 import {
   ArrowUpOutlined,
@@ -43,6 +44,15 @@ import dayjs from "dayjs";
 
 const { RangePicker } = DatePicker;
 
+const DATE_FIELD_OPTIONS = [
+  { value: "createdAt", label: "Created Time" },
+  { value: "approvedTime", label: "Approved Time" },
+  { value: "storeTime", label: "Store Time" },
+  { value: "packingTime", label: "Packing Time" },
+  { value: "intransitTime", label: "In-Transit Time" },
+  { value: "courierUpdatedAt", label: "Courier Update Time" },
+];
+
 const PortFolioOverview = dynamic(() => import("./PortFolioOverview"), {
   ssr: false,
 });
@@ -54,9 +64,11 @@ const AreaWiseAnalytics = dynamic(() => import("./AreaWiseAnalytics"), {
 export default function Dashboard() {
   const [period, setPeriod] = useState<string>("month");
   const [customRange, setCustomRange] = useState<any>(null);
+  const [dateField, setDateField] = useState<string>("createdAt");
 
   const queryParams: any = {
     period,
+    dateField,
   };
 
   if (period === "custom" && customRange && customRange[0] && customRange[1]) {
@@ -148,6 +160,14 @@ export default function Dashboard() {
 
           {/* Filter Toolbar */}
           <div className="flex flex-wrap items-center gap-3">
+            <Select
+              value={dateField}
+              onChange={setDateField}
+              options={DATE_FIELD_OPTIONS}
+              size="middle"
+              className="min-w-[180px]"
+            />
+
             <Radio.Group
               value={period}
               onChange={(e) => setPeriod(e.target.value)}
@@ -404,6 +424,7 @@ export default function Dashboard() {
               <PortFolioOverview
                 chartData={summary?.chartData}
                 periodTitle={`Sales & Revenue Inflow (${activePeriodLabel})`}
+                dateField={dateField}
               />
             </Card>
           </Col>
@@ -422,6 +443,7 @@ export default function Dashboard() {
             period={period}
             startDate={queryParams.startDate}
             endDate={queryParams.endDate}
+            dateField={dateField}
           />
         </div>
 

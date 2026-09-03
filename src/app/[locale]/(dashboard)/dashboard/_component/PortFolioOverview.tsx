@@ -10,6 +10,7 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
 interface PortFolioOverviewProps {
   chartData?: Array<{ key: string; revenue: number; orders?: number }>;
   periodTitle?: string;
+  dateField?: string;
 }
 
 const DEFAULT_CATEGORIES = [
@@ -19,10 +20,11 @@ const DEFAULT_CATEGORIES = [
 const PortFolioOverview: React.FC<PortFolioOverviewProps> = ({
   chartData,
   periodTitle = "Revenue & Sales Trend",
+  dateField = "createdAt",
 }) => {
   const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES);
   const [seriesData, setSeriesData] = useState<number[]>(new Array(12).fill(0));
-  const { data: queryData, isLoading } = useGetMonthlySalesReportQuery(undefined);
+  const { data: queryData, isLoading } = useGetMonthlySalesReportQuery({ dateField });
 
   useEffect(() => {
     if (chartData && chartData.length > 0) {
