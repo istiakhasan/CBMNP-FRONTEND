@@ -12,34 +12,51 @@ import {
   Pagination,
   Popover,
   Segmented,
-  Tooltip
+  TableProps,
+  Tooltip,
 } from "antd";
 import moment from "moment";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
-import React, {  useState } from "react";
+import React, { useState } from "react";
+import GbDropdown from "@/components/ui/dashboard/GbDropdown";
+import GbModal from "@/components/ui/GbModal";
+import GbForm from "@/components/forms/GbForm";
+import BulkChangeOrders from "./BulkChangeOrders";
 
-const Delivered = ({warehosueIds,productIds,searchTerm,currierIds,rangeValue,orderStatus,countData,creationRangeValue}: any) => {
+const Delivered = ({
+  warehosueIds,
+  productIds,
+  searchTerm,
+  currierIds,
+  rangeValue,
+  orderStatus,
+  countData,
+  creationRangeValue,
+}: any) => {
   // all states
-  const [paymentStatus, setPaymentStatus] = useState<any>('Pending');
+  const [statuschangedModal, setStatusChangeModal] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<any>("Pending");
   const [page, setPage] = useState<number>(1);
   const [size, setSize] = useState<number>(10);
   const { data, isLoading } = useGetAllOrdersQuery({
-     page:searchTerm?1:page,
+    page: searchTerm ? 1 : page,
     limit: size,
     searchTerm,
-    statusId:orderStatus?.length>0  ?( orderStatus?.includes(8) ? 8 : "112") : '8',
-    locationId:warehosueIds,
-    productId:productIds,
-    currier:currierIds,
-    paymentStatus:paymentStatus,
+    statusId:
+      orderStatus?.length > 0 ? (orderStatus?.includes(8) ? 8 : "112") : "8",
+    locationId: warehosueIds,
+    productId: productIds,
+    currier: currierIds,
+    paymentStatus: paymentStatus,
     ...rangeValue,
     ...creationRangeValue,
   });
-  const local=useLocale()
+  const local = useLocale();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-    const tableColumn = [
+  const tableColumn = [
     {
       title: "SL",
       key: "sl",
@@ -252,92 +269,158 @@ const Delivered = ({warehosueIds,productIds,searchTerm,currierIds,rangeValue,ord
     label: title,
     value: key,
   }));
+  const [selectedOrders, setSelectedOrders] = useState<any>([]);
+  const rowSelection: TableProps<any>["rowSelection"] = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
+      setSelectedOrders(selectedRows);
+    },
+    getCheckboxProps: (record: any) => ({
+      disabled: record.name === "Disabled User",
+      name: record.name,
+    }),
+  };
   return (
     <>
       <ConfigProvider
         theme={{
           components: {
             Segmented: {
-              itemSelectedBg: "#4F8A6D",   
-              itemSelectedColor: "#fff", 
-              fontSize:10
+              itemSelectedBg: "#4F8A6D",
+              itemSelectedColor: "#fff",
+              fontSize: 10,
             },
           },
         }}
       >
-        <Segmented 
+        <Segmented
           options={[
-            { label: `Pay Due`, value: 'Pending' },
-            { label: `Partial Delivered `, value: 'Partial' },
-            { label: `Pay Collected `, value: 'Paid' },
-            { label: `All`, value: '' },
+            { label: `Pay Due`, value: "Pending" },
+            { label: `Partial Delivered `, value: "Partial" },
+            { label: `Pay Collected `, value: "Paid" },
+            { label: `All`, value: "" },
             // { label: `Pay Due (${countData?.data?.find((ab:any)=>ab?.id===11)?.count || 0})`, value: 'Pending' },
             // { label: `Partial Delivered  (${countData?.data?.find((ab:any)=>ab?.id===12)?.count || 0})`, value: 'Partial' },
             // { label: `Pay Collected  (${countData?.data?.find((ab:any)=>ab?.id===10)?.count || 0})`, value: 'Paid' },
             // { label: `All  (${countData?.data?.find((ab:any)=>ab?.id===10)?.count || 0})`, value: '' },
           ]}
           onChange={(val) => {
-            setPaymentStatus(val)
+            setPaymentStatus(val);
           }}
         />
       </ConfigProvider>
-    <div className="gb_border mt-1">
-      <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
-        <div className="flex gap-2">
-          <div className="border p-2 h-[35px] w-[35px] flex gap-3 items-center cursor-pointer justify-center">
-            <i
-              style={{ fontSize: "24px" }}
-              className="ri-restart-line text-gray-600"
-            ></i>
-          </div>
-          <Popover
-            placement="bottom"
-            content={
-              <div className=" min-w-[200px]">
-                <Checkbox.Group
-                  className="flex flex-col gap-3"
-                  value={checkedList}
-                  options={options as CheckboxOptionType[]}
-                  onChange={(value) => {
-                    setCheckedList(value as string[]);
-                  }}
-                />
-              </div>
-            }
-            trigger="click"
-            open={open}
-            onOpenChange={handleOpenChange}
-          >
-            <div className="border p-2 h-[35px] flex items-center gap-2 cursor-pointer">
+      <div className="gb_border mt-1">
+        <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
+          <div className="flex gap-2">
+            <div className="border p-2 h-[35px] w-[35px] flex gap-3 items-center cursor-pointer justify-center">
               <i
                 style={{ fontSize: "24px" }}
-                className="ri-equalizer-line text-gray-600"
-              ></i>{" "}
-              Filter Column
+                className="ri-restart-line text-gray-600"
+              ></i>
             </div>
-          </Popover>
+            <Popover
+              placement="bottom"
+              content={
+                <div className=" min-w-[200px]">
+                  <Checkbox.Group
+                    className="flex flex-col gap-3"
+                    value={checkedList}
+                    options={options as CheckboxOptionType[]}
+                    onChange={(value) => {
+                      setCheckedList(value as string[]);
+                    }}
+                  />
+                </div>
+              }
+              trigger="click"
+              open={open}
+              onOpenChange={handleOpenChange}
+            >
+              <div className="border p-2 h-[35px] flex items-center gap-2 cursor-pointer">
+                <i
+                  style={{ fontSize: "24px" }}
+                  className="ri-equalizer-line text-gray-600"
+                ></i>{" "}
+                Filter Column
+              </div>
+            </Popover>
+          </div>
+
+          <div className="flex gap-3">
+            <div>
+              {
+                <GbDropdown
+                  items={[
+                    {
+                      label: (
+                        <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
+                          <span
+                            onClick={async () => {
+                              setOpenModal(true);
+                            }}
+                          >
+                            Payment Report
+                          </span>
+                        </span>
+                      ),
+                      key: "0",
+                    },
+                    {
+                      label: (
+                        <span
+                          onClick={() => setStatusChangeModal(true)}
+                          className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center"
+                        >
+                          <span>Change Status</span>
+                        </span>
+                      ),
+                      key: "2",
+                    },
+                  ]}
+                >
+                  <button className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]">
+                    Action
+                  </button>
+                </GbDropdown>
+              }
+            </div>
+          </div>
+        </div>
+        <div className="custom_scroll overflow-scroll h-[400px]">
+          <GbTable
+            loading={isLoading}
+            columns={newColumns}
+            dataSource={data?.data}
+            rowSelection={rowSelection}
+          />
+        </div>
+           <GbModal
+        width="600px"
+        clseTab={false}
+        isModalOpen={statuschangedModal}
+        openModal={() => setStatusChangeModal(true)}
+        closeModal={() => setStatusChangeModal(false)}
+      >
+        <GbForm submitHandler={(data: any) => console.log(data)}>
+          <BulkChangeOrders
+            status="Delivered"
+            setModalOpen={setStatusChangeModal}
+            selectedOrders={selectedOrders}
+          />
+        </GbForm>
+      </GbModal>
+        <div className="my-4 flex justify-end">
+          <Pagination
+            pageSize={size}
+            total={data?.meta?.total}
+            onChange={(v, d) => {
+              setPage(v);
+              setSize(d);
+            }}
+            pageSizeOptions={[10, 20, 50, 100, 500]}
+            showSizeChanger={true}
+          />
         </div>
       </div>
-      <div className="custom_scroll overflow-scroll h-[400px]">
-        <GbTable
-          loading={isLoading}
-          columns={newColumns}
-          dataSource={data?.data}
-        />
-      </div>
-           <div className="my-4 flex justify-end">
-              <Pagination
-                pageSize={size}
-                total={data?.meta?.total}
-                onChange={(v, d) => {
-                  setPage(v);
-                  setSize(d);
-                }}
-                pageSizeOptions={[10, 20, 50, 100, 500]}
-                showSizeChanger={true}
-              />
-            </div>
-    </div>
     </>
   );
 };
