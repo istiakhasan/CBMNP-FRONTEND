@@ -352,20 +352,6 @@ const Delivered = ({
                   items={[
                     {
                       label: (
-                        <span className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center">
-                          <span
-                            onClick={async () => {
-                              setOpenModal(true);
-                            }}
-                          >
-                            Payment Report
-                          </span>
-                        </span>
-                      ),
-                      key: "0",
-                    },
-                    {
-                      label: (
                         <span
                           onClick={() => setStatusChangeModal(true)}
                           className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center"
