@@ -154,7 +154,43 @@ const ProductSalesReportTable: React.FC<ProductSalesReportTableProps> = ({
     },
   ];
 
-  // NEW: Date-wise breakdown columns
+  // Nested — shown when a date row is expanded: product name, SKU, qty, amount
+  const dateProductColumns: any = [
+    {
+      title: "Product Name",
+      dataIndex: "productName",
+      key: "productName",
+      render: (name: string, record: any) => (
+        <div>
+          <span className="font-semibold text-gray-800 block">{name || "Product"}</span>
+          <span className="text-xs text-gray-400 font-mono flex items-center gap-1">
+            <BarcodeOutlined /> SKU: {record.sku || "N/A"}
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: "Quantity Sold",
+      dataIndex: "quantity",
+      key: "quantity",
+      align: "center" as const,
+      sorter: (a: any, b: any) => Number(a.quantity || 0) - Number(b.quantity || 0),
+      render: (qty: number) => (
+        <span className="font-bold text-blue-700">{Number(qty || 0).toLocaleString()} pcs</span>
+      ),
+    },
+    {
+      title: "Sales Amount (Tk)",
+      dataIndex: "saleAmount",
+      key: "saleAmount",
+      align: "right" as const,
+      sorter: (a: any, b: any) => Number(a.saleAmount || 0) - Number(b.saleAmount || 0),
+      render: (amt: number) => (
+        <span className="font-bold text-emerald-700">৳ {formatAmount(amt)}</span>
+      ),
+    },
+  ];
+
   const dateColumns: any = [
     {
       title: "Date",
@@ -167,12 +203,17 @@ const ProductSalesReportTable: React.FC<ProductSalesReportTableProps> = ({
             {date ? dayjs(date).format("DD MMM YYYY") : "N/A"}
           </span>
           {date && (
-            <span className="text-xs text-gray-400">
-              ({dayjs(date).format("dddd")})
-            </span>
+            <span className="text-xs text-gray-400">({dayjs(date).format("dddd")})</span>
           )}
         </div>
       ),
+    },
+    {
+      title: "Products",
+      dataIndex: "products",
+      key: "productsCount",
+      align: "center" as const,
+      render: (products: any[]) => <Tag color="blue">{products?.length || 0} SKUs</Tag>,
     },
     {
       title: "Orders",
@@ -278,7 +319,7 @@ const ProductSalesReportTable: React.FC<ProductSalesReportTableProps> = ({
           <Card
             title={
               <span className="font-bold text-gray-700 text-sm">
-                Date-wise Sales Breakdown ({summary.dateBreakdown.length} Days)
+                Date-wise Sales Breakdown ({summary.dateBreakdown.length} Days) — click a row to see product-wise detail
               </span>
             }
             className="rounded-xl border-gray-200 shadow-sm"
@@ -287,12 +328,21 @@ const ProductSalesReportTable: React.FC<ProductSalesReportTableProps> = ({
               dataSource={summary.dateBreakdown}
               columns={dateColumns}
               rowKey={(r) => r.date}
-              pagination={
-                summary.dateBreakdown.length > 10
-                  ? { pageSize: 10, showSizeChanger: true }
-                  : false
-              }
+              pagination={false}
               size="small"
+              expandable={{
+                expandedRowRender: (record: any) => (
+                  <Table
+                    dataSource={record.products || []}
+                    columns={dateProductColumns}
+                    rowKey={(p: any) => `${record.date}-${p.productId}`}
+                    pagination={false}
+                    size="small"
+                    className="bg-gray-50 rounded-lg"
+                  />
+                ),
+                rowExpandable: (record: any) => (record.products || []).length > 0,
+              }}
               summary={(pageData) => {
                 const totalOrders = pageData.reduce(
                   (sum, r) => sum + Number(r.orderCount || 0),
@@ -312,17 +362,18 @@ const ProductSalesReportTable: React.FC<ProductSalesReportTableProps> = ({
                       <Table.Summary.Cell index={0}>
                         <span className="text-gray-900 font-bold">Total:</span>
                       </Table.Summary.Cell>
-                      <Table.Summary.Cell index={1} align="center">
+                      <Table.Summary.Cell index={1} />
+                      <Table.Summary.Cell index={2} align="center">
                         <span className="text-gray-900 font-bold">
                           {totalOrders.toLocaleString()} Orders
                         </span>
                       </Table.Summary.Cell>
-                      <Table.Summary.Cell index={2} align="center">
+                      <Table.Summary.Cell index={3} align="center">
                         <span className="text-blue-700 font-bold">
                           {totalQty.toLocaleString()} pcs
                         </span>
                       </Table.Summary.Cell>
-                      <Table.Summary.Cell index={3} align="right">
+                      <Table.Summary.Cell index={4} align="right">
                         <span className="text-emerald-700 font-bold">
                           ৳ {formatAmount(totalAmount)}
                         </span>

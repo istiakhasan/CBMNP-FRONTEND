@@ -38,54 +38,71 @@ const DATE_FIELD_OPTIONS = [
 ];
 
 const Page = () => {
-const handleDownloadExcel = () => {
-  if (!data?.data?.length) {
-    message.warning("No report data to export");
-    return;
-  }
+  const handleDownloadExcel = () => {
+    if (!data?.data?.length) {
+      message.warning("No report data to export");
+      return;
+    }
 
-  const rows = data.data.map((r: any) => ({
-    "Product Name": r.productName,
-    SKU: r.sku,
-    "Order Source": r.orderSource,
-    "Quantity Sold": Number(r.totalOrderQuantity || 0),
-    "Avg Unit Price": Number(r.price || 0),
-    "Total Revenue (Tk)": Number(r.totalSaleAmount || 0),
-    "Orders Count": Number(r.orderCount || 0),
-  }));
-
-  const workbook = XLSX.utils.book_new();
-
-  const sheet = XLSX.utils.json_to_sheet(rows);
-  XLSX.utils.book_append_sheet(workbook, sheet, "Product Sales");
-
-  // NEW: Date-wise breakdown sheet
-  if (data?.summary?.dateBreakdown?.length) {
-    const dateRows = data.summary.dateBreakdown.map((d: any) => ({
-      Date: d.date,
-      "Orders Count": Number(d.orderCount || 0),
-      "Quantity Sold": Number(d.productQuantity || 0),
-      "Sales Amount (Tk)": Number(d.saleAmount || 0),
+    const rows = data.data.map((r: any) => ({
+      "Product Name": r.productName,
+      SKU: r.sku,
+      "Order Source": r.orderSource,
+      "Quantity Sold": Number(r.totalOrderQuantity || 0),
+      "Avg Unit Price": Number(r.price || 0),
+      "Total Revenue (Tk)": Number(r.totalSaleAmount || 0),
+      "Orders Count": Number(r.orderCount || 0),
     }));
-    const dateSheet = XLSX.utils.json_to_sheet(dateRows);
-    XLSX.utils.book_append_sheet(workbook, dateSheet, "Date-wise Breakdown");
-  }
 
-  const summaryRows = [
-    { Metric: "Products Sold", Value: Number(data?.summary?.totalProductQuantity || 0) },
-    { Metric: "Total Orders", Value: Number(data?.summary?.totalOrders || 0) },
-    { Metric: "Gross Sales (Tk)", Value: Number(data?.summary?.salesAmount || 0) },
-    { Metric: "Paid Amount (Tk)", Value: Number(data?.summary?.paidAmount || 0) },
-    { Metric: "Courier Orders", Value: Number(data?.summary?.courierOrderCount || 0) },
-    { Metric: "Distinct Products", Value: Number(data?.summary?.totalProducts || rows.length) },
-  ];
-  const summarySheet = XLSX.utils.json_to_sheet(summaryRows);
-  XLSX.utils.book_append_sheet(workbook, summarySheet, "Summary");
+    const workbook = XLSX.utils.book_new();
 
-  const from = (startDate || today).format("YYYY-MM-DD");
-  const to = (endDate || today).format("YYYY-MM-DD");
-  XLSX.writeFile(workbook, `Product-Sales-Report_${from}_to_${to}.xlsx`);
-};
+    const sheet = XLSX.utils.json_to_sheet(rows);
+    XLSX.utils.book_append_sheet(workbook, sheet, "Product Sales");
+
+    // Date + Product-wise breakdown sheet
+    if (data?.summary?.dateBreakdown?.length) {
+      const dateProductRows: any[] = [];
+      data.summary.dateBreakdown.forEach((d: any) => {
+        if (d.products?.length) {
+          d.products.forEach((p: any) => {
+            dateProductRows.push({
+              Date: d.date,
+              "Product Name": p.productName,
+              SKU: p.sku,
+              "Quantity Sold": p.quantity,
+              "Sales Amount (Tk)": p.saleAmount,
+            });
+          });
+        } else {
+          dateProductRows.push({
+            Date: d.date,
+            "Product Name": "-",
+            SKU: "-",
+            "Quantity Sold": d.productQuantity,
+            "Sales Amount (Tk)": d.saleAmount,
+          });
+        }
+      });
+      const dateSheet = XLSX.utils.json_to_sheet(dateProductRows);
+      XLSX.utils.book_append_sheet(workbook, dateSheet, "Date-wise Breakdown");
+    }
+
+    const summaryRows = [
+      { Metric: "Products Sold", Value: Number(data?.summary?.totalProductQuantity || 0) },
+      { Metric: "Total Orders", Value: Number(data?.summary?.totalOrders || 0) },
+      { Metric: "Gross Sales (Tk)", Value: Number(data?.summary?.salesAmount || 0) },
+      { Metric: "Paid Amount (Tk)", Value: Number(data?.summary?.paidAmount || 0) },
+      { Metric: "Courier Orders", Value: Number(data?.summary?.courierOrderCount || 0) },
+      { Metric: "Distinct Products", Value: Number(data?.summary?.totalProducts || rows.length) },
+    ];
+    const summarySheet = XLSX.utils.json_to_sheet(summaryRows);
+    XLSX.utils.book_append_sheet(workbook, summarySheet, "Summary");
+
+    const from = (startDate || today).format("YYYY-MM-DD");
+    const to = (endDate || today).format("YYYY-MM-DD");
+    XLSX.writeFile(workbook, `Product-Sales-Report_${from}_to_${to}.xlsx`);
+  };
+
   const today = dayjs();
   const [startDate, setStartDate] = useState<Dayjs | null>(today);
   const [endDate, setEndDate] = useState<Dayjs | null>(today);
@@ -271,25 +288,25 @@ const handleDownloadExcel = () => {
               Refresh
             </Button>
             <Button
-  icon={<FilterOutlined />}
-  onClick={() => setIsFilterOpen(true)}
-  type="primary"
->
-  Advanced Filters
-</Button>
-<Button
-  icon={<DownloadOutlined />}
-  onClick={handleDownloadExcel}
-  disabled={!data?.data?.length}
->
-  Download Excel
-</Button>
-<Button
-  icon={<PrinterOutlined />}
-  onClick={() => window.print()}
->
-  Print Report
-</Button>
+              icon={<FilterOutlined />}
+              onClick={() => setIsFilterOpen(true)}
+              type="primary"
+            >
+              Advanced Filters
+            </Button>
+            <Button
+              icon={<DownloadOutlined />}
+              onClick={handleDownloadExcel}
+              disabled={!data?.data?.length}
+            >
+              Download Excel
+            </Button>
+            <Button
+              icon={<PrinterOutlined />}
+              onClick={() => window.print()}
+            >
+              Print Report
+            </Button>
           </Space>
         </div>
 
