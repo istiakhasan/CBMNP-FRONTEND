@@ -86,7 +86,8 @@ export default function DirectPurchasePage() {
     0
   );
 
-  const handleAddProductToCart = (productId: string) => {
+  const handleAddProductToCart = (productId?: string | null) => {
+    if (!productId) return;
     const prod = products.find((p: any) => p.id === productId);
     if (!prod) return;
 
