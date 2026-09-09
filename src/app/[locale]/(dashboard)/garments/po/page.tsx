@@ -53,7 +53,7 @@ import { useGarmentsPermission } from "@/hook/useGarmentsPermission";
 const { Option } = Select;
 
 function GarmentsPoContent() {
-  const { canCreatePo, canCheckPo, canApprovePo } = useGarmentsPermission();
+  const { canCreatePo, canCheckPo, canApprovePo, canReceiveMaterials } = useGarmentsPermission();
   const searchParams = useSearchParams();
   const preSelectedOrderId = searchParams ? searchParams.get("orderId") : null;
 
