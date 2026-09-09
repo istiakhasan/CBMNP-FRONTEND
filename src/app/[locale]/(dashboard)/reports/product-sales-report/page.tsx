@@ -38,70 +38,119 @@ const DATE_FIELD_OPTIONS = [
 ];
 
 const Page = () => {
-  const handleDownloadExcel = () => {
-    if (!data?.data?.length) {
-      message.warning("No report data to export");
-      return;
-    }
+const handleDownloadExcel = () => {
+  if (!data?.data?.length) {
+    message.warning("No report data to export");
+    return;
+  }
 
-    const rows = data.data.map((r: any) => ({
-      "Product Name": r.productName,
-      SKU: r.sku,
-      "Order Source": r.orderSource,
-      "Quantity Sold": Number(r.totalOrderQuantity || 0),
-      "Avg Unit Price": Number(r.price || 0),
-      "Total Revenue (Tk)": Number(r.totalSaleAmount || 0),
-      "Orders Count": Number(r.orderCount || 0),
+  const workbook = XLSX.utils.book_new();
+
+  // Sheet 1: Product Sales
+  const rows = data.data.map((r: any) => ({
+    "Product Name": r.productName,
+    SKU: r.sku,
+    "Order Source": r.orderSource,
+    "Quantity Sold": Number(r.totalOrderQuantity || 0),
+    "Avg Unit Price": Number(r.price || 0),
+    "Total Revenue (Tk)": Number(r.totalSaleAmount || 0),
+    "Orders Count": Number(r.orderCount || 0),
+  }));
+  const sheet = XLSX.utils.json_to_sheet(rows);
+  XLSX.utils.book_append_sheet(workbook, sheet, "Product Sales");
+
+  // Sheet 2 & 3: Date-wise breakdown
+  const dateBreakdown = data?.summary?.dateBreakdown;
+
+  if (Array.isArray(dateBreakdown) && dateBreakdown.length > 0) {
+    // Sheet 2: Date Summary (unchanged)
+    const dateSummaryRows = dateBreakdown.map((d: any) => ({
+      Date: d.date ? dayjs(d.date).format("DD MMM YYYY") : "N/A",
+      Day: d.date ? dayjs(d.date).format("dddd") : "",
+      "SKUs Sold": Array.isArray(d.products) ? d.products.length : 0,
+      Orders: Number(d.orderCount || 0),
+      "Quantity Sold": Number(d.productQuantity || 0),
+      "Sales Amount (Tk)": Number(d.saleAmount || 0),
     }));
+    const dateSummarySheet = XLSX.utils.json_to_sheet(dateSummaryRows);
+    XLSX.utils.book_append_sheet(workbook, dateSummarySheet, "Date Summary");
 
-    const workbook = XLSX.utils.book_new();
+    // Sheet 3: Date-Product Detail — grouped visually with merged date cells
+    const header = ["Date", "Product Name", "SKU", "Quantity Sold", "Sales Amount (Tk)"];
+    const aoa: any[][] = [header];
+    const merges: XLSX.Range[] = [];
 
-    const sheet = XLSX.utils.json_to_sheet(rows);
-    XLSX.utils.book_append_sheet(workbook, sheet, "Product Sales");
+    dateBreakdown.forEach((d: any) => {
+      const dateLabel = d.date ? dayjs(d.date).format("DD MMM YYYY") : "N/A";
+      const products =
+        Array.isArray(d.products) && d.products.length > 0
+          ? d.products
+          : [
+              {
+                productName: "(no product-level detail)",
+                sku: "-",
+                quantity: d.productQuantity || 0,
+                saleAmount: d.saleAmount || 0,
+              },
+            ];
 
-    // Date + Product-wise breakdown sheet
-    if (data?.summary?.dateBreakdown?.length) {
-      const dateProductRows: any[] = [];
-      data.summary.dateBreakdown.forEach((d: any) => {
-        if (d.products?.length) {
-          d.products.forEach((p: any) => {
-            dateProductRows.push({
-              Date: d.date,
-              "Product Name": p.productName,
-              SKU: p.sku,
-              "Quantity Sold": p.quantity,
-              "Sales Amount (Tk)": p.saleAmount,
-            });
-          });
-        } else {
-          dateProductRows.push({
-            Date: d.date,
-            "Product Name": "-",
-            SKU: "-",
-            "Quantity Sold": d.productQuantity,
-            "Sales Amount (Tk)": d.saleAmount,
-          });
-        }
+      const startRow = aoa.length; // 0-indexed row where this date's block starts
+
+      products.forEach((p: any, idx: number) => {
+        aoa.push([
+          idx === 0 ? dateLabel : "", // date text only on first row of the block
+          p.productName || "N/A",
+          p.sku || "N/A",
+          Number(p.quantity || 0),
+          Number(p.saleAmount || 0),
+        ]);
       });
-      const dateSheet = XLSX.utils.json_to_sheet(dateProductRows);
-      XLSX.utils.book_append_sheet(workbook, dateSheet, "Date-wise Breakdown");
-    }
 
-    const summaryRows = [
-      { Metric: "Products Sold", Value: Number(data?.summary?.totalProductQuantity || 0) },
-      { Metric: "Total Orders", Value: Number(data?.summary?.totalOrders || 0) },
-      { Metric: "Gross Sales (Tk)", Value: Number(data?.summary?.salesAmount || 0) },
-      { Metric: "Paid Amount (Tk)", Value: Number(data?.summary?.paidAmount || 0) },
-      { Metric: "Courier Orders", Value: Number(data?.summary?.courierOrderCount || 0) },
-      { Metric: "Distinct Products", Value: Number(data?.summary?.totalProducts || rows.length) },
+      const endRow = aoa.length - 1;
+
+      // Merge the Date column (col 0) across all rows of this date's block
+      if (endRow > startRow) {
+        merges.push({ s: { r: startRow, c: 0 }, e: { r: endRow, c: 0 } });
+      }
+    });
+
+    const dateProductSheet = XLSX.utils.aoa_to_sheet(aoa);
+    dateProductSheet["!merges"] = merges;
+
+    // Optional: reasonable column widths for readability
+    dateProductSheet["!cols"] = [
+      { wch: 14 }, // Date
+      { wch: 55 }, // Product Name
+      { wch: 16 }, // SKU
+      { wch: 14 }, // Quantity Sold
+      { wch: 18 }, // Sales Amount
     ];
-    const summarySheet = XLSX.utils.json_to_sheet(summaryRows);
-    XLSX.utils.book_append_sheet(workbook, summarySheet, "Summary");
 
-    const from = (startDate || today).format("YYYY-MM-DD");
-    const to = (endDate || today).format("YYYY-MM-DD");
+    XLSX.utils.book_append_sheet(workbook, dateProductSheet, "Date-Product Detail");
+  }
+
+  // Sheet 4: Summary
+  const summaryRows = [
+    { Metric: "Products Sold", Value: Number(data?.summary?.totalProductQuantity || 0) },
+    { Metric: "Total Orders", Value: Number(data?.summary?.totalOrders || 0) },
+    { Metric: "Gross Sales (Tk)", Value: Number(data?.summary?.salesAmount || 0) },
+    { Metric: "Paid Amount (Tk)", Value: Number(data?.summary?.paidAmount || 0) },
+    { Metric: "Courier Orders", Value: Number(data?.summary?.courierOrderCount || 0) },
+    { Metric: "Distinct Products", Value: Number(data?.summary?.totalProducts || rows.length) },
+  ];
+  const summarySheet = XLSX.utils.json_to_sheet(summaryRows);
+  XLSX.utils.book_append_sheet(workbook, summarySheet, "Summary");
+
+  const from = (startDate || today).format("YYYY-MM-DD");
+  const to = (endDate || today).format("YYYY-MM-DD");
+
+  try {
     XLSX.writeFile(workbook, `Product-Sales-Report_${from}_to_${to}.xlsx`);
-  };
+  } catch (err) {
+    console.error("Excel export failed:", err);
+    message.error("Failed to generate Excel file");
+  }
+};
 
   const today = dayjs();
   const [startDate, setStartDate] = useState<Dayjs | null>(today);
