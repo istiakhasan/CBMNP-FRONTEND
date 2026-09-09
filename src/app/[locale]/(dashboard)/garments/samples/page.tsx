@@ -305,7 +305,7 @@ export default function SampleDevelopmentPage() {
             </Tag>
             {record.buyerFeedback && (
               <div className="text-xs text-gray-500 truncate max-w-xs mt-0.5">
-                "{record.buyerFeedback}"
+                {record.buyerFeedback}
               </div>
             )}
           </div>
