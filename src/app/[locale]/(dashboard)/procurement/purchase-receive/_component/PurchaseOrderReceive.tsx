@@ -3,7 +3,7 @@ import { useReceivePurchaseOrderMutation } from "@/redux/api/procurementApi";
 import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
 import { message } from "antd";
 import moment from "moment";
-import React from "react";
+import React, { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 const PurchaseOrderReceive = ({
@@ -11,12 +11,12 @@ const PurchaseOrderReceive = ({
   setReceiveModal,
   setRowData,
 }: any) => {
-  console.log(rowData, "asdfas");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { data } = useLoadAllWarehouseOptionsQuery(undefined);
   const [receivePurchaseOrder] = useReceivePurchaseOrderMutation();
   const { watch } = useFormContext();
   return (
-    <div className="bg-white  rounded-lg  w-full ">
+    <div className="bg-white rounded-lg w-full">
       <h2 className="text-lg font-semibold mb-4">
         Receive from Purchase Order
       </h2>
@@ -65,7 +65,6 @@ const PurchaseOrderReceive = ({
                       }
                       value={item?.quantityToReceive || ""}
                       onChange={(e) => {
-                        console.log(+e.target.value, +item?.orderedQuantity);
                         if ((+e.target.value + item?.receivedQuantity) > +item?.orderedQuantity) {
                           return message.error(
                             "Receive quantity is not greater then order quantity"
@@ -140,59 +139,100 @@ const PurchaseOrderReceive = ({
       <div className="mt-6 flex justify-end space-x-4">
         <button
           type="button"
-          onClick={async () => {
+          disabled={isSubmitting}
+          onClick={async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (isSubmitting) return;
+
             try {
-              if (!watch()?.warehouse && !watch()?.warehouse?.value) {
-                return message.error("Please select warehouse");
+              const warehouseVal = watch("warehouse") || watch()?.warehouse;
+              const warehouseId =
+                typeof warehouseVal === "object" && warehouseVal !== null
+                  ? warehouseVal.value
+                  : warehouseVal;
+
+              if (!warehouseId) {
+                message.error("Please select a receiving warehouse");
+                return;
               }
-              const modifiedData = rowData?.items
-                ?.map((item: any) => {
-                  return {
-                    productId: item?.productId,
-                    quantity: +item?.quantityToReceive,
-                    expiredQuantity: 0,
-                    wastageQuantity: 0,
-                    type: true,
-                    inventoryItems: [
-                      {
-                        locationId: watch()?.warehouse?.value,
-                        quantity: item?.quantityToReceive,
-                        expiredQuantity: 0,
-                        wastageQuantity: 0,
-                        productId: item?.productId,
-                      },
-                    ],
-                  };
-                })
-                .filter((item: any) => +item?.quantity > 0);
-              const poIds = rowData?.items
-                ?.filter((item: any) => +item?.quantityToReceive > 0)
-                .map((item: any) => {
-                  return {
-                    productId: item?.productId,
-                    id: item?.id,
-                    receivedQuantity:
-                      +item?.receivedQuantity + +item?.quantityToReceive,
-                  };
-                });
-              const result = await receivePurchaseOrder({
-                stock: modifiedData,
+
+              const itemsToReceive = (rowData?.items || []).filter(
+                (item: any) => Number(item?.quantityToReceive || 0) > 0
+              );
+
+              if (itemsToReceive.length === 0) {
+                message.warning("Please enter receive quantity for at least one item");
+                return;
+              }
+
+              setIsSubmitting(true);
+
+              const stock = itemsToReceive.map((item: any) => {
+                const qty = Number(item.quantityToReceive || 0);
+                return {
+                  productId: item.productId,
+                  quantity: qty,
+                  expiredQuantity: 0,
+                  wastageQuantity: 0,
+                  type: true,
+                  inventoryItems: [
+                    {
+                      locationId: warehouseId,
+                      quantity: qty,
+                      expiredQuantity: 0,
+                      wastageQuantity: 0,
+                      productId: item.productId,
+                    },
+                  ],
+                };
+              });
+
+              const poIds = itemsToReceive.map((item: any) => ({
+                productId: item.productId,
+                id: item.id,
+                receivedQuantity:
+                  Number(item.receivedQuantity || 0) + Number(item.quantityToReceive || 0),
+              }));
+
+              const result: any = await receivePurchaseOrder({
+                stock,
                 poIds,
-                procurementId:rowData?.id
-              }).unwrap();
-              if (result) {
-                message.success("Product receive successfully...");
+                procurementId: rowData?.id,
+              });
+
+              if (result?.data?.success || result?.success || !result?.error) {
+                message.success(
+                  result?.data?.message ||
+                  result?.message ||
+                  "Product received successfully into warehouse!"
+                );
                 setReceiveModal(false);
+                if (typeof setRowData === "function") {
+                  setRowData(null);
+                }
+              } else {
+                const errorMsg =
+                  result?.error?.data?.message ||
+                  result?.error?.message ||
+                  "Failed to receive purchase order items";
+                message.error(errorMsg);
               }
-            } catch (error) {
-              message.error("Ha ha ha aitai bastob...");
+            } catch (error: any) {
+              message.error(error?.data?.message || error?.message || "Failed to receive order");
+            } finally {
+              setIsSubmitting(false);
             }
           }}
-          className="bg-primary text-white px-4 py-2 rounded hover:bg-green-700"
+          className={`bg-primary text-white px-5 py-2 rounded font-medium transition ${
+            isSubmitting ? "opacity-60 cursor-not-allowed" : "hover:bg-green-700"
+          }`}
         >
-          RECEIVE
+          {isSubmitting ? "RECEIVING..." : "RECEIVE"}
         </button>
         <button
+          type="button"
+          disabled={isSubmitting}
           onClick={() => setReceiveModal(false)}
           className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
         >

@@ -1,61 +1,17 @@
 import { MenuProps } from "antd";
 import Link from "next/link";
 type MenuItem = Required<MenuProps>["items"][number];
+
 export const agentMenu: MenuItem[] = [
-	// {
-	// 	key: "Order",
-	// 	label: <p className="text-[14px]">Order</p>,
-	// 	icon: (
-	// 		<div>
-	// 			<i style={{ fontSize: "18px" }} className="ri-file-list-3-fill"></i>
-	// 		</div>
-	// 	),
-	// 	children: [
-	// 		{
-	// 			key: "/order/order-submission",
-	// 			label: (
-	// 				<Link className=" text-[14px]" href={"/order/order-submission"}>
-	// 					Submit Order
-	// 				</Link>
-	// 			),
-	// 		},
-	// 		{
-	// 			key: "/order/pending-orders",
-	// 			label: (
-	// 				<Link className=" text-[14px]" href={"/order/pending-orders"}>
-	// 					Pending Orders
-	// 				</Link>
-	// 			),
-	// 		},
-	// 		{
-	// 			key: "/order/approved-orders",
-	// 			label: (
-	// 				<Link className=" text-[14px]" href={"/order/approved-orders"}>
-	// 					Approved Orders
-	// 				</Link>
-	// 			),
-	// 		},
-	// 		{
-	// 			key: "/order/order-list",
-	// 			label: (
-	// 				<Link className=" text-[14px]" href={"/order/all-orders"}>
-	// 					All Orders
-	// 				</Link>
-	// 			),
-	// 		},
-	// 	],
-	// },
 	{
 		key: "/employee/profile",
 		label: (
 			<Link href={"/employee/profile"}>
-				{" "}
 				<p>Dashboard</p>
 			</Link>
 		),
 		icon: <i style={{ fontSize: "18px" }} className="ri-team-fill"></i>,
 	},
-
 	{
 		key: "Subscription",
 		label: <p className="text-[14px]">Subscription</p>,
@@ -77,63 +33,15 @@ export const agentMenu: MenuItem[] = [
 				key: "/subscription/customer_list",
 				label: (
 					<Link className=" text-[14px]" href={"/subscription/customer_list"}>
-						 Subscriber list
+						Subscriber list
 					</Link>
 				),
 			},
 		],
 	},
-
-	// {
-	// 	key: "Order",
-	// 	label: <p className="text-[14px]">Order</p>,
-	// 	icon: (
-	// 		<div>
-	// 			<i style={{ fontSize: "18px" }} className="ri-file-list-3-fill"></i>
-	// 		</div>
-	// 	),
-	// 	children: [
-	// 		{
-	// 			key: "/order/order-submission",
-	// 			label: (
-	// 				<Link className=" text-[14px]" href={"/order/order-submission"}>
-	// 					Submit Order
-	// 				</Link>
-	// 			),
-	// 		},
-	// 		{
-	// 			key: "/order/pending-orders",
-	// 			label: (
-	// 				<Link className=" text-[14px]" href={"/order/pending-orders"}>
-	// 					Pending Orders
-	// 				</Link>
-	// 			),
-	// 		},
-	// 		{
-	// 			key: "/order/approved-orders",
-	// 			label: (
-	// 				<Link className=" text-[14px]" href={"/order/approved-orders"}>
-	// 					Approved Orders
-	// 				</Link>
-	// 			),
-	// 		},
-	// 		{
-	// 			key: "/order/order-list",
-	// 			label: (
-	// 				<Link className=" text-[14px]" href={"/order/all-orders"}>
-	// 					All Orders
-	// 				</Link>
-	// 			),
-	// 		},
-	// 	],
-	// },
 ];
+
 export const menuItem: MenuItem[] = [
-	// {
-	//   key: "/profile",
-	//   label: <Link style={{fontSize:"14px"}} className="text-[14px]" href={"/profile"}>Dashboard</Link>,
-	//   icon:<i style={{fontSize:"18px"}} className="ri-layout-2-fill "></i>,
-	// },
 	{
 		key: "Order",
 		label: <p className="text-[14px]">Order</p>,
@@ -217,18 +125,6 @@ export const menuItem: MenuItem[] = [
 					</Link>
 				),
 			},
-			// {
-			//   key:"Ready For Shipping",
-			//   label:<Link className="ml-[30px] text-[14px]" href={"/"}>Ready For Shipping</Link>,
-			// },
-			// {
-			//   key:"Order In-transit",
-			//   label:<Link className="ml-[30px] text-[14px]" href={"/"}>Order In-transit</Link>,
-			// },
-			// {
-			//   key:"Order Transfer",
-			//   label:<Link className="ml-[30px] text-[14px]" href={"/"}>Order Transfer</Link>,
-			// },
 		],
 	},
 	{
@@ -239,6 +135,140 @@ export const menuItem: MenuItem[] = [
 			</Link>
 		),
 		icon: <i style={{ fontSize: "18px" }} className="ri-box-1-line"></i>,
+	},
+	{
+		key: "Inventory",
+		label: <p className="text-[14px]">Inventory</p>,
+		icon: (
+			<div>
+				<i style={{ fontSize: "18px" }} className="ri-store-3-fill"></i>
+			</div>
+		),
+		children: [
+			{
+				key: "/inventory",
+				label: (
+					<Link className=" text-[14px]" href={"/inventory"}>
+						Stock & Movement Logs
+					</Link>
+				),
+			},
+			{
+				key: "/inventory/adjustments",
+				label: (
+					<Link className=" text-[14px]" href={"/inventory/adjustments"}>
+						Stock Adjustments
+					</Link>
+				),
+			},
+			{
+				key: "/inventory/transfers",
+				label: (
+					<Link className=" text-[14px]" href={"/inventory/transfers"}>
+						Stock Transfers
+					</Link>
+				),
+			},
+			{
+				key: "/inventory/valuation",
+				label: (
+					<Link className=" text-[14px]" href={"/inventory/valuation"}>
+						Valuation & Low Stock
+					</Link>
+				),
+			},
+		],
+	},
+	{
+		key: "Procurement",
+		label: <p className="text-[14px]">Procurement</p>,
+		icon: (
+			<div>
+				<i style={{ fontSize: "18px" }} className="ri-luggage-cart-fill"></i>
+			</div>
+		),
+		children: [
+			{
+				key: "/procurement/direct-purchase",
+				label: (
+					<Link className=" text-[14px]" href={"/procurement/direct-purchase"}>
+						Direct Purchase
+					</Link>
+				),
+			},
+			{
+				key: "/procurement/purchase-order",
+				label: (
+					<Link className=" text-[14px]" href={"/procurement/purchase-order"}>
+						Purchase Orders
+					</Link>
+				),
+			},
+			{
+				key: "/procurement/purchase-approved",
+				label: (
+					<Link className=" text-[14px]" href={"/procurement/purchase-approved"}>
+						Purchase Approved
+					</Link>
+				),
+			},
+			{
+				key: "/procurement/purchase-receive",
+				label: (
+					<Link className=" text-[14px]" href={"/procurement/purchase-receive"}>
+						Purchase Receive
+					</Link>
+				),
+			},
+			{
+				key: "/procurement/grn",
+				label: (
+					<Link className=" text-[14px]" href={"/procurement/grn"}>
+						Goods Receipt (GRN & QA)
+					</Link>
+				),
+			},
+			{
+				key: "/procurement/purchase-completed",
+				label: (
+					<Link className=" text-[14px]" href={"/procurement/purchase-completed"}>
+						Purchase Completed
+					</Link>
+				),
+			},
+			{
+				key: "/procurement/purchase-cancel",
+				label: (
+					<Link className=" text-[14px]" href={"/procurement/purchase-cancel"}>
+						Purchase Canceled
+					</Link>
+				),
+			},
+			{
+				key: "/procurement/returns",
+				label: (
+					<Link className=" text-[14px]" href={"/procurement/returns"}>
+						Purchase Returns
+					</Link>
+				),
+			},
+			{
+				key: "/procurement/supplier",
+				label: (
+					<Link className=" text-[14px]" href={"/procurement/supplier"}>
+						Suppliers Directory
+					</Link>
+				),
+			},
+			{
+				key: "/procurement/purchase-report",
+				label: (
+					<Link className=" text-[14px]" href={"/procurement/purchase-report"}>
+						Purchase Reports
+					</Link>
+				),
+			},
+		],
 	},
 	{
 		key: "Settings",
@@ -256,10 +286,6 @@ export const menuItem: MenuItem[] = [
 					</Link>
 				),
 			},
-			// {
-			//   key:"/settings/product-category/sub-category",
-			//   label:<Link className="ml-[30px]" href={"/settings/product-category/sub-category"}>Sub Category</Link>,
-			// },
 			{
 				key: "/settings/brand",
 				label: (
@@ -298,7 +324,6 @@ export const menuItem: MenuItem[] = [
 		key: "/employee/profile",
 		label: (
 			<Link href={"/employee/profile"}>
-				{" "}
 				<p>Employee</p>
 			</Link>
 		),
@@ -325,48 +350,14 @@ export const menuItem: MenuItem[] = [
 				key: "/subscription/customer_list",
 				label: (
 					<Link className=" text-[14px]" href={"/subscription/customer_list"}>
-						 Subscriber list
-					</Link>
-				),
-			},
-		],
-	},
-	{
-		key: "Inventory",
-		label: <p className="text-[14px]">Inventory</p>,
-		icon: (
-			<div>
-				<i style={{ fontSize: "18px" }} className="ri-store-3-fill"></i>
-			</div>
-		),
-		children: [
-			{
-				key: "/inventory/product-receive",
-				label: (
-					<Link className=" text-[14px]" href={"/inventory/product-receive"}>
-						Product Receive
-					</Link>
-				),
-			},
-			{
-				key: "/inventory/stock-information",
-				label: (
-					<Link className=" text-[14px]" href={"/subscription/stock-information"}>
-						Stock Information
-					</Link>
-				),
-			},
-			{
-				key: "/inventory/valuation",
-				label: (
-					<Link className=" text-[14px]" href={"/inventory/valuation"}>
-						Reorder Rules
+						Subscriber list
 					</Link>
 				),
 			},
 		],
 	},
 ];
+
 export const hrMenuList: MenuItem[] = [
 	{
 		key: "HR & Payroll",
@@ -376,26 +367,10 @@ export const hrMenuList: MenuItem[] = [
 		icon: <i style={{ fontSize: "18px" }} className="ri-team-fill"></i>,
 		children: [
 			{
-				key: "/hr/setup",
-				label: (
-					<Link className=" text-[14px]" href={"/hr/setup"}>
-						HR Setup
-					</Link>
-				),
-			},
-			{
 				key: "/hr/employees",
 				label: (
 					<Link className=" text-[14px]" href={"/hr/employees"}>
 						Employee Directory
-					</Link>
-				),
-			},
-			{
-				key: "/hr/leaves",
-				label: (
-					<Link className=" text-[14px]" href={"/hr/leaves"}>
-						Leave Management
 					</Link>
 				),
 			},
@@ -408,6 +383,14 @@ export const hrMenuList: MenuItem[] = [
 				),
 			},
 			{
+				key: "/hr/leaves",
+				label: (
+					<Link className=" text-[14px]" href={"/hr/leaves"}>
+						Leave Management
+					</Link>
+				),
+			},
+			{
 				key: "/hr/payroll",
 				label: (
 					<Link className=" text-[14px]" href={"/hr/payroll"}>
@@ -416,10 +399,50 @@ export const hrMenuList: MenuItem[] = [
 				),
 			},
 			{
+				key: "/hr/loans",
+				label: (
+					<Link className=" text-[14px]" href={"/hr/loans"}>
+						Advance Salary & Loans
+					</Link>
+				),
+			},
+			{
+				key: "/hr/claims",
+				label: (
+					<Link className=" text-[14px]" href={"/hr/claims"}>
+						Expense Claims
+					</Link>
+				),
+			},
+			{
+				key: "/hr/recruitment",
+				label: (
+					<Link className=" text-[14px]" href={"/hr/recruitment"}>
+						Recruitment & ATS
+					</Link>
+				),
+			},
+			{
+				key: "/hr/assets",
+				label: (
+					<Link className=" text-[14px]" href={"/hr/assets"}>
+						Asset Management
+					</Link>
+				),
+			},
+			{
 				key: "/hr/performance",
 				label: (
 					<Link className=" text-[14px]" href={"/hr/performance"}>
 						Commissions & Targets
+					</Link>
+				),
+			},
+			{
+				key: "/hr/setup",
+				label: (
+					<Link className=" text-[14px]" href={"/hr/setup"}>
+						HR Setup & Biometrics
 					</Link>
 				),
 			},
@@ -456,7 +479,7 @@ export const getMenuItemByRole = (role: string) => {
 	if (role === "hr") {
 		return hrMenuList;
 	}
-	if (role == "ctgadmin") {
+	if (role === "ctgadmin") {
 		return ctgMenu;
 	}
 	return menuItem;

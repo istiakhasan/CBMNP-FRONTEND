@@ -37,7 +37,25 @@ const GbSidebar = () => {
     {
       href: "/inventory",
       title: "Inventory",
-      icon: "ri-ancient-gate-line",
+      icon: "ri-store-3-line",
+      children: [
+        {
+          href: "/inventory",
+          title: "Stock & Movement Logs",
+        },
+        {
+          href: "/inventory/adjustments",
+          title: "Stock Adjustments",
+        },
+        {
+          href: "/inventory/transfers",
+          title: "Stock Transfers",
+        },
+        {
+          href: "/inventory/valuation",
+          title: "Valuation & Low Stock",
+        },
+      ],
     },
     {
       href: "/products",
@@ -87,8 +105,12 @@ const GbSidebar = () => {
       icon: "ri-luggage-cart-line",
       children: [
         {
+          href: "/procurement/direct-purchase",
+          title: "Direct Purchase",
+        },
+        {
           href: "/procurement/purchase-order",
-          title: "PO",
+          title: "Purchase Orders",
         },
         {
           href: "/procurement/purchase-approved",
@@ -99,20 +121,75 @@ const GbSidebar = () => {
           title: "Purchase Receive",
         },
         {
-          href: "/procurement/purchase-cancel",
-          title: "Purchase Canceled",
+          href: "/procurement/grn",
+          title: "Goods Receipt (GRN & QA)",
         },
         {
           href: "/procurement/purchase-completed",
           title: "Purchase Completed",
         },
         {
-          href: "/procurement/purchase-report",
-          title: "Purchase Report",
+          href: "/procurement/purchase-cancel",
+          title: "Purchase Canceled",
+        },
+        {
+          href: "/procurement/returns",
+          title: "Purchase Returns",
         },
         {
           href: "/procurement/supplier",
-          title: "Supplier",
+          title: "Suppliers Directory",
+        },
+        {
+          href: "/procurement/purchase-report",
+          title: "Purchase Reports",
+        },
+      ],
+    },
+    {
+      href: "/garments",
+      title: "Garments ERP",
+      icon: "ri-t-shirt-2-line",
+      children: [
+        {
+          href: "/garments",
+          title: "Garments Dashboard",
+        },
+        {
+          href: "/garments/orders",
+          title: "Buyer Orders",
+        },
+        {
+          href: "/garments/samples",
+          title: "Sample Development",
+        },
+        {
+          href: "/garments/bom",
+          title: "Bill of Materials (BOM)",
+        },
+        {
+          href: "/garments/po",
+          title: "Purchase Orders (PO)",
+        },
+        {
+          href: "/garments/po-approval",
+          title: "PO Approvals",
+        },
+        {
+          href: "/garments/po-receive",
+          title: "Goods Inward & Receive",
+        },
+        {
+          href: "/garments/inventory",
+          title: "Fabric & Trims Inventory",
+        },
+        {
+          href: "/garments/inventory-adjustments",
+          title: "Stock Adjustments",
+        },
+        {
+          href: "/garments/material-issue",
+          title: "Floor Material Issue",
         },
       ],
     },
@@ -196,39 +273,6 @@ const GbSidebar = () => {
       ],
     },
     {
-      href: "/inventory-ops",
-      title: "Inventory Ops",
-      icon: "ri-store-3-line",
-      children: [
-        {
-          href: "/inventory/transfers",
-          title: "Stock Transfers",
-        },
-        {
-          href: "/inventory/adjustments",
-          title: "Stock Adjustments",
-        },
-        {
-          href: "/inventory/valuation",
-          title: "Valuation & Low Stock",
-        },
-      ],
-    },
-    {
-      title: "Procurement Ops",
-      icon: "ri-shopping-bag-3-line",
-      children: [
-        {
-          href: "/procurement/returns",
-          title: "Purchase Returns",
-        },
-        {
-          href: "/procurement/grn",
-          title: "Goods Receipt (GRN)",
-        },
-      ],
-    },
-    {
       title: "Sales Ops & POS",
       icon: "ri-shopping-cart-2-line",
       children: [
@@ -251,28 +295,44 @@ const GbSidebar = () => {
       icon: "ri-user-star-line",
       children: [
         {
-          href: "/hr/setup",
-          title: "HR Setup",
-        },
-        {
           href: "/hr/employees",
           title: "Employee Directory",
-        },
-        {
-          href: "/hr/leaves",
-          title: "Leave Management",
         },
         {
           href: "/hr/attendance",
           title: "Daily Attendance",
         },
         {
+          href: "/hr/leaves",
+          title: "Leave Management",
+        },
+        {
           href: "/hr/payroll",
           title: "Monthly Payroll",
         },
         {
+          href: "/hr/loans",
+          title: "Advance Salary & Loans",
+        },
+        {
+          href: "/hr/claims",
+          title: "Expense Claims",
+        },
+        {
+          href: "/hr/recruitment",
+          title: "Recruitment & ATS",
+        },
+        {
+          href: "/hr/assets",
+          title: "Asset Management",
+        },
+        {
           href: "/hr/performance",
           title: "Commissions & Targets",
+        },
+        {
+          href: "/hr/setup",
+          title: "HR Setup & Biometrics",
         },
       ],
     },
@@ -373,35 +433,98 @@ const GbSidebar = () => {
     //   icon: "ri-folder-chart-line",
     // },
   ].filter(
-    (mi: any) =>
-      permission?.includes(mi.title) ||
-      mi.children?.some((child: any) => permission?.includes(child.title)) ||
-      userInfo?.role === "admin"
+    (mi: any) => {
+      const userRole = String(userInfo?.role || "").toLowerCase();
+      const isSuperOrAdmin = ["admin", "super_admin", "owner"].includes(userRole);
+      if (isSuperOrAdmin) return true;
+
+      if (permission?.includes(mi.title)) return true;
+      if (mi.title === "Garments ERP" && (permission?.includes("Garments") || permission?.includes("Garments ERP") || permission?.includes("VIEW_GARMENTS_ORDERS"))) {
+        return true;
+      }
+      return mi.children?.some((child: any) => permission?.includes(child.title));
+    }
   );
 
   const pathName = usePathname();
   const local = useLocale();
   const [isActive, setIsActive] = useState(true);
-  const [subMenuActive, setSubMenuActive] = useState<any>(null);
+  const [openMenus, setOpenMenus] = useState<{ [key: number]: boolean }>({});
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  // Strip locale prefix from current URL path
+  const cleanPath = React.useMemo(() => {
+    if (!pathName) return "/";
+    const regex = new RegExp(`^/${local}(?=/|$)`);
+    const stripped = pathName.replace(regex, "");
+    return stripped === "" ? "/" : stripped;
+  }, [pathName, local]);
+
+  // Find the exact or most specific matching leaf route
+  const activeLeafHref = React.useMemo(() => {
+    const allLeafHrefs: string[] = [];
+    menuItems.forEach((item: any) => {
+      if (item.children && item.children.length > 0) {
+        item.children.forEach((c: any) => {
+          if (c.href) allLeafHrefs.push(c.href);
+        });
+      } else if (item.href) {
+        allLeafHrefs.push(item.href);
+      }
+    });
+
+    // 1. Exact match with a leaf item
+    if (allLeafHrefs.includes(cleanPath)) {
+      return cleanPath;
+    }
+
+    // 2. Longest prefix match with '/' boundary (for dynamic sub-routes)
+    const matching = allLeafHrefs
+      .filter((h) => h !== "/" && cleanPath.startsWith(h + "/"))
+      .sort((a, b) => b.length - a.length);
+
+    return matching[0] || cleanPath;
+  }, [cleanPath, menuItems]);
+
+  // Auto-expand the active section based on current activeLeafHref
   useEffect(() => {
-    setSubMenuActive(null);
     setLoading(false);
-  }, [pathName]);
+    menuItems.forEach((item, index) => {
+      if (item.children) {
+        const hasActiveChild = item.children.some(
+          (child: any) => child?.href === activeLeafHref
+        );
+        if (hasActiveChild) {
+          setOpenMenus((prev) => ({ ...prev, [index]: true }));
+        }
+      }
+    });
+  }, [activeLeafHref]);
+
+  const toggleSubMenu = (index: number) => {
+    setOpenMenus((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
+
   const handleButtonClick = (path: any) => {
-    if (pathName !== "/" + local + path) {
+    if (!path) return;
+    if (cleanPath !== path) {
       setLoading(true);
-      router.push(`/${local}/${path}`);
+      const targetUrl = `/${local}${path.startsWith("/") ? path : "/" + path}`;
+      router.push(targetUrl);
     }
   };
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
-        dispatch(toggleSidebar({show:false}))
+        dispatch(toggleSidebar({ show: false }));
         setIsActive(false);
       } else {
-        dispatch(toggleSidebar({show:true}))
+        dispatch(toggleSidebar({ show: true }));
         setIsActive(true);
       }
     };
@@ -411,175 +534,168 @@ const GbSidebar = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-
   return (
     <>
       {loading && <Loader />}
-       {rstate?.toggle &&   <aside 
-        className={`gb_sidebar  sticky top-0   ${
-          isActive ? "show overflow-y-scroll h-[100vh]" : "hide h-fit"
-        }`}
-      >
-         <div className="toggle_btn">
-          <i
-            onClick={() => setIsActive(!isActive)}
-            className="ri-menu-fill hidden md:block"
-          ></i>
-          <i
-            onClick={() => dispatch(toggleSidebar({show:false}))}
-            className="ri-close-large-fill md:hidden"
-          ></i>
-        </div>
+      {rstate?.toggle && (
+        <aside
+          className={`gb_sidebar sticky top-0 ${
+            isActive ? "show overflow-y-scroll h-[100vh]" : "hide h-fit"
+          }`}
+        >
+          <div className="toggle_btn flex items-center justify-between">
+            <i
+              onClick={() => setIsActive(!isActive)}
+              className="ri-menu-fill hidden md:block cursor-pointer text-gray-700 hover:text-emerald-700 transition"
+            ></i>
+            <i
+              onClick={() => dispatch(toggleSidebar({ show: false }))}
+              className="ri-close-large-fill md:hidden cursor-pointer text-gray-700"
+            ></i>
+          </div>
 
-        <div className="menu_list_wraper">
-          {menuItems?.map((item, index) => {
-            return (
-              <Fragment key={index}>
-                {item?.children ? (
-                  <>
-                    <div 
-                     
+          <div className="menu_list_wraper space-y-1">
+            {menuItems?.map((item, index) => {
+              const hasChildren = item?.children && item.children.length > 0;
+              const isChildActive =
+                hasChildren &&
+                item.children.some((child: any) => child?.href === activeLeafHref);
+              const isDirectActive = !hasChildren && item?.href === activeLeafHref;
+              const isParentActive = isChildActive || isDirectActive;
+              const isOpen = openMenus[index] || false;
+
+              return (
+                <Fragment key={index}>
+                  {hasChildren ? (
+                    <div className="relative group rounded-md">
+                      <Tooltip
+                        placement="right"
+                        title={isActive ? "" : item.title}
+                      >
+                        <div
+                          onClick={() => toggleSubMenu(index)}
+                          className={`cursor-pointer menu_list flex items-center justify-between rounded-md transition-all duration-200 px-3 py-2.5 ${
+                            isParentActive
+                              ? "bg-emerald-50 text-emerald-800 font-semibold border-l-4 border-emerald-600"
+                              : "text-gray-700 hover:bg-gray-50 hover:text-emerald-700"
+                          }`}
+                        >
+                          <div className="flex items-center min-w-0">
+                            <i className={`${item.icon} text-[18px] shrink-0`}></i>
+                            {isActive && (
+                              <span className="ml-3 text-[13px] font-medium truncate">
+                                {item.title}
+                              </span>
+                            )}
+                          </div>
+
+                          {isActive && (
+                            <i
+                              className={`ri-arrow-down-s-line text-[16px] text-gray-400 transition-transform duration-300 shrink-0 ml-2 ${
+                                isOpen ? "rotate-180 text-emerald-600 font-bold" : ""
+                              }`}
+                            ></i>
+                          )}
+                        </div>
+                      </Tooltip>
+
+                      {/* Expanded Submenu for Active Sidebar */}
+                      {isActive && (
+                        <div
+                          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            isOpen ? "max-h-[800px] opacity-100 my-1" : "max-h-0 opacity-0"
+                          }`}
+                        >
+                          <div className="border-l-2 border-emerald-200 ml-5 pl-2.5 space-y-1">
+                            {item?.children?.map((child: any, count: number) => {
+                              const isSubActive = child?.href === activeLeafHref;
+                              return (
+                                <div
+                                  key={count}
+                                  onClick={() => handleButtonClick(child?.href)}
+                                  className={`cursor-pointer px-2.5 py-1.5 rounded-md text-[12px] flex items-center justify-between transition-colors ${
+                                    isSubActive
+                                      ? "bg-emerald-600 text-white font-semibold shadow-sm"
+                                      : "text-gray-600 hover:bg-emerald-50 hover:text-emerald-800"
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-2 truncate">
+                                    <i
+                                      className={`ri-corner-down-right-line text-[11px] ${
+                                        isSubActive ? "text-white" : "text-gray-400"
+                                      }`}
+                                    ></i>
+                                    <span className="truncate">{child?.title}</span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Flyout Submenu for Collapsed Sidebar */}
+                      {!isActive && (
+                        <div
+                          className={`sub_menu_collaps shadow-xl rounded-lg p-2 ${
+                            isOpen ? "active" : ""
+                          }`}
+                        >
+                          <div className="text-xs font-bold text-gray-900 border-b pb-1.5 mb-2 px-2">
+                            {item.title}
+                          </div>
+                          {item?.children?.map((child: any, count: number) => {
+                            const isSubActive = child?.href === activeLeafHref;
+                            return (
+                              <div
+                                key={count}
+                                onClick={() => handleButtonClick(child?.href)}
+                                className={`cursor-pointer px-3 py-1.5 rounded text-[12px] whitespace-nowrap transition ${
+                                  isSubActive
+                                    ? "bg-emerald-600 text-white font-semibold"
+                                    : "text-gray-700 hover:bg-emerald-50 hover:text-emerald-800"
+                                }`}
+                              >
+                                {child?.title}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => handleButtonClick(item?.href)}
                       key={index}
-                      className={`${
-                        ((index === subMenuActive && isActive) ||
-                          pathName
-                            ?.split("/")
-                            .includes(
-                              item?.href?.slice(1, item?.href?.length)
-                            )) &&
-                        "border"
-                      } duration-300 relative kashem_test`}
+                      className="cursor-pointer"
                     >
                       <Tooltip
                         placement="right"
                         title={isActive ? "" : item.title}
                       >
                         <div
-                          onClick={() => {
-                            console.log("click");
-                            if (index === subMenuActive) {
-                              console.log("1");
-
-                              setSubMenuActive(null);
-                            } else {
-                              console.log("2");
-
-                              setSubMenuActive(index);
-                            }
-                          }}
-                          className={`cursor-pointer menu_list ${
-                            pathName
-                              ?.split("/")
-                              .includes(
-                                item?.href?.slice(1, item?.href?.length)
-                              )
-                              ? "active"
-                              : ""
+                          className={`menu_list flex items-center rounded-md px-3 py-2.5 transition-all duration-200 ${
+                            isParentActive
+                              ? "bg-emerald-50 text-emerald-800 font-semibold border-l-4 border-emerald-600"
+                              : "text-gray-700 hover:bg-gray-50 hover:text-emerald-700"
                           }`}
                         >
-                          <i className={item.icon}></i>{" "}
-                          <p className="ml-[10px]">{item.title}</p>
+                          <i className={`${item.icon} text-[18px] shrink-0`}></i>
+                          {isActive && (
+                            <span className="ml-3 text-[13px] font-medium truncate">
+                              {item.title}
+                            </span>
+                          )}
                         </div>
                       </Tooltip>
-
-                      {isActive && (
-                        <div
-                          className={`sub_menu ${
-                            subMenuActive === index ||
-                            pathName
-                              ?.split("/")
-                              .includes(item?.href?.split("/")[1])
-                              ? "active"
-                              : ""
-                          }`}
-                        >
-                          {item?.children?.map((child: any, count: any) => {
-                            return (
-                              // work here
-                              <div
-                                className={`${
-                                  pathName
-                                    ?.split("/")
-                                    .includes(child?.href?.split("/")[2])
-                                    ? "font-bold"
-                                    : ""
-                                }`}
-                                key={count}
-                                onClick={() => handleButtonClick(child?.href)}
-                              >
-                                <li
-                                  className={`${
-                                    pathName === child?.href &&
-                                    "sum_link_active"
-                                  }`}
-                                >
-                                  {child?.title}
-                                </li>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                      {!isActive && (
-                        <div
-                          className={`sub_menu_collaps ${
-                            subMenuActive === index ? "active" : ""
-                          }`}
-                        >
-                          {item?.children?.map((child: any, count: any) => (
-                            <div
-                              className={`${
-                                pathName
-                                  ?.split("/")
-                                  .includes(child?.href?.split("/")[2])
-                                  ? "font-bold"
-                                  : ""
-                              } whitespace-nowrap`}
-                              onClick={() => handleButtonClick(child?.href)}
-                              key={count}
-                            >
-                              <li
-                                className={`${
-                                  pathName === child?.href && "sum_link_active"
-                                }`}
-                              >
-                                {child?.title}
-                              </li>
-                            </div>
-                          ))}
-                        </div>
-                      )}
                     </div>
-                  </>
-                ) : (
-                  <div
-                    onClick={() => handleButtonClick(item?.href)}
-                    key={index}
-                  >
-                    <Tooltip
-                      placement="right"
-                      title={isActive ? "" : item.title}
-                    >
-                      <div
-                        className={`menu_list ${
-                          pathName
-                            ?.split("/")
-                            .includes(item?.href?.slice(1, item?.href?.length))
-                            ? "active"
-                            : ""
-                        }`}
-                      >
-                        <i className={item.icon}></i>{" "}
-                        <p className="ml-[10px]">{item.title}</p>
-                      </div>
-                    </Tooltip>
-                  </div>
-                )}
-              </Fragment>
-            );
-          })}
-        </div>
-      </aside>}
+                  )}
+                </Fragment>
+              );
+            })}
+          </div>
+        </aside>
+      )}
     </>
   );
 };

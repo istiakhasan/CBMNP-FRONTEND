@@ -25,6 +25,7 @@ const Page = () => {
   const search = useSearchParams();
   const tab = search.get("tab") || "stock";
   const [warehouseId, setwarehouseId] = useState("");
+  const [movementType, setMovementType] = useState<string>("");
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
   const [searchInput, setSearchInput] = useState("");
@@ -33,8 +34,15 @@ const Page = () => {
   const [logDrawerOpen, setLogDrawerOpen] = useState(false);
 
   const query = useMemo(
-    () => ({ page, limit: size, searchProducts: searchTerm, warehouseId }),
-    [page, size, searchTerm, warehouseId],
+    () => ({
+      page,
+      limit: size,
+      searchProducts: searchTerm,
+      searchTerm,
+      warehouseId,
+      type: movementType || undefined,
+    }),
+    [page, size, searchTerm, warehouseId, movementType],
   );
 
   const { data: warehouseOptions, isLoading } =
@@ -48,6 +56,7 @@ const Page = () => {
 
   const { data: transactionData, isLoading: transactionLoading } =
     useLoadAllTransactionQuery(query, { skip: tab !== "logs" });
+
   const [
     loadProductTransactions,
     { data: productTransactionData, isFetching: productTransactionLoading },
@@ -80,6 +89,7 @@ const Page = () => {
     setSearchInput("");
     setSearchTerm("");
     setwarehouseId("");
+    setMovementType("");
   };
 
   const openProductLog = (record: any) => {
@@ -128,53 +138,59 @@ const Page = () => {
 
   return (
     <>
-      <GbHeader title="Inventory" />
+      <GbHeader title="Inventory Management & Stock Ledger" />
       <div className="p-[16px]">
         {/* Tabs */}
-        <div className="mb-3 space-x-2">
+        <div className="mb-3 flex items-center gap-2">
           {[
-            { label: "Stock", key: "stock" },
-            { label: "Warehouse Wise Stock", key: "wws" },
-            { label: "Logs", key: "logs" },
+            { label: "Master Stock Overview", key: "stock" },
+            { label: "Warehouse Stock Distribution", key: "wws" },
+            { label: "Movement & Audit Logs", key: "logs" },
           ].map(({ label, key }) => (
             <Button
               key={key}
               style={{
-                background: "#f2f8fa",
-                color: "#4F8A6D",
+                background: tab === key ? "#4F8A6D" : "#f2f8fa",
+                color: tab === key ? "#ffffff" : "#4F8A6D",
+                borderColor: tab === key ? "#4F8A6D" : "#d9e8e2",
                 boxShadow: "none",
+                fontWeight: tab === key ? "600" : "normal",
               }}
-              type="primary"
-              size="small"
-              onClick={() => router.push(`/${local}/inventory?tab=${key}`)}
+              type={tab === key ? "primary" : "default"}
+              size="middle"
+              onClick={() => {
+                setPage(1);
+                router.push(`/${local}/inventory?tab=${key}`);
+              }}
             >
               {label}
             </Button>
           ))}
         </div>
 
-        {/* Table */}
-        <div className="gb_border">
-          <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">
-            <div className="flex gap-2">
+        {/* Filters and Table Container */}
+        <div className="gb_border bg-white rounded-lg shadow-sm">
+          <div className="flex justify-between items-center gap-3 flex-wrap p-4 border-b border-gray-100">
+            <div className="flex items-center gap-3 flex-wrap">
               <div
-                className="border p-2 h-[35px] w-[35px] flex items-center justify-center cursor-pointer"
+                className="border border-gray-300 rounded p-2 h-[36px] w-[36px] flex items-center justify-center cursor-pointer hover:bg-gray-50 transition"
                 onClick={handleReset}
+                title="Reset Filters"
               >
                 <i
-                  style={{ fontSize: "24px" }}
+                  style={{ fontSize: "20px" }}
                   className="ri-restart-line text-gray-600"
                 ></i>
               </div>
 
               <div>
                 <Select
-                  style={{ width: "200px" }}
+                  style={{ width: "210px" }}
                   placeholder="Filter by Warehouse"
                   value={warehouseId || undefined}
                   options={[
-                    { label: "All", value: "" },
-                    ...warehouseOptions?.data,
+                    { label: "All Warehouses", value: "" },
+                    ...(warehouseOptions?.data || []),
                   ]}
                   onChange={(e) => {
                     setPage(1);
@@ -182,25 +198,47 @@ const Page = () => {
                   }}
                 />
               </div>
-              {tab === "stock" && (
-                <Input
-                  placeholder="Search by product name or code"
-                  allowClear
-                  style={{ width: "240px" }}
-                  value={searchInput}
-                  onChange={handleSearchChange}
-                />
+
+              {tab === "logs" && (
+                <div>
+                  <Select
+                    style={{ width: "160px" }}
+                    placeholder="Movement Type"
+                    value={movementType || undefined}
+                    options={[
+                      { label: "All Movements", value: "" },
+                      { label: "🟢 Stock IN (+)", value: "IN" },
+                      { label: "🔴 Stock OUT (-)", value: "OUT" },
+                    ]}
+                    onChange={(e) => {
+                      setPage(1);
+                      setMovementType(e);
+                    }}
+                  />
+                </div>
               )}
+
+              <Input
+                placeholder={
+                  tab === "logs"
+                    ? "Search product, SKU, reference or remarks..."
+                    : "Search by product name or code..."
+                }
+                allowClear
+                style={{ width: "300px" }}
+                value={searchInput}
+                onChange={handleSearchChange}
+              />
             </div>
 
             <Pagination
               pageSize={size}
               total={
-              tab === "stock"
+                tab === "stock"
                   ? inventoryData?.total
                   : tab === "wws"
                     ? warehouseData?.total
-                    : transactionData?.data?.total || transactionData?.total
+                    : transactionData?.data?.total || transactionData?.total || 0
               }
               current={page}
               onChange={(p, s) => {
@@ -211,18 +249,20 @@ const Page = () => {
             />
           </div>
 
-          <div className="max-h-[500px] overflow-auto">
+          <div>
             <GbTable
               loading={loading}
               columns={columns}
               dataSource={data}
               pageSize={size}
+              stickey={true}
+              scrollX={undefined}
               totalPages={
                 tab === "stock"
                   ? inventoryData?.total
                   : tab === "wws"
                     ? warehouseData?.total
-                    : transactionData?.data?.total || transactionData?.total
+                    : transactionData?.data?.total || transactionData?.total || 0
               }
               onPaginationChange={(p, s) => {
                 setPage(p);
@@ -232,7 +272,7 @@ const Page = () => {
                 tab === "stock"
                   ? (record: any) => ({
                       onClick: () => openProductLog(record),
-                      className: "cursor-pointer",
+                      className: "cursor-pointer hover:bg-emerald-50/40 transition",
                     })
                   : undefined
               }
@@ -240,11 +280,15 @@ const Page = () => {
           </div>
         </div>
       </div>
+
+      {/* Single Product Log Drawer */}
       <Drawer
         title={
           <div>
-            <div>{selectedProduct?.product?.name || "Product"} Inventory Log</div>
-            <div className="text-xs text-gray-500 font-normal">
+            <div className="font-bold text-gray-900 text-base">
+              {selectedProduct?.product?.name || "Product"} — Stock Movement History
+            </div>
+            <div className="text-xs text-gray-500 font-mono mt-0.5">
               SKU: {selectedProduct?.product?.sku || "N/A"}
             </div>
           </div>
@@ -256,44 +300,85 @@ const Page = () => {
         <Table
           columns={[
             {
-              title: "Time",
+              title: "Date & Time",
               dataIndex: "transactionDate",
               key: "transactionDate",
-              render: (value: string) => value ? new Date(value).toLocaleString() : "N/A",
+              width: "170px",
+              render: (value: string) => (
+                <span className="text-sm font-mono text-gray-700 font-medium">
+                  {value
+                    ? new Date(value).toLocaleString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })
+                    : "N/A"}
+                </span>
+              ),
             },
             {
               title: "Warehouse",
               key: "warehouse",
-              render: (_: any, record: any) => record?.location?.name || "Inventory",
+              width: "170px",
+              render: (_: any, record: any) =>
+                record?.location?.name ? (
+                  <span className="font-bold text-blue-800 text-sm">
+                    {record.location.name}
+                  </span>
+                ) : (
+                  <span className="text-purple-800 bg-purple-100 font-semibold px-2.5 py-1 rounded text-xs">
+                    Master Inventory
+                  </span>
+                ),
             },
             {
               title: "Movement",
               key: "movement",
-              align: "right" as const,
-              render: (_: any, record: any) => (
-                <Tag color={record?.type === "IN" ? "green" : "red"}>
-                  {record?.type === "IN" ? "+" : "-"}
-                  {record?.quantity}
-                </Tag>
+              align: "center" as const,
+              width: "130px",
+              render: (_: any, record: any) => {
+                const isEntry = record?.type === "IN";
+                return (
+                  <span
+                    className={`inline-block font-extrabold text-sm px-3 py-1 rounded-full ${
+                      isEntry
+                        ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                        : "bg-rose-100 text-rose-800 border border-rose-300"
+                    }`}
+                  >
+                    {isEntry ? `+ ${record?.quantity} IN` : `- ${record?.quantity} OUT`}
+                  </span>
+                );
+              },
+            },
+            {
+              title: "Event / Reason",
+              dataIndex: "referenceType",
+              key: "referenceType",
+              width: "170px",
+              render: (value: string, record: any) => (
+                <div>
+                  <span className="text-sm font-semibold text-gray-900 block">
+                    {value || "Stock Adjustment"}
+                  </span>
+                  {record?.referenceNumber && (
+                    <span className="text-xs font-mono text-gray-600 font-medium">
+                      Ref: {record.referenceNumber}
+                    </span>
+                  )}
+                </div>
               ),
             },
             {
-              title: "Reason",
-              dataIndex: "referenceType",
-              key: "referenceType",
-              render: (value: string) => value || "Inventory Update",
-            },
-            {
-              title: "Reference",
-              dataIndex: "referenceNumber",
-              key: "referenceNumber",
-              render: (value: string) => value || "-",
-            },
-            {
-              title: "Remarks",
+              title: "Remarks & Context",
               dataIndex: "remarks",
               key: "remarks",
-              render: (value: string) => value || "-",
+              render: (value: string) => (
+                <span className="text-sm text-gray-800 font-medium">{value || "Inventory adjusted"}</span>
+              ),
             },
           ]}
           dataSource={productTransactionData?.data?.data || productTransactionData?.data || []}

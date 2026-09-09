@@ -142,6 +142,14 @@ export const orderApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [tagTypes.order],
     }),
+    directDeliverOrders: build.mutation({
+      query: (data) => ({
+        url: "/orders/direct-deliver",
+        method: "PATCH",
+        data,
+      }),
+      invalidatesTags: [tagTypes.order, tagTypes.inventory, tagTypes.requisition],
+    }),
   }),
 });
 
@@ -167,5 +175,6 @@ export const {
   useLazyGetScanOrderByIdQuery,
   useLazyGetDeliveryPartnerOrderDetailsQuery,
   useExchangeOrderProductMutation,
-  useDeleteOrdersByPhoneMutation
+  useDeleteOrdersByPhoneMutation,
+  useDirectDeliverOrdersMutation,
 } = orderApi;

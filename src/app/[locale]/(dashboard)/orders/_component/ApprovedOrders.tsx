@@ -10,6 +10,7 @@ import {
   useGetAllOrdersQuery,
   useGetOrderByIdQuery,
   useLazyGetOrderByIdQuery,
+  useDirectDeliverOrdersMutation,
 } from "@/redux/api/orderApi";
 import { useCreateRequisitionMutation } from "@/redux/api/requisitionApi";
 import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
@@ -23,6 +24,7 @@ import {
   message,
   Pagination,
   Popover,
+  Popconfirm,
   Select,
   TableProps,
 } from "antd";
@@ -84,12 +86,60 @@ const ApprovedOrders = ({
 
   const [handleCreateRequisition, { isLoading: creatingRequisition }] =
     useCreateRequisitionMutation();
+  const [directDeliverOrders, { isLoading: isDirectDelivering }] =
+    useDirectDeliverOrdersMutation();
+  const [directDeliverModal, setDirectDeliverModal] = useState(false);
   const [reqPreviewData, setReqPreviewData] = useState<any>([]);
   console.log(reqPreviewData, "abcd");
   // preview generate হয়েছে কিনা — না হলে Create button block থাকবে
   const [previewGenerated, setPreviewGenerated] = useState(false);
   const router = useRouter();
   const [open, setOpen] = useState(false);
+
+  const handleDirectDeliverSingle = async (record: any) => {
+    try {
+      const res: any = await directDeliverOrders({
+        orderIds: [record.id],
+        userId: userInfo?.userId,
+        notes: "Direct Spot Delivery",
+      }).unwrap();
+      message.success(
+        res?.message ||
+          `Order ${record?.orderNumber || record?.id} directly delivered and Requisition generated successfully!`
+      );
+      refetch();
+      if (typeof countRefetch === "function") countRefetch();
+    } catch (err: any) {
+      message.error(
+        err?.data?.message || err?.message || "Failed to direct deliver order"
+      );
+    }
+  };
+
+  const handleBulkDirectDeliver = async () => {
+    if (!selectedOrders?.length) return;
+    try {
+      const orderIds = selectedOrders.map((o: any) => o.id);
+      const res: any = await directDeliverOrders({
+        orderIds,
+        userId: userInfo?.userId,
+        notes: "Bulk Direct Spot Delivery",
+      }).unwrap();
+      message.success(
+        res?.message ||
+          `${orderIds.length} order(s) directly delivered and Requisition generated successfully!`
+      );
+      setDirectDeliverModal(false);
+      setSelectedOrders([]);
+      setSelectedRowKeys([]);
+      refetch();
+      if (typeof countRefetch === "function") countRefetch();
+    } catch (err: any) {
+      message.error(
+        err?.data?.message || err?.message || "Failed to direct deliver orders"
+      );
+    }
+  };
 
   // ---------------------------------------------------------------------
   // Preview data-র field name backend যাই পাঠাক (qty / orderQuantity,
@@ -259,6 +309,19 @@ const ApprovedOrders = ({
         return (
           <>
             <div>
+              <Popconfirm
+                title="Direct Deliver Order"
+                description={`Directly deliver order ${record?.orderNumber || record?.id}? This will auto-create a Requisition, mark as Delivered, and reduce master + warehouse stock.`}
+                onConfirm={() => handleDirectDeliverSingle(record)}
+                okText="Yes, Deliver"
+                cancelText="Cancel"
+                okButtonProps={{ loading: isDirectDelivering }}
+              >
+                <i
+                  title="Direct Deliver"
+                  className="ri-truck-line text-[18px] text-emerald-600 hover:text-emerald-800 ml-[4px] cursor-pointer"
+                ></i>
+              </Popconfirm>
               <i
                 onClick={() => {
                   setPrintModal(true);
@@ -447,6 +510,23 @@ const ApprovedOrders = ({
         </span>
       ),
       key: "2",
+    },
+    {
+      label: (
+        <span
+          onClick={() => {
+            if (!selectedOrders?.length) {
+              message.warning("Please select at least one order to direct deliver");
+              return;
+            }
+            setDirectDeliverModal(true);
+          }}
+          className="flex gap-2 text-[14px] text-emerald-700 font-[500] items-center"
+        >
+          <span>🚚 Direct Deliver Selected ({selectedOrders?.length || 0})</span>
+        </span>
+      ),
+      key: "3",
     },
   ];
 
@@ -712,7 +792,94 @@ const ApprovedOrders = ({
         </GbForm>
       </GbModal>
 
-      {/* Hidden Component Only for Printing */}
+      <GbModal
+        width="700px"
+        isModalOpen={directDeliverModal}
+        openModal={() => setDirectDeliverModal(true)}
+        closeModal={() => setDirectDeliverModal(false)}
+      >
+        <div className="p-4">
+          <div className="flex items-center gap-2 mb-3 text-emerald-700">
+            <i className="ri-truck-line text-[24px]"></i>
+            <h2 className="text-lg font-semibold">
+              Direct Order Delivery Confirmation
+            </h2>
+          </div>
+          <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-md text-sm text-emerald-900 mb-4">
+            <p className="font-medium">
+              Are you sure you want to directly deliver{" "}
+              <span className="font-bold">{selectedOrders?.length}</span> selected
+              order(s)?
+            </p>
+            <ul className="list-disc list-inside mt-1 space-y-0.5 text-xs text-emerald-800">
+              <li>A new <strong>Requisition</strong> will be automatically created & linked.</li>
+              <li>Order status will immediately change to <strong>Delivered</strong>.</li>
+              <li><strong>Master Inventory</strong> and <strong>Warehouse Inventory</strong> stock & orderQue will be deducted.</li>
+            </ul>
+          </div>
+
+          <div className="max-h-[250px] overflow-y-auto border rounded mb-4">
+            <table className="w-full text-xs text-left border-collapse">
+              <thead className="bg-gray-100 sticky top-0">
+                <tr>
+                  <th className="p-2 border">#</th>
+                  <th className="p-2 border">Order No</th>
+                  <th className="p-2 border">Customer</th>
+                  <th className="p-2 border">Phone</th>
+                  <th className="p-2 border">Amount (৳)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedOrders?.map((order: any, idx: number) => (
+                  <tr key={order.id} className="hover:bg-gray-50">
+                    <td className="p-2 border">{idx + 1}</td>
+                    <td className="p-2 border font-medium text-primary">
+                      {order.orderNumber || order.id}
+                    </td>
+                    <td className="p-2 border">
+                      {order.receiverName || order.customer?.name || "N/A"}
+                    </td>
+                    <td className="p-2 border">{order.receiverPhoneNumber || "N/A"}</td>
+                    <td className="p-2 border font-semibold">
+                      ৳{Number(order.totalPrice || 0).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="flex justify-end gap-3">
+            <button
+              type="button"
+              disabled={isDirectDelivering}
+              onClick={() => setDirectDeliverModal(false)}
+              className="px-4 py-2 border rounded text-gray-700 hover:bg-gray-100 text-sm font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={isDirectDelivering}
+              onClick={handleBulkDirectDeliver}
+              className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-sm font-medium flex items-center gap-2"
+            >
+              {isDirectDelivering ? (
+                <>
+                  <i className="ri-loader-4-line animate-spin"></i>
+                  Delivering...
+                </>
+              ) : (
+                <>
+                  <i className="ri-check-double-line"></i>
+                  Confirm Direct Delivery
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </GbModal>
+
       {/* Hidden Component Only for Printing */}
       <div style={{ display: "none" }}>
         <div ref={bulkPrintRef}>

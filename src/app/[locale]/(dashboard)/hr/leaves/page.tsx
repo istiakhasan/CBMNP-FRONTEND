@@ -1,198 +1,431 @@
 "use client";
 import React, { useState } from "react";
-import { Button, Card, DatePicker, Form, Input, InputNumber, Modal, Popconfirm, Select, Space, Switch, Table, Tag, message } from "antd";
-import { CheckCircleOutlined, CloseCircleOutlined, PlusOutlined, ReloadOutlined } from "@ant-design/icons";
-import dayjs from "dayjs";
 import {
+  Table,
+  Button,
+  Modal,
+  Form,
+  Input,
+  Select,
+  Card,
+  Row,
+  Col,
+  Statistic,
+  Tag,
+  Space,
+  message,
+  Tabs,
+  DatePicker,
+  Divider,
+} from "antd";
+import {
+  PlusOutlined,
+  ReloadOutlined,
+  CalendarOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  ClockCircleOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import dayjs from "dayjs";
+import GbHeader from "@/components/ui/dashboard/GbHeader";
+import {
+  useGetLeaveRequestsQuery,
   useApplyLeaveMutation,
   useApproveLeaveMutation,
-  useCreateLeaveTypeMutation,
-  useGetEmployeesQuery,
-  useGetLeaveRequestsQuery,
   useGetLeaveTypesQuery,
+  useGetEmployeesQuery,
 } from "@/redux/api/hrPayrollApi";
-import GbHeader from "@/components/ui/dashboard/GbHeader";
 
-type ModalType = "type" | "request";
+const { Option } = Select;
+const { RangePicker } = DatePicker;
+const { TabPane } = Tabs;
 
-export default function LeaveManagementPage() {
+export default function LeavesPage() {
+  const [selectedStatus, setSelectedStatus] = useState<string | undefined>(undefined);
+  const [applyModal, setApplyModal] = useState(false);
+  const [reviewModal, setReviewModal] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<any>(null);
+
   const [form] = Form.useForm();
-  const [modalType, setModalType] = useState<ModalType | null>(null);
+  const [reviewForm] = Form.useForm();
 
-  const { data: typesData, isLoading: typesLoading, refetch: refetchTypes } = useGetLeaveTypesQuery(undefined);
-  const { data: requestsData, isLoading: requestsLoading, refetch: refetchRequests } = useGetLeaveRequestsQuery(undefined);
+  // Queries
+  const { data, isLoading, refetch } = useGetLeaveRequestsQuery({
+    status: selectedStatus || undefined,
+  });
+  const { data: leaveTypesData } = useGetLeaveTypesQuery(undefined);
   const { data: employeesData } = useGetEmployeesQuery(undefined);
-  const [createLeaveType, { isLoading: creatingType }] = useCreateLeaveTypeMutation();
-  const [applyLeave, { isLoading: applyingLeave }] = useApplyLeaveMutation();
-  const [approveLeave] = useApproveLeaveMutation();
 
-  const leaveTypes = typesData?.data || [];
-  const leaveRequests = requestsData?.data || [];
+  // Mutations
+  const [applyLeave, { isLoading: isApplying }] = useApplyLeaveMutation();
+  const [approveLeave, { isLoading: isApproving }] = useApproveLeaveMutation();
+
+  const requests = data?.data || [];
+  const leaveTypes = leaveTypesData?.data || [];
   const employees = employeesData?.data || [];
 
-  const openModal = (type: ModalType) => {
-    setModalType(type);
-    form.resetFields();
-    form.setFieldsValue({ daysAllowedPerYear: 14, isPaid: true, isActive: true });
-  };
+  const pendingCount = requests.filter((r: any) => r.status === "Pending").length;
+  const approvedCount = requests.filter((r: any) => r.status === "Approved").length;
+  const rejectedCount = requests.filter((r: any) => r.status === "Rejected").length;
 
-  const handleFinish = async (values: any) => {
+  const handleApply = async (values: any) => {
     try {
-      if (modalType === "type") {
-        await createLeaveType(values).unwrap();
-        message.success("Leave type created");
-      }
-      if (modalType === "request") {
-        const startDate = values.dateRange?.[0];
-        const endDate = values.dateRange?.[1];
-        await applyLeave({
-          ...values,
-          dateRange: undefined,
-          startDate: startDate?.format("YYYY-MM-DD"),
-          endDate: endDate?.format("YYYY-MM-DD"),
-          daysCount: endDate && startDate ? endDate.diff(startDate, "day") + 1 : values.daysCount,
-        }).unwrap();
-        message.success("Leave request submitted");
-      }
-      setModalType(null);
+      const [start, end] = values.dateRange || [];
+      const startDate = start ? dayjs(start).format("YYYY-MM-DD") : undefined;
+      const endDate = end ? dayjs(end).format("YYYY-MM-DD") : undefined;
+      const diff = end && start ? dayjs(end).diff(dayjs(start), "day") + 1 : 1;
+
+      const payload = {
+        employeeId: values.employeeId,
+        leaveTypeId: values.leaveTypeId,
+        startDate,
+        endDate,
+        daysCount: diff,
+        reason: values.reason,
+        emergencyPhone: values.emergencyPhone,
+      };
+
+      await applyLeave(payload).unwrap();
+      message.success("Leave application submitted successfully");
+      setApplyModal(false);
       form.resetFields();
+      refetch();
     } catch (err: any) {
-      message.error(err?.data?.message || "Unable to save leave data");
+      message.error(err?.data?.message || "Failed to submit leave application");
     }
   };
 
-  const handleApproval = async (id: string, approved: boolean) => {
+  const handleOpenReview = (record: any) => {
+    setSelectedRequest(record);
+    reviewForm.setFieldsValue({
+      approved: true,
+      remarks: "",
+    });
+    setReviewModal(true);
+  };
+
+  const handleReviewSubmit = async (values: any) => {
     try {
-      await approveLeave({ id, approved, remarks: approved ? "Approved from HR panel" : "Rejected from HR panel" }).unwrap();
-      message.success(approved ? "Leave approved" : "Leave rejected");
-      refetchRequests();
+      await approveLeave({
+        id: selectedRequest.id,
+        approved: values.approved,
+        remarks: values.remarks,
+      }).unwrap();
+      message.success(`Leave request ${values.approved ? "Approved" : "Rejected"}`);
+      setReviewModal(false);
+      reviewForm.resetFields();
+      refetch();
     } catch (err: any) {
-      message.error(err?.data?.message || "Unable to update leave status");
+      message.error(err?.data?.message || "Failed to update leave status");
     }
   };
+
+  const columns: any = [
+    {
+      title: "Employee",
+      dataIndex: ["employee", "fullName"],
+      key: "employee",
+      render: (name: string, record: any) => (
+        <div>
+          <span className="font-semibold text-gray-900 block text-sm">{name}</span>
+          <span className="text-xs text-gray-400 font-mono">
+            {record.employee?.employeeCode} • {record.employee?.department?.name || "Staff"}
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: "Leave Type",
+      dataIndex: ["leaveType", "name"],
+      key: "leaveType",
+      render: (lt: string) => <Tag color="blue">{lt || "Casual Leave"}</Tag>,
+    },
+    {
+      title: "Date Range",
+      key: "dates",
+      render: (_: any, record: any) => (
+        <div>
+          <span className="font-medium text-gray-800 text-xs block">
+            {record.startDate} ~ {record.endDate}
+          </span>
+          <span className="text-[11px] text-gray-400 font-bold">
+            Total: {record.daysCount} Day(s)
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: "Reason",
+      dataIndex: "reason",
+      key: "reason",
+      render: (r: string) => <span className="text-xs text-gray-600 max-w-xs block truncate">{r}</span>,
+    },
+    {
+      title: "Emergency Phone",
+      dataIndex: "emergencyPhone",
+      key: "emergencyPhone",
+      render: (p: string) => <span className="text-xs font-mono">{p || "-"}</span>,
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      align: "center" as const,
+      render: (st: string) => (
+        <Tag
+          color={st === "Approved" ? "green" : st === "Rejected" ? "volcano" : "orange"}
+          className="font-medium px-2 py-0.5"
+        >
+          {st}
+        </Tag>
+      ),
+    },
+    {
+      title: "Action",
+      key: "action",
+      align: "center" as const,
+      render: (_: any, record: any) => (
+        <Space size="small">
+          {record.status === "Pending" ? (
+            <Button
+              size="small"
+              type="primary"
+              className="bg-emerald-600 hover:bg-emerald-700 text-xs"
+              onClick={() => handleOpenReview(record)}
+            >
+              Review / Action
+            </Button>
+          ) : (
+            <span className="text-xs text-gray-400 italic">
+              {record.approvalRemarks || "Completed"}
+            </span>
+          )}
+        </Space>
+      ),
+    },
+  ];
 
   return (
     <div className="p-6 space-y-6">
-      <GbHeader title="Leave Management" />
+      <GbHeader title="Leave Management & Applications" />
 
+      {/* KPI Cards */}
+      <Row gutter={[16, 16]}>
+        <Col xs={24} sm={8} md={6}>
+          <Card className="rounded-xl border border-gray-200 shadow-sm">
+            <Statistic
+              title={<span className="text-xs font-bold text-gray-500 uppercase">Pending Requests</span>}
+              value={pendingCount}
+              prefix={<ClockCircleOutlined className="text-amber-500" />}
+              valueStyle={{ fontWeight: "bold", color: "#d97706" }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={8} md={6}>
+          <Card className="rounded-xl border border-gray-200 shadow-sm">
+            <Statistic
+              title={<span className="text-xs font-bold text-gray-500 uppercase">Approved Leaves</span>}
+              value={approvedCount}
+              prefix={<CheckCircleOutlined className="text-emerald-600" />}
+              valueStyle={{ fontWeight: "bold", color: "#059669" }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={8} md={6}>
+          <Card className="rounded-xl border border-gray-200 shadow-sm">
+            <Statistic
+              title={<span className="text-xs font-bold text-gray-500 uppercase">Rejected Requests</span>}
+              value={rejectedCount}
+              prefix={<CloseCircleOutlined className="text-rose-500" />}
+              valueStyle={{ fontWeight: "bold", color: "#e11d48" }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={8} md={6}>
+          <Card className="rounded-xl border border-gray-200 shadow-sm">
+            <Statistic
+              title={<span className="text-xs font-bold text-gray-500 uppercase">Total Applications</span>}
+              value={requests.length}
+              prefix={<CalendarOutlined className="text-blue-600" />}
+              valueStyle={{ fontWeight: "bold", color: "#2563eb" }}
+            />
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Table Card */}
       <Card
-        title="Leave Requests"
-        extra={
-          <Space>
-            <Button icon={<ReloadOutlined />} onClick={() => refetchRequests()} />
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal("request")}>
-              Apply Leave
-            </Button>
-          </Space>
+        className="rounded-xl border border-gray-200 shadow-sm"
+        title={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Select
+                placeholder="Filter by Status"
+                value={selectedStatus}
+                onChange={setSelectedStatus}
+                allowClear
+                style={{ width: 160 }}
+              >
+                <Option value="Pending">Pending</Option>
+                <Option value="Approved">Approved</Option>
+                <Option value="Rejected">Rejected</Option>
+              </Select>
+            </div>
+
+            <Space>
+              <Button icon={<ReloadOutlined />} onClick={() => refetch()}>
+                Refresh
+              </Button>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => setApplyModal(true)}
+                className="bg-emerald-600 hover:bg-emerald-700 border-none"
+              >
+                Apply for Leave
+              </Button>
+            </Space>
+          </div>
         }
       >
         <Table
-          columns={[
-            { title: "Employee", dataIndex: ["employee", "fullName"], key: "employee", render: (name: string, record: any) => <span className="font-semibold">{name} ({record.employee?.employeeCode || "N/A"})</span> },
-            { title: "Leave Type", dataIndex: ["leaveType", "name"], key: "leaveType" },
-            { title: "Start", dataIndex: "startDate", key: "startDate" },
-            { title: "End", dataIndex: "endDate", key: "endDate" },
-            { title: "Days", dataIndex: "daysCount", key: "daysCount", align: "right" },
-            { title: "Reason", dataIndex: "reason", key: "reason", ellipsis: true },
-            { title: "Status", dataIndex: "status", key: "status", render: (status: string) => <Tag color={status === "Approved" ? "green" : status === "Rejected" ? "red" : "orange"}>{status}</Tag> },
-            {
-              title: "Action",
-              key: "action",
-              align: "center",
-              render: (_: any, record: any) =>
-                record.status === "Pending" ? (
-                  <Space>
-                    <Popconfirm title="Approve leave?" onConfirm={() => handleApproval(record.id, true)}>
-                      <Button size="small" type="primary" icon={<CheckCircleOutlined />}>Approve</Button>
-                    </Popconfirm>
-                    <Popconfirm title="Reject leave?" onConfirm={() => handleApproval(record.id, false)}>
-                      <Button size="small" danger icon={<CloseCircleOutlined />}>Reject</Button>
-                    </Popconfirm>
-                  </Space>
-                ) : null,
-            },
-          ]}
-          dataSource={leaveRequests}
+          dataSource={requests}
           rowKey="id"
-          loading={requestsLoading}
+          columns={columns}
+          loading={isLoading}
           pagination={{ pageSize: 10 }}
-          size="middle"
+          className="custom_scroll"
         />
       </Card>
 
-      <Card
-        title="Leave Types"
-        extra={
-          <Space>
-            <Button icon={<ReloadOutlined />} onClick={() => refetchTypes()} />
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal("type")}>
-              Add Leave Type
-            </Button>
-          </Space>
-        }
-      >
-        <Table
-          columns={[
-            { title: "Name", dataIndex: "name", key: "name", render: (name: string) => <span className="font-semibold">{name}</span> },
-            { title: "Days / Year", dataIndex: "daysAllowedPerYear", key: "daysAllowedPerYear", align: "right" },
-            { title: "Paid", dataIndex: "isPaid", key: "isPaid", render: (paid: boolean) => <Tag color={paid ? "green" : "default"}>{paid ? "Paid" : "Unpaid"}</Tag> },
-            { title: "Status", dataIndex: "isActive", key: "isActive", render: (active: boolean) => <Tag color={active ? "green" : "default"}>{active ? "Active" : "Inactive"}</Tag> },
-          ]}
-          dataSource={leaveTypes}
-          rowKey="id"
-          loading={typesLoading}
-          pagination={{ pageSize: 10 }}
-          size="middle"
-        />
-      </Card>
-
+      {/* MODAL 1: APPLY FOR LEAVE */}
       <Modal
-        title={modalType === "type" ? "Add Leave Type" : "Apply Leave"}
-        open={!!modalType}
-        onCancel={() => setModalType(null)}
-        onOk={() => form.submit()}
-        confirmLoading={creatingType || applyingLeave}
+        title="Submit Leave Application"
+        open={applyModal}
+        onCancel={() => setApplyModal(false)}
+        footer={null}
         destroyOnClose
-        width={modalType === "request" ? 720 : 520}
       >
-        <Form form={form} layout="vertical" onFinish={handleFinish}>
-          {modalType === "type" && (
-            <>
-              <Form.Item name="name" label="Leave Type" rules={[{ required: true, message: "Enter leave type" }]}>
-                <Input placeholder="e.g. Casual Leave" />
-              </Form.Item>
-              <Form.Item name="daysAllowedPerYear" label="Days Allowed Per Year">
-                <InputNumber min={0} className="w-full" />
-              </Form.Item>
-              <div className="grid grid-cols-2 gap-4">
-                <Form.Item name="isPaid" label="Paid Leave" valuePropName="checked">
-                  <Switch checkedChildren="Paid" unCheckedChildren="Unpaid" />
-                </Form.Item>
-                <Form.Item name="isActive" label="Status" valuePropName="checked">
-                  <Switch checkedChildren="Active" unCheckedChildren="Inactive" />
-                </Form.Item>
-              </div>
-            </>
-          )}
+        <Form form={form} layout="vertical" onFinish={handleApply}>
+          <Form.Item
+            name="employeeId"
+            label="Employee"
+            rules={[{ required: true, message: "Please select employee" }]}
+          >
+            <Select
+              placeholder="Search employee..."
+              showSearch
+              filterOption={(input, option: any) =>
+                (option?.children ?? "").toLowerCase().includes(input.toLowerCase())
+              }
+            >
+              {employees.map((emp: any) => (
+                <Option key={emp.id} value={emp.id}>
+                  {emp.fullName} ({emp.employeeCode})
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
 
-          {modalType === "request" && (
-            <>
-              <div className="grid grid-cols-2 gap-4">
-                <Form.Item name="employeeId" label="Employee" rules={[{ required: true, message: "Select employee" }]}>
-                  <Select showSearch optionFilterProp="label" options={employees.map((employee: any) => ({ label: `${employee.fullName} (${employee.employeeCode})`, value: employee.id }))} />
-                </Form.Item>
-                <Form.Item name="leaveTypeId" label="Leave Type" rules={[{ required: true, message: "Select leave type" }]}>
-                  <Select showSearch optionFilterProp="label" options={leaveTypes.map((type: any) => ({ label: type.name, value: type.id }))} />
-                </Form.Item>
-              </div>
-              <Form.Item name="dateRange" label="Leave Dates" rules={[{ required: true, message: "Select leave dates" }]}>
-                <DatePicker.RangePicker className="w-full" defaultPickerValue={[dayjs(), dayjs()]} />
-              </Form.Item>
-              <Form.Item name="reason" label="Reason" rules={[{ required: true, message: "Enter leave reason" }]}>
-                <Input.TextArea rows={3} />
-              </Form.Item>
-            </>
-          )}
+          <Form.Item
+            name="leaveTypeId"
+            label="Leave Policy / Type"
+            rules={[{ required: true, message: "Please select leave type" }]}
+          >
+            <Select placeholder="Select leave type">
+              {leaveTypes.map((lt: any) => (
+                <Option key={lt.id} value={lt.id}>
+                  {lt.name} ({lt.daysAllowedPerYear} days quota)
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="dateRange"
+            label="Leave Date Range (Start ~ End Date)"
+            rules={[{ required: true, message: "Please select date range" }]}
+          >
+            <RangePicker className="w-full" />
+          </Form.Item>
+
+          <Form.Item name="emergencyPhone" label="Emergency Contact Phone">
+            <Input placeholder="017XXXXXXXX" />
+          </Form.Item>
+
+          <Form.Item
+            name="reason"
+            label="Reason for Leave"
+            rules={[{ required: true, message: "Please state reason" }]}
+          >
+            <Input.TextArea rows={3} placeholder="Provide details about the leave requirement..." />
+          </Form.Item>
+
+          <div className="flex justify-end gap-2 pt-4 border-t">
+            <Button onClick={() => setApplyModal(false)}>Cancel</Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={isApplying}
+              className="bg-emerald-600 hover:bg-emerald-700 border-none"
+            >
+              Submit Application
+            </Button>
+          </div>
+        </Form>
+      </Modal>
+
+      {/* MODAL 2: APPROVE / REJECT LEAVE APPLICATION */}
+      <Modal
+        title="Supervisor Leave Approval / Review"
+        open={reviewModal}
+        onCancel={() => setReviewModal(false)}
+        footer={null}
+        destroyOnClose
+      >
+        {selectedRequest && (
+          <div className="mb-4 bg-gray-50 p-3 rounded-lg border text-xs space-y-1">
+            <div>
+              <span className="text-gray-400">Employee: </span>
+              <span className="font-bold text-gray-900">{selectedRequest.employee?.fullName}</span>
+            </div>
+            <div>
+              <span className="text-gray-400">Leave Duration: </span>
+              <span className="font-semibold text-gray-800">
+                {selectedRequest.startDate} ~ {selectedRequest.endDate} ({selectedRequest.daysCount} Days)
+              </span>
+            </div>
+            <div>
+              <span className="text-gray-400">Reason: </span>
+              <span className="text-gray-700">{selectedRequest.reason}</span>
+            </div>
+          </div>
+        )}
+
+        <Form form={reviewForm} layout="vertical" onFinish={handleReviewSubmit}>
+          <Form.Item name="approved" label="Decision" initialValue={true}>
+            <Select>
+              <Option value={true}>Approve Application</Option>
+              <Option value={false}>Reject Application</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item name="remarks" label="Supervisor Remarks / Comments">
+            <Input.TextArea rows={2} placeholder="Optional notes for the employee..." />
+          </Form.Item>
+
+          <div className="flex justify-end gap-2 pt-4 border-t">
+            <Button onClick={() => setReviewModal(false)}>Cancel</Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={isApproving}
+              className="bg-emerald-600 hover:bg-emerald-700 border-none"
+            >
+              Confirm Decision
+            </Button>
+          </div>
         </Form>
       </Modal>
     </div>
