@@ -7,6 +7,7 @@ import {
   CarOutlined,
   CheckCircleOutlined,
   BarcodeOutlined,
+  CalendarOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 
@@ -153,6 +154,56 @@ const ProductSalesReportTable: React.FC<ProductSalesReportTableProps> = ({
     },
   ];
 
+  // NEW: Date-wise breakdown columns
+  const dateColumns: any = [
+    {
+      title: "Date",
+      dataIndex: "date",
+      key: "date",
+      render: (date: string) => (
+        <div className="flex items-center gap-2">
+          <CalendarOutlined className="text-indigo-500" />
+          <span className="font-bold text-gray-800">
+            {date ? dayjs(date).format("DD MMM YYYY") : "N/A"}
+          </span>
+          {date && (
+            <span className="text-xs text-gray-400">
+              ({dayjs(date).format("dddd")})
+            </span>
+          )}
+        </div>
+      ),
+    },
+    {
+      title: "Orders",
+      dataIndex: "orderCount",
+      key: "orderCount",
+      align: "center" as const,
+      sorter: (a: any, b: any) => Number(a.orderCount || 0) - Number(b.orderCount || 0),
+      render: (cnt: number) => `${Number(cnt || 0).toLocaleString()} Orders`,
+    },
+    {
+      title: "Quantity Sold",
+      dataIndex: "productQuantity",
+      key: "productQuantity",
+      align: "center" as const,
+      sorter: (a: any, b: any) => Number(a.productQuantity || 0) - Number(b.productQuantity || 0),
+      render: (qty: number) => (
+        <span className="font-extrabold text-blue-700">{Number(qty || 0).toLocaleString()} pcs</span>
+      ),
+    },
+    {
+      title: "Sales Amount (Tk)",
+      dataIndex: "saleAmount",
+      key: "saleAmount",
+      align: "right" as const,
+      sorter: (a: any, b: any) => Number(a.saleAmount || 0) - Number(b.saleAmount || 0),
+      render: (amt: number) => (
+        <span className="font-extrabold text-emerald-700">৳ {formatAmount(amt)}</span>
+      ),
+    },
+  ];
+
   return (
     <Spin spinning={loading}>
       <div className="space-y-6">
@@ -222,6 +273,68 @@ const ProductSalesReportTable: React.FC<ProductSalesReportTableProps> = ({
           </Col>
         </Row>
 
+        {/* Date-wise Sales Breakdown */}
+        {summary?.dateBreakdown?.length > 0 && (
+          <Card
+            title={
+              <span className="font-bold text-gray-700 text-sm">
+                Date-wise Sales Breakdown ({summary.dateBreakdown.length} Days)
+              </span>
+            }
+            className="rounded-xl border-gray-200 shadow-sm"
+          >
+            <Table
+              dataSource={summary.dateBreakdown}
+              columns={dateColumns}
+              rowKey={(r) => r.date}
+              pagination={
+                summary.dateBreakdown.length > 10
+                  ? { pageSize: 10, showSizeChanger: true }
+                  : false
+              }
+              size="small"
+              summary={(pageData) => {
+                const totalOrders = pageData.reduce(
+                  (sum, r) => sum + Number(r.orderCount || 0),
+                  0
+                );
+                const totalQty = pageData.reduce(
+                  (sum, r) => sum + Number(r.productQuantity || 0),
+                  0
+                );
+                const totalAmount = pageData.reduce(
+                  (sum, r) => sum + Number(r.saleAmount || 0),
+                  0
+                );
+                return (
+                  <Table.Summary fixed>
+                    <Table.Summary.Row className="bg-gray-50 font-bold">
+                      <Table.Summary.Cell index={0}>
+                        <span className="text-gray-900 font-bold">Total:</span>
+                      </Table.Summary.Cell>
+                      <Table.Summary.Cell index={1} align="center">
+                        <span className="text-gray-900 font-bold">
+                          {totalOrders.toLocaleString()} Orders
+                        </span>
+                      </Table.Summary.Cell>
+                      <Table.Summary.Cell index={2} align="center">
+                        <span className="text-blue-700 font-bold">
+                          {totalQty.toLocaleString()} pcs
+                        </span>
+                      </Table.Summary.Cell>
+                      <Table.Summary.Cell index={3} align="right">
+                        <span className="text-emerald-700 font-bold">
+                          ৳ {formatAmount(totalAmount)}
+                        </span>
+                      </Table.Summary.Cell>
+                    </Table.Summary.Row>
+                  </Table.Summary>
+                );
+              }}
+            />
+          </Card>
+        )}
+
         {/* Courier Dispatches Summary */}
         {summary?.courierBreakdown?.length > 0 && (
           <Card
@@ -290,7 +403,9 @@ const ProductSalesReportTable: React.FC<ProductSalesReportTableProps> = ({
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={3} />
                     <Table.Summary.Cell index={4} align="right">
-                      <span className="text-emerald-700 font-bold">৳ {formatAmount(totalAmount)}</span>
+                      <span className="text-emerald-700 font-bold">
+                        ৳ {formatAmount(totalAmount)}
+                      </span>
                     </Table.Summary.Cell>
                     <Table.Summary.Cell index={5} align="center">
                       <span className="text-gray-900 font-bold">{totalOrders.toLocaleString()} Orders</span>

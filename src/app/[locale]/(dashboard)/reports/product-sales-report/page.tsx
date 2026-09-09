@@ -38,7 +38,7 @@ const DATE_FIELD_OPTIONS = [
 ];
 
 const Page = () => {
-  const handleDownloadExcel = () => {
+const handleDownloadExcel = () => {
   if (!data?.data?.length) {
     message.warning("No report data to export");
     return;
@@ -58,6 +58,18 @@ const Page = () => {
 
   const sheet = XLSX.utils.json_to_sheet(rows);
   XLSX.utils.book_append_sheet(workbook, sheet, "Product Sales");
+
+  // NEW: Date-wise breakdown sheet
+  if (data?.summary?.dateBreakdown?.length) {
+    const dateRows = data.summary.dateBreakdown.map((d: any) => ({
+      Date: d.date,
+      "Orders Count": Number(d.orderCount || 0),
+      "Quantity Sold": Number(d.productQuantity || 0),
+      "Sales Amount (Tk)": Number(d.saleAmount || 0),
+    }));
+    const dateSheet = XLSX.utils.json_to_sheet(dateRows);
+    XLSX.utils.book_append_sheet(workbook, dateSheet, "Date-wise Breakdown");
+  }
 
   const summaryRows = [
     { Metric: "Products Sold", Value: Number(data?.summary?.totalProductQuantity || 0) },
