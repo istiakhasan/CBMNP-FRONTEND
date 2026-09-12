@@ -3,27 +3,46 @@
 
 import GbHeader from "@/components/ui/dashboard/GbHeader";
 import { useGetAllProductQuery } from "@/redux/api/productApi";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ProductOrderList from "./Abc";
-import { Avatar, Badge, message } from "antd";
+import { Badge, Empty, Skeleton, message } from "antd";
 import GbDrawer from "@/components/ui/GbDrawer";
-import AddSimpleProuct from "../../products/_component/AddSimpleProuct";
 import moment from "moment";
 import { useGetOrganizationByIdQuery } from "@/redux/api/organizationApi";
 
 const ProductShowcase = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [activeCategory, setActiveCategory] = useState<string>("all");
   const [cart, setCart] = useState<any[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const { data:organization } = useGetOrganizationByIdQuery(undefined);
+  const [customer, setCustomer] = useState<any>({});
+  const [now, setNow] = useState(moment());
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  const { data: organization } = useGetOrganizationByIdQuery(undefined);
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 300);
+    const handler = setTimeout(() => setDebouncedSearchTerm(searchTerm), 300);
     return () => clearTimeout(handler);
   }, [searchTerm]);
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(moment()), 30000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // F2 = jump to barcode / search field, like most billing counters
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "F2") {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   const { data, isLoading } = useGetAllProductQuery({
     searchTerm: debouncedSearchTerm,
@@ -31,19 +50,30 @@ const ProductShowcase = () => {
     active: true,
   });
 
+  const categories = useMemo(() => {
+    const map = new Map<string, string>();
+    data?.data?.forEach((p: any) => {
+      if (p?.category?.id) map.set(p.category.id, p.category.label);
+    });
+    return Array.from(map, ([id, label]) => ({ id, label }));
+  }, [data]);
+
+  const filteredProducts = useMemo(() => {
+    if (activeCategory === "all") return data?.data ?? [];
+    return (data?.data ?? []).filter((p: any) => p?.category?.id === activeCategory);
+  }, [data, activeCategory]);
+
   const handleAddToCart = (product: any) => {
-    if (
-      !product?.inventories?.stock &&
-      Number(product?.inventories?.stock || 0) < 1
-    ) {
-      return message.error("Product has no quantity");
-    }
+    const stock = Number(product?.inventories?.stock || 0);
+    if (stock < 1) return message.error("Out of stock");
     setCart((prev) => {
       const existing = prev.find((p) => p.id === product.id);
       if (existing) {
-        return prev.map((p) =>
-          p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p
-        );
+        if (existing.quantity + 1 > stock) {
+          message.error("No more stock available");
+          return prev;
+        }
+        return prev.map((p) => (p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p));
       }
       return [...prev, { ...product, quantity: 1 }];
     });
@@ -52,155 +82,132 @@ const ProductShowcase = () => {
   const handleQuantityChange = (productId: string, delta: number) => {
     setCart((prev) =>
       prev
-        .map((p) =>
-          p.id === productId
-            ? { ...p, quantity: Math.max(1, p.quantity + delta) }
-            : p
-        )
+        .map((p) => (p.id === productId ? { ...p, quantity: Math.max(1, p.quantity + delta) } : p))
         .filter((p) => p.quantity > 0)
     );
   };
 
-  if (isLoading) return null;
+  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <div className="bg-[#E6EAED]">
+    <div className="pos-shell">
       <GbHeader />
-      <div className=" p-[8px] md:p-[16px] md:grid grid-cols-12 gap-4">
-        <div className="col-span-8  ">
-          <div className="md:p-[16px]   mb-3 bg-[#E6EAED]  sticky top-[60px]">
-            <div className=" mb-2 ">
-              <h1 className="text-xl mb-0 font-bold text-gray-800">
-                Welcome, {organization?.data?.name}
-              </h1>
-              <p className="text-gray-600">{moment().format('DD MMMM YYYY')}</p>
-            </div>
 
-            {/* Search Area */}
-            <div className="flex flex-col md:flex-row gap-4 mb-2">
-              <div className="relative flex-grow">
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-                <button className="absolute right-3 top-3 text-gray-400">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                </button>
+      {/* Counter strip — shop name, counter, live clock */}
+      <div className="pos-counter-bar">
+        <div className="pos-counter-shop">
+          <i className="ri-store-2-line" />
+          {organization?.data?.name || "Point of Sale"}
+        </div>
+        <div className="pos-counter-meta">
+          <span>Counter 01</span>
+          <span>{now.format("DD MMM YYYY, hh:mm:ss A")}</span>
+        </div>
+        <button className="pos-cart-fab" onClick={() => setDrawerOpen(true)}>
+          <Badge count={cartCount} size="small">
+            <i className="ri-shopping-cart-2-line" />
+          </Badge>
+        </button>
+      </div>
+
+      <div className="pos-layout">
+        <div className="pos-catalog">
+          <div className="pos-scan-row">
+            <i className="ri-barcode-line" />
+            <input
+              ref={searchRef}
+              type="text"
+              placeholder="Scan barcode or type product name…  [F2]"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              autoFocus
+            />
+            {searchTerm && (
+              <button onClick={() => setSearchTerm("")} aria-label="Clear search">
+                <i className="ri-close-line" />
+              </button>
+            )}
+          </div>
+
+          <div className="pos-category-rail">
+            <button className={activeCategory === "all" ? "active" : ""} onClick={() => setActiveCategory("all")}>
+              All items
+            </button>
+            {categories.map((c) => (
+              <button key={c.id} className={activeCategory === c.id ? "active" : ""} onClick={() => setActiveCategory(c.id)}>
+                {c.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="pos-grid-scroll custom_scroll">
+            {isLoading ? (
+              <div className="pos-grid">
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <div className="pos-card pos-card-skeleton" key={i}>
+                    <Skeleton.Image active style={{ width: "100%", height: 80 }} />
+                    <Skeleton active title paragraph={{ rows: 1 }} />
+                  </div>
+                ))}
               </div>
-            </div>
+            ) : filteredProducts.length === 0 ? (
+              <Empty description="No products found" className="pos-empty" />
+            ) : (
+              <div className="pos-grid">
+                {filteredProducts.map((product: any) => {
+                  const cartItem = cart.find((p) => p.id === product.id);
+                  const stock = Number(product?.inventories?.stock || 0);
+                  const lowStock = stock > 0 && stock <= 10;
+                  const outOfStock = stock < 1;
 
-            <div
-              onClick={() => setDrawerOpen(true)}
-              style={{ borderRadius: "10px 0 0px 10px" }}
-              className="absolute cursor-pointer md:hidden right-[-10px] flex items-center justify-start px-2 text-white top-0 bg-primary w-[70px] py-[5px]"
-            >
-              <Badge size="default" count={cart?.length}>
-                <i className="ri-shopping-cart-2-line text-[20px] text-white"></i>
-              </Badge>
-            </div>
-
-            <GbDrawer open={drawerOpen} setOpen={setDrawerOpen}>
-              {" "}
-              <ProductOrderList
-                setCart={setCart}
-                cart={cart}
-                handleQuantityChange={handleQuantityChange}
-              />
-            </GbDrawer>
-          </div>
-
-          {/* Product Grid */}
-          <div className="md:h-[550px] h-auto overflow-y-scroll custom_scroll">
-            <div className="grid  grid-cols-2 md:grid-cols-3 lg:grid-cols-4 md:gap-6 gap-2">
-            {data?.data?.map((product: any) => {
-              const cartItem = cart.find((p) => p.id === product.id);
-              return (
-                <div
-                  key={product.id}
-                  className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow"
-                >
-                  {/* Image */}
-                  <div className="p-4 flex justify-center bg-gray-100">
-                    <img
-                      src={product?.images?.[0]?.url}
-                      alt={product.name}
-                      className="md:h-[170px] md:w-[170px] w-[50px] h-[50px] object-fill"
-                    />
-                  </div>
-
-                  {/* Info */}
-                  <div className="p-4">
-                    <span className="text-xs font-semibold text-primary bg-blue-100 px-2 py-1 rounded mr-2">
-                      {product?.category?.label}
-                    </span>
-                    (<span>{product?.inventories?.stock || 0}</span>)
-                    <h3 className="mt-2 text-[12px] md:text-lg font-semibold text-gray-800">
-                      {product?.name?.length>40?`${product?.name?.slice(0,40)}...`:product?.name}
-                    </h3>
-                    <p className="mt-1 text-[12px] md:text-xl font-bold text-gray-900">
-                      ৳{product.salePrice?.toLocaleString()}
-                    </p>
-                    {/* Quantity + Add to Cart */}
-                    <div className="mt-4 flex items-center justify-between">
-                      {cartItem ? (
-                        <div className="flex items-center border border-gray-300 rounded-lg">
-                          <button
-                            onClick={() => handleQuantityChange(product.id, -1)}
-                            className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-l-lg"
-                          >
-                            -
-                          </button>
-                          <span className="px-3 py-1">{cartItem.quantity}</span>
-                          <button
-                            onClick={() => {
-                              handleQuantityChange(product.id, 1);
-                            }}
-                            className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-r-lg"
-                          >
-                            +
-                          </button>
+                  return (
+                    <button
+                      key={product.id}
+                      className={`pos-card ${outOfStock ? "is-out" : ""} ${cartItem ? "is-in-cart" : ""}`}
+                      disabled={outOfStock}
+                      onClick={() => handleAddToCart(product)}
+                    >
+                      {cartItem && <span className="pos-card-qty-badge">{cartItem.quantity}</span>}
+                      <div className="pos-card-media">
+                        <img src={product?.images?.[0]?.url} alt={product.name} />
+                      </div>
+                      <div className="pos-card-body">
+                        <h3>{product?.name?.length > 34 ? `${product.name.slice(0, 34)}…` : product?.name}</h3>
+                        <div className="pos-card-footer">
+                          <span className="pos-price">৳{product.salePrice?.toLocaleString()}</span>
+                          <span className={`pos-stock-tag ${outOfStock ? "out" : lowStock ? "low" : ""}`}>
+                            {outOfStock ? "Out" : `Stk ${stock}`}
+                          </span>
                         </div>
-                      ) : (
-                        <button
-                          onClick={() => handleAddToCart(product)}
-                          className="px-4 py-1 bg-primary text-white text-[12px]   transition-colors"
-                        >
-                          Add to Cart
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
-        {/* Cart Summary */}
-        <div className=" bg-white p-4 hidden  md:block rounded h-fit shadow col-span-4 sticky top-[80px]">
+
+        <div className="pos-cart-panel">
           <ProductOrderList
-            setCart={setCart}
             cart={cart}
+            setCart={setCart}
             handleQuantityChange={handleQuantityChange}
+            customer={customer}
+            setCustomer={setCustomer}
           />
         </div>
       </div>
+
+      <GbDrawer open={drawerOpen} setOpen={setDrawerOpen}>
+        <ProductOrderList
+          cart={cart}
+          setCart={setCart}
+          handleQuantityChange={handleQuantityChange}
+          customer={customer}
+          setCustomer={setCustomer}
+        />
+      </GbDrawer>
     </div>
   );
 };
