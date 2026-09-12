@@ -488,19 +488,28 @@ const GbSidebar = () => {
   }, [cleanPath, menuItems]);
 
   // Auto-expand the active section based on current activeLeafHref
-  useEffect(() => {
-    setLoading(false);
-    menuItems.forEach((item, index) => {
-      if (item.children) {
-        const hasActiveChild = item.children.some(
-          (child: any) => child?.href === activeLeafHref
-        );
-        if (hasActiveChild) {
-          setOpenMenus((prev) => ({ ...prev, [index]: true }));
-        }
+// Stop navigation loader whenever the actual route changes
+useEffect(() => {
+  setLoading(false);
+}, [pathName]);
+
+// Auto-expand active menu
+useEffect(() => {
+  menuItems.forEach((item, index) => {
+    if (item.children) {
+      const hasActiveChild = item.children.some(
+        (child: any) => child?.href === activeLeafHref
+      );
+
+      if (hasActiveChild) {
+        setOpenMenus((prev) => ({
+          ...prev,
+          [index]: true,
+        }));
       }
-    });
-  }, [activeLeafHref]);
+    }
+  });
+}, [activeLeafHref]);
 
   const toggleSubMenu = (index: number) => {
     setOpenMenus((prev) => ({
@@ -509,14 +518,18 @@ const GbSidebar = () => {
     }));
   };
 
-  const handleButtonClick = (path: any) => {
-    if (!path) return;
-    if (cleanPath !== path) {
-      setLoading(true);
-      const targetUrl = `/${local}${path.startsWith("/") ? path : "/" + path}`;
-      router.push(targetUrl);
-    }
-  };
+const handleButtonClick = (path: string) => {
+  if (!path) return;
+
+  const targetPath = path.startsWith("/") ? path : `/${path}`;
+
+  if (cleanPath === targetPath) return;
+
+  setLoading(true);
+
+  const targetUrl = `/${local}${targetPath}`;
+  router.push(targetUrl);
+};
 
   useEffect(() => {
     const handleResize = () => {
