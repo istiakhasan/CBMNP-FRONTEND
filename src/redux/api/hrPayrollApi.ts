@@ -303,8 +303,199 @@ export const hrPayrollApi = baseApi.injectEndpoints({
       query: (data) => ({ url: "/hr-payroll/targets", method: "POST", data }),
       invalidatesTags: [tagTypes.hrPayroll],
     }),
+
+    // ================= SHIFT UPDATE / DELETE =================
+    updateShift: build.mutation({
+      query: ({ id, ...data }) => ({ url: `/hr-payroll/shifts/${id}`, method: "PATCH", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+    deleteShift: build.mutation({
+      query: (id) => ({ url: `/hr-payroll/shifts/${id}`, method: "DELETE" }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+
+    // ================= HOLIDAY UPDATE =================
+    updateHoliday: build.mutation({
+      query: ({ id, ...data }) => ({ url: `/hr-payroll/holidays/${id}`, method: "PATCH", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+
+    // ================= DASHBOARD =================
+    getHrDashboard: build.query({
+      query: () => ({ url: "/hr-payroll/dashboard", method: "GET" }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
+
+    // ================= EMPLOYEE TIMELINE =================
+    getEmployeeTimeline: build.query({
+      query: (employeeId) => ({ url: `/hr-payroll/employees/${employeeId}/timeline`, method: "GET" }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
+    recordTimelineEvent: build.mutation({
+      query: ({ employeeId, ...data }) => ({ url: `/hr-payroll/employees/${employeeId}/timeline`, method: "POST", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+
+    // ================= SALARY HISTORY =================
+    getSalaryHistory: build.query({
+      query: (employeeId) => ({ url: `/hr-payroll/salary-history/${employeeId}`, method: "GET" }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
+    addSalaryRevision: build.mutation({
+      query: (data) => ({ url: "/hr-payroll/salary-history", method: "POST", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+
+    // ================= ATTENDANCE CORRECTIONS =================
+    submitAttendanceCorrection: build.mutation({
+      query: (data) => ({ url: "/hr-payroll/attendance/corrections", method: "POST", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+    getAttendanceCorrections: build.query({
+      query: (params) => ({ url: "/hr-payroll/attendance/corrections", method: "GET", params }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
+    approveAttendanceCorrection: build.mutation({
+      query: ({ id, ...data }) => ({ url: `/hr-payroll/attendance/corrections/${id}/approve`, method: "PATCH", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+
+    // ================= OVERTIME =================
+    submitOvertimeRequest: build.mutation({
+      query: (data) => ({ url: "/hr-payroll/overtime", method: "POST", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+    getOvertimeRequests: build.query({
+      query: (params) => ({ url: "/hr-payroll/overtime", method: "GET", params }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
+    approveOvertimeRequest: build.mutation({
+      query: ({ id, ...data }) => ({ url: `/hr-payroll/overtime/${id}/approve`, method: "PATCH", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+
+    // ================= TRANSFERS =================
+    recordTransfer: build.mutation({
+      query: (data) => ({ url: "/hr-payroll/transfers", method: "POST", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+    getTransfers: build.query({
+      query: (params) => ({ url: "/hr-payroll/transfers", method: "GET", params }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
+    approveTransfer: build.mutation({
+      query: ({ id, ...data }) => ({ url: `/hr-payroll/transfers/${id}/approve`, method: "PATCH", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+
+    // ================= PERFORMANCE REVIEWS =================
+    createPerformanceReview: build.mutation({
+      query: (data) => ({ url: "/hr-payroll/performance-reviews", method: "POST", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+    getPerformanceReviews: build.query({
+      query: (params) => ({ url: "/hr-payroll/performance-reviews", method: "GET", params }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
+    updatePerformanceReview: build.mutation({
+      query: ({ id, ...data }) => ({ url: `/hr-payroll/performance-reviews/${id}`, method: "PATCH", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+
+    // ================= TRAINING =================
+    createTrainingProgram: build.mutation({
+      query: (data) => ({ url: "/hr-payroll/training", method: "POST", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+    getTrainingPrograms: build.query({
+      query: () => ({ url: "/hr-payroll/training", method: "GET" }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
+    updateTrainingProgram: build.mutation({
+      query: ({ id, ...data }) => ({ url: `/hr-payroll/training/${id}`, method: "PATCH", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+    enrollInTraining: build.mutation({
+      query: (data) => ({ url: "/hr-payroll/training/enroll", method: "POST", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+    updateEnrollment: build.mutation({
+      query: ({ id, ...data }) => ({ url: `/hr-payroll/training/enrollments/${id}`, method: "PATCH", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+    getEnrollmentsByEmployee: build.query({
+      query: (employeeId) => ({ url: `/hr-payroll/training/enrollments/${employeeId}`, method: "GET" }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
+
+    // ================= DISCIPLINARY ACTIONS =================
+    createDisciplinaryAction: build.mutation({
+      query: (data) => ({ url: "/hr-payroll/disciplinary", method: "POST", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+    getDisciplinaryActions: build.query({
+      query: (params) => ({ url: "/hr-payroll/disciplinary", method: "GET", params }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
+    updateDisciplinaryAction: build.mutation({
+      query: ({ id, ...data }) => ({ url: `/hr-payroll/disciplinary/${id}`, method: "PATCH", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+
+    // ================= ANNOUNCEMENTS =================
+    createAnnouncement: build.mutation({
+      query: (data) => ({ url: "/hr-payroll/announcements", method: "POST", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+    getAnnouncements: build.query({
+      query: () => ({ url: "/hr-payroll/announcements", method: "GET" }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
+    updateAnnouncement: build.mutation({
+      query: ({ id, ...data }) => ({ url: `/hr-payroll/announcements/${id}`, method: "PATCH", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+    deleteAnnouncement: build.mutation({
+      query: (id) => ({ url: `/hr-payroll/announcements/${id}`, method: "DELETE" }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+
+    // ================= LOAN REPAYMENTS =================
+    recordLoanRepayment: build.mutation({
+      query: ({ loanId, ...data }) => ({ url: `/hr-payroll/loans/${loanId}/repayments`, method: "POST", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+    getLoanRepayments: build.query({
+      query: (loanId) => ({ url: `/hr-payroll/loans/${loanId}/repayments`, method: "GET" }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
+
+    // ================= FINAL SETTLEMENT =================
+    getFinalSettlement: build.query({
+      query: (employeeId) => ({ url: `/hr-payroll/employees/${employeeId}/final-settlement`, method: "GET" }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
+
+    // ================= REPORTS =================
+    getHrReport: build.query({
+      query: (params) => ({ url: "/hr-payroll/reports", method: "GET", params }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
+
+    // ================= LEAVE CALENDAR =================
+    getLeaveCalendar: build.query({
+      query: (params) => ({ url: "/hr-payroll/leave-calendar", method: "GET", params }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
+
+    // ================= PAYROLL SHEET ITEMS =================
+    getPayrollSheetItems: build.query({
+      query: (sheetId) => ({ url: `/hr-payroll/payroll-sheets/${sheetId}/items`, method: "GET" }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
   }),
 });
+
 
 export const {
   // Departments & Designations
@@ -390,4 +581,72 @@ export const {
   useGetCommissionsQuery,
   useGetSalesTargetsQuery,
   useSetSalesTargetMutation,
+
+  // Shift & Holiday CRUD
+  useUpdateShiftMutation,
+  useDeleteShiftMutation,
+  useUpdateHolidayMutation,
+
+  // Dashboard
+  useGetHrDashboardQuery,
+
+  // Employee Timeline
+  useGetEmployeeTimelineQuery,
+  useRecordTimelineEventMutation,
+
+  // Salary History
+  useGetSalaryHistoryQuery,
+  useAddSalaryRevisionMutation,
+
+  // Attendance Corrections
+  useSubmitAttendanceCorrectionMutation,
+  useGetAttendanceCorrectionsQuery,
+  useApproveAttendanceCorrectionMutation,
+
+  // Overtime
+  useSubmitOvertimeRequestMutation,
+  useGetOvertimeRequestsQuery,
+  useApproveOvertimeRequestMutation,
+
+  // Transfers
+  useRecordTransferMutation,
+  useGetTransfersQuery,
+  useApproveTransferMutation,
+
+  // Performance Reviews
+  useCreatePerformanceReviewMutation,
+  useGetPerformanceReviewsQuery,
+  useUpdatePerformanceReviewMutation,
+
+  // Training
+  useCreateTrainingProgramMutation,
+  useGetTrainingProgramsQuery,
+  useUpdateTrainingProgramMutation,
+  useEnrollInTrainingMutation,
+  useUpdateEnrollmentMutation,
+  useGetEnrollmentsByEmployeeQuery,
+
+  // Disciplinary
+  useCreateDisciplinaryActionMutation,
+  useGetDisciplinaryActionsQuery,
+  useUpdateDisciplinaryActionMutation,
+
+  // Announcements
+  useCreateAnnouncementMutation,
+  useGetAnnouncementsQuery,
+  useUpdateAnnouncementMutation,
+  useDeleteAnnouncementMutation,
+
+  // Loan Repayments
+  useRecordLoanRepaymentMutation,
+  useGetLoanRepaymentsQuery,
+
+  // Final Settlement
+  useGetFinalSettlementQuery,
+
+  // Reports & Calendar
+  useGetHrReportQuery,
+  useGetLeaveCalendarQuery,
+  useGetPayrollSheetItemsQuery,
 } = hrPayrollApi;
+

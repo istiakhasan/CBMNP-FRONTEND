@@ -295,6 +295,10 @@ const GbSidebar = () => {
       icon: "ri-user-star-line",
       children: [
         {
+          href: "/hr/dashboard",
+          title: "HR Dashboard",
+        },
+        {
           href: "/hr/employees",
           title: "Employee Directory",
         },
@@ -305,6 +309,10 @@ const GbSidebar = () => {
         {
           href: "/hr/leaves",
           title: "Leave Management",
+        },
+        {
+          href: "/hr/overtime",
+          title: "Overtime Management",
         },
         {
           href: "/hr/payroll",
@@ -323,12 +331,36 @@ const GbSidebar = () => {
           title: "Recruitment & ATS",
         },
         {
+          href: "/hr/letters",
+          title: "Letter Generator",
+        },
+        {
           href: "/hr/assets",
           title: "Asset Management",
         },
         {
           href: "/hr/performance",
-          title: "Commissions & Targets",
+          title: "Performance Reviews",
+        },
+        {
+          href: "/hr/training",
+          title: "Training Programs",
+        },
+        {
+          href: "/hr/transfers",
+          title: "Transfers",
+        },
+        {
+          href: "/hr/disciplinary",
+          title: "Disciplinary Actions",
+        },
+        {
+          href: "/hr/announcements",
+          title: "HR Announcements",
+        },
+        {
+          href: "/hr/reports",
+          title: "HR Reports",
         },
         {
           href: "/hr/setup",
@@ -440,6 +472,9 @@ const GbSidebar = () => {
 
       if (permission?.includes(mi.title)) return true;
       if (mi.title === "Garments ERP" && (permission?.includes("Garments") || permission?.includes("Garments ERP") || permission?.includes("VIEW_GARMENTS_ORDERS"))) {
+        return true;
+      }
+      if (mi.title === "HR & Payroll" && (permission?.includes("HR") || permission?.includes("VIEW_HR_EMPLOYEES") || permission?.includes("VIEW_HR_ATTENDANCE"))) {
         return true;
       }
       return mi.children?.some((child: any) => permission?.includes(child.title));

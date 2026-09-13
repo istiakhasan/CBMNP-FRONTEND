@@ -367,6 +367,14 @@ export const hrMenuList: MenuItem[] = [
 		icon: <i style={{ fontSize: "18px" }} className="ri-team-fill"></i>,
 		children: [
 			{
+				key: "/hr/dashboard",
+				label: (
+					<Link className=" text-[14px]" href={"/hr/dashboard"}>
+						HR Dashboard
+					</Link>
+				),
+			},
+			{
 				key: "/hr/employees",
 				label: (
 					<Link className=" text-[14px]" href={"/hr/employees"}>
@@ -387,6 +395,14 @@ export const hrMenuList: MenuItem[] = [
 				label: (
 					<Link className=" text-[14px]" href={"/hr/leaves"}>
 						Leave Management
+					</Link>
+				),
+			},
+			{
+				key: "/hr/overtime",
+				label: (
+					<Link className=" text-[14px]" href={"/hr/overtime"}>
+						Overtime Management
 					</Link>
 				),
 			},
@@ -423,6 +439,14 @@ export const hrMenuList: MenuItem[] = [
 				),
 			},
 			{
+				key: "/hr/letters",
+				label: (
+					<Link className=" text-[14px]" href={"/hr/letters"}>
+						Letter Generator
+					</Link>
+				),
+			},
+			{
 				key: "/hr/assets",
 				label: (
 					<Link className=" text-[14px]" href={"/hr/assets"}>
@@ -434,7 +458,47 @@ export const hrMenuList: MenuItem[] = [
 				key: "/hr/performance",
 				label: (
 					<Link className=" text-[14px]" href={"/hr/performance"}>
-						Commissions & Targets
+						Performance Reviews
+					</Link>
+				),
+			},
+			{
+				key: "/hr/training",
+				label: (
+					<Link className=" text-[14px]" href={"/hr/training"}>
+						Training Programs
+					</Link>
+				),
+			},
+			{
+				key: "/hr/transfers",
+				label: (
+					<Link className=" text-[14px]" href={"/hr/transfers"}>
+						Transfers
+					</Link>
+				),
+			},
+			{
+				key: "/hr/disciplinary",
+				label: (
+					<Link className=" text-[14px]" href={"/hr/disciplinary"}>
+						Disciplinary Actions
+					</Link>
+				),
+			},
+			{
+				key: "/hr/announcements",
+				label: (
+					<Link className=" text-[14px]" href={"/hr/announcements"}>
+						HR Announcements
+					</Link>
+				),
+			},
+			{
+				key: "/hr/reports",
+				label: (
+					<Link className=" text-[14px]" href={"/hr/reports"}>
+						HR Reports
 					</Link>
 				),
 			},

@@ -37,39 +37,38 @@
   }
 }
 /* In your global CSS file */
-@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap");
 
-/* :root {
-  --bglight: #fff;
-  --primaryColor: #288ea5;
-  --bgbase: #fafafa;
-  --secondaryText: #999;
-} */
-
-/* :root {
-  --bglight: #f5f7fa; 
-  --primaryColor: #4caf50;
-  --bgbase: #e8f5e9;
-  --secondaryText: #666666; 
-} */
+/* ─── Theme CSS Variables (overridden at runtime by ThemeProvider) ─── */
 :root {
-  --bglight: white; /* Deep black */
-  --primaryColor: #4F8A6D; /* Fiery crimson red */
-  --bgbase: #8FB1B7; /* Rich burgundy */
-  --secondaryText: #306178; /* Soft peach highlights */
+  --fontFamily: "Poppins", sans-serif;
+  /* Default: Forest Green theme */
+  --primaryColor: #4F8A6D;
+  --primaryHover: #3e6e56;
+  --bglight: #ffffff;
+  --bgbase: #f4f8f6;
+  --secondaryText: #475569;
+  --sidebarBg: #ffffff;
+  --sidebarText: #306178;
+  --headerBg: #ffffff;
+  --cardBg: #ffffff;
+  --borderColor: #e2e8f0;
+  --textPrimary: #1e293b;
+
+  /* Typography scale */
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 13px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 18px;
+  --text-2xl: 22px;
+
+  /* Spacing */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 .custom_overview_active_btn {
   background: rgba(0, 100, 0, 0.1);
@@ -82,27 +81,45 @@
 h1, h2, h3, h4, h5, h6 {
   margin-top: 0;
   margin-bottom: .5em;
-  color: rgba(0, 0, 0, .85);
-  font-weight: 500;
+  color: #1e293b;
+  font-weight: 600;
+  font-family: var(--fontFamily), sans-serif;
 }
 
 .color_primary {
   color: var(--primaryColor);
 }
 .primary_border {
-  border: 1px solid  var(--primaryColor);
+  border: 1px solid var(--primaryColor);
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
+  font-family: var(--fontFamily), sans-serif;
   font-style: normal;
+}
+
+body, html, button, input, select, textarea {
+  font-family: var(--fontFamily), sans-serif;
+}
+
+/* Explicitly protect icon font families */
+i[class*="ri-"], [class^="ri-"], [class*=" ri-"] {
+  font-family: "remixicon" !important;
+}
+i[class*="ri-"]::before, [class^="ri-"]::before, [class*=" ri-"]::before {
+  font-family: "remixicon" !important;
+}
+.anticon, .anticon * {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
 }
 
 P {
   font-size: 12px;
+  color: #334155;
+  font-family: var(--fontFamily), sans-serif;
 }
 
 html {
@@ -111,8 +128,8 @@ html {
 }
 
 body {
-  background: var(--bglight) !important;
-  /* max-width: 1440px; */
+  background: #ffffff !important;
+  color: #1e293b;
   margin: 0 auto;
   height: 100vh;
 }
@@ -128,19 +145,37 @@ body {
 /* =========================================common css end==================== */
 
 /* ghorer bazar sidebar  start   */
-/* Sidebar Styling */
 aside.gb_sidebar {
   z-index: 1000;
-	width: 75px;
-	/* position: fixed; */
-	background: var(--bglight);
-	/* box-shadow: 1px 0 32px rgba(0, 0, 0, 0.12); */
-	transition: width 0.3s ease-in-out;
-  }
-  
-  aside.gb_sidebar.show {
-	width: 230px;
-  }
+  width: 75px;
+  background: var(--sidebarBg, var(--bglight));
+  transition: width 0.3s ease-in-out;
+}
+
+aside.gb_sidebar.show {
+  width: 230px;
+}
+
+/* Dark sidebar themes */
+[data-dark-sidebar="true"] aside.gb_sidebar,
+[data-theme="slate"] aside.gb_sidebar {
+  background: var(--sidebarBg, #1e293b);
+}
+[data-dark-sidebar="true"] .menu_list_wraper .menu_list,
+[data-theme="slate"] .menu_list_wraper .menu_list {
+  color: #94a3b8 !important;
+}
+[data-dark-sidebar="true"] .sub_menu li,
+[data-theme="slate"] .sub_menu li {
+  color: #94a3b8 !important;
+}
+[data-dark-sidebar="true"] aside.gb_sidebar.show .menu_list_wraper .menu_list:not(.active):hover,
+[data-theme="slate"] aside.gb_sidebar.show .menu_list_wraper .menu_list:not(.active):hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+
+
   
   .toggle_btn {
 	height: 65px;
@@ -191,13 +226,13 @@ aside.gb_sidebar {
   aside.gb_sidebar.show .menu_list_wraper .menu_list:not(.active):hover {
 	color: var(--primaryColor);
 	cursor: pointer;
-	background: #F2F8FA;
+	background: var(--bgbase);
   }
   
   .show .menu_list_wraper .menu_list.active,
   .hide .menu_list_wraper .menu_list.active {
 	background: var(--primaryColor);
-	color: var(--bglight) !important;
+	color: #ffffff !important;
   }
 
   .sub_menu{
@@ -211,20 +246,22 @@ aside.gb_sidebar {
   }
 
   .sub_menu li{
-    padding: 10px ;
-    color: var(--secondaryText);
+    padding: 8px 12px;
+    color: #475569;
     cursor: pointer;
     margin-bottom: 2px;
+    font-size: 12px;
+    border-radius: 4px;
   }
   .sub_menu li:hover{
     color: var(--primaryColor);
     cursor: pointer;
-    background: #F2F8FA;
+    background: var(--bgbase);
   }
 
   .sum_link_active{
     background: var(--primaryColor) !important;
-    color: var(--bgbase) !important;
+    color: #ffffff !important;
   }
 
   /* sub menu collaps */
@@ -312,14 +349,17 @@ aside.gb_sidebar {
     font-size: 12px !important;
     font-weight: 400 !important;
     line-height: 16px !important;
-    padding: 5px !important;
-    color: #0f3e49 !important;
+    padding: 6px 10px !important;
+    color: #1e293b !important;
+    background: #ffffff;
 }
   .ant-table .ant-table-container th.ant-table-cell {
-    font-weight: bold !important;
+    font-weight: 600 !important;
     position: sticky !important;
     top: 0 !important;
     z-index: 100 !important;
+    color: #0f172a !important;
+    background: #f8fafc !important;
 }
 
 .ant-pagination-item-active{
