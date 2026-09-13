@@ -3,22 +3,15 @@ import { Suspense } from 'react';
 import { store } from "@/redux/store";
 import { Provider } from "react-redux";
 import StyledComponentsRegistry from "./AntdRegistry";
-import { ConfigProvider } from 'antd';
+import { ThemeProvider } from "@/context/ThemeContext";
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
     <Provider store={store}>
       {/* <Suspense fallback={<h1>Loading</h1>}> */}
       <StyledComponentsRegistry>
-        <ConfigProvider 
-        theme={{
-          token:{
-            colorPrimary: '#4F8A6D',
-            colorBgBase:"#ffffff"
-          }
-        }}
-        >
+        <ThemeProvider>
           {children}
-        </ConfigProvider>
+        </ThemeProvider>
         </StyledComponentsRegistry>
       {/* </Suspense> */}
     </Provider>

@@ -59,21 +59,26 @@ const GbHeader = ({ title }: { title?: string }) => {
   return (
     <>
       <div
-        style={{ zIndex: "1000" }}
-        className="bg-[#FFFFFF] gb-header h-[65px] px-[16px] flex items-center sticky top-0 z-50"
+        style={{ zIndex: "1000", background: "var(--headerBg)" }}
+        className="gb-header min-h-[65px] px-3 sm:px-4 py-2 flex items-center gap-3 sticky top-0 z-50"
       >
         {!rstate?.toggle && (
-          <div className="toggle_btn md:hidden">
+          <div className="md:hidden shrink-0 h-10 w-10 flex items-center justify-center">
             <i
               onClick={() => dispatch(toggleSidebar({ show: true }))}
-              className="ri-menu-fill"
+              className="ri-menu-fill text-[22px] cursor-pointer"
             ></i>
           </div>
         )}
 
-        <h1 className="text-xl font-semibold text-primary">{title}</h1>
+        <h1
+          className="text-base sm:text-xl font-semibold leading-snug break-words min-w-0"
+          style={{ color: "var(--primaryColor)" }}
+        >
+          {title}
+        </h1>
 
-        <div className="ml-auto flex items-center gap-[20px]">
+        <div className="ml-auto flex items-center gap-2 sm:gap-5 shrink-0">
           {/* Theme Switcher */}
           <ThemeSwitcher />
 

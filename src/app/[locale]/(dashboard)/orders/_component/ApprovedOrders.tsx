@@ -592,6 +592,7 @@ const ApprovedOrders = ({
           loading={isLoading}
           columns={newColumns}
           dataSource={data?.data}
+          stickey={true}
           showSizeChanger={true}
         />
       </div>

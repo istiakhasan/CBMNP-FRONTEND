@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Table } from "antd";
+import { useAppTheme } from "@/context/ThemeContext";
 
 type DTableProps = {
   loading?: boolean;
@@ -39,6 +40,7 @@ const GbTable = ({
   scrollY,
   onRow,
 }: DTableProps) => {
+  const { design } = useAppTheme();
   const paginationConfig = showPagination
     ? {
         pageSize,
@@ -50,9 +52,20 @@ const GbTable = ({
     : false;
 
   const sticky = stickey ? { offsetHeader: 0 } : false;
+  const tableScrollY = scrollY ?? (design.tableFullHeight ? "calc(100vh - 320px)" : undefined);
+const hasExplicitWidths =
+  Array.isArray(columns) &&
+  columns.length > 0 &&
+  columns.every((col: any) => col?.width !== undefined && col?.width !== null);
+
+// user যা select করেছে সেটাই respect করো, শুধু fixed হলে width বাধ্যতামূলক
+const tableLayout =
+  design.tableLayout === "fixed" && !hasExplicitWidths
+    ? "auto"          // fixed চাইলেও column width না থাকলে জোর করে auto (নাহলে header cut হবে)
+    : design.tableLayout;
 
   return (
-    <div className="w-full">
+    <div className="gb-table-wrapper w-full" data-full-height={design.tableFullHeight}>
       <Table
         className="gb-table"
         loading={loading}
@@ -64,9 +77,11 @@ const GbTable = ({
         rowSelection={rowSelection}
         onRow={onRow}
         sticky={sticky}
+        bordered={design.tableBordered}
+        tableLayout={tableLayout}
         scroll={{
           x: scrollX,
-          y: scrollY,
+          y: tableScrollY,
         }}
       />
     </div>

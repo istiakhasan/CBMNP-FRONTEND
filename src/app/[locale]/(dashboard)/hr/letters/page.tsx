@@ -377,7 +377,7 @@ export default function HrLettersPage() {
               </Space>
             }
             extra={
-              <Space>
+              <Space wrap>
                 <Button icon={<CopyOutlined />} disabled={!letterBody} onClick={copyLetter}>Copy</Button>
                 <Button type="primary" icon={<PrinterOutlined />} disabled={!letterBody} onClick={printLetter} className="bg-blue-600 hover:bg-blue-700 border-none">
                   Print / Save PDF

@@ -71,10 +71,6 @@ const GbSidebar = () => {
           href: "/access/users",
           title: "Users",
         },
-        //  {
-        //   href:"/access/group-permission",
-        //   title:"Group Permission"
-        //  }
       ],
     },
     {
@@ -459,11 +455,6 @@ const GbSidebar = () => {
         },
       ],
     },
-    // {
-    //   href: "/TbTest",
-    //   title: "TbTest",
-    //   icon: "ri-folder-chart-line",
-    // },
   ].filter(
     (mi: any) => {
       const userRole = String(userInfo?.role || "").toLowerCase();
@@ -484,9 +475,14 @@ const GbSidebar = () => {
   const pathName = usePathname();
   const local = useLocale();
   const [isActive, setIsActive] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
   const [openMenus, setOpenMenus] = useState<{ [key: number]: boolean }>({});
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  // Mobile-এ drawer সবসময় label/menu সহ (expanded) দেখাবে,
+  // desktop-এর collapse state (isActive) mobile-এ প্রভাব ফেলবে না।
+  const showExpanded = isActive || isMobile;
 
   // Strip locale prefix from current URL path
   const cleanPath = React.useMemo(() => {
@@ -509,12 +505,10 @@ const GbSidebar = () => {
       }
     });
 
-    // 1. Exact match with a leaf item
     if (allLeafHrefs.includes(cleanPath)) {
       return cleanPath;
     }
 
-    // 2. Longest prefix match with '/' boundary (for dynamic sub-routes)
     const matching = allLeafHrefs
       .filter((h) => h !== "/" && cleanPath.startsWith(h + "/"))
       .sort((a, b) => b.length - a.length);
@@ -522,65 +516,95 @@ const GbSidebar = () => {
     return matching[0] || cleanPath;
   }, [cleanPath, menuItems]);
 
-  // Auto-expand the active section based on current activeLeafHref
-// Stop navigation loader whenever the actual route changes
-useEffect(() => {
-  setLoading(false);
-}, [pathName]);
+  useEffect(() => {
+    setLoading(false);
+  }, [pathName]);
 
-// Auto-expand active menu
-useEffect(() => {
-  menuItems.forEach((item, index) => {
-    if (item.children) {
-      const hasActiveChild = item.children.some(
-        (child: any) => child?.href === activeLeafHref
-      );
-
-      if (hasActiveChild) {
-        setOpenMenus((prev) => ({
-          ...prev,
-          [index]: true,
-        }));
+  // Auto-expand ONLY the currently active section — replace (not merge) so
+  // previously visited sections close instead of accumulating forever.
+  useEffect(() => {
+    const next: { [key: number]: boolean } = {};
+    menuItems.forEach((item, index) => {
+      if (item.children?.some((child: any) => child?.href === activeLeafHref)) {
+        next[index] = true;
       }
-    }
-  });
-}, [activeLeafHref]);
+    });
+    setOpenMenus(next);
+  }, [activeLeafHref]);
 
+  // Accordion behavior: একটা section খুললে আগে খোলা থাকা অন্যগুলো auto-close হয়ে যাবে।
+  // একই section-এ আবার ক্লিক করলে সেটা toggle off হবে।
   const toggleSubMenu = (index: number) => {
-    setOpenMenus((prev) => ({
-      ...prev,
-      [index]: !prev[index],
-    }));
+    setOpenMenus((prev) => {
+      const isCurrentlyOpen = !!prev[index];
+      return isCurrentlyOpen ? {} : { [index]: true };
+    });
   };
 
-const handleButtonClick = (path: string) => {
-  if (!path) return;
+  // Collapse/expand toggle — collapsing করার সময় stale open state ক্লিয়ার করে দেয়
+  const handleToggleActive = () => {
+    setIsActive((prev) => {
+      const next = !prev;
+      if (!next) {
+        setOpenMenus({});
+      }
+      return next;
+    });
+  };
 
-  const targetPath = path.startsWith("/") ? path : `/${path}`;
+  const handleButtonClick = (path: string) => {
+    if (!path) return;
 
-  if (cleanPath === targetPath) return;
+    const targetPath = path.startsWith("/") ? path : `/${path}`;
 
-  setLoading(true);
+    if (cleanPath === targetPath) return;
 
-  const targetUrl = `/${local}${targetPath}`;
-  router.push(targetUrl);
-};
+    setLoading(true);
+
+    const targetUrl = `/${local}${targetPath}`;
+    router.push(targetUrl);
+
+    if (isMobile) {
+      dispatch(toggleSidebar({ show: false }));
+    }
+  };
+
+  const activeMenuStyle = {
+    background: "var(--bgbase)",
+    color: "var(--primaryColor)",
+    borderLeftColor: "var(--primaryColor)",
+  };
+
+  const inactiveMenuStyle = {
+    color: "var(--secondaryText)",
+  };
+
+  const activeSubMenuStyle = {
+    background: "var(--primaryColor)",
+    color: "#ffffff",
+  };
+
+  const activeArrowStyle = {
+    color: "var(--primaryColor)",
+  };
 
   useEffect(() => {
+    // এই effect শুধু mobile/desktop detect করে ও sidebar-এর overall visibility
+    // (rstate.toggle) কন্ট্রোল করে — isActive (desktop expand/collapse) কখনো touch করে না।
     const handleResize = () => {
-      if (window.innerWidth < 768) {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) {
         dispatch(toggleSidebar({ show: false }));
-        setIsActive(false);
       } else {
         dispatch(toggleSidebar({ show: true }));
-        setIsActive(true);
       }
     };
 
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [dispatch]);
 
   return (
     <>
@@ -588,12 +612,12 @@ const handleButtonClick = (path: string) => {
       {rstate?.toggle && (
         <aside
           className={`gb_sidebar sticky top-0 ${
-            isActive ? "show overflow-y-scroll h-[100vh]" : "hide h-fit"
+            showExpanded ? "show overflow-y-scroll h-[100vh]" : "hide h-fit"
           }`}
         >
           <div className="toggle_btn flex items-center justify-between">
             <i
-              onClick={() => setIsActive(!isActive)}
+              onClick={handleToggleActive}
               className="ri-menu-fill hidden md:block cursor-pointer text-gray-700 hover:text-emerald-700 transition"
             ></i>
             <i
@@ -618,43 +642,48 @@ const handleButtonClick = (path: string) => {
                     <div className="relative group rounded-md">
                       <Tooltip
                         placement="right"
-                        title={isActive ? "" : item.title}
+                        title={showExpanded ? "" : item.title}
                       >
                         <div
                           onClick={() => toggleSubMenu(index)}
                           className={`cursor-pointer menu_list flex items-center justify-between rounded-md transition-all duration-200 px-3 py-2.5 ${
                             isParentActive
-                              ? "bg-emerald-50 text-emerald-800 font-semibold border-l-4 border-emerald-600"
-                              : "text-gray-700 hover:bg-gray-50 hover:text-emerald-700"
+                              ? "font-semibold border-l-4"
+                              : "hover:bg-gray-50"
                           }`}
+                          style={isParentActive ? activeMenuStyle : inactiveMenuStyle}
                         >
                           <div className="flex items-center min-w-0">
                             <i className={`${item.icon} text-[18px] shrink-0`}></i>
-                            {isActive && (
+                            {showExpanded && (
                               <span className="ml-3 text-[13px] font-medium truncate">
                                 {item.title}
                               </span>
                             )}
                           </div>
 
-                          {isActive && (
+                          {showExpanded && (
                             <i
                               className={`ri-arrow-down-s-line text-[16px] text-gray-400 transition-transform duration-300 shrink-0 ml-2 ${
-                                isOpen ? "rotate-180 text-emerald-600 font-bold" : ""
+                                isOpen ? "rotate-180 font-bold" : ""
                               }`}
+                              style={isOpen ? activeArrowStyle : undefined}
                             ></i>
                           )}
                         </div>
                       </Tooltip>
 
-                      {/* Expanded Submenu for Active Sidebar */}
-                      {isActive && (
+                      {/* Expanded Submenu (desktop expanded rail OR mobile drawer) */}
+                      {showExpanded && (
                         <div
                           className={`overflow-hidden transition-all duration-300 ease-in-out ${
                             isOpen ? "max-h-[800px] opacity-100 my-1" : "max-h-0 opacity-0"
                           }`}
                         >
-                          <div className="border-l-2 border-emerald-200 ml-5 pl-2.5 space-y-1">
+                          <div
+                            className="border-l-2 ml-5 pl-2.5 space-y-1"
+                            style={{ borderLeftColor: "color-mix(in srgb, var(--primaryColor) 35%, white)" }}
+                          >
                             {item?.children?.map((child: any, count: number) => {
                               const isSubActive = child?.href === activeLeafHref;
                               return (
@@ -663,9 +692,10 @@ const handleButtonClick = (path: string) => {
                                   onClick={() => handleButtonClick(child?.href)}
                                   className={`cursor-pointer px-2.5 py-1.5 rounded-md text-[12px] flex items-center justify-between transition-colors ${
                                     isSubActive
-                                      ? "bg-emerald-600 text-white font-semibold shadow-sm"
-                                      : "text-gray-600 hover:bg-emerald-50 hover:text-emerald-800"
+                                      ? "font-semibold shadow-sm"
+                                      : "text-gray-600 hover:bg-gray-50"
                                   }`}
+                                  style={isSubActive ? activeSubMenuStyle : undefined}
                                 >
                                   <div className="flex items-center gap-2 truncate">
                                     <i
@@ -682,13 +712,10 @@ const handleButtonClick = (path: string) => {
                         </div>
                       )}
 
-                      {/* Flyout Submenu for Collapsed Sidebar */}
-                      {!isActive && (
-                        <div
-                          className={`sub_menu_collaps shadow-xl rounded-lg p-2 ${
-                            isOpen ? "active" : ""
-                          }`}
-                        >
+                      {/* Flyout Submenu for Collapsed Desktop Rail — শুধু isOpen হলেই DOM-এ বসবে,
+                          বন্ধ অবস্থায় element-ই থাকে না, তাই কোনো ghost/blank box দেখা যাবে না */}
+                      {!showExpanded && isOpen && (
+                        <div className="sub_menu_collaps active shadow-xl rounded-lg p-2">
                           <div className="text-xs font-bold text-gray-900 border-b pb-1.5 mb-2 px-2">
                             {item.title}
                           </div>
@@ -698,11 +725,12 @@ const handleButtonClick = (path: string) => {
                               <div
                                 key={count}
                                 onClick={() => handleButtonClick(child?.href)}
-                                className={`cursor-pointer px-3 py-1.5 rounded text-[12px] whitespace-nowrap transition ${
-                                  isSubActive
-                                    ? "bg-emerald-600 text-white font-semibold"
-                                    : "text-gray-700 hover:bg-emerald-50 hover:text-emerald-800"
+                                  className={`cursor-pointer px-3 py-1.5 rounded text-[12px] whitespace-nowrap transition ${
+                                    isSubActive
+                                    ? "font-semibold"
+                                    : "text-gray-700 hover:bg-gray-50"
                                 }`}
+                                style={isSubActive ? activeSubMenuStyle : undefined}
                               >
                                 {child?.title}
                               </div>
@@ -719,17 +747,18 @@ const handleButtonClick = (path: string) => {
                     >
                       <Tooltip
                         placement="right"
-                        title={isActive ? "" : item.title}
+                        title={showExpanded ? "" : item.title}
                       >
                         <div
                           className={`menu_list flex items-center rounded-md px-3 py-2.5 transition-all duration-200 ${
                             isParentActive
-                              ? "bg-emerald-50 text-emerald-800 font-semibold border-l-4 border-emerald-600"
-                              : "text-gray-700 hover:bg-gray-50 hover:text-emerald-700"
+                              ? "font-semibold border-l-4"
+                              : "hover:bg-gray-50"
                           }`}
+                          style={isParentActive ? activeMenuStyle : inactiveMenuStyle}
                         >
                           <i className={`${item.icon} text-[18px] shrink-0`}></i>
-                          {isActive && (
+                          {showExpanded && (
                             <span className="ml-3 text-[13px] font-medium truncate">
                               {item.title}
                             </span>

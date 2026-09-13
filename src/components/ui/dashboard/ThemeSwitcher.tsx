@@ -1,9 +1,9 @@
 "use client";
 import React, { useState } from "react";
-import { Drawer, Tooltip, Divider, Segmented, Select, Tabs } from "antd";
+import { Drawer, Tooltip, Divider, Segmented, Select, Switch } from "antd";
 import {
   BgColorsOutlined, CheckOutlined, FontSizeOutlined,
-  BorderOutlined, FontColorsOutlined,
+  BorderOutlined, FontColorsOutlined, TableOutlined,
 } from "@ant-design/icons";
 import { useAppTheme, DesignOptions, FONT_LIST, FontFamily } from "@/context/ThemeContext";
 
@@ -86,6 +86,18 @@ export default function ThemeSwitcher() {
           ]}
         />
 
+        <SectionTitle icon={<FontColorsOutlined />} title="Text Weight" />
+        <Segmented
+          block
+          value={design.fontWeight}
+          onChange={(v) => setDesign({ fontWeight: v as DesignOptions["fontWeight"] })}
+          options={[
+            { label: "Regular", value: "regular" },
+            { label: "Medium", value: "medium" },
+            { label: "Semi Bold", value: "semibold" },
+          ]}
+        />
+
         {/* ─── BORDER RADIUS / CORNERS ───────────── */}
         <SectionTitle icon={<BorderOutlined />} title="Corner Style" />
         <div className="grid grid-cols-3 gap-2">
@@ -118,6 +130,60 @@ export default function ThemeSwitcher() {
             );
           })}
         </div>
+
+        <Divider style={{ borderColor: "#e2e8f0", margin: "16px 0 12px" }} />
+
+        <SectionTitle icon={<TableOutlined />} title="Table Layout" />
+        <Segmented
+          block
+          value={design.tableDensity}
+          onChange={(v) => setDesign({ tableDensity: v as DesignOptions["tableDensity"] })}
+          options={[
+            { label: "Compact", value: "compact" },
+            { label: "Comfort", value: "comfortable" },
+            { label: "Spacious", value: "spacious" },
+          ]}
+        />
+
+        <div className="mt-3">
+          <Segmented
+            block
+            value={design.tableLayout}
+            onChange={(v) => setDesign({ tableLayout: v as DesignOptions["tableLayout"] })}
+            options={[
+              { label: "Auto Width", value: "auto" },
+              { label: "Fixed Width", value: "fixed" },
+            ]}
+          />
+        </div>
+
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <label className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2">
+            <span className="text-xs font-medium text-slate-700">Striped Rows</span>
+            <Switch
+              size="small"
+              checked={design.tableStriped}
+              onChange={(checked) => setDesign({ tableStriped: checked })}
+            />
+          </label>
+          <label className="flex items-center justify-between rounded-md border border-slate-200 px-3 py-2">
+            <span className="text-xs font-medium text-slate-700">Cell Borders</span>
+            <Switch
+              size="small"
+              checked={design.tableBordered}
+              onChange={(checked) => setDesign({ tableBordered: checked })}
+            />
+          </label>
+        </div>
+
+        <label className="mt-3 flex items-center justify-between rounded-md border border-slate-200 px-3 py-2">
+          <span className="text-xs font-medium text-slate-700">Fill Screen Height</span>
+          <Switch
+            size="small"
+            checked={design.tableFullHeight}
+            onChange={(checked) => setDesign({ tableFullHeight: checked })}
+          />
+        </label>
 
         <Divider style={{ borderColor: "#e2e8f0", margin: "16px 0 12px" }} />
 
@@ -198,7 +264,17 @@ export default function ThemeSwitcher() {
           onClick={() => {
             localStorage.removeItem("gb_design_font_manual");
             setTheme("forest");
-            setDesign({ fontSize: "medium", borderRadius: "rounded", fontFamily: "Poppins" });
+            setDesign({
+              fontSize: "medium",
+              fontWeight: "regular",
+              borderRadius: "rounded",
+              fontFamily: "Poppins",
+              tableDensity: "comfortable",
+              tableLayout: "auto",
+              tableStriped: false,
+              tableBordered: false,
+              tableFullHeight: true,
+            });
           }}
           className="w-full py-2 text-xs font-medium rounded-lg border border-slate-200 transition-all hover:bg-slate-50 text-slate-600 cursor-pointer"
         >

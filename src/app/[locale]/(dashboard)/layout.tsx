@@ -36,9 +36,9 @@ const App: React.FC = ({ children }: any) => {
    )
   }
   return (
-    <div style={{ height: "100vh",display:"flex"}}>
+    <div className="dashboard-shell">
       <GbSidebar />
-      <div className="h-fit sticky top-0  custom_scroll" style={{ width: "calc(100% - 75px)",flex:"1", marginLeft: "auto",overflow:"scroll" }}>
+      <div className="dashboard-content custom_scroll">
         <ProtectedRoute>
         {children}
         </ProtectedRoute>

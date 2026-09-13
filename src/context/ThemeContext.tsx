@@ -415,7 +415,10 @@ export const THEMES: AppTheme[] = [
 
 // ─── Design Options ───────────────────────────────────────────────────────────
 export type FontSize = "small" | "medium" | "large";
+export type FontWeight = "regular" | "medium" | "semibold";
 export type BorderRadius = "sharp" | "rounded" | "pill";
+export type TableDensity = "compact" | "comfortable" | "spacious";
+export type TableLayoutMode = "auto" | "fixed";
 export type FontFamily =
   | "Poppins"
   | "Inter"
@@ -435,8 +438,14 @@ export type FontFamily =
 
 export interface DesignOptions {
   fontSize: FontSize;
+  fontWeight: FontWeight;
   borderRadius: BorderRadius;
   fontFamily: FontFamily;
+  tableDensity: TableDensity;
+  tableLayout: TableLayoutMode;
+  tableStriped: boolean;
+  tableBordered: boolean;
+  tableFullHeight: boolean;
 }
 
 export const FONT_LIST: { label: string; value: FontFamily }[] = [
@@ -463,16 +472,37 @@ const FONT_SIZE_MAP: Record<FontSize, number> = {
   large: 13,
 };
 
+const FONT_WEIGHT_MAP: Record<FontWeight, number> = {
+  regular: 400,
+  medium: 500,
+  semibold: 600,
+};
+
 const BORDER_RADIUS_MAP: Record<BorderRadius, number> = {
   sharp: 2,
   rounded: 6,
   pill: 10,
 };
 
+const TABLE_DENSITY_MAP: Record<
+  TableDensity,
+  { cellPaddingBlock: number; cellPaddingInline: number; rowHeight: number }
+> = {
+  compact: { cellPaddingBlock: 5, cellPaddingInline: 8, rowHeight: 32 },
+  comfortable: { cellPaddingBlock: 8, cellPaddingInline: 12, rowHeight: 40 },
+  spacious: { cellPaddingBlock: 12, cellPaddingInline: 16, rowHeight: 48 },
+};
+
 const DEFAULT_DESIGN: DesignOptions = {
   fontSize: "medium",
+  fontWeight: "regular",
   borderRadius: "rounded",
   fontFamily: "Poppins",
+  tableDensity: "comfortable",
+  tableLayout: "fixed",
+  tableStriped: false,
+  tableBordered: false,
+  tableFullHeight: true,
 };
 
 // ─── Context ──────────────────────────────────────────────────────────────────
@@ -516,6 +546,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const root = document.documentElement;
+    const fs = FONT_SIZE_MAP[design.fontSize];
+    const fw = FONT_WEIGHT_MAP[design.fontWeight];
+    const br = BORDER_RADIUS_MAP[design.borderRadius];
+    const tableDensity = TABLE_DENSITY_MAP[design.tableDensity];
 
     root.style.setProperty("--primaryColor", theme.primaryColor);
     root.style.setProperty("--primaryHover", theme.primaryHover);
@@ -529,6 +563,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     root.style.setProperty("--borderColor", theme.borderColor);
     root.style.setProperty("--textPrimary", theme.textPrimary);
     root.style.setProperty("--fontFamily", `"${design.fontFamily}", sans-serif`);
+    root.style.setProperty("--app-font-size", `${fs}px`);
+    root.style.setProperty("--app-font-weight", `${fw}`);
+    root.style.setProperty("--radius-sm", `${br}px`);
+    root.style.setProperty("--radius-md", `${br + 2}px`);
+    root.style.setProperty("--radius-lg", `${br + 4}px`);
+    root.style.setProperty("--table-cell-padding-y", `${tableDensity.cellPaddingBlock}px`);
+    root.style.setProperty("--table-cell-padding-x", `${tableDensity.cellPaddingInline}px`);
+    root.style.setProperty("--table-row-height", `${tableDensity.rowHeight}px`);
+    root.style.setProperty("--table-header-font-weight", `${Math.max(fw, 600)}`);
+    root.style.setProperty("--table-fill-height", "calc(100vh - 260px)");
 
     // Dynamic global style tag injection to force font family override on all tags & Ant Design while preserving icon fonts
     let fontStyleEl = document.getElementById("gb-dynamic-font-override") as HTMLStyleElement;
@@ -548,6 +592,79 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       .ant-card, .ant-menu, .ant-drawer, .ant-modal, .ant-tag {
         font-family: "${design.fontFamily}", sans-serif !important;
       }
+      body, p, span:not([class*="ri-"]):not(.anticon):not(.anticon *),
+      div:not(.anticon), button:not(.anticon), input, select, textarea, a:not(.anticon),
+      table, tr, th, td, label,
+      .ant-typography, .ant-btn:not(.anticon), .ant-table, .ant-input, .ant-select,
+      .ant-card, .ant-menu, .ant-drawer, .ant-modal, .ant-tag {
+        font-size: var(--app-font-size) !important;
+      }
+      body, p, span:not([class*="ri-"]):not(.anticon):not(.anticon *),
+      div:not(.anticon), button:not(.anticon), input, select, textarea, a:not(.anticon),
+      table, tr, th, td, label,
+      .ant-typography, .ant-btn:not(.anticon), .ant-table, .ant-input, .ant-select,
+      .ant-card, .ant-menu, .ant-drawer, .ant-modal, .ant-tag {
+        font-weight: var(--app-font-weight);
+      }
+      h1, h2, h3, h4, h5, h6,
+      strong, b, .font-bold, .font-semibold {
+        font-weight: 600 !important;
+      }
+      .font-medium {
+        font-weight: 500 !important;
+      }
+      .ant-table-wrapper .ant-table,
+      .ant-table-wrapper .ant-table-cell,
+      .gb-table .ant-table-cell {
+        font-family: "${design.fontFamily}", sans-serif !important;
+        font-size: var(--app-font-size) !important;
+      }
+      .ant-table-wrapper table,
+      .gb-table table {
+        table-layout: ${design.tableLayout} !important;
+      }
+      .gb-table-wrapper[data-full-height="true"] {
+        min-height: var(--table-fill-height);
+      }
+      .gb-table-wrapper[data-full-height="true"] .ant-table-wrapper,
+      .gb-table-wrapper[data-full-height="true"] .ant-spin-nested-loading,
+      .gb-table-wrapper[data-full-height="true"] .ant-spin-container,
+      .gb-table-wrapper[data-full-height="true"] .ant-table {
+        min-height: var(--table-fill-height);
+      }
+      .gb-table-wrapper[data-full-height="true"] .ant-table-container,
+      .gb-table-wrapper[data-full-height="true"] .ant-table-body {
+        min-height: calc(var(--table-fill-height) - 52px);
+      }
+      .dashboard-content .ant-table-wrapper {
+        min-height: ${design.tableFullHeight ? "min(640px, calc(100vh - 260px))" : "auto"};
+      }
+      .dashboard-content .ant-table-wrapper .ant-table {
+        min-height: ${design.tableFullHeight ? "min(640px, calc(100vh - 260px))" : "auto"};
+      }
+      .ant-table-wrapper .ant-table-thead > tr > th,
+      .gb-table .ant-table-thead > tr > th {
+        font-weight: var(--table-header-font-weight) !important;
+        padding: var(--table-cell-padding-y) var(--table-cell-padding-x) !important;
+      }
+      .ant-table-wrapper .ant-table-tbody > tr > td,
+      .gb-table .ant-table-tbody > tr > td {
+        font-weight: var(--app-font-weight) !important;
+        min-height: var(--table-row-height);
+        padding: var(--table-cell-padding-y) var(--table-cell-padding-x) !important;
+      }
+      .ant-table-wrapper .ant-table-tbody > tr:nth-child(even) > td,
+      .gb-table .ant-table-tbody > tr:nth-child(even) > td {
+        background: ${design.tableStriped ? "color-mix(in srgb, var(--bgbase) 58%, white)" : "#ffffff"} !important;
+      }
+      .ant-table-wrapper .ant-table-container,
+      .gb-table .ant-table-container {
+        border: ${design.tableBordered ? "1px solid var(--borderColor)" : "0"} !important;
+      }
+      .ant-table-wrapper .ant-table-cell,
+      .gb-table .ant-table-cell {
+        border-inline-end: ${design.tableBordered ? "1px solid var(--borderColor)" : "0"} !important;
+      }
       /* Protect RemixIcon & AntDesign icons */
       i[class*="ri-"], [class^="ri-"], [class*=" ri-"], .anticon, .anticon * {
         font-family: inherit;
@@ -556,14 +673,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         font-family: "remixicon" !important;
       }
     `;
-
-    const fs = FONT_SIZE_MAP[design.fontSize];
-    root.style.setProperty("--app-font-size", `${fs}px`);
-
-    const br = BORDER_RADIUS_MAP[design.borderRadius];
-    root.style.setProperty("--radius-sm", `${br}px`);
-    root.style.setProperty("--radius-md", `${br + 2}px`);
-    root.style.setProperty("--radius-lg", `${br + 4}px`);
 
     root.setAttribute("data-theme", theme.key);
     if (theme.sidebarBg !== "#ffffff") {
@@ -605,6 +714,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const fs = FONT_SIZE_MAP[design.fontSize];
   const br = BORDER_RADIUS_MAP[design.borderRadius];
+  const tableDensity = TABLE_DENSITY_MAP[design.tableDensity];
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, themes: THEMES, design, setDesign }}>
@@ -626,6 +736,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
               headerColor: "#0f172a",
               borderColor: "#e2e8f0",
               fontSize: fs,
+              cellFontSize: fs,
+              headerBorderRadius: br,
+              cellPaddingBlock: tableDensity.cellPaddingBlock,
+              cellPaddingInline: tableDensity.cellPaddingInline,
+              cellPaddingBlockSM: Math.max(tableDensity.cellPaddingBlock - 2, 3),
+              cellPaddingInlineSM: Math.max(tableDensity.cellPaddingInline - 2, 6),
               rowHoverBg: "#f1f5f9",
             },
             Button: {
