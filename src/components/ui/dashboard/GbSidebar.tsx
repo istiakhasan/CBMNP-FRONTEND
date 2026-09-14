@@ -455,22 +455,38 @@ const GbSidebar = () => {
         },
       ],
     },
-  ].filter(
-    (mi: any) => {
-      const userRole = String(userInfo?.role || "").toLowerCase();
-      const isSuperOrAdmin = ["admin", "super_admin", "owner"].includes(userRole);
-      if (isSuperOrAdmin) return true;
+    ].filter(
+  (mi: any) => {
+    const userRole = String(userInfo?.role || "").toLowerCase();
+    const isMasterAdmin = userRole === "master_admin";
+    if (isMasterAdmin) return true;
 
-      if (permission?.includes(mi.title)) return true;
-      if (mi.title === "Garments ERP" && (permission?.includes("Garments") || permission?.includes("Garments ERP") || permission?.includes("VIEW_GARMENTS_ORDERS"))) {
-        return true;
-      }
-      if (mi.title === "HR & Payroll" && (permission?.includes("HR") || permission?.includes("VIEW_HR_EMPLOYEES") || permission?.includes("VIEW_HR_ATTENDANCE"))) {
-        return true;
-      }
-      return mi.children?.some((child: any) => permission?.includes(child.title));
+    if (permission?.includes(mi.title)) return true;
+    if (mi.title === "Garments ERP" && (permission?.includes("Garments") || permission?.includes("Garments ERP") || permission?.includes("VIEW_GARMENTS_ORDERS"))) {
+      return true;
     }
-  );
+    if (mi.title === "HR & Payroll" && (permission?.includes("HR") || permission?.includes("VIEW_HR_EMPLOYEES") || permission?.includes("VIEW_HR_ATTENDANCE"))) {
+      return true;
+    }
+    return mi.children?.some((child: any) => permission?.includes(child.title));
+  }
+);
+  // ].filter(
+  //   (mi: any) => {
+  //     const userRole = String(userInfo?.role || "").toLowerCase();
+  //     const isSuperOrAdmin = ["admin", "super_admin", "owner"].includes(userRole);
+  //     if (isSuperOrAdmin) return true;
+
+  //     if (permission?.includes(mi.title)) return true;
+  //     if (mi.title === "Garments ERP" && (permission?.includes("Garments") || permission?.includes("Garments ERP") || permission?.includes("VIEW_GARMENTS_ORDERS"))) {
+  //       return true;
+  //     }
+  //     if (mi.title === "HR & Payroll" && (permission?.includes("HR") || permission?.includes("VIEW_HR_EMPLOYEES") || permission?.includes("VIEW_HR_ATTENDANCE"))) {
+  //       return true;
+  //     }
+  //     return mi.children?.some((child: any) => permission?.includes(child.title));
+  //   }
+  // );
 
   const pathName = usePathname();
   const local = useLocale();
