@@ -194,6 +194,17 @@ export default function GarmentsInventoryPage() {
   // Main Inventory Ledger Columns
   const columns = [
     {
+      title: "Item Code",
+      dataIndex: "itemCode",
+      key: "itemCode",
+      width: 140,
+      render: (code: string) => (
+        <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded-md border border-gray-200 text-gray-700 font-bold">
+          {code || "-"}
+        </span>
+      ),
+    },
+    {
       title: "Category",
       dataIndex: "itemCategory",
       key: "itemCategory",
