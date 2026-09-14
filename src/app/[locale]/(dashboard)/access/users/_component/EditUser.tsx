@@ -71,6 +71,10 @@ const EditUser = ({ setOpenAddUserModal, rowData }: any) => {
                 value: "admin",
               },
               {
+                label: "Master Admin",
+                value: "master_admin",
+              },
+              {
                 label: "Owner",
                 value: "owner",
               },

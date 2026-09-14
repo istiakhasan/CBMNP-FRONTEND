@@ -1,25 +1,29 @@
-// components/ProtectedRoute.tsx
 "use client";
+
+import { useEffect, useMemo } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
+import { Row, Space, Spin } from "antd";
 import { useGetUserByIdQuery } from "@/redux/api/usersApi";
 import { getUserInfo } from "@/service/authService";
 import { getRequiredPermission, MASTER_ADMIN_ROLE } from "@/lib/route-permissions";
-import { useLocale } from "next-intl";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
-import { Row, Space, Spin } from "antd";
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const pathname = usePathname();
-  const router = useRouter();
+interface RouteGuardProps {
+  children: React.ReactNode;
+}
+
+const RouteGuard = ({ children }: RouteGuardProps) => {
   const userInfo: any = getUserInfo();
   const local = useLocale();
+  const router = useRouter();
+  const pathName = usePathname();
 
   const { data: userData, isLoading, isFetching } = useGetUserByIdQuery({
     id: userInfo?.userId,
   });
 
-  const permissions: string[] = useMemo(
-    () => userData?.permission?.map((p: any) => p.label) || [],
+  const permission: string[] = useMemo(
+    () => userData?.permission?.map((item: any) => item?.label) || [],
     [userData]
   );
 
@@ -27,11 +31,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const isMasterAdmin = userRole === MASTER_ADMIN_ROLE;
 
   const cleanPath = useMemo(() => {
-    if (!pathname) return "/";
+    if (!pathName) return "/";
     const regex = new RegExp(`^/${local}(?=/|$)`);
-    const stripped = pathname.replace(regex, "");
+    const stripped = pathName.replace(regex, "");
     return stripped === "" ? "/" : stripped;
-  }, [pathname, local]);
+  }, [pathName, local]);
 
   const requiredPermission = useMemo(
     () => getRequiredPermission(cleanPath),
@@ -39,12 +43,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   );
 
   const isAuthorized =
-    isMasterAdmin || !requiredPermission || permissions.includes(requiredPermission);
+    isMasterAdmin || !requiredPermission || permission.includes(requiredPermission);
 
   useEffect(() => {
     if (isLoading || isFetching) return;
     if (!isAuthorized) {
-      router.replace(`/${local}/not-authorized`);
+      router.replace(`/${local}/unauthorized`);
     }
   }, [isAuthorized, isLoading, isFetching, local, router]);
 
@@ -61,4 +65,4 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-export default ProtectedRoute;
+export default RouteGuard;
