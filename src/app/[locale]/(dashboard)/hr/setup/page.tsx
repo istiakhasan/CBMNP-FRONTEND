@@ -64,6 +64,7 @@ import {
   useSyncDeviceNowMutation,
   useGetBiometricDeviceUsersQuery,
   useGetEnrolledDeviceUsersQuery,
+  useGetCachedEnrolledDeviceUsersQuery,
   useGetEmployeesQuery,
   useGetHolidaysQuery,
   useCreateHolidayMutation,
@@ -135,6 +136,14 @@ export default function HrSetupPage() {
     usersDrawerDevice?.id,
     { skip: !usersDrawerDevice || usersDrawerTab !== "enrolled" }
   );
+  const { data: cachedEnrolledUsersData, isLoading: cachedEnrolledUsersLoading } = useGetCachedEnrolledDeviceUsersQuery(
+    usersDrawerDevice?.id,
+    { skip: !usersDrawerDevice || usersDrawerTab !== "enrolled" },
+  );
+  const displayedEnrolledUsersData =
+    enrolledUsersData?.data?.users?.length || enrolledUsersData?.data?.source === "live"
+      ? enrolledUsersData
+      : cachedEnrolledUsersData;
 
   const departments = deptData?.data || [];
   const designations = desigData?.data || [];
@@ -1302,13 +1311,22 @@ export default function HrSetupPage() {
                   This connects to the machine live and lists every fingerprint/user actually registered on it —
                   regardless of whether they punched today.
                 </p>
-                {enrolledUsersLoading ? (
+                {displayedEnrolledUsersData?.data?.source === "cache" && (
+                  <Alert
+                    className="mb-3"
+                    type="info"
+                    showIcon
+                    message="Showing the last roster synced from the office network"
+                    description={displayedEnrolledUsersData?.data?.lastSyncedAt ? `Last synced: ${dayjs(displayedEnrolledUsersData.data.lastSyncedAt).format("DD MMM YYYY, hh:mm A")}` : undefined}
+                  />
+                )}
+                {enrolledUsersLoading && cachedEnrolledUsersLoading ? (
                   <div className="text-center text-gray-400 py-10 text-sm">Connecting to device...</div>
-                ) : enrolledUsersData?.success === false ? (
-                  <Alert type="error" showIcon message="Could not read device user list" description={enrolledUsersData?.message} />
-                ) : enrolledUsersData?.data?.users?.length ? (
+                ) : displayedEnrolledUsersData?.success === false ? (
+                  <Alert type="error" showIcon message="Could not read device user list" description={displayedEnrolledUsersData?.message} />
+                ) : displayedEnrolledUsersData?.data?.users?.length ? (
                   <div className="space-y-2">
-                    {enrolledUsersData.data.users.map((u: any, idx: number) => (
+                    {displayedEnrolledUsersData.data.users.map((u: any, idx: number) => (
                       <div key={idx} className="flex items-center justify-between border border-gray-200 rounded-lg px-3 py-2">
                         <div>
                           <span className="font-semibold text-gray-900 text-sm block">{u.name}</span>

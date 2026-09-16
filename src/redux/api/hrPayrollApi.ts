@@ -83,6 +83,10 @@ export const hrPayrollApi = baseApi.injectEndpoints({
       query: (id: string) => ({ url: `/hr-payroll/biometric/devices/${id}/enrolled-users`, method: "GET" }),
       providesTags: [tagTypes.hrPayroll],
     }),
+    getCachedEnrolledDeviceUsers: build.query({
+      query: (id: string) => ({ url: `/hr-payroll/biometric/devices/${id}/enrolled-users/cache`, method: "GET" }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
 
     // ================= WORK SHIFTS & HOLIDAYS =================
     getShifts: build.query({
@@ -555,6 +559,7 @@ export const {
   useSyncDeviceNowMutation,
   useGetBiometricDeviceUsersQuery,
   useGetEnrolledDeviceUsersQuery,
+  useGetCachedEnrolledDeviceUsersQuery,
   useGetBiometricPunchLogsQuery,
   useGetShiftsQuery,
   useCreateShiftMutation,
