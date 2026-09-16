@@ -44,6 +44,22 @@ const AddUsers = ({setOpenAddUserModal}:any) => {
             value:'owner',
           },
           {
+            label:'HR',
+            value:'hr',
+          },
+          {
+            label:'Employee',
+            value:'employee',
+          },
+          {
+            label:'CEO (Final Approver)',
+            value:'ceo',
+          },
+          {
+            label:'CCO (Final Approver)',
+            value:'cco',
+          },
+          {
             label:'User',
             value:'user',
           },

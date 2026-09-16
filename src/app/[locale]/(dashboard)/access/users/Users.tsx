@@ -81,7 +81,7 @@ const Users = () => {
             onClick={() => router.push(`/${local}/access/users/${record?.userId}`)}
             className="color_primary cursor-pointer"
           >
-            {record?.name}
+            <span className="font-semibold">{record?.name}<small className="block text-xs text-gray-500 font-normal">User: {record?.userId || "-"} · Internal: {record?.internalId || "-"}</small></span>
           </span>
         );
       },
@@ -91,11 +91,12 @@ const Users = () => {
       key: 2,
       //@ts-ignore
       render: (text, record, index) => {
-        return <span className=" cursor-pointer">{record?.email}</span>;
+        return <span className="cursor-pointer">{record?.email}<small className="block text-xs text-gray-500">{record?.phone || "No phone"}</small></span>;
       },
     },
     {
       title: "User Id",
+      hidden: true,
       key: 22,
       //@ts-ignore
       render: (text, record, index) => {
@@ -104,6 +105,7 @@ const Users = () => {
     },
     {
       title: "Internal Id",
+      hidden: true,
       key: 22,
       //@ts-ignore
       render: (text, record, index) => {
@@ -112,6 +114,7 @@ const Users = () => {
     },
     {
       title: "Phone Number",
+      hidden: true,
       key: 3,
       //@ts-ignore
       render: (text, record, index) => {
@@ -124,9 +127,7 @@ const Users = () => {
       //@ts-ignore
       render: (text, record, index) => {
         return (
-          <span className="color_primary uppercase font-semibold cursor-pointer">
-            {record?.role}
-          </span>
+          <span className="color_primary uppercase font-semibold cursor-pointer">{record?.role}</span>
         );
       },
     },
@@ -209,7 +210,7 @@ const Users = () => {
   const [checkedList, setCheckedList] = useState(defaultCheckedList);
   const newColumns = tableColumn.map((item: any) => ({
     ...item,
-    hidden: !checkedList.includes(item.key as string),
+    hidden: item.hidden || !checkedList.includes(item.key as string),
   }));
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);

@@ -273,7 +273,7 @@ export default function ThemeSwitcher() {
               tableLayout: "auto",
               tableStriped: false,
               tableBordered: false,
-              tableFullHeight: true,
+              tableFullHeight: false,
             });
           }}
           className="w-full py-2 text-xs font-medium rounded-lg border border-slate-200 transition-all hover:bg-slate-50 text-slate-600 cursor-pointer"

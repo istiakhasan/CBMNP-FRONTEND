@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { Avatar, MenuProps, Space } from "antd";
+import { Avatar, Badge, MenuProps, Space, Tooltip } from "antd";
 import GbDropdown from "./GbDropdown";
 import { getUserInfo, removeUserInfo } from "@/service/authService";
 import { useRouter } from "next/navigation";
@@ -13,6 +13,7 @@ import { useState } from "react";
 import GbModal from "../GbModal";
 import UserPasswordChangeForm from "@/components/UserPasswordChangeForm";
 import ThemeSwitcher from "./ThemeSwitcher";
+import { useGetApprovalCenterItemsQuery } from "@/redux/api/hrPayrollApi";
 
 const GbHeader = ({ title }: { title?: string }) => {
   const rstate = useSelector((state: RootState) => state.menu);
@@ -21,6 +22,8 @@ const GbHeader = ({ title }: { title?: string }) => {
   const local = useLocale();
   const userInfo: any = getUserInfo();
   const [openPasswordModal, setOpenPasswordModal] = useState(false);
+  const { data: approvals } = useGetApprovalCenterItemsQuery(undefined);
+  const pendingApprovalCount = approvals?.data?.items?.length || 0;
 
   const items: MenuProps["items"] = [
     {
@@ -36,6 +39,18 @@ const GbHeader = ({ title }: { title?: string }) => {
         </>
       ),
       key: "change-password",
+    },
+    {
+      label: (
+        <span
+          onClick={() => router.push(`/${local}/employee/profile`)}
+          className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center"
+        >
+          <i style={{ fontSize: "20px" }} className="ri-user-line"></i>
+          <span>My Profile</span>
+        </span>
+      ),
+      key: "profile",
     },
     {
       label: (
@@ -81,6 +96,11 @@ const GbHeader = ({ title }: { title?: string }) => {
         <div className="ml-auto flex items-center gap-2 sm:gap-5 shrink-0">
           {/* Theme Switcher */}
           <ThemeSwitcher />
+          <Tooltip title={pendingApprovalCount ? `${pendingApprovalCount} approval(s) waiting for you` : "No pending approvals"}>
+            <button onClick={() => router.push(`/${local}/approval-center`)} className="relative h-9 w-9 rounded-full hover:bg-slate-100 text-slate-600">
+              <Badge count={pendingApprovalCount} size="small" overflowCount={99}><i className="ri-notification-3-line text-xl" /></Badge>
+            </button>
+          </Tooltip>
 
           {/* User Menu */}
           <div>

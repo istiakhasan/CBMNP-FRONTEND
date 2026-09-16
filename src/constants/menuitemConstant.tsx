@@ -510,6 +510,10 @@ export const hrMenuList: MenuItem[] = [
 					</Link>
 				),
 			},
+			{
+				key: "/hr/offices",
+				label: <Link className=" text-[14px]" href={"/hr/offices"}>Office Attendance Range</Link>,
+			},
 		],
 	},
 ];

@@ -68,7 +68,20 @@ export default function OvertimePage() {
             { title: "Date", dataIndex: "overtimeDate", key: "date" },
             { title: "Hours", dataIndex: "hours", key: "hours", align: "center" as const },
             { title: "Reason", dataIndex: "reason", key: "reason" },
-            { title: "Status", dataIndex: "status", key: "status", render: (v: string) => <Tag color={v === "Approved" ? "green" : v === "Rejected" ? "red" : "orange"}>{v || "Pending"}</Tag> },
+            {
+              title: "Status",
+              key: "status",
+              render: (_: any, record: any) => (
+                <div className="flex flex-col gap-1">
+                  <Tag color={record.status === "Approved" ? "green" : record.status === "Rejected" ? "red" : "orange"}>{record.status || "Pending"}</Tag>
+                  {record.status === "Pending" && (
+                    <Tag color={record.approvalStage === "PendingDeptHead" ? "gold" : "blue"} className="text-[10px] px-1.5 py-0 m-0">
+                      {record.approvalStage === "PendingDeptHead" ? "Step 1: Dept Head" : "Step 2: Final Approver"}
+                    </Tag>
+                  )}
+                </div>
+              ),
+            },
             {
               title: "Action",
               key: "action",

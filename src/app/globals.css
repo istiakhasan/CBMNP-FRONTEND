@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Leaflet now owns the geofence and employee markers; hide the retired iframe overlays. */
+.attendance-location-map > .absolute {
+  display: none;
+}
+
+/* Leave history should grow only with its rows, even when dashboard-wide full-height tables are enabled. */
+.dashboard-content .leave-applications-table.ant-table-wrapper,
+.dashboard-content .leave-applications-table.ant-table-wrapper .ant-table {
+  min-height: 0 !important;
+}
+
+
 @layer components {
   .flex_center {
     @apply flex items-center justify-items-center;

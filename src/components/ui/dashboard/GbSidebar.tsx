@@ -30,6 +30,16 @@ const GbSidebar = () => {
       icon: "ri-bar-chart-box-line",
     },
     {
+      href: "/employee/profile",
+      title: "My Profile",
+      icon: "ri-user-3-line",
+    },
+    {
+      href: "/approval-center",
+      title: "Approval Center",
+      icon: "ri-checkbox-circle-line",
+    },
+    {
       href: "/orders",
       title: "Orders",
       icon: "ri-shopping-bag-3-line",
@@ -362,6 +372,10 @@ const GbSidebar = () => {
           href: "/hr/setup",
           title: "HR Setup & Biometrics",
         },
+        {
+          href: "/hr/offices",
+          title: "Office Attendance Range",
+        },
       ],
     },
     {
@@ -461,11 +475,21 @@ const GbSidebar = () => {
     const isMasterAdmin = userRole === "master_admin";
     if (isMasterAdmin) return true;
 
+    if (mi.title === "Dashboard" && ["hr", "employee"].includes(userRole)) return true;
+    if (mi.title === "My Profile" && userRole === "employee") return true;
+
     if (permission?.includes(mi.title)) return true;
     if (mi.title === "Garments ERP" && (permission?.includes("Garments") || permission?.includes("Garments ERP") || permission?.includes("VIEW_GARMENTS_ORDERS"))) {
       return true;
     }
-    if (mi.title === "HR & Payroll" && (permission?.includes("HR") || permission?.includes("VIEW_HR_EMPLOYEES") || permission?.includes("VIEW_HR_ATTENDANCE"))) {
+    if (mi.title === "HR & Payroll" && (userRole === "hr" || permission?.includes("HR") || permission?.includes("VIEW_HR_EMPLOYEES") || permission?.includes("VIEW_HR_ATTENDANCE"))) {
+      return true;
+    }
+    // Executive-tier roles inherently need this page (it's how they act on things
+    // routed to them) — don't require a separate manual permission grant on top of
+    // just being CEO/CCO. Department Heads / Reporting Managers with a plain role
+    // still get it via the normal "Approval Center" permission assignment below.
+    if (mi.title === "Approval Center" && ["ceo", "cco"].includes(userRole)) {
       return true;
     }
     return mi.children?.some((child: any) => permission?.includes(child.title));

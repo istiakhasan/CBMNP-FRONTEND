@@ -67,6 +67,22 @@ export const hrPayrollApi = baseApi.injectEndpoints({
       query: (params) => ({ url: "/hr-payroll/biometric/logs", method: "GET", params }),
       providesTags: [tagTypes.hrPayroll],
     }),
+    syncDeviceNow: build.mutation({
+      query: (id) => ({ url: `/hr-payroll/biometric/devices/${id}/sync-now`, method: "POST" }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
+    getBiometricDeviceUsers: build.query({
+      query: ({ id, date }: { id: string; date?: string }) => ({
+        url: `/hr-payroll/biometric/devices/${id}/users`,
+        method: "GET",
+        params: date ? { date } : undefined,
+      }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
+    getEnrolledDeviceUsers: build.query({
+      query: (id: string) => ({ url: `/hr-payroll/biometric/devices/${id}/enrolled-users`, method: "GET" }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
 
     // ================= WORK SHIFTS & HOLIDAYS =================
     getShifts: build.query({
@@ -89,11 +105,26 @@ export const hrPayrollApi = baseApi.injectEndpoints({
       query: (id) => ({ url: `/hr-payroll/holidays/${id}`, method: "DELETE" }),
       invalidatesTags: [tagTypes.hrPayroll],
     }),
+    approveHoliday: build.mutation({
+      query: ({ id, ...data }) => ({ url: `/hr-payroll/holidays/${id}/approve`, method: "PATCH", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
 
     // ================= EMPLOYEES =================
     getEmployees: build.query({
       query: (params) => ({ url: "/hr-payroll/employees", method: "GET", params }),
       providesTags: [tagTypes.hrPayroll],
+    }),
+    getOffices: build.query({ query: () => ({ url: "/hr-payroll/offices", method: "GET" }), providesTags: [tagTypes.hrPayroll] }),
+    createOffice: build.mutation({ query: (data) => ({ url: "/hr-payroll/offices", method: "POST", data }), invalidatesTags: [tagTypes.hrPayroll] }),
+    updateOffice: build.mutation({ query: ({ id, ...data }) => ({ url: `/hr-payroll/offices/${id}`, method: "PATCH", data }), invalidatesTags: [tagTypes.hrPayroll] }),
+    getSelfServiceProfile: build.query({
+      query: () => ({ url: "/hr-payroll/self-service/profile", method: "GET" }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
+    applySelfServiceLeave: build.mutation({
+      query: (data) => ({ url: "/hr-payroll/self-service/leaves", method: "POST", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
     }),
     getEmployeeById: build.query({
       query: (id) => ({ url: `/hr-payroll/employees/${id}`, method: "GET" }),
@@ -482,6 +513,12 @@ export const hrPayrollApi = baseApi.injectEndpoints({
       providesTags: [tagTypes.hrPayroll],
     }),
 
+    // ================= APPROVAL CENTER =================
+    getApprovalCenterItems: build.query({
+      query: () => ({ url: "/hr-payroll/approval-center", method: "GET" }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
+
     // ================= LEAVE CALENDAR =================
     getLeaveCalendar: build.query({
       query: (params) => ({ url: "/hr-payroll/leave-calendar", method: "GET", params }),
@@ -515,12 +552,16 @@ export const {
   useRegenerateDeviceKeyMutation,
   useDeleteBiometricDeviceMutation,
   useSyncBiometricPunchMutation,
+  useSyncDeviceNowMutation,
+  useGetBiometricDeviceUsersQuery,
+  useGetEnrolledDeviceUsersQuery,
   useGetBiometricPunchLogsQuery,
   useGetShiftsQuery,
   useCreateShiftMutation,
   useGetHolidaysQuery,
   useCreateHolidayMutation,
   useDeleteHolidayMutation,
+  useApproveHolidayMutation,
 
   // Employees
   useGetEmployeesQuery,
@@ -528,6 +569,11 @@ export const {
   useCreateEmployeeMutation,
   useUpdateEmployeeMutation,
   useDeleteEmployeeMutation,
+  useGetOfficesQuery,
+  useCreateOfficeMutation,
+  useUpdateOfficeMutation,
+  useGetSelfServiceProfileQuery,
+  useApplySelfServiceLeaveMutation,
 
   // Attendance & Leaves
   useClockInMutation,
@@ -646,7 +692,7 @@ export const {
 
   // Reports & Calendar
   useGetHrReportQuery,
+  useGetApprovalCenterItemsQuery,
   useGetLeaveCalendarQuery,
   useGetPayrollSheetItemsQuery,
 } = hrPayrollApi;
-

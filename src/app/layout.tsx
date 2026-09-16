@@ -5,6 +5,7 @@ import Providers from "@/lib/Providers";
 import "remixicon/fonts/remixicon.css";
 import "react-confirm-alert/src/react-confirm-alert.css";
 import "react-quill/dist/quill.snow.css";
+import "leaflet/dist/leaflet.css";
 const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "GB-SME",

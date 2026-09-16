@@ -42,8 +42,11 @@ const RouteGuard = ({ children }: RouteGuardProps) => {
     [cleanPath]
   );
 
-  const isAuthorized =
-    isMasterAdmin || !requiredPermission || permission.includes(requiredPermission);
+  const hasRoleAccess =
+    (userRole === "hr" && cleanPath.startsWith("/hr/")) ||
+    (userRole === "employee" && ["/dashboard", "/employee/profile"].includes(cleanPath)) ||
+    (["hr", "employee"].includes(userRole) && cleanPath === "/dashboard");
+  const isAuthorized = isMasterAdmin || hasRoleAccess || !requiredPermission || permission.includes(requiredPermission);
 
   useEffect(() => {
     if (isLoading || isFetching) return;

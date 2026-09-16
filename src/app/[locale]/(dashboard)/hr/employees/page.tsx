@@ -20,6 +20,8 @@ import {
   Divider,
   Popconfirm,
   Badge,
+  Switch,
+  Alert,
 } from "antd";
 import {
   PlusOutlined,
@@ -35,6 +37,7 @@ import {
   MailOutlined,
   TeamOutlined,
   CheckCircleOutlined,
+  CalendarOutlined,
 } from "@ant-design/icons";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
 import {
@@ -45,7 +48,10 @@ import {
   useGetDepartmentsQuery,
   useGetDesignationsQuery,
   useGetEmployeeByIdQuery,
+  useGetShiftsQuery,
+  useGetOfficesQuery,
 } from "@/redux/api/hrPayrollApi";
+import { useGetAllUsersOptionsQuery } from "@/redux/api/usersApi";
 
 const { Option } = Select;
 const { TabPane } = Tabs;
@@ -72,6 +78,9 @@ export default function EmployeesPage() {
   });
   const { data: deptData } = useGetDepartmentsQuery(undefined);
   const { data: desigData } = useGetDesignationsQuery(undefined);
+  const { data: shiftData } = useGetShiftsQuery(undefined);
+  const { data: officesData } = useGetOfficesQuery(undefined);
+  const { data: userOptionsData } = useGetAllUsersOptionsQuery(undefined);
   const { data: empDetailsData, isLoading: detailsLoading } = useGetEmployeeByIdQuery(
     selectedEmpId as string,
     { skip: !selectedEmpId }
@@ -85,6 +94,18 @@ export default function EmployeesPage() {
   const employees = data?.data || [];
   const departments = deptData?.data || [];
   const designations = desigData?.data || [];
+  const shifts = shiftData?.data || [];
+  const offices = officesData?.data || [];
+  const userOptions = userOptionsData?.data || [];
+
+  // Logins already linked to some OTHER employee shouldn't even be selectable here —
+  // catching this before submit is much clearer than a save-time "already linked" error.
+  const takenUserIds = new Set(
+    employees
+      .filter((e: any) => e.userId && e.id !== editingEmployee?.id)
+      .map((e: any) => e.userId)
+  );
+  const availableUserOptions = userOptions.filter((u: any) => !takenUserIds.has(u.value));
   const emp360 = empDetailsData?.data;
 
   // Stats
@@ -152,11 +173,25 @@ export default function EmployeesPage() {
           </Avatar>
           <div>
             <span className="font-semibold text-gray-900 block text-sm">{name}</span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs text-gray-400 font-mono font-medium">{record.employeeCode}</span>
               {record.biometricUserId && (
                 <Tag color="cyan" className="text-[10px] font-mono px-1 py-0 m-0">
                   <ApiOutlined className="mr-0.5" /> Bio ID: {record.biometricUserId}
+                </Tag>
+              )}
+              {departments.some((d: any) => d.headEmployeeId === record.id) && (
+                <Tag color="geekblue" className="text-[10px] px-1 py-0 m-0">Dept Head</Tag>
+              )}
+              {record.isFinalApprover && (
+                <Tag color="purple" className="text-[10px] px-1 py-0 m-0">Final Approver</Tag>
+              )}
+              {!record.userId && (record.isFinalApprover || departments.some((d: any) => d.headEmployeeId === record.id)) && (
+                <Tag color="volcano" className="text-[10px] px-1 py-0 m-0">No login linked!</Tag>
+              )}
+              {record.customLeaveQuota && (
+                <Tag color="purple" className="text-[10px] font-mono px-1 py-0 m-0">
+                  <CalendarOutlined className="mr-0.5" /> Quota: {record.customLeaveQuota}d
                 </Tag>
               )}
             </div>
@@ -306,6 +341,7 @@ export default function EmployeesPage() {
       {/* Table Card with Filter & Search */}
       <Card
         className="rounded-xl border border-gray-200 shadow-sm"
+        styles={{ body: { paddingBottom: 0 } }}
         title={
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
@@ -365,7 +401,7 @@ export default function EmployeesPage() {
           rowKey="id"
           columns={columns}
           loading={isLoading}
-          pagination={{ pageSize: 10 }}
+          pagination={{ pageSize: 10, showSizeChanger: false, hideOnSinglePage: true }}
           className="custom_scroll"
         />
       </Card>
@@ -478,7 +514,7 @@ export default function EmployeesPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <Form.Item name="departmentId" label="Department">
+              <Form.Item name="departmentId" label="Department">
                   <Select placeholder="Select department">
                     {departments.map((d: any) => (
                       <Option key={d.id} value={d.id}>
@@ -495,6 +531,12 @@ export default function EmployeesPage() {
                         {d.name}
                       </Option>
                     ))}
+                  </Select>
+                </Form.Item>
+
+                <Form.Item name="officeId" label="Assigned Office" tooltip="Required for manual location-based check-in/check-out.">
+                  <Select allowClear placeholder={offices.length ? "Select office" : "Create an office first"}>
+                    {offices.filter((office: any) => office.isActive !== false).map((office: any) => <Option key={office.id} value={office.id}>{office.name}</Option>)}
                   </Select>
                 </Form.Item>
               </div>
@@ -534,10 +576,106 @@ export default function EmployeesPage() {
                     ))}
                 </Select>
               </Form.Item>
+
+              <Divider className="my-3" />
+
+              <Form.Item
+                name="customLeaveQuota"
+                label="Custom Leave Quota (Days/Year)"
+                tooltip="Override the organization's default leave quota for this employee. Leave blank to use the default set in Leave Type settings. Example: set to 20 to give this employee 20 days instead of the standard 14."
+              >
+                <Input type="number" min={0} placeholder="Leave blank for default" />
+              </Form.Item>
             </TabPane>
 
-            {/* TAB 3: Salary & Bank/MFS Accounts */}
-            <TabPane tab="3. Salary & Banking" key="3">
+            {/* TAB 3: Approval & System Access */}
+            <TabPane
+              tab={
+                <span className="flex items-center gap-1">
+                  <ApiOutlined /> 3. Approval & Access
+                </span>
+              }
+              key="approval"
+            >
+              <Alert
+                type="info"
+                showIcon
+                className="mb-4"
+                message="What this tab controls"
+                description="These three settings decide (a) what counts as 'on time' for this person, (b) whether they can log in at all, and (c) what approval powers their login has. All three are optional — leave them blank for a regular employee with no special access."
+              />
+
+              <Form.Item
+                name="workShiftId"
+                label="Work Shift (Attendance In-Time)"
+                tooltip="Which office shift this employee follows for late/overtime calculation. Leave empty to use the organization's default shift."
+              >
+                <Select placeholder="Use organization's default shift" allowClear>
+                  {shifts.map((s: any) => (
+                    <Option key={s.id} value={s.id}>
+                      {s.name} ({s.startTime?.slice(0, 5)} - {s.endTime?.slice(0, 5)}){s.isDefault ? " — Default" : ""}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+
+              <Divider className="my-3" />
+
+              <Form.Item
+                name="userId"
+                label="Login Account"
+                tooltip="Links this HR profile to an actual email/password login. Required before this person can log in and approve anything as a Department Head or Final Approver."
+                extra={
+                  availableUserOptions.length === 0 && userOptions.length > 0
+                    ? "Every existing login is already linked to someone else. Create a new one under Access > Users first."
+                    : undefined
+                }
+              >
+                <Select
+                  placeholder="No login linked yet — search by name..."
+                  allowClear
+                  showSearch
+                  filterOption={(input, option: any) =>
+                    (option?.children ?? "").toLowerCase().includes(input.toLowerCase())
+                  }
+                >
+                  {availableUserOptions.map((u: any) => (
+                    <Option key={u.value} value={u.value}>
+                      {u.label}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+
+              <Form.Item
+                noStyle
+                shouldUpdate={(prev, cur) => prev.userId !== cur.userId}
+              >
+                {({ getFieldValue }) =>
+                  getFieldValue("userId") ? (
+                    <Form.Item
+                      name="isFinalApprover"
+                      label="Final Approver (CCO/CEO-level)"
+                      valuePropName="checked"
+                      tooltip="If on, this person gives the LAST sign-off on any Leave, Expense, Overtime or Attendance Correction request — after the employee's Department Head has already approved it."
+                    >
+                      <Switch checkedChildren="Final Approver" unCheckedChildren="Not a final approver" />
+                    </Form.Item>
+                  ) : (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      className="mb-4"
+                      message="Link a Login Account above to enable Final Approver"
+                      description="Without a login, this person can't actually click Approve anywhere, so this switch is hidden until one is set."
+                    />
+                  )
+                }
+              </Form.Item>
+            </TabPane>
+
+            {/* TAB 4: Salary & Bank/MFS Accounts */}
+            <TabPane tab="4. Salary & Banking" key="3">
               <Form.Item
                 name="basicSalary"
                 label="Basic Monthly Salary (BDT ৳)"
@@ -581,7 +719,7 @@ export default function EmployeesPage() {
             </TabPane>
 
             {/* TAB 4: Emergency Contacts */}
-            <TabPane tab="4. Emergency Contact" key="4">
+            <TabPane tab="5. Emergency Contact" key="4">
               <Form.Item name="emergencyContactName" label="Contact Person Full Name">
                 <Input placeholder="e.g. Mrs. Fatema Begum" />
               </Form.Item>
@@ -642,6 +780,11 @@ export default function EmployeesPage() {
                   {emp360.employee?.biometricUserId && (
                     <Tag color="cyan" className="font-mono text-xs">
                       <ApiOutlined /> Machine Bio ID: {emp360.employee?.biometricUserId}
+                    </Tag>
+                  )}
+                  {emp360.employee?.customLeaveQuota && (
+                    <Tag color="purple" className="font-mono text-xs">
+                      <CalendarOutlined /> Custom Quota: {emp360.employee?.customLeaveQuota} days/yr
                     </Tag>
                   )}
                 </div>

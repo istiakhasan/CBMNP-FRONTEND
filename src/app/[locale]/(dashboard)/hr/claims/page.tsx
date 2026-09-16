@@ -137,15 +137,21 @@ export default function ExpenseClaimsPage() {
     },
     {
       title: "Status",
-      dataIndex: "status",
       key: "status",
       align: "center" as const,
-      render: (st: string) => (
-        <Tag
-          color={st === "Reimbursed" ? "green" : st === "Approved" ? "cyan" : st === "Pending" ? "orange" : "volcano"}
-        >
-          {st}
-        </Tag>
+      render: (_: any, record: any) => (
+        <div className="flex flex-col items-center gap-1">
+          <Tag
+            color={record.status === "Reimbursed" ? "green" : record.status === "Approved" ? "cyan" : record.status === "Pending" ? "orange" : "volcano"}
+          >
+            {record.status}
+          </Tag>
+          {record.status === "Pending" && (
+            <Tag color={record.approvalStage === "PendingDeptHead" ? "gold" : "blue"} className="text-[10px] px-1.5 py-0 m-0">
+              {record.approvalStage === "PendingDeptHead" ? "Step 1: Dept Head" : "Step 2: Final Approver"}
+            </Tag>
+          )}
+        </div>
       ),
     },
     {

@@ -33,6 +33,7 @@ import {
   EditOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
+import { formatBD } from "@/helpers/bdTime";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
 import {
   useGetAttendanceQuery,
@@ -49,7 +50,8 @@ const { Option } = Select;
 const { TabPane } = Tabs;
 
 export default function AttendancePage() {
-  const [selectedDate, setSelectedDate] = useState<string>(dayjs().format("YYYY-MM-DD"));
+  const todayBD = formatBD(new Date(), "YYYY-MM-DD");
+  const [selectedDate, setSelectedDate] = useState<string>(todayBD);
   const [selectedDept, setSelectedDept] = useState<string | undefined>(undefined);
   const [activeTab, setActiveTab] = useState<string>("roster");
 
@@ -258,7 +260,17 @@ export default function AttendancePage() {
       align: "center" as const,
       render: (_: any, record: any) => (
         <Space size="small">
-          {!record.clockOutTime && (
+          {!record.clockInTime && selectedDate === todayBD && (
+            <Button
+              size="small"
+              type="primary"
+              className="bg-emerald-600 hover:bg-emerald-700 text-xs"
+              onClick={() => handleClockIn({ employeeId: record.employeeId })}
+            >
+              Clock In
+            </Button>
+          )}
+          {record.clockInTime && !record.clockOutTime && (
             <Button
               size="small"
               type="primary"
@@ -286,7 +298,7 @@ export default function AttendancePage() {
       key: "punchTime",
       render: (dt: string) => (
         <span className="font-mono text-xs font-semibold text-gray-800">
-          {dayjs(dt).format("YYYY-MM-DD HH:mm:ss")}
+          {formatBD(dt)}
         </span>
       ),
     },

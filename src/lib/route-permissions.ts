@@ -121,6 +121,7 @@ export const routePermissionMap: RoutePermission[] = [
   { href: "/hr/announcements", requiredPermission: "HR" },
   { href: "/hr/reports", requiredPermission: "HR" },
   { href: "/hr/setup", requiredPermission: "HR" },
+  { href: "/hr/offices", requiredPermission: "HR" },
   { href: "/logistics/routing", requiredPermission: "Logistics Ops" },
   { href: "/logistics/settlements", requiredPermission: "Logistics Ops" },
 

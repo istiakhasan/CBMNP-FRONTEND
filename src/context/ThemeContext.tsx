@@ -502,7 +502,7 @@ const DEFAULT_DESIGN: DesignOptions = {
   tableLayout: "fixed",
   tableStriped: false,
   tableBordered: false,
-  tableFullHeight: true,
+  tableFullHeight: false,
 };
 
 // ─── Context ──────────────────────────────────────────────────────────────────
@@ -635,12 +635,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       .gb-table-wrapper[data-full-height="true"] .ant-table-container,
       .gb-table-wrapper[data-full-height="true"] .ant-table-body {
         min-height: calc(var(--table-fill-height) - 52px);
-      }
-      .dashboard-content .ant-table-wrapper {
-        min-height: ${design.tableFullHeight ? "min(640px, calc(100vh - 260px))" : "auto"};
-      }
-      .dashboard-content .ant-table-wrapper .ant-table {
-        min-height: ${design.tableFullHeight ? "min(640px, calc(100vh - 260px))" : "auto"};
       }
       .ant-table-wrapper .ant-table-thead > tr > th,
       .gb-table .ant-table-thead > tr > th {

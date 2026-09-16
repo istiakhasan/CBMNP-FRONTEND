@@ -20,6 +20,11 @@ import {
   Alert,
   Divider,
   Tooltip,
+  Drawer,
+  Badge,
+  Empty,
+  Row,
+  Col,
 } from "antd";
 import {
   PlusOutlined,
@@ -33,12 +38,16 @@ import {
   ApiOutlined,
   CheckCircleOutlined,
   PlayCircleOutlined,
+  SyncOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
+import { formatBD } from "@/helpers/bdTime";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
 import {
   useGetDepartmentsQuery,
   useCreateDepartmentMutation,
+  useUpdateDepartmentMutation,
   useDeleteDepartmentMutation,
   useGetDesignationsQuery,
   useCreateDesignationMutation,
@@ -52,7 +61,13 @@ import {
   useRegenerateDeviceKeyMutation,
   useDeleteBiometricDeviceMutation,
   useSyncBiometricPunchMutation,
+  useSyncDeviceNowMutation,
+  useGetBiometricDeviceUsersQuery,
+  useGetEnrolledDeviceUsersQuery,
   useGetEmployeesQuery,
+  useGetHolidaysQuery,
+  useCreateHolidayMutation,
+  useDeleteHolidayMutation,
 } from "@/redux/api/hrPayrollApi";
 
 const { TabPane } = Tabs;
@@ -64,19 +79,26 @@ export default function HrSetupPage() {
 
   // Modals
   const [deptModal, setDeptModal] = useState(false);
+  const [editingDept, setEditingDept] = useState<any>(null);
   const [desigModal, setDesigModal] = useState(false);
   const [leaveTypeModal, setLeaveTypeModal] = useState(false);
   const [shiftModal, setShiftModal] = useState(false);
   const [deviceModal, setDeviceModal] = useState(false);
   const [simModal, setSimModal] = useState(false);
+  const [usersDrawerDevice, setUsersDrawerDevice] = useState<any>(null);
+  const [deptHeadModal, setDeptHeadModal] = useState<any>(null);
+  const [usersDrawerTab, setUsersDrawerTab] = useState<string>("punched");
 
   // Forms
   const [deptForm] = Form.useForm();
+  const [deptHeadForm] = Form.useForm();
   const [desigForm] = Form.useForm();
   const [leaveTypeForm] = Form.useForm();
   const [shiftForm] = Form.useForm();
   const [deviceForm] = Form.useForm();
   const [simForm] = Form.useForm();
+  const [holidayForm] = Form.useForm();
+  const [holidayModal, setHolidayModal] = useState(false);
 
   // Queries
   const { data: deptData, isLoading: deptLoading, refetch: refetchDept } = useGetDepartmentsQuery(undefined);
@@ -85,18 +107,34 @@ export default function HrSetupPage() {
   const { data: shiftData, isLoading: shiftLoading, refetch: refetchShift } = useGetShiftsQuery(undefined);
   const { data: deviceData, isLoading: deviceLoading, refetch: refetchDevice } = useGetBiometricDevicesQuery(undefined);
   const { data: employeesData } = useGetEmployeesQuery(undefined);
+  const { data: holidayData, isLoading: holidayLoading, refetch: refetchHolidays } = useGetHolidaysQuery(undefined);
 
   // Mutations
   const [createDept] = useCreateDepartmentMutation();
+  const [updateDept] = useUpdateDepartmentMutation();
   const [deleteDept] = useDeleteDepartmentMutation();
   const [createDesig] = useCreateDesignationMutation();
   const [deleteDesig] = useDeleteDesignationMutation();
   const [createLeaveType] = useCreateLeaveTypeMutation();
   const [createShift] = useCreateShiftMutation();
+  const [createHoliday] = useCreateHolidayMutation();
+  const [deleteHoliday] = useDeleteHolidayMutation();
   const [registerDevice] = useRegisterBiometricDeviceMutation();
   const [regenerateKey] = useRegenerateDeviceKeyMutation();
   const [deleteDevice] = useDeleteBiometricDeviceMutation();
   const [syncPunch, { isLoading: isSyncing }] = useSyncBiometricPunchMutation();
+  const [syncDeviceNow] = useSyncDeviceNowMutation();
+  const [syncingDeviceId, setSyncingDeviceId] = useState<string | null>(null);
+  const holidays = holidayData?.data || [];
+  const saveHoliday = async (values: any) => { try { await createHoliday(values).unwrap(); message.success("Holiday added"); holidayForm.resetFields(); setHolidayModal(false); refetchHolidays(); } catch (err: any) { message.error(err?.data?.message || "Could not add holiday"); } };
+  const { data: deviceUsersData, isLoading: deviceUsersLoading } = useGetBiometricDeviceUsersQuery(
+    usersDrawerDevice ? { id: usersDrawerDevice.id } : ({} as any),
+    { skip: !usersDrawerDevice }
+  );
+  const { data: enrolledUsersData, isLoading: enrolledUsersLoading } = useGetEnrolledDeviceUsersQuery(
+    usersDrawerDevice?.id,
+    { skip: !usersDrawerDevice || usersDrawerTab !== "enrolled" }
+  );
 
   const departments = deptData?.data || [];
   const designations = desigData?.data || [];
@@ -108,12 +146,29 @@ export default function HrSetupPage() {
   // Handlers
   const handleCreateDept = async (values: any) => {
     try {
-      await createDept(values).unwrap();
-      message.success("Department created successfully");
+      if (editingDept) {
+        await updateDept({ id: editingDept.id, ...values }).unwrap();
+        message.success("Department updated successfully");
+      } else {
+        await createDept(values).unwrap();
+        message.success("Department created successfully");
+      }
       setDeptModal(false);
+      setEditingDept(null);
       deptForm.resetFields();
     } catch (err: any) {
       message.error(err?.data?.message || "Failed to create department");
+    }
+  };
+
+  const handleSetDeptHead = async (values: any) => {
+    try {
+      await updateDept({ id: deptHeadModal.id, headEmployeeId: values.headEmployeeId || null }).unwrap();
+      message.success("Department Head updated successfully");
+      setDeptHeadModal(null);
+      deptHeadForm.resetFields();
+    } catch (err: any) {
+      message.error(err?.data?.message || "Failed to update Department Head");
     }
   };
 
@@ -185,6 +240,22 @@ export default function HrSetupPage() {
       message.success("Device removed successfully");
     } catch (err: any) {
       message.error(err?.data?.message || "Failed to remove device");
+    }
+  };
+
+  const handleSyncNow = async (id: string) => {
+    setSyncingDeviceId(id);
+    try {
+      const res = await syncDeviceNow(id).unwrap();
+      if (res.success) {
+        message.success(res.message || "Device connected successfully");
+      } else {
+        message.error(res.message || "Failed to connect to device");
+      }
+    } catch (err: any) {
+      message.error(err?.data?.message || "Failed to connect to device");
+    } finally {
+      setSyncingDeviceId(null);
     }
   };
 
@@ -333,13 +404,31 @@ export default function HrSetupPage() {
                     render: (cnt: number) => <span className="font-bold text-emerald-700">{cnt || 0}</span>,
                   },
                   {
-                    title: "Last Sync",
-                    dataIndex: "lastSyncAt",
-                    key: "lastSyncAt",
-                    render: (dt: string) => (
-                      <span className="text-xs text-gray-500">
-                        {dt ? dayjs(dt).format("YYYY-MM-DD HH:mm:ss") : "Never"}
-                      </span>
+                    title: "Connection",
+                    key: "connection",
+                    align: "center",
+                    render: (_: any, record: any) => (
+                      <Tooltip
+                        title={
+                          record.isOnline
+                            ? `Last connected: ${formatBD(record.lastSyncAt)} (BD time)`
+                            : record.lastConnectionError || (record.lastSyncAt ? "Not connected recently" : "Never connected yet")
+                        }
+                      >
+                        <div className="flex flex-col items-center gap-0.5">
+                          <Badge
+                            status={record.isOnline ? "success" : "error"}
+                            text={
+                              <span className={`text-xs font-semibold ${record.isOnline ? "text-emerald-700" : "text-rose-600"}`}>
+                                {record.isOnline ? "Online" : "Offline"}
+                              </span>
+                            }
+                          />
+                          <span className="text-[10px] text-gray-400">
+                            {record.lastSyncAt ? formatBD(record.lastSyncAt, "HH:mm:ss") : "Never synced"}
+                          </span>
+                        </div>
+                      </Tooltip>
                     ),
                   },
                   {
@@ -356,14 +445,42 @@ export default function HrSetupPage() {
                     key: "action",
                     align: "center",
                     render: (_: any, record: any) => (
-                      <Popconfirm
-                        title="Delete this device?"
-                        onConfirm={() => handleDeleteDevice(record.id)}
-                      >
-                        <Button size="small" danger>
-                          Delete
-                        </Button>
-                      </Popconfirm>
+                      <Space direction="vertical" size={4}>
+                        <Space size={4}>
+                          <Tooltip title="Connect now & pull latest punches">
+                            <Button
+                              size="small"
+                              icon={<SyncOutlined spin={syncingDeviceId === record.id} />}
+                              loading={syncingDeviceId === record.id}
+                              onClick={() => handleSyncNow(record.id)}
+                              className="text-blue-600 border-blue-300"
+                            >
+                              Sync Now
+                            </Button>
+                          </Tooltip>
+                          <Tooltip title="See who punched on this device today">
+                            <Button
+                              size="small"
+                              icon={<TeamOutlined />}
+                              onClick={() => {
+                                setUsersDrawerTab("punched");
+                                setUsersDrawerDevice(record);
+                              }}
+                              className="text-purple-600 border-purple-300"
+                            >
+                              Users
+                            </Button>
+                          </Tooltip>
+                        </Space>
+                        <Popconfirm
+                          title="Delete this device?"
+                          onConfirm={() => handleDeleteDevice(record.id)}
+                        >
+                          <Button size="small" danger block>
+                            Delete
+                          </Button>
+                        </Popconfirm>
+                      </Space>
                     ),
                   },
                 ]}
@@ -443,7 +560,7 @@ export default function HrSetupPage() {
                 <Button
                   type="primary"
                   icon={<PlusOutlined />}
-                  onClick={() => setDeptModal(true)}
+                  onClick={() => { setEditingDept(null); deptForm.resetFields(); setDeptModal(true); }}
                   className="bg-blue-600 hover:bg-blue-700 border-none"
                 >
                   Add Department
@@ -469,21 +586,43 @@ export default function HrSetupPage() {
                     render: (desc: string) => <span className="text-gray-500 text-xs">{desc || "N/A"}</span>,
                   },
                   {
+                    title: "Department Head (1st Approver)",
+                    key: "headEmployee",
+                    render: (_: any, record: any) =>
+                      record.headEmployee ? (
+                        <Tag color="geekblue">{record.headEmployee.fullName}</Tag>
+                      ) : (
+                        <Tag color="default">Not set</Tag>
+                      ),
+                  },
+                  {
                     title: "Action",
                     key: "action",
                     align: "center",
                     render: (_: any, record: any) => (
-                      <Popconfirm
-                        title="Delete this department?"
-                        onConfirm={async () => {
-                          await deleteDept(record.id);
-                          message.success("Department deleted");
-                        }}
-                      >
-                        <Button size="small" danger>
-                          Delete
+                      <Space size="small">
+                        <Button size="small" onClick={() => { setEditingDept(record); deptForm.setFieldsValue({ name: record.name, description: record.description, weeklyOffDays: record.weeklyOffDays?.length ? record.weeklyOffDays : [5] }); setDeptModal(true); }}>Edit</Button>
+                        <Button
+                          size="small"
+                          onClick={() => {
+                            deptHeadForm.setFieldsValue({ headEmployeeId: record.headEmployeeId });
+                            setDeptHeadModal(record);
+                          }}
+                        >
+                          Set Head
                         </Button>
-                      </Popconfirm>
+                        <Popconfirm
+                          title="Delete this department?"
+                          onConfirm={async () => {
+                            await deleteDept(record.id);
+                            message.success("Department deleted");
+                          }}
+                        >
+                          <Button size="small" danger>
+                            Delete
+                          </Button>
+                        </Popconfirm>
+                      </Space>
                     ),
                   },
                 ]}
@@ -574,14 +713,11 @@ export default function HrSetupPage() {
             <div className="space-y-4 pt-2">
               <div className="flex justify-between items-center">
                 <span className="text-sm font-semibold text-gray-700">Annual Leave Quota & Policy</span>
-                <Button
-                  type="primary"
-                  icon={<PlusOutlined />}
-                  onClick={() => setLeaveTypeModal(true)}
-                  className="bg-orange-600 hover:bg-orange-700 border-none"
-                >
-                  Add Leave Policy
-                </Button>
+                <Space>
+                  <Button onClick={() => { leaveTypeForm.setFieldsValue({ name: "Sick Leave", daysAllowedPerYear: 14, isPaid: true }); setLeaveTypeModal(true); }}>Add Sick Leave</Button>
+                  <Button onClick={() => { leaveTypeForm.setFieldsValue({ name: "Casual Leave", daysAllowedPerYear: 10, isPaid: true }); setLeaveTypeModal(true); }}>Add Casual Leave</Button>
+                  <Button type="primary" icon={<PlusOutlined />} onClick={() => setLeaveTypeModal(true)} className="bg-orange-600 hover:bg-orange-700 border-none">Add Leave Policy</Button>
+                </Space>
               </div>
 
               <Table
@@ -700,8 +836,13 @@ export default function HrSetupPage() {
               />
             </div>
           </TabPane>
+          <TabPane tab={<span className="flex items-center gap-2 font-medium"><CalendarOutlined className="text-rose-600" />Holiday Calendar ({holidays.length})</span>} key="holidays">
+            <div className="space-y-4 pt-2"><Alert type="info" showIcon message="Holiday approval workflow" description="HR creates a holiday request and selects an approver. Only approved holidays appear on employee calendars." /><div className="flex justify-between items-center"><span className="text-sm font-semibold text-gray-700">Company Holidays & Weekly Off Days</span><Button type="primary" icon={<PlusOutlined />} onClick={() => setHolidayModal(true)} className="bg-rose-600 border-none">Add Holiday</Button></div><Table loading={holidayLoading} dataSource={holidays} rowKey="id" pagination={{ pageSize: 8 }} columns={[{ title: "Holiday", dataIndex: "name" }, { title: "From", dataIndex: "fromDate" }, { title: "To", dataIndex: "toDate" }, { title: "Type", dataIndex: "holidayType", render: (v) => <Tag color="magenta">{v}</Tag> }, { title: "Pending with", render: (_: any, row: any) => { const approver = (employeesData?.data || []).find((employee: any) => employee.id === row.approverEmployeeId); return approver ? <div><b>{approver.fullName}</b><div className="text-xs text-gray-500">{approver.designation?.name || "Approver"}</div></div> : <Tag color="default">Not assigned</Tag>; } }, { title: "Status", dataIndex: "approvalStatus", render: (v) => <Tag color={v === "Approved" ? "green" : v === "Rejected" ? "red" : "orange"}>{v || "Pending"}</Tag> }, { title: "Action", render: (_: any, row: any) => <Popconfirm title="Delete this holiday?" onConfirm={async () => { await deleteHoliday(row.id).unwrap(); message.success("Holiday deleted"); refetchHolidays(); }}><Button type="link" danger>Delete</Button></Popconfirm> }]} /></div>
+          </TabPane>
         </Tabs>
       </Card>
+
+      <Modal title="Create Holiday Request" open={holidayModal} footer={null} onCancel={() => setHolidayModal(false)} destroyOnClose><Form form={holidayForm} layout="vertical" onFinish={saveHoliday}><Form.Item name="name" label="Holiday Name" rules={[{ required: true }]}><Input placeholder="e.g. Independence Day" /></Form.Item><Row gutter={12}><Col span={12}><Form.Item name="fromDate" label="From Date" rules={[{ required: true }]}><Input type="date" /></Form.Item></Col><Col span={12}><Form.Item name="toDate" label="To Date" rules={[{ required: true }]}><Input type="date" /></Form.Item></Col></Row><Form.Item name="approverEmployeeId" label="Approver" rules={[{ required: true, message: "Select who will approve this holiday" }]}><Select showSearch optionFilterProp="label" options={(employeesData?.data || []).filter((e: any) => e.userId).map((e: any) => ({ value: e.id, label: `${e.fullName} (${e.designation?.name || "Employee"})` }))} placeholder="Select CEO, CCO or any authorized employee" /></Form.Item><Form.Item name="holidayType" label="Holiday Type" initialValue="Public Holiday"><Select options={["Public Holiday", "Festival / Religious", "Company Special", "Weekly Weekend"].map(value => ({ value, label: value }))} /></Form.Item><Form.Item name="description" label="Description"><Input.TextArea rows={2} /></Form.Item><Space className="w-full justify-end"><Button onClick={() => setHolidayModal(false)}>Cancel</Button><Button htmlType="submit" type="primary">Send for Approval</Button></Space></Form></Modal>
 
       {/* MODAL 1: REGISTER BIOMETRIC DEVICE */}
       <Modal
@@ -846,9 +987,9 @@ export default function HrSetupPage() {
 
       {/* MODAL 3: ADD DEPARTMENT */}
       <Modal
-        title="Add New Department"
+        title={editingDept ? "Edit Department" : "Add New Department"}
         open={deptModal}
-        onCancel={() => setDeptModal(false)}
+        onCancel={() => { setDeptModal(false); setEditingDept(null); }}
         footer={null}
         destroyOnClose
       >
@@ -865,10 +1006,71 @@ export default function HrSetupPage() {
             <Input.TextArea rows={3} placeholder="Department overview..." />
           </Form.Item>
 
+          <Form.Item name="weeklyOffDays" label="Weekly Off Days" initialValue={[5]} tooltip="Choose the days this department does not normally work.">
+            <Select mode="multiple" placeholder="Select weekly holidays" options={["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].map((label, value) => ({ label, value }))} />
+          </Form.Item>
+
           <div className="flex justify-end gap-2 pt-4 border-t">
             <Button onClick={() => setDeptModal(false)}>Cancel</Button>
             <Button type="primary" htmlType="submit" className="bg-blue-600 hover:bg-blue-700 border-none">
-              Save Department
+              {editingDept ? "Update Department" : "Save Department"}
+            </Button>
+          </div>
+        </Form>
+      </Modal>
+
+      {/* MODAL: SET DEPARTMENT HEAD */}
+      <Modal
+        title={`Set Department Head — ${deptHeadModal?.name || ""}`}
+        open={Boolean(deptHeadModal)}
+        onCancel={() => setDeptHeadModal(null)}
+        footer={null}
+        destroyOnClose
+      >
+        <Alert
+          type="info"
+          showIcon
+          className="mb-4"
+          message="This person is the first-stage approver"
+          description="Leave, Expense, Overtime and Attendance Correction requests from employees in this department will go to this person first, before final approval."
+        />
+        <Form form={deptHeadForm} layout="vertical" onFinish={handleSetDeptHead}>
+          <Form.Item name="headEmployeeId" label="Department Head">
+            <Select
+              placeholder="Select employee"
+              allowClear
+              showSearch
+              filterOption={(input, option: any) =>
+                (option?.children ?? "").toLowerCase().includes(input.toLowerCase())
+              }
+            >
+              {employees.map((emp: any) => (
+                <Option key={emp.id} value={emp.id}>
+                  {emp.fullName} ({emp.employeeCode}) {emp.userId ? "✓ has login" : "— no login yet"}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item noStyle shouldUpdate={(prev, cur) => prev.headEmployeeId !== cur.headEmployeeId}>
+            {({ getFieldValue }) => {
+              const selected = employees.find((e: any) => e.id === getFieldValue("headEmployeeId"));
+              return selected && !selected.userId ? (
+                <Alert
+                  type="warning"
+                  showIcon
+                  className="mb-4"
+                  message={`${selected.fullName} has no login account yet`}
+                  description="They can be set as Department Head, but won't be able to actually click Approve until you link a login for them under HR > Employee Directory > Edit > Approval & Access."
+                />
+              ) : null;
+            }}
+          </Form.Item>
+
+          <div className="flex justify-end gap-2 pt-4 border-t">
+            <Button onClick={() => setDeptHeadModal(null)}>Cancel</Button>
+            <Button type="primary" htmlType="submit" className="bg-blue-600 hover:bg-blue-700 border-none">
+              Save
             </Button>
           </div>
         </Form>
@@ -1006,6 +1208,128 @@ export default function HrSetupPage() {
           </div>
         </Form>
       </Modal>
+
+      {/* DRAWER: USERS ON DEVICE (CHECK-IN / CHECK-OUT) */}
+      <Drawer
+        title={
+          <div className="flex items-center gap-2">
+            <TeamOutlined className="text-purple-600" />
+            <span>{usersDrawerDevice?.name || "Device"} — Today's Punches</span>
+          </div>
+        }
+        open={Boolean(usersDrawerDevice)}
+        onClose={() => setUsersDrawerDevice(null)}
+        width={480}
+        destroyOnClose
+      >
+        {usersDrawerDevice && (
+          <div className="space-y-4">
+            <Alert
+              type={usersDrawerDevice.isOnline ? "success" : "warning"}
+              showIcon
+              message={usersDrawerDevice.isOnline ? "Device is currently online" : "Device is currently offline"}
+              description={
+                usersDrawerDevice.isOnline
+                  ? `Last connected: ${formatBD(usersDrawerDevice.lastSyncAt)} (BD time)`
+                  : usersDrawerDevice.lastConnectionError || "This device has not synced successfully yet. Try 'Sync Now' from the device table."
+              }
+            />
+
+            <Row gutter={12}>
+              <Col span={12}>
+                <Card size="small" className="text-center rounded-lg bg-cyan-50 border-cyan-200">
+                  <div className="text-2xl font-bold text-cyan-700">
+                    {deviceUsersData?.data?.totalPunchesToday ?? 0}
+                  </div>
+                  <div className="text-[11px] text-cyan-800 uppercase font-semibold">Total Punches Today</div>
+                </Card>
+              </Col>
+              <Col span={12}>
+                <Card size="small" className="text-center rounded-lg bg-purple-50 border-purple-200">
+                  <div className="text-2xl font-bold text-purple-700">
+                    {deviceUsersData?.data?.users?.length ?? 0}
+                  </div>
+                  <div className="text-[11px] text-purple-800 uppercase font-semibold">People Punched Today</div>
+                </Card>
+              </Col>
+            </Row>
+
+            <Tabs activeKey={usersDrawerTab} onChange={setUsersDrawerTab} size="small">
+              <TabPane tab="Punched Today" key="punched">
+                {deviceUsersLoading ? (
+                  <div className="text-center text-gray-400 py-10 text-sm">Loading punches...</div>
+                ) : deviceUsersData?.data?.users?.length ? (
+                  <div className="space-y-3">
+                    {deviceUsersData.data.users.map((u: any, idx: number) => (
+                      <Card key={idx} size="small" className="rounded-lg border border-gray-200">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="font-semibold text-gray-900 block text-sm">
+                              {u.employee?.fullName || `Unmapped ID: ${u.biometricUserId}`}
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              {u.employee?.department?.name || (u.matched ? "Staff" : "No employee mapped to this biometric ID")}
+                            </span>
+                          </div>
+                          {!u.matched && <Tag color="orange">Unmapped</Tag>}
+                        </div>
+                        <Divider className="my-2" />
+                        <div className="flex items-center justify-between text-xs">
+                          <span>
+                            <span className="text-gray-400">Check In: </span>
+                            <span className="font-mono font-semibold text-emerald-700">
+                              {u.checkInTime ? formatBD(u.checkInTime, "HH:mm:ss") : "-"}
+                            </span>
+                          </span>
+                          <span>
+                            <span className="text-gray-400">Check Out: </span>
+                            <span className="font-mono font-semibold text-blue-700">
+                              {u.checkOutTime ? formatBD(u.checkOutTime, "HH:mm:ss") : "-"}
+                            </span>
+                          </span>
+                          <Tag color="cyan">{u.totalPunches} punch{u.totalPunches > 1 ? "es" : ""}</Tag>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <Empty description="No punches received from this device today yet" />
+                )}
+              </TabPane>
+
+              <TabPane tab="Enrolled on Device" key="enrolled">
+                <p className="text-xs text-gray-500 mb-3">
+                  This connects to the machine live and lists every fingerprint/user actually registered on it —
+                  regardless of whether they punched today.
+                </p>
+                {enrolledUsersLoading ? (
+                  <div className="text-center text-gray-400 py-10 text-sm">Connecting to device...</div>
+                ) : enrolledUsersData?.success === false ? (
+                  <Alert type="error" showIcon message="Could not read device user list" description={enrolledUsersData?.message} />
+                ) : enrolledUsersData?.data?.users?.length ? (
+                  <div className="space-y-2">
+                    {enrolledUsersData.data.users.map((u: any, idx: number) => (
+                      <div key={idx} className="flex items-center justify-between border border-gray-200 rounded-lg px-3 py-2">
+                        <div>
+                          <span className="font-semibold text-gray-900 text-sm block">{u.name}</span>
+                          <span className="text-xs text-gray-400 font-mono">Device ID: {u.deviceUserId}</span>
+                        </div>
+                        {u.matched ? (
+                          <Tag color="green">{u.employee?.fullName}</Tag>
+                        ) : (
+                          <Tag color="orange">Not mapped in ERP</Tag>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <Empty description="No users found on device" />
+                )}
+              </TabPane>
+            </Tabs>
+          </div>
+        )}
+      </Drawer>
     </div>
   );
 }

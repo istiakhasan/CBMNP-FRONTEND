@@ -21,19 +21,16 @@ const AvatarDropdown = () => {
   const profileImageUrl = user?.profile_img ? `${getBaseUrl()}/${user?.profile_img}` : AvatarImage.src;
 
   const items: MenuProps["items"] = [
-    // {
-    //   key: "1",
-    //   label: (
-    //     <div className="min-w-[200px]">
-    //       <h1
-    //         onClick={() => router.push("/employee/profile/edit-profile")}
-    //         className="text-[12px] py-2 border-b-[1px] border-gray-100 font-bold"
-    //       >
-    //         My Profile
-    //       </h1>
-    //     </div>
-    //   ),
-    // },
+    {
+      key: "profile",
+      label: (
+        <div className="min-w-[200px]">
+          <h1 onClick={() => router.push("/employee/profile")} className="text-[12px] py-2 border-b-[1px] border-gray-100 font-bold">
+            My Profile
+          </h1>
+        </div>
+      ),
+    },
     // {
     //   key: "2",
     //   label: (

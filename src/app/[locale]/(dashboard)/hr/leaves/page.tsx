@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   Button,
@@ -35,6 +35,7 @@ import {
   useApproveLeaveMutation,
   useGetLeaveTypesQuery,
   useGetEmployeesQuery,
+  useGetLeaveBalancesQuery,
 } from "@/redux/api/hrPayrollApi";
 
 const { Option } = Select;
@@ -46,9 +47,29 @@ export default function LeavesPage() {
   const [applyModal, setApplyModal] = useState(false);
   const [reviewModal, setReviewModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [selectedBalance, setSelectedBalance] = useState<any>(null);
 
   const [form] = Form.useForm();
   const [reviewForm] = Form.useForm();
+
+  // Fetch leave balance when employee or leave type changes in the form
+  const { data: balanceData } = useGetLeaveBalancesQuery(
+    form.getFieldValue("employeeId") || "",
+    {
+      skip: !form.getFieldValue("employeeId"),
+    },
+  );
+
+  useEffect(() => {
+    const empId = form.getFieldValue("employeeId");
+    const ltId = form.getFieldValue("leaveTypeId");
+    if (empId && ltId && balanceData?.data) {
+      const found = balanceData.data.find((b: any) => b.leaveTypeId === ltId);
+      setSelectedBalance(found || null);
+    } else {
+      setSelectedBalance(null);
+    }
+  }, [balanceData, form.getFieldValue("employeeId"), form.getFieldValue("leaveTypeId")]);
 
   // Queries
   const { data, isLoading, refetch } = useGetLeaveRequestsQuery({
@@ -90,9 +111,16 @@ export default function LeavesPage() {
       message.success("Leave application submitted successfully");
       setApplyModal(false);
       form.resetFields();
+      setSelectedBalance(null);
       refetch();
     } catch (err: any) {
-      message.error(err?.data?.message || "Failed to submit leave application");
+      const msg = err?.data?.message || "Failed to submit leave application";
+      // Check if it's our balance validation error
+      if (msg.includes("Insufficient leave balance") || msg.includes("remaining")) {
+        message.error(msg);
+      } else {
+        message.error(msg);
+      }
     }
   };
 
@@ -169,16 +197,22 @@ export default function LeavesPage() {
     },
     {
       title: "Status",
-      dataIndex: "status",
       key: "status",
       align: "center" as const,
-      render: (st: string) => (
-        <Tag
-          color={st === "Approved" ? "green" : st === "Rejected" ? "volcano" : "orange"}
-          className="font-medium px-2 py-0.5"
-        >
-          {st}
-        </Tag>
+      render: (_: any, record: any) => (
+        <div className="flex flex-col items-center gap-1">
+          <Tag
+            color={record.status === "Approved" ? "green" : record.status === "Rejected" ? "volcano" : "orange"}
+            className="font-medium px-2 py-0.5"
+          >
+            {record.status}
+          </Tag>
+          {record.status === "Pending" && (
+            <Tag color={record.approvalStage === "PendingDeptHead" ? "gold" : "blue"} className="text-[10px] px-1.5 py-0 m-0">
+              {record.approvalStage === "PendingDeptHead" ? "Step 1: Dept Head" : "Step 2: Final Approver"}
+            </Tag>
+          )}
+        </div>
       ),
     },
     {
@@ -342,6 +376,31 @@ export default function LeavesPage() {
             </Select>
           </Form.Item>
 
+          {/* Balance display */}
+          {selectedBalance && (
+            <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200 text-sm">
+              <div className="flex justify-between items-center">
+                <div>
+                  <span className="font-semibold text-blue-900">{selectedBalance.leaveTypeName}</span>
+                  <span className="ml-2 text-gray-500">
+                    Balance:{" "}
+                    <span className="font-bold text-blue-700">
+                      {selectedBalance.remainingDays} / {selectedBalance.totalAllowed} days
+                    </span>
+                  </span>
+                </div>
+                {selectedBalance.remainingDays === 0 && (
+                  <Tag color="red">Leave Exhausted</Tag>
+                )}
+              </div>
+              {selectedBalance.remainingDays > 0 && selectedBalance.remainingDays < 5 && (
+                <div className="mt-1 text-xs text-amber-600">
+                  ⚠️ Only {selectedBalance.remainingDays} day(s) remaining — use carefully
+                </div>
+              )}
+            </div>
+          )}
+
           <Form.Item
             name="dateRange"
             label="Leave Date Range (Start ~ End Date)"
@@ -399,6 +458,18 @@ export default function LeavesPage() {
             <div>
               <span className="text-gray-400">Reason: </span>
               <span className="text-gray-700">{selectedRequest.reason}</span>
+            </div>
+            <div className="pt-2 mt-2 border-t border-gray-200">
+              <Tag color={selectedRequest.approvalStage === "PendingDeptHead" ? "gold" : "blue"}>
+                {selectedRequest.approvalStage === "PendingDeptHead"
+                  ? "Stage 1: Awaiting Department Head decision"
+                  : "Stage 2 (Final): Awaiting Final Approver decision"}
+              </Tag>
+              {selectedRequest.approvalStage === "PendingFinalApproval" && selectedRequest.deptHeadActionAt && (
+                <div className="mt-1 text-gray-500">
+                  Department Head already approved{selectedRequest.deptHeadRemarks ? `: "${selectedRequest.deptHeadRemarks}"` : "."}
+                </div>
+              )}
             </div>
           </div>
         )}
