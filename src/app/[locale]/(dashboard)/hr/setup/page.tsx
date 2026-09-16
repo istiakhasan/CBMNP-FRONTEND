@@ -1214,7 +1214,7 @@ export default function HrSetupPage() {
         title={
           <div className="flex items-center gap-2">
             <TeamOutlined className="text-purple-600" />
-            <span>{usersDrawerDevice?.name || "Device"} — Today's Punches</span>
+            <span>{usersDrawerDevice?.name || "Device"} — {"Today's Punches"}</span>
           </div>
         }
         open={Boolean(usersDrawerDevice)}
