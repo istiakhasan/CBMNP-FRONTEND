@@ -21,7 +21,7 @@ const OrderCreateEdit = () => {
       <GbHeader  title="Create order" />
 
       <div className=" ">
-        <div className="flex gap-6 bg-[#FFFFFF] px-[16px] h-[90vh]">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 bg-[#FFFFFF] px-3 sm:px-4 h-auto lg:h-[90vh] overflow-visible lg:overflow-hidden">
           {/* Create customer */}
           <CreateCustomerEdit customer={customer}  />
           {/* Load products or products */}

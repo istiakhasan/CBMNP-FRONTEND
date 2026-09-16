@@ -142,6 +142,7 @@ export const routePermissionMap: RoutePermission[] = [
   { href: "/reports/customer-retention-report", requiredPermission: "Reports" },
   { href: "/reports/top-customers", requiredPermission: "Reports" },
   { href: "/reports/shipment-report", requiredPermission: "Reports" },
+  { href: "/reports/monthly-sales-courier-report", requiredPermission: "Reports" },
 ];
 
 /**

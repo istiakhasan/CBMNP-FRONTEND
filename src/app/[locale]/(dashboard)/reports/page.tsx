@@ -197,6 +197,15 @@ export default function CentralReportsHub() {
       tag: "Shipments",
       color: "blue",
     },
+    {
+      title: "Monthly Sales & Courier Summary",
+      description: "Monthly sales, advance collection, courier receivable, delivery charges, and return value in one report.",
+      category: "logistics",
+      href: `/${local}/reports/monthly-sales-courier-report`,
+      icon: <DollarOutlined />,
+      tag: "Monthly Summary",
+      color: "green",
+    },
 
     // --- HR & PAYROLL REPORTS ---
     {

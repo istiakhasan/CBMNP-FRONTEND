@@ -34,6 +34,14 @@ export const orderApi = baseApi.injectEndpoints({
       }),
       providesTags: [tagTypes.order],
     }),
+    getMonthlySalesCourierReport: build.query({
+      query: (arg) => ({
+        url: "/orders/monthly-sales-courier-report",
+        method: "GET",
+        params: arg,
+      }),
+      providesTags: [tagTypes.order],
+    }),
     getProductWiseSalesReport: build.query({
       query: (arg) => ({
         url: "/orders/product-sales-report",
@@ -168,6 +176,7 @@ export const {
   useCreatePOSOrderMutation,
   useLazyGetAllOrdersQuery,
   useLazyGetOrdersReportsQuery,
+  useGetMonthlySalesCourierReportQuery,
   useLazyGetProductWiseSalesReportQuery,
   useDeliveryPartnerReportQuery,
   useLazyDeliveryPartnerReportQuery,

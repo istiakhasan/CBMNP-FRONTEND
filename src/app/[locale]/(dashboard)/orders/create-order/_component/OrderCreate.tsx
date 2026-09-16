@@ -15,7 +15,7 @@ const OrderCreate = () => {
   return (
     <div>
       <GbHeader title="Create order" />
-      <div className="flex gap-6  px-[16px] h-[90vh]">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-6 px-3 sm:px-4 h-auto lg:h-[90vh] overflow-visible lg:overflow-hidden">
         <CreateCustomer customer={customer} setCustomer={setCustomer} />
         <LoadProducts cart={cart} setCart={setCart} />
         <OrderCart

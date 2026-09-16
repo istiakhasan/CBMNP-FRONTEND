@@ -13,6 +13,13 @@
   min-height: 0 !important;
 }
 
+@media (max-width: 639px) {
+  .orders-page .order-toolbar > * { width: 100%; }
+  .orders-page .ant-table-wrapper { max-width: 100%; overflow-x: auto; }
+  .orders-page .ant-table { min-width: 720px; }
+  .orders-page .ant-pagination { padding: 8px 0; justify-content: flex-start; }
+}
+
 
 @layer components {
   .flex_center {

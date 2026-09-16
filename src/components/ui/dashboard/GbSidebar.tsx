@@ -467,6 +467,10 @@ const GbSidebar = () => {
           href: "/reports/shipment-report",
           title: "Shipment Report",
         },
+        {
+          href: "/reports/monthly-sales-courier-report",
+          title: "Monthly Sales & Courier",
+        },
       ],
     },
     ].filter(

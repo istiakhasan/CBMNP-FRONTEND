@@ -17,7 +17,7 @@ const CreateCustomerEdit = ({customer}:{customer:any}) => {
  }
  const orderCount=data?.data
   return (
-    <div className="w-[400px] h-[90vh] overflow-x-auto  pr-[16px] border-r  custom_scroll">
+    <div className="w-full lg:w-[400px] lg:shrink-0 h-auto lg:h-[90vh] overflow-visible lg:overflow-x-auto pr-0 lg:pr-4 border-b lg:border-b-0 lg:border-r custom_scroll">
      
       {Object.values(customer).length > 1 && (
         <div className="">

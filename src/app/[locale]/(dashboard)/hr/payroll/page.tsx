@@ -35,6 +35,7 @@ import {
   useGetPayrollSheetsQuery,
   useGeneratePayrollMutation,
   useDisbursePayrollMutation,
+  useGetDepartmentsQuery,
 } from "@/redux/api/hrPayrollApi";
 
 const { Option } = Select;
@@ -44,6 +45,7 @@ export default function PayrollPage() {
   const [sheetDrawer, setSheetDrawer] = useState(false);
   const [selectedSheet, setSelectedSheet] = useState<any>(null);
   const [payslipModal, setPayslipModal] = useState(false);
+  const { data: departmentsData } = useGetDepartmentsQuery(undefined);
   const [selectedPayslipItem, setSelectedPayslipItem] = useState<any>(null);
 
   const [form] = Form.useForm();
@@ -436,6 +438,10 @@ export default function PayrollPage() {
               <Option value={11}>November</Option>
               <Option value={12}>December</Option>
             </Select>
+          </Form.Item>
+
+          <Form.Item name="departmentId" label="Department" tooltip="Leave empty to generate payroll for all departments.">
+            <Select allowClear placeholder="All Departments" options={(departmentsData?.data || []).map((department: any) => ({ value: department.id, label: department.name }))} />
           </Form.Item>
 
           <div className="flex justify-end gap-2 pt-4 border-t">

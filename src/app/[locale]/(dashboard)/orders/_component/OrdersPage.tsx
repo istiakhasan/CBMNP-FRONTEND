@@ -324,7 +324,7 @@ const OrdersPage = () => {
   }, [warehouseOptions?.data]);
 
   return (
-    <div>
+    <div className="orders-page">
       <GbHeader title="Orders" />
       <div className="p-[16px]">
         {getUserLoading ? (
@@ -334,16 +334,16 @@ const OrdersPage = () => {
         ) : (
           <>
             {permission?.includes("CREATE_ORDERS") && (
-              <div className="flex items-center justify-between gap-3 flex-wrap">
-                <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="order-toolbar flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                   <OrderSearch
                     setSearchTerm={setSearchTerm}
                     searchTerm={searchTerm}
                   />
                   <Select
                     placeholder="Select warehouse"
+                    className="w-full sm:w-[250px]"
                     style={{
-                      width: "250px",
                       height: "35px",
                       borderRadius: "0",
                     }}
@@ -575,7 +575,7 @@ const OrdersPage = () => {
                       </div>
                     }
                   >
-                    <div className="border p-2 h-[35px] flex items-center gap-2 cursor-pointer">
+                    <div className="border p-2 h-[35px] flex items-center justify-center sm:justify-start gap-2 cursor-pointer w-full sm:w-auto">
                       <i
                         style={{ fontSize: "24px" }}
                         className="ri-equalizer-line text-gray-600"
@@ -588,13 +588,16 @@ const OrdersPage = () => {
                 </div>
                 <button
                   onClick={() => router.push(`/${local}/orders/create-order`)}
-                  className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px]"
+                  className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[2.5] h-[35px] w-full sm:w-auto"
                 >
                   Create order
                 </button>
               </div>
             )}
-            <div className="flex gap-[20px] bg-white my-2">
+            <div className="md:hidden my-3">
+              <Select className="w-full" value={activeTab} onChange={handleTabChange} options={tabs.map((tab: any) => ({ value: tab.id, label: `${tab.name} (${convertNumberToShorthand(tab.count || 0)})` }))} />
+            </div>
+            <div className="hidden md:flex gap-[20px] bg-white my-2 overflow-x-auto custom_scroll">
               {tabs?.map((tab: any) => (
                 <p
                   key={tab.id}
