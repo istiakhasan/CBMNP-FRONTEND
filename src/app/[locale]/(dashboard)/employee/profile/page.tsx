@@ -4,28 +4,48 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import dayjs from "dayjs";
 import { Alert, Button, Card, Col, DatePicker, Descriptions, Empty, Form, Input, Modal, Row, Select, Space, Statistic, Table, Tag, message } from "antd";
-import { CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, UserOutlined } from "@ant-design/icons";
+import { CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, EditOutlined, UserOutlined } from "@ant-design/icons";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
-import { useApplySelfServiceLeaveMutation, useClockInMutation, useClockOutMutation, useGetLeaveTypesQuery, useGetOfficesQuery, useGetSelfServiceProfileQuery } from "@/redux/api/hrPayrollApi";
+import { useApplySelfServiceLeaveMutation, useClockInMutation, useClockOutMutation, useGetAttendanceCorrectionsQuery, useGetLeaveTypesQuery, useGetOfficesQuery, useGetSelfServiceProfileQuery, useSubmitSelfServiceAttendanceCorrectionMutation } from "@/redux/api/hrPayrollApi";
 
 const AttendanceLocationMap = dynamic(() => import("@/components/attendance/AttendanceLocationMap"), { ssr: false });
 
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 
+const formatAttendanceTime = (time?: string) => {
+  if (!time) return "—";
+  const [hours = 0, minutes = 0] = time.split(":").map(Number);
+  const suffix = hours >= 12 ? "PM" : "AM";
+  return `${((hours + 11) % 12) + 1}:${String(minutes).padStart(2, "0")} ${suffix}`;
+};
+
+const attendanceAppearance = (status?: string) => {
+  const normalized = String(status || "").toLowerCase();
+  if (normalized === "present") return { stripe: "bg-emerald-500", badge: "bg-emerald-50 text-emerald-700", label: "P" };
+  if (normalized === "late") return { stripe: "bg-amber-400", badge: "bg-amber-50 text-amber-700", label: "L" };
+  if (normalized === "onleave" || normalized === "leave") return { stripe: "bg-violet-500", badge: "bg-violet-50 text-violet-700", label: "LV" };
+  if (normalized === "absent") return { stripe: "bg-rose-500", badge: "bg-rose-50 text-rose-700", label: "A" };
+  return { stripe: "bg-slate-400", badge: "bg-slate-100 text-slate-600", label: status?.slice(0, 1).toUpperCase() || "—" };
+};
+
 export default function EmployeeProfilePage() {
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [selectedLeave, setSelectedLeave] = useState<any>(null);
   const [punchMode, setPunchMode] = useState<"in" | "out" | null>(null);
   const [punchLocation, setPunchLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [reconciliationOpen, setReconciliationOpen] = useState(false);
+  const [selectedAttendance, setSelectedAttendance] = useState<any>(null);
   const [punchForm] = Form.useForm();
   const [form] = Form.useForm();
+  const [reconciliationForm] = Form.useForm();
   const { data: profileData, isLoading, refetch } = useGetSelfServiceProfileQuery(undefined);
   const { data: leaveTypesData } = useGetLeaveTypesQuery(undefined);
   const { data: officesData } = useGetOfficesQuery(undefined);
   const [applyLeave, { isLoading: isApplying }] = useApplySelfServiceLeaveMutation();
   const [clockIn, { isLoading: clockingIn }] = useClockInMutation();
   const [clockOut, { isLoading: clockingOut }] = useClockOutMutation();
+  const [submitReconciliation, { isLoading: isSubmittingReconciliation }] = useSubmitSelfServiceAttendanceCorrectionMutation();
 
   const user = profileData?.data?.user || profileData?.data?.profile || null;
   const self = profileData?.data || {};
@@ -33,6 +53,8 @@ export default function EmployeeProfilePage() {
   const attendance = self.attendance || [];
   const leaves = self.leaves || [];
   const balances = self.leaveBalances || [];
+  const { data: correctionData, refetch: refetchCorrections } = useGetAttendanceCorrectionsQuery({ employeeId: employee?.id }, { skip: !employee?.id });
+  const corrections = correctionData?.data || [];
   const leaveTypes = leaveTypesData?.data || [];
   const assignedOffice = (officesData?.data || []).find((office: any) => office.id === employee?.officeId);
   const officeLat = Number(assignedOffice?.latitude);
@@ -70,6 +92,18 @@ export default function EmployeeProfilePage() {
     if (!punchMode || !punchLocation) return;
     try { await (punchMode === "in" ? clockIn : clockOut)({ employeeId: employee.id, ...punchLocation, remarks: values.remarks }).unwrap(); message.success(punchMode === "in" ? "Checked in successfully" : "Checked out successfully"); setPunchMode(null); setPunchLocation(null); punchForm.resetFields(); refetch(); }
     catch (error: any) { message.error(error?.data?.message || "Attendance could not be recorded"); }
+  };
+  const openReconciliation = (record: any) => {
+    setSelectedAttendance(record);
+    reconciliationForm.setFieldsValue({ attendanceDate: dayjs(record.attendanceDate), requestedClockIn: record.clockInTime ? dayjs(`2000-01-01 ${record.clockInTime}`) : undefined, requestedClockOut: record.clockOutTime ? dayjs(`2000-01-01 ${record.clockOutTime}`) : undefined, reason: "" });
+    setReconciliationOpen(true);
+  };
+  const submitAttendanceReconciliation = async (values: any) => {
+    try {
+      await submitReconciliation({ attendanceDate: values.attendanceDate.format("YYYY-MM-DD"), requestedClockIn: values.requestedClockIn?.format("HH:mm:ss"), requestedClockOut: values.requestedClockOut?.format("HH:mm:ss"), reason: values.reason }).unwrap();
+      message.success("Attendance reconciliation submitted for approval");
+      setReconciliationOpen(false); reconciliationForm.resetFields(); refetchCorrections();
+    } catch (error: any) { message.error(error?.data?.message || "Could not submit attendance reconciliation"); }
   };
 
   if (!employee && !isLoading) {
@@ -118,11 +152,53 @@ export default function EmployeeProfilePage() {
         ]} /> : <Empty description="No leave balance configured" />}
       </Card>
 
-      <Card title="My Attendance (last 90 records)" extra={<Space><Button loading={clockingIn} onClick={() => openPunch("in")}>Check In</Button><Button loading={clockingOut} onClick={() => openPunch("out")}>Check Out</Button></Space>}>
-        <Table dataSource={attendance} rowKey="id" pagination={{ pageSize: 10 }} scroll={{ x: true }} columns={[
-          { title: "Date", dataIndex: "attendanceDate" }, { title: "Check In", dataIndex: "clockInTime", render: (v) => v || "-" }, { title: "Check Out", dataIndex: "clockOutTime", render: (v) => v || "-" },
-          { title: "Work Hours", dataIndex: "workHours", render: (v) => v ?? "-" }, { title: "Status", dataIndex: "status", render: (v) => <Tag color={v === "Present" ? "green" : v === "Late" ? "orange" : "blue"}>{v}</Tag> },
-        ]} />
+      <Card
+        title="My Attendance"
+        extra={<Space><Button loading={clockingIn} onClick={() => openPunch("in")}>Check In</Button><Button loading={clockingOut} onClick={() => openPunch("out")}>Check Out</Button></Space>}
+        className="overflow-hidden"
+        bodyStyle={{ padding: 0 }}
+      >
+        <div className="bg-slate-50 p-3 sm:p-5">
+          <div className="mb-4 flex items-center justify-between px-1">
+            <p className="text-sm text-slate-500">Your recent check-in and check-out history</p>
+            <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-500 shadow-sm">Last {attendance.length} records</span>
+          </div>
+          {attendance.length ? (
+            <div className="space-y-3">
+              {attendance.map((record: any) => {
+                const visual = attendanceAppearance(record.status);
+                const date = dayjs(record.attendanceDate);
+                return (
+                  <article key={record.id} className="relative overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+                    <span className={`absolute inset-y-5 left-0 w-1 rounded-r-full ${visual.stripe}`} />
+                    <div className="grid grid-cols-1 gap-4 px-5 py-4 pl-6 sm:grid-cols-[1.35fr_1fr_1fr_auto_auto] sm:items-center">
+                      <div>
+                        <p className="text-sm font-medium text-blue-600">Date ({date.format("dddd")})</p>
+                        <div className="mt-1 flex items-center gap-2">
+                          <span className="text-lg font-bold text-slate-900">{date.format("DD MMM YYYY")}</span>
+                          <span className={`grid h-7 min-w-7 place-items-center rounded-full px-1 text-xs font-bold ${visual.badge}`} title={record.status}>{visual.label}</span>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-blue-600">In Time</p>
+                        <p className="mt-1 text-lg font-bold text-slate-900">{formatAttendanceTime(record.clockInTime)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-blue-600">Out Time</p>
+                        <p className="mt-1 text-lg font-bold text-slate-900">{formatAttendanceTime(record.clockOutTime)}</p>
+                      </div>
+                      <div className="sm:text-right">
+                        <Tag color={record.status === "Present" ? "green" : record.status === "Late" ? "orange" : "blue"} className="!mr-0 !rounded-full !px-3 !py-1">{record.status || "Pending"}</Tag>
+                        {record.workHours != null && <p className="mt-2 text-xs text-slate-500">{record.workHours} hrs worked</p>}
+                      </div>
+                      <div className="sm:text-right"><Button size="small" icon={<EditOutlined />} onClick={() => openReconciliation(record)}>Edit / Reconcile</Button></div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : <Empty description="No attendance records yet" />}
+        </div>
       </Card>
 
       <Modal open={!!punchMode} title={punchMode === "in" ? "Check In" : "Check Out"} footer={null} onCancel={() => { setPunchMode(null); setPunchLocation(null); }} destroyOnClose>
@@ -138,6 +214,16 @@ export default function EmployeeProfilePage() {
           <Space className="w-full justify-end"><Button onClick={() => setPunchMode(null)}>Cancel</Button><Button htmlType="submit" type="primary" loading={clockingIn || clockingOut}>Submit</Button></Space>
         </Form> : <div className="py-10 text-center">Getting your location…</div>}
       </Modal>
+
+      <Card title="My Attendance Reconciliation Requests">
+        <Table dataSource={corrections} rowKey="id" pagination={{ pageSize: 6, hideOnSinglePage: true }} scroll={{ x: true }} locale={{ emptyText: "No reconciliation request yet" }} columns={[
+          { title: "Date", dataIndex: "attendanceDate" },
+          { title: "Requested In", dataIndex: "requestedClockIn", render: formatAttendanceTime },
+          { title: "Requested Out", dataIndex: "requestedClockOut", render: formatAttendanceTime },
+          { title: "Reason", dataIndex: "reason", ellipsis: true },
+          { title: "Approval Stage", render: (_: any, row: any) => row.status === "Pending" ? <Tag color="gold">{row.approvalStage === "PendingDeptHead" ? "Department Head review" : "Final approval"}</Tag> : <Tag color={row.status === "Approved" ? "green" : "red"}>{row.status}</Tag> },
+        ]} />
+      </Card>
 
       <Card title="My Leave Applications">
         <Table className="leave-applications-table" dataSource={leaves} rowKey="id" pagination={{ pageSize: 10, showSizeChanger: false, hideOnSinglePage: true }} scroll={{ x: true }} columns={[
@@ -172,6 +258,16 @@ export default function EmployeeProfilePage() {
           <Form.Item name="reason" label="Reason" rules={[{ required: true, message: "Enter a reason" }]}><TextArea rows={3} /></Form.Item>
           <Form.Item name="emergencyPhone" label="Emergency Phone"><Input /></Form.Item>
           <Space className="w-full justify-end"><Button onClick={() => setLeaveOpen(false)}>Cancel</Button><Button htmlType="submit" type="primary" loading={isApplying}>Submit Application</Button></Space>
+        </Form>
+      </Modal>
+
+      <Modal title="Attendance Reconciliation Request" open={reconciliationOpen} onCancel={() => { setReconciliationOpen(false); reconciliationForm.resetFields(); }} footer={null} destroyOnClose>
+        <Alert className="mb-5" type="info" showIcon message="Two-step approval required" description="Your Department Head reviews first. Attendance time changes only after the Final Approver approves." />
+        <Form form={reconciliationForm} layout="vertical" onFinish={submitAttendanceReconciliation}>
+          <Form.Item name="attendanceDate" label="Attendance Date" rules={[{ required: true, message: "Select attendance date" }]}><DatePicker className="w-full" disabled /></Form.Item>
+          <Row gutter={12}><Col span={12}><Form.Item name="requestedClockIn" label="Corrected Check-in"><DatePicker.TimePicker className="w-full" format="hh:mm A" use12Hours /></Form.Item></Col><Col span={12}><Form.Item name="requestedClockOut" label="Corrected Check-out"><DatePicker.TimePicker className="w-full" format="hh:mm A" use12Hours /></Form.Item></Col></Row>
+          <Form.Item name="reason" label="Reason" rules={[{ required: true, message: "Explain why this correction is required" }]}><TextArea rows={4} placeholder="Example: biometric device was offline during check-in" /></Form.Item>
+          <Space className="w-full justify-end"><Button onClick={() => setReconciliationOpen(false)}>Cancel</Button><Button type="primary" htmlType="submit" loading={isSubmittingReconciliation}>Send for Approval</Button></Space>
         </Form>
       </Modal>
     </div>

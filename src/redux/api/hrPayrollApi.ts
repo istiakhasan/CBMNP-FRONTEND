@@ -386,6 +386,10 @@ export const hrPayrollApi = baseApi.injectEndpoints({
       query: (data) => ({ url: "/hr-payroll/attendance/corrections", method: "POST", data }),
       invalidatesTags: [tagTypes.hrPayroll],
     }),
+    submitSelfServiceAttendanceCorrection: build.mutation({
+      query: (data) => ({ url: "/hr-payroll/self-service/attendance-corrections", method: "POST", data }),
+      invalidatesTags: [tagTypes.hrPayroll],
+    }),
     getAttendanceCorrections: build.query({
       query: (params) => ({ url: "/hr-payroll/attendance/corrections", method: "GET", params }),
       providesTags: [tagTypes.hrPayroll],
@@ -651,6 +655,7 @@ export const {
 
   // Attendance Corrections
   useSubmitAttendanceCorrectionMutation,
+  useSubmitSelfServiceAttendanceCorrectionMutation,
   useGetAttendanceCorrectionsQuery,
   useApproveAttendanceCorrectionMutation,
 
