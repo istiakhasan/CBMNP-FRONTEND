@@ -5,8 +5,11 @@ import {
   Button,
   Modal,
   Form,
+  Input,
+  InputNumber,
   Select,
   Card,
+  Checkbox,
   Row,
   Col,
   Statistic,
@@ -36,12 +39,15 @@ import {
   useGeneratePayrollMutation,
   useDisbursePayrollMutation,
   useGetDepartmentsQuery,
+  useGetEmployeesQuery,
+  useSetSalaryStructureMutation,
 } from "@/redux/api/hrPayrollApi";
 
 const { Option } = Select;
 
 export default function PayrollPage() {
   const [generateModal, setGenerateModal] = useState(false);
+  const [structureModal, setStructureModal] = useState(false);
   const [sheetDrawer, setSheetDrawer] = useState(false);
   const [selectedSheet, setSelectedSheet] = useState<any>(null);
   const [payslipModal, setPayslipModal] = useState(false);
@@ -49,15 +55,19 @@ export default function PayrollPage() {
   const [selectedPayslipItem, setSelectedPayslipItem] = useState<any>(null);
 
   const [form] = Form.useForm();
+  const [structureForm] = Form.useForm();
 
   // Queries
   const { data, isLoading, refetch } = useGetPayrollSheetsQuery(undefined);
+  const { data: employeesData } = useGetEmployeesQuery(undefined);
 
   // Mutations
   const [generatePayroll, { isLoading: isGenerating }] = useGeneratePayrollMutation();
   const [disbursePayroll, { isLoading: isDisbursing }] = useDisbursePayrollMutation();
+  const [setSalaryStructure, { isLoading: isSavingStructure }] = useSetSalaryStructureMutation();
 
   const sheets = data?.data || [];
+  const employees = employeesData?.data || [];
 
   const totalDisbursed = sheets
     .filter((s: any) => s.status === "Disbursed")
@@ -78,15 +88,18 @@ export default function PayrollPage() {
       message.error(err?.data?.message || "Failed to generate payroll");
     }
   };
+  const saveSalaryStructure = async (values: any) => { try { await setSalaryStructure({ ...values, basicSalary: Number(values.basicSalary || 0), houseRentAllowance: Number(values.houseRentAllowance || 0), medicalAllowance: Number(values.medicalAllowance || 0), conveyanceAllowance: Number(values.conveyanceAllowance || 0), taxDeduction: Number(values.taxDeduction || 0), providentFundDeduction: Number(values.providentFundDeduction || 0), customEarnings: (values.customEarnings || []).map((item: any) => ({ name: item.name, amount: Number(item.amount || 0) })), customDeductions: (values.customDeductions || []).map((item: any) => ({ name: item.name, amount: Number(item.amount || 0) })) }).unwrap(); message.success("Employee salary structure saved"); setStructureModal(false); structureForm.resetFields(); } catch (err: any) { message.error(err?.data?.message || "Could not save salary structure"); } };
 
   const handleDisburse = async (sheetId: string) => {
     try {
-      await disbursePayroll(sheetId).unwrap();
+      const response: any = await disbursePayroll(sheetId).unwrap();
       message.success("Monthly payroll disbursed successfully");
-      refetch();
+      await refetch();
       if (selectedSheet) {
-        setSelectedSheet({ ...selectedSheet, status: "Disbursed" });
+        const serverSheet = response?.data;
+        setSelectedSheet({ ...selectedSheet, ...serverSheet, status: "Disbursed", items: (serverSheet?.items || selectedSheet.items || []).map((item: any) => ({ ...item, paymentStatus: "Paid" })) });
       }
+      if (selectedPayslipItem?.payrollSheetId === sheetId) setSelectedPayslipItem({ ...selectedPayslipItem, paymentStatus: "Paid" });
     } catch (err: any) {
       message.error(err?.data?.message || "Failed to disburse payroll");
     }
@@ -103,7 +116,40 @@ export default function PayrollPage() {
   };
 
   const handlePrint = () => {
-    window.print();
+    if (!selectedPayslipItem) return;
+
+    const escapeHtml = (value: unknown) =>
+      String(value ?? "-")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    const money = (value: unknown) => `৳${Number(value || 0).toLocaleString()}`;
+    const payslip = selectedPayslipItem;
+    const earnings = [
+      ["Basic Salary", payslip.basicSalary],
+      ["Total Allowances", payslip.totalAllowances],
+      ["Sales Commissions", payslip.commissionsEarned],
+      ...(payslip.earningsBreakdown || []).map((item: any) => [item.name, item.amount]),
+    ];
+    const deductions = [
+      ["Tax / TDS", payslip.taxDeductions],
+      ["Salary Advance / Loan EMI", payslip.loanDeductions || payslip.unpaidLeaveDeductions],
+      ...(payslip.deductionsBreakdown || []).map((item: any) => [item.name, item.amount]),
+    ];
+    const detailRows = (items: any[]) => items
+      .map(([label, amount]) => `<tr><td>${escapeHtml(label)}</td><td>${money(amount)}</td></tr>`)
+      .join("");
+    const printWindow = window.open("", "_blank", "width=820,height=1000");
+
+    if (!printWindow) {
+      message.error("Allow pop-ups to print the payslip");
+      return;
+    }
+
+    printWindow.document.write(`<!doctype html><html><head><title>Payslip - ${escapeHtml(payslip.employee?.employeeCode)}</title><style>@page{margin:14mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#172033;margin:0;font-size:12px}.header{text-align:center;border-bottom:2px solid #087f5b;padding-bottom:14px}.header h1{font-size:20px;color:#087f5b;margin:0 0 5px}.header p{margin:3px 0;color:#667085}.badge{display:inline-block;margin-top:7px;padding:5px 11px;background:#d1fae5;color:#065f46;border-radius:12px;font-size:10px;font-weight:bold;text-transform:uppercase}.info{display:grid;grid-template-columns:1fr 1fr;gap:16px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:7px;margin:18px 0;padding:12px}.right{text-align:right}.label{display:block;color:#6b7280;font-size:10px;margin-bottom:3px}.value{font-size:14px;font-weight:bold} .tables{display:grid;grid-template-columns:1fr 1fr;gap:16px}section{border:1px solid #d1d5db;border-radius:7px;padding:12px}h2{font-size:12px;text-transform:uppercase;margin:0 0 8px;padding-bottom:6px;border-bottom:1px solid #d1d5db;color:#065f46}table{width:100%;border-collapse:collapse}td{padding:5px 0}td:last-child{text-align:right;font-weight:600}.total{border-top:1px solid #9ca3af;font-weight:bold}.net{background:#087f5b;color:#fff;border-radius:8px;margin-top:18px;padding:15px;display:flex;justify-content:space-between;align-items:center}.net span{display:block}.net strong{font-size:20px}.signatures{display:grid;grid-template-columns:1fr 1fr;gap:45px;margin-top:85px;text-align:center;color:#4b5563}.signature{border-top:1px solid #374151;padding-top:6px}@media print{body{font-size:12px}}</style></head><body><div class="header"><h1>CBMNP ENTERPRISE ERP</h1><p>Headquarters: Dhaka, Bangladesh</p><span class="badge">Salary Payslip / Disbursement Advice</span></div><div class="info"><div><span class="label">Employee Name</span><span class="value">${escapeHtml(payslip.employee?.fullName)}</span><span class="label">ID: ${escapeHtml(payslip.employee?.employeeCode)}</span></div><div class="right"><span class="label">Department & Designation</span><span class="value">${escapeHtml(payslip.employee?.department?.name || "General")}</span><span class="label">Payment Status: ${escapeHtml(payslip.paymentStatus)}</span></div></div><div class="tables"><section><h2>Earnings</h2><table>${detailRows(earnings)}<tr class="total"><td>Gross Earnings</td><td>${money(Number(payslip.basicSalary || 0) + Number(payslip.totalAllowances || 0) + Number(payslip.commissionsEarned || 0))}</td></tr></table></section><section><h2>Deductions</h2><table>${detailRows(deductions)}<tr class="total"><td>Total Deductions</td><td>${money(Number(payslip.taxDeductions || 0) + Number(payslip.loanDeductions || payslip.unpaidLeaveDeductions || 0))}</td></tr></table></section></div><div class="net"><span>NET PAYABLE AMOUNT</span><strong>${money(payslip.netSalary)} BDT</strong></div><div class="signatures"><div class="signature">Authorized Signatory (HR & Accounts)</div><div class="signature">Employee Signature</div></div><script>window.onload=function(){window.focus();window.print();}</script></body></html>`);
+    printWindow.document.close();
   };
 
   const sheetColumns: any = [
@@ -221,9 +267,8 @@ export default function PayrollPage() {
     },
     {
       title: "Deductions",
-      dataIndex: "taxDeductions",
-      key: "taxDeductions",
-      render: (amt: number) => <span className="text-rose-600">৳{Number(amt || 0).toLocaleString()}</span>,
+      key: "deductions",
+      render: (_: any, record: any) => <span className="text-rose-600">৳{(Number(record.taxDeductions || 0) + Number(record.loanDeductions || record.unpaidLeaveDeductions || 0)).toLocaleString()}</span>,
     },
     {
       title: "Net Salary",
@@ -444,6 +489,11 @@ export default function PayrollPage() {
             <Select allowClear placeholder="All Departments" options={(departmentsData?.data || []).map((department: any) => ({ value: department.id, label: department.name }))} />
           </Form.Item>
 
+          <Form.Item name="regenerate" valuePropName="checked">
+            <Checkbox>Regenerate existing Draft payroll</Checkbox>
+          </Form.Item>
+          <p className="-mt-3 mb-4 text-xs text-amber-600">This replaces an existing Draft sheet for the selected month. Disbursed payroll cannot be regenerated.</p>
+
           <div className="flex justify-end gap-2 pt-4 border-t">
             <Button onClick={() => setGenerateModal(false)}>Cancel</Button>
             <Button
@@ -452,9 +502,19 @@ export default function PayrollPage() {
               loading={isGenerating}
               className="bg-emerald-600 hover:bg-emerald-700 border-none"
             >
-              Generate Payroll Now
+              Generate / Regenerate Payroll
             </Button>
           </div>
+        </Form>
+      </Modal>
+
+      <Modal title="Employee-wise Salary Structure" open={structureModal} onCancel={() => setStructureModal(false)} footer={null} width={760} destroyOnClose>
+        <Form form={structureForm} layout="vertical" onFinish={saveSalaryStructure} initialValues={{ customEarnings: [], customDeductions: [] }}>
+          <Form.Item name="employeeId" label="Employee" rules={[{ required: true, message: "Select an employee" }]}><Select showSearch optionFilterProp="label" options={employees.map((employee: any) => ({ value: employee.id, label: `${employee.fullName} (${employee.employeeCode})` }))} /></Form.Item>
+          <p className="mb-3 text-xs font-bold uppercase text-emerald-700">Standard earnings & deductions</p><Row gutter={12}><Col span={12}><Form.Item name="basicSalary" label="Basic Salary"><InputNumber min={0} className="w-full" /></Form.Item></Col><Col span={12}><Form.Item name="houseRentAllowance" label="House Rent"><InputNumber min={0} className="w-full" /></Form.Item></Col><Col span={12}><Form.Item name="medicalAllowance" label="Medical"><InputNumber min={0} className="w-full" /></Form.Item></Col><Col span={12}><Form.Item name="conveyanceAllowance" label="Conveyance"><InputNumber min={0} className="w-full" /></Form.Item></Col><Col span={12}><Form.Item name="taxDeduction" label="Tax / TDS"><InputNumber min={0} className="w-full" /></Form.Item></Col><Col span={12}><Form.Item name="providentFundDeduction" label="Provident Fund"><InputNumber min={0} className="w-full" /></Form.Item></Col></Row>
+          <DynamicComponents name="customEarnings" title="Custom earnings" addText="Add earning component" positive />
+          <DynamicComponents name="customDeductions" title="Custom deductions" addText="Add deduction component" />
+          <div className="mt-5 flex justify-end gap-2 border-t pt-4"><Button onClick={() => setStructureModal(false)}>Cancel</Button><Button type="primary" htmlType="submit" loading={isSavingStructure}>Save Salary Structure</Button></div>
         </Form>
       </Modal>
 
@@ -530,6 +590,7 @@ export default function PayrollPage() {
                     ৳{Number(selectedPayslipItem.commissionsEarned || 0).toLocaleString()}
                   </span>
                 </div>
+                {(selectedPayslipItem.earningsBreakdown || []).map((item: any, index: number) => <div key={index} className="flex justify-between text-xs"><span className="text-gray-600">{item.name}</span><span className="font-semibold text-emerald-700">৳{Number(item.amount || 0).toLocaleString()}</span></div>)}
                 <div className="flex justify-between text-xs font-bold border-t pt-2 text-emerald-900">
                   <span>Gross Earnings</span>
                   <span>
@@ -552,12 +613,13 @@ export default function PayrollPage() {
                   </span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-600">Unpaid Leaves</span>
-                  <span className="font-semibold text-rose-600">৳0</span>
+                  <span className="text-gray-600">Salary Advance / Loan EMI</span>
+                  <span className="font-semibold text-rose-600">৳{Number(selectedPayslipItem.loanDeductions || selectedPayslipItem.unpaidLeaveDeductions || 0).toLocaleString()}</span>
                 </div>
+                {(selectedPayslipItem.deductionsBreakdown || []).map((item: any, index: number) => <div key={index} className="flex justify-between text-xs"><span className="text-gray-600">{item.name}</span><span className="font-semibold text-rose-600">৳{Number(item.amount || 0).toLocaleString()}</span></div>)}
                 <div className="flex justify-between text-xs font-bold border-t pt-2 text-rose-900">
                   <span>Total Deductions</span>
-                  <span>৳{Number(selectedPayslipItem.taxDeductions || 0).toLocaleString()}</span>
+                  <span>৳{(Number(selectedPayslipItem.taxDeductions || 0) + Number(selectedPayslipItem.loanDeductions || selectedPayslipItem.unpaidLeaveDeductions || 0)).toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -589,4 +651,8 @@ export default function PayrollPage() {
       </Modal>
     </div>
   );
+}
+
+function DynamicComponents({ name, title, addText, positive = false }: any) {
+  return <Form.List name={name}>{(fields, { add, remove }) => <div className={`mb-4 rounded-xl border p-3 ${positive ? "border-emerald-100 bg-emerald-50/40" : "border-rose-100 bg-rose-50/40"}`}><div className="mb-2 flex items-center justify-between"><b className="text-sm">{title}</b><Button size="small" type="dashed" onClick={() => add({ name: "", amount: 0 })}>{addText}</Button></div>{fields.map(({ key, name: index }) => <Row key={key} gutter={8} className="mb-2"><Col span={13}><Form.Item name={[index, "name"]} rules={[{ required: true, message: "Component name required" }]} noStyle><Input placeholder="e.g. Food allowance" /></Form.Item></Col><Col span={8}><Form.Item name={[index, "amount"]} noStyle><InputNumber min={0} className="w-full" placeholder="Amount" /></Form.Item></Col><Col span={3}><Button danger size="small" onClick={() => remove(index)}>Remove</Button></Col></Row>)}</div>}</Form.List>;
 }

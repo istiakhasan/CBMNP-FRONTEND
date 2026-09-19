@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Table,
   Button,
@@ -50,6 +50,8 @@ import {
   useGetEmployeeByIdQuery,
   useGetShiftsQuery,
   useGetOfficesQuery,
+  useSetSalaryStructureMutation,
+  useGetSalaryStructureQuery,
 } from "@/redux/api/hrPayrollApi";
 import { useGetAllUsersOptionsQuery } from "@/redux/api/usersApi";
 
@@ -85,11 +87,13 @@ export default function EmployeesPage() {
     selectedEmpId as string,
     { skip: !selectedEmpId }
   );
+  const { data: salaryStructureData } = useGetSalaryStructureQuery(editingEmployee?.id, { skip: !editingEmployee?.id });
 
   // Mutations
   const [createEmployee, { isLoading: isCreating }] = useCreateEmployeeMutation();
   const [updateEmployee, { isLoading: isUpdating }] = useUpdateEmployeeMutation();
   const [deleteEmployee] = useDeleteEmployeeMutation();
+  const [setSalaryStructure] = useSetSalaryStructureMutation();
 
   const employees = data?.data || [];
   const departments = deptData?.data || [];
@@ -107,6 +111,7 @@ export default function EmployeesPage() {
   );
   const availableUserOptions = userOptions.filter((u: any) => !takenUserIds.has(u.value));
   const emp360 = empDetailsData?.data;
+  useEffect(() => { if (salaryStructureData?.data && editingEmployee) { const uniqueComponents = (items: any[] = []) => Array.from(items.reduce((map, item) => { const name = String(item?.name || "").trim(); if (name) map.set(name.toLowerCase(), { name, amount: Number(map.get(name.toLowerCase())?.amount || 0) + Number(item.amount || 0) }); return map; }, new Map()).values()); const structure = salaryStructureData.data; form.setFieldsValue({ ...editingEmployee, ...structure, customEarnings: uniqueComponents(structure.customEarnings), customDeductions: uniqueComponents(structure.customDeductions) }); } }, [salaryStructureData, editingEmployee, form]);
 
   // Stats
   const totalEmployees = employees.length;
@@ -134,13 +139,17 @@ export default function EmployeesPage() {
 
   const handleSubmit = async (values: any) => {
     try {
+      const { customEarnings, customDeductions, ...employeeValues } = values;
+      let employeeId = editingEmployee?.id;
       if (editingEmployee) {
-        await updateEmployee({ id: editingEmployee.id, ...values }).unwrap();
+        await updateEmployee({ id: editingEmployee.id, ...employeeValues }).unwrap();
         message.success("Employee profile updated successfully");
       } else {
-        await createEmployee(values).unwrap();
+        const created: any = await createEmployee(employeeValues).unwrap();
+        employeeId = created?.data?.id || created?.id;
         message.success("Employee profile created successfully");
       }
+      if (employeeId) await setSalaryStructure({ employeeId, basicSalary: Number(values.basicSalary || 0), taxDeduction: Number(values.taxDeduction || 0), providentFundDeduction: Number(values.providentFundDeduction || 0), ...(customEarnings ? { customEarnings } : {}), ...(customDeductions ? { customDeductions } : {}) }).unwrap();
       setCreateDrawer(false);
       form.resetFields();
     } catch (err: any) {
@@ -232,14 +241,14 @@ export default function EmployeesPage() {
       ),
     },
     {
-      title: "Salary & Pay",
+      title: "Gross Salary & Pay",
       key: "salary",
       render: (_: any, record: any) => (
         <div>
           <span className="font-bold text-gray-900 text-xs block">
-            ৳{Number(record.basicSalary || 0).toLocaleString()}
+            ৳{(Number(record.salaryStructure?.basicSalary ?? record.basicSalary ?? 0) + (record.salaryStructure?.customEarnings || []).reduce((sum: number, item: any) => sum + Number(item.amount || 0), 0)).toLocaleString()}
           </span>
-          <span className="text-[11px] text-gray-400">{record.paymentMethod || "Bank"}</span>
+          <span className="text-[11px] text-gray-400">Gross · {record.paymentMethod || "Bank"}</span>
         </div>
       ),
     },
@@ -685,6 +694,12 @@ export default function EmployeesPage() {
                 <InputNumber min={0} className="w-full font-bold text-emerald-700" prefix="৳" />
               </Form.Item>
 
+              <SalaryComponents name="customEarnings" title="Earnings Components" addText="Add earning" positive presets={["House Rent", "Medical Allowance", "Conveyance", "Food Allowance", "Arrear (E/D)", "Allowance", "Others", "Eid Bonus"]} />
+              <Form.Item noStyle shouldUpdate>{({ getFieldValue }) => <div className="mb-4 flex items-center justify-between rounded-xl bg-emerald-700 p-4 text-white"><span className="text-sm font-semibold">Gross Monthly Salary</span><b className="text-xl">৳{(Number(getFieldValue("basicSalary") || 0) + (getFieldValue("customEarnings") || []).reduce((sum: number, item: any) => sum + Number(item?.amount || 0), 0)).toLocaleString()}</b></div>}</Form.Item>
+              <div className="grid grid-cols-2 gap-4"><Form.Item name="taxDeduction" label="Tax / TDS (Monthly)"><InputNumber min={0} className="w-full" /></Form.Item><Form.Item name="providentFundDeduction" label="Provident Fund (Monthly)"><InputNumber min={0} className="w-full" /></Form.Item></div>
+              <SalaryComponents name="customDeductions" title="Adjustments & Deductions" addText="Add adjustment" presets={["Loan EMI", "Absence Deduction", "Salary Advance Recovery", "Other Adjustment", "Health / Life Insurance", "Welfare Fund", "Union / Association Fee"]} />
+              <Form.Item noStyle shouldUpdate>{({ getFieldValue }) => { const gross = Number(getFieldValue("basicSalary") || 0) + (getFieldValue("customEarnings") || []).reduce((sum: number, item: any) => sum + Number(item?.amount || 0), 0); const deductions = Number(getFieldValue("taxDeduction") || 0) + Number(getFieldValue("providentFundDeduction") || 0) + (getFieldValue("customDeductions") || []).reduce((sum: number, item: any) => sum + Number(item?.amount || 0), 0); return <div className="mb-4 grid grid-cols-2 gap-3"><div className="rounded-xl bg-rose-50 p-3"><p className="m-0 text-xs font-semibold text-rose-600">TOTAL MONTHLY DEDUCTIONS</p><b className="text-lg text-rose-700">৳{deductions.toLocaleString()}</b></div><div className="rounded-xl bg-blue-700 p-3 text-white"><p className="m-0 text-xs font-semibold text-blue-100">ESTIMATED NET PAYABLE</p><b className="text-lg">৳{Math.max(0, gross - deductions).toLocaleString()}</b></div></div>; }}</Form.Item>
+
               <Form.Item name="paymentMethod" label="Disbursement Method" initialValue="Bank Transfer">
                 <Select>
                   <Option value="Bank Transfer">Bank Transfer</Option>
@@ -882,4 +897,10 @@ export default function EmployeesPage() {
       </Drawer>
     </div>
   );
+}
+
+function SalaryComponents({ name, title, addText, positive = false, presets = [] }: any) {
+  const form = Form.useFormInstance();
+  const addPreset = (preset: string, add: any) => { if ((form.getFieldValue(name) || []).some((item: any) => String(item?.name || "").trim().toLowerCase() === preset.toLowerCase())) return message.info(`${preset} is already added`); add({ name: preset, amount: 0 }); };
+  return <Form.List name={name}>{(fields, { add, remove }) => <div className={`mb-4 rounded-xl border p-3 ${positive ? "border-emerald-100 bg-emerald-50/40" : "border-rose-100 bg-rose-50/40"}`}><div className="mb-2 flex items-center justify-between"><b className="text-sm">{title}</b><Button size="small" type="dashed" onClick={() => add({ name: "", amount: 0 })}>{addText}</Button></div>{presets.length > 0 && <div className="mb-3 flex flex-wrap gap-1"><span className="mr-1 text-xs text-slate-500">Quick add:</span>{presets.map((preset: string) => <Button key={preset} size="small" onClick={() => addPreset(preset, add)}>{preset}</Button>)}</div>}{fields.map(({ key, name: index }) => <Row key={key} gutter={8} className="mb-2"><Col span={13}><Form.Item name={[index, "name"]} noStyle rules={[{ required: true, message: "Name required" }]}><Input placeholder="e.g. Mobile allowance" /></Form.Item></Col><Col span={8}><Form.Item name={[index, "amount"]} noStyle><InputNumber min={0} className="w-full" placeholder="Amount" /></Form.Item></Col><Col span={3}><Button size="small" danger onClick={() => remove(index)}>×</Button></Col></Row>)}</div>}</Form.List>;
 }

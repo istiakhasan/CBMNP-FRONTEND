@@ -3,10 +3,10 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import dayjs from "dayjs";
-import { Alert, Button, Card, Col, DatePicker, Descriptions, Empty, Form, Input, Modal, Row, Select, Space, Statistic, Table, Tag, message } from "antd";
-import { CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, EditOutlined, UserOutlined } from "@ant-design/icons";
+import { Alert, Button, Calendar, Card, Col, DatePicker, Descriptions, Empty, Form, Input, Modal, Progress, Row, Select, Space, Statistic, Table, Tag, message } from "antd";
+import { ApartmentOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, EditOutlined, EnvironmentOutlined, FileTextOutlined, UserOutlined } from "@ant-design/icons";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
-import { useApplySelfServiceLeaveMutation, useClockInMutation, useClockOutMutation, useGetAttendanceCorrectionsQuery, useGetLeaveTypesQuery, useGetOfficesQuery, useGetSelfServiceProfileQuery, useSubmitSelfServiceAttendanceCorrectionMutation } from "@/redux/api/hrPayrollApi";
+import { useApplySelfServiceLeaveMutation, useClockInMutation, useClockOutMutation, useGetAttendanceCorrectionsQuery, useGetLeaveTypesQuery, useGetOfficesQuery, useGetSelfServiceProfileQuery, useGetSelfServiceWorkspaceQuery, useSubmitSelfServiceAttendanceCorrectionMutation } from "@/redux/api/hrPayrollApi";
 
 const AttendanceLocationMap = dynamic(() => import("@/components/attendance/AttendanceLocationMap"), { ssr: false });
 
@@ -40,6 +40,7 @@ export default function EmployeeProfilePage() {
   const [form] = Form.useForm();
   const [reconciliationForm] = Form.useForm();
   const { data: profileData, isLoading, refetch } = useGetSelfServiceProfileQuery(undefined);
+  const { data: workspaceData } = useGetSelfServiceWorkspaceQuery(undefined);
   const { data: leaveTypesData } = useGetLeaveTypesQuery(undefined);
   const { data: officesData } = useGetOfficesQuery(undefined);
   const [applyLeave, { isLoading: isApplying }] = useApplySelfServiceLeaveMutation();
@@ -53,6 +54,7 @@ export default function EmployeeProfilePage() {
   const attendance = self.attendance || [];
   const leaves = self.leaves || [];
   const balances = self.leaveBalances || [];
+  const workspace = workspaceData?.data || {};
   const { data: correctionData, refetch: refetchCorrections } = useGetAttendanceCorrectionsQuery({ employeeId: employee?.id }, { skip: !employee?.id });
   const corrections = correctionData?.data || [];
   const leaveTypes = leaveTypesData?.data || [];
@@ -64,6 +66,18 @@ export default function EmployeeProfilePage() {
   const currentLeft = 50; const currentTop = 50;
   const locationDistance = hasAssignedOfficeLocation && punchLocation ? 6371000 * 2 * Math.atan2(Math.sqrt(Math.sin(((punchLocation.latitude - officeLat) * Math.PI / 180) / 2) ** 2 + Math.cos(officeLat * Math.PI / 180) * Math.cos(punchLocation.latitude * Math.PI / 180) * Math.sin(((punchLocation.longitude - officeLng) * Math.PI / 180) / 2) ** 2), Math.sqrt(1 - (Math.sin(((punchLocation.latitude - officeLat) * Math.PI / 180) / 2) ** 2 + Math.cos(officeLat * Math.PI / 180) * Math.cos(punchLocation.latitude * Math.PI / 180) * Math.sin(((punchLocation.longitude - officeLng) * Math.PI / 180) / 2) ** 2))) : 0;
   const insideOfficeRange = !assignedOffice || (hasAssignedOfficeLocation && locationDistance <= Number(assignedOffice.radiusMeters || 0));
+  const today = dayjs().format("YYYY-MM-DD");
+  const todayAttendance = attendance.find((item: any) => item.attendanceDate === today);
+  const presentDays = attendance.filter((item: any) => ["Present", "Late"].includes(item.status)).length;
+  const missedAttendance = attendance.filter((item: any) => item.status === "Absent").length;
+  const leaveTaken = balances.reduce((sum: number, item: any) => sum + Number(item.usedDays || 0), 0);
+  const leaveRemaining = balances.reduce((sum: number, item: any) => sum + Number(item.remainingDays || 0), 0);
+  const pendingItems = [...(leaves || []), ...(workspace.overtime || []), ...(workspace.expenses || []), ...(workspace.loans || [])].filter((item: any) => String(item.status || "").toLowerCase() === "pending").length;
+  const calendarCell = (date: dayjs.Dayjs) => {
+    const item = attendance.find((record: any) => record.attendanceDate === date.format("YYYY-MM-DD"));
+    const color = item?.status === "Present" ? "bg-emerald-500" : item?.status === "Late" ? "bg-amber-400" : item?.status === "OnLeave" ? "bg-cyan-400" : item?.status === "Holiday" ? "bg-slate-400" : item?.status === "Weekly Off" ? "bg-violet-400" : "";
+    return <div className="h-8 pt-1 text-center">{color && <span className={`inline-grid h-6 w-6 place-items-center rounded-full text-xs font-bold text-white ${color}`}>{date.date()}</span>}</div>;
+  };
 
   const submitLeave = async (values: any) => {
     const [start, end] = values.dates || [];
@@ -122,9 +136,51 @@ export default function EmployeeProfilePage() {
     );
   }
 
+  // Dashboard owns attendance, leave, approvals and all workday actions.
+  // This route intentionally stays focused on the employee's identity and
+  // employment details so the sidebar does not lead to a duplicate dashboard.
   return (
     <div className="p-6 space-y-6">
       <GbHeader title="My Profile" />
+      <Card loading={isLoading} className="rounded-2xl">
+        <div className="mb-6 flex flex-col items-center gap-4 border-b border-slate-100 pb-6 sm:flex-row sm:items-start">
+          <div className="grid h-20 w-20 place-items-center rounded-full bg-blue-100 text-3xl font-bold text-blue-700">{employee?.fullName?.[0] || "E"}</div>
+          <div className="text-center sm:text-left"><h1 className="m-0 text-2xl font-bold text-slate-900">{employee?.fullName || "Employee"}</h1><p className="mt-1 text-slate-500">{employee?.designation?.name || "Employee"} · {employee?.department?.name || "No department"}</p><Tag color="green">{employee?.status || "Active"}</Tag></div>
+        </div>
+        <Descriptions title="Employment information" column={{ xs: 1, md: 2 }} bordered size="small">
+          <Descriptions.Item label="Employee code">{employee?.employeeCode || "-"}</Descriptions.Item><Descriptions.Item label="Joining date">{employee?.joiningDate || "-"}</Descriptions.Item>
+          <Descriptions.Item label="Department">{employee?.department?.name || "-"}</Descriptions.Item><Descriptions.Item label="Designation">{employee?.designation?.name || "-"}</Descriptions.Item>
+          <Descriptions.Item label="Reporting manager">{employee?.reportingManager?.fullName || "-"}</Descriptions.Item><Descriptions.Item label="Office / branch">{employee?.office?.name || "-"}</Descriptions.Item>
+        </Descriptions>
+        <Descriptions className="mt-6" title="Contact information" column={{ xs: 1, md: 2 }} bordered size="small">
+          <Descriptions.Item label="Email">{employee?.email || user?.email || "-"}</Descriptions.Item><Descriptions.Item label="Phone">{employee?.phone || user?.phone || "-"}</Descriptions.Item>
+          <Descriptions.Item label="Present address" span={2}>{employee?.presentAddress || user?.address || "-"}</Descriptions.Item>
+        </Descriptions>
+      </Card>
+      <Alert type="info" showIcon message="Workday tools are on your Dashboard" description="Use Dashboard for attendance, leave, approvals, assets, payslips and other self-service activities." />
+    </div>
+  );
+
+  return (
+    <div className="p-6 space-y-6">
+      <GbHeader title="My Dashboard" />
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-12">
+        <Card loading={isLoading} className="xl:col-span-3 !rounded-2xl" bodyStyle={{ padding: 20 }}>
+          <div className="flex items-center gap-3 border-b border-slate-100 pb-4"><div className="grid h-14 w-14 place-items-center rounded-full bg-blue-100 text-xl font-bold text-blue-700">{employee?.fullName?.[0] || "E"}</div><div><h2 className="m-0 text-base font-bold text-slate-900">{employee?.fullName}</h2><p className="m-0 text-sm text-slate-500">{employee?.designation?.name || "Employee"}</p><p className="m-0 text-xs text-slate-400">{employee?.employeeCode}</p></div></div>
+          <dl className="mt-4 grid grid-cols-2 gap-y-3 text-sm"><dt className="text-slate-500">Branch</dt><dd className="m-0 text-right font-medium">{employee?.office?.name || "-"}</dd><dt className="text-slate-500">Department</dt><dd className="m-0 text-right font-medium">{employee?.department?.name || "-"}</dd><dt className="text-slate-500">Joining date</dt><dd className="m-0 text-right font-medium">{employee?.joiningDate || "-"}</dd></dl>
+        </Card>
+        <Card title="At a glance" className="xl:col-span-9 !rounded-2xl" bodyStyle={{ padding: 16 }}>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-5"><DashboardMetric icon={<CalendarOutlined />} label="Leave spent" value={leaveTaken} /><DashboardMetric icon={<EnvironmentOutlined />} label="Visit taken" value={0} /><DashboardMetric icon={<ClockCircleOutlined />} label="Missed attendance" value={missedAttendance} /><DashboardMetric icon={<CheckCircleOutlined />} label="Pending approval" value={pendingItems} /><DashboardMetric icon={<FileTextOutlined />} label="Assets assigned" value={(workspace.assets || []).length} /></div>
+        </Card>
+      </section>
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-12">
+        <Card className="xl:col-span-3 !rounded-2xl" title="Today" bodyStyle={{ padding: 18 }}>
+          <div className="grid grid-cols-2 gap-3"><div className="rounded-xl bg-emerald-50 p-3"><p className="m-0 text-xs text-slate-500">In time</p><b className="text-emerald-600">{formatAttendanceTime(todayAttendance?.clockInTime)}</b></div><div className="rounded-xl bg-rose-50 p-3"><p className="m-0 text-xs text-slate-500">Out time</p><b className="text-rose-500">{formatAttendanceTime(todayAttendance?.clockOutTime)}</b></div></div><div className="mt-5 flex items-center justify-between border-t pt-4"><span className="font-semibold">Breaks today</span><span className="text-sm text-slate-500">No active break</span></div><Space className="mt-5"><Button type="primary" onClick={() => openPunch("in")}>Check in</Button><Button onClick={() => openPunch("out")}>Check out</Button></Space>
+        </Card>
+        <Card title="Attendance overview" className="xl:col-span-6 !rounded-2xl" bodyStyle={{ padding: 12 }}><Calendar fullscreen={false} headerRender={({ value }) => <div className="px-3 pt-2 text-center font-semibold text-slate-700">{value.format("MMMM YYYY")}</div>} dateCellRender={calendarCell} /><div className="flex flex-wrap gap-3 px-3 pb-3 text-xs text-slate-500"><span>● Present: {presentDays}</span><span>● Leave</span><span>● Holiday</span><span>● Weekend</span></div></Card>
+        <Card title="Leave overview" className="xl:col-span-3 !rounded-2xl"><div className="flex justify-center"><Progress type="circle" percent={leaveTaken + leaveRemaining ? Math.round((leaveTaken / (leaveTaken + leaveRemaining)) * 100) : 0} format={() => <span className="text-xs">{leaveRemaining}<br/><small>remaining</small></span>} /></div><div className="mt-5 max-h-32 space-y-2 overflow-auto">{balances.map((item: any) => <div key={item.leaveTypeId} className="flex justify-between rounded-lg bg-slate-50 p-2 text-sm"><span>{item.leaveTypeName}</span><b>{item.remainingDays}/{item.totalAllowed}</b></div>)}</div></Card>
+      </section>
+      <Card title="Reporting hierarchy" className="!rounded-2xl"><div className="flex items-center gap-3"><ApartmentOutlined className="text-xl text-blue-600" /><div><p className="m-0 font-semibold">{employee?.reportingManager?.fullName || "No reporting manager assigned"}</p><p className="m-0 text-sm text-slate-500">Supervisor</p></div></div></Card>
       <Card loading={isLoading} className="rounded-xl">
         <Descriptions title={employee?.fullName || "Employee Profile"} column={{ xs: 1, md: 3 }}>
           <Descriptions.Item label="Employee Code">{employee?.employeeCode}</Descriptions.Item>
@@ -204,12 +260,12 @@ export default function EmployeeProfilePage() {
       <Modal open={!!punchMode} title={punchMode === "in" ? "Check In" : "Check Out"} footer={null} onCancel={() => { setPunchMode(null); setPunchLocation(null); }} destroyOnClose>
         {punchLocation ? <Form form={punchForm} layout="vertical" onFinish={punch}>
           <div className="attendance-location-map h-52 overflow-hidden rounded-xl border mb-5 bg-slate-100">
-            <AttendanceLocationMap office={assignedOffice} employeeLocation={punchLocation} isInsideRange={insideOfficeRange} />
+            <AttendanceLocationMap office={assignedOffice} employeeLocation={punchLocation!} isInsideRange={insideOfficeRange} />
             {assignedOffice && <div className="absolute rounded-full border-2 border-blue-600 bg-blue-500/20 pointer-events-none flex items-center justify-center" style={{ left: "50%", top: "50%", transform: "translate(-50%, -50%)", width: Math.min(180, Math.max(64, Math.sqrt(Number(assignedOffice.radiusMeters || 100)) * 8)), height: Math.min(180, Math.max(64, Math.sqrt(Number(assignedOffice.radiusMeters || 100)) * 8)) }}><span className="absolute w-4 h-4 rounded-full bg-blue-600 border-2 border-white shadow" /><span className="absolute bg-white/90 rounded-full px-2 py-1 text-xs font-bold text-blue-700 whitespace-nowrap" style={{ top: "calc(100% + 4px)" }}>{assignedOffice.name} · {assignedOffice.radiusMeters}m</span></div>}
             {punchLocation && <div className={`absolute w-4 h-4 rounded-full border-2 border-white shadow pointer-events-none ${insideOfficeRange ? "bg-emerald-500" : "bg-red-500"}`} style={{ left: `${Math.max(2, Math.min(98, currentLeft))}%`, top: `${Math.max(2, Math.min(98, currentTop))}%`, transform: "translate(-50%, -50%)" }} title="Your current location" />}
           </div>
           {hasAssignedOfficeLocation ? <Alert className="mb-4" type={insideOfficeRange ? "success" : "error"} showIcon message={insideOfficeRange ? "You are inside the office attendance range" : "You are outside the office attendance range"} description={`${assignedOffice.name} allows check-in/out within ${assignedOffice.radiusMeters || 100}m. You are ${Math.round(locationDistance)}m from the office.`} /> : <Alert className="mb-4" type="warning" showIcon message="No office geofence is assigned" description="Your location is shown, but HR needs to assign an office location to validate attendance range." />}
-          <p className="text-xs text-gray-500 mb-4">Current location: {punchLocation.latitude.toFixed(6)}, {punchLocation.longitude.toFixed(6)}</p>
+          <p className="text-xs text-gray-500 mb-4">Current location: {punchLocation!.latitude.toFixed(6)}, {punchLocation!.longitude.toFixed(6)}</p>
           <Form.Item name="remarks" label="Remarks"><TextArea rows={3} placeholder="Optional note for this attendance" /></Form.Item>
           <Space className="w-full justify-end"><Button onClick={() => setPunchMode(null)}>Cancel</Button><Button htmlType="submit" type="primary" loading={clockingIn || clockingOut}>Submit</Button></Space>
         </Form> : <div className="py-10 text-center">Getting your location…</div>}
@@ -272,6 +328,10 @@ export default function EmployeeProfilePage() {
       </Modal>
     </div>
   );
+}
+
+function DashboardMetric({ icon, label, value }: any) {
+  return <div className="rounded-xl bg-slate-50 p-4"><div className="flex items-center gap-2 text-sm font-medium text-slate-500"><span className="text-orange-400">{icon}</span>{label}</div><p className="mb-0 mt-2 text-2xl font-bold text-slate-900">{value}</p></div>;
 }
 
 function ApprovalStep({ label, approver, state, last = false }: any) {

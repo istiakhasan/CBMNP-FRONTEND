@@ -17,6 +17,7 @@ import {
   message,
   Popconfirm,
   Progress,
+  Upload,
 } from "antd";
 import {
   PlusOutlined,
@@ -34,6 +35,7 @@ import {
   useRequestLoanMutation,
   useUpdateLoanStatusMutation,
   useGetEmployeesQuery,
+  useUploadSignedLoanDocumentMutation,
 } from "@/redux/api/hrPayrollApi";
 
 const { Option } = Select;
@@ -49,6 +51,7 @@ export default function LoansPage() {
   // Mutations
   const [requestLoan, { isLoading: isRequesting }] = useRequestLoanMutation();
   const [updateLoanStatus] = useUpdateLoanStatusMutation();
+  const [uploadSignedDocument] = useUploadSignedLoanDocumentMutation();
 
   const loans = data?.data || [];
   const employees = employeesData?.data || [];
@@ -81,6 +84,8 @@ export default function LoansPage() {
       message.error(err?.data?.message || "Failed to update loan status");
     }
   };
+  const uploadSignedFile = async (loanId: string, file: File) => { try { const formData = new FormData(); formData.append("document", file); await uploadSignedDocument({ id: loanId, formData }).unwrap(); message.success("Signed document attached"); refetch(); } catch (err: any) { message.error(err?.data?.message || "Document upload failed"); } return false; };
+  const printLoanForm = (loan: any) => { const win = window.open("", "_blank", "width=820,height=900"); if (!win) return message.error("Allow pop-ups to print the form"); win.document.write(`<html><head><title>Advance Salary / Loan Application</title><style>body{font-family:Arial;padding:42px;color:#172033}h1{text-align:center}.row{display:flex;justify-content:space-between;border-bottom:1px solid #ddd;padding:12px 0}.sign{display:flex;justify-content:space-between;margin-top:120px}.sign div{width:28%;border-top:1px solid #333;padding-top:8px;text-align:center}</style></head><body><h1>Advance Salary / Loan Application</h1><p>Please obtain the required signatures and attach this signed copy before final HR approval.</p><div class="row"><b>Employee</b><span>${loan.employee?.fullName || "-"} (${loan.employee?.employeeCode || "-"})</span></div><div class="row"><b>Department</b><span>${loan.employee?.department?.name || "-"}</span></div><div class="row"><b>Request type</b><span>${loan.loanType}</span></div><div class="row"><b>Amount</b><span>BDT ${Number(loan.principalAmount || 0).toLocaleString()}</span></div><div class="row"><b>Installments</b><span>${loan.totalInstallments} month(s) · BDT ${Number(loan.monthlyEmiAmount || 0).toLocaleString()} per month</span></div><div class="row"><b>Reason</b><span>${loan.reason || "-"}</span></div><div class="sign"><div>Employee signature</div><div>Department Head recommendation</div><div>HR / Authorized approval</div></div></body></html>`); win.document.close(); win.focus(); win.print(); };
 
   const columns: any = [
     {
@@ -153,16 +158,21 @@ export default function LoansPage() {
       title: "Action",
       key: "action",
       align: "center" as const,
+      width: 330,
+      fixed: "right" as const,
       render: (_: any, record: any) => (
-        <Space size="small">
+        <Space size="small" wrap className="justify-center">
           {record.status === "Pending" && (
             <>
+              <Button size="small" onClick={() => printLoanForm(record)}>Print form</Button>
+              <Upload accept=".pdf,.jpg,.jpeg,.png" showUploadList={false} beforeUpload={(file) => uploadSignedFile(record.id, file as File)}><Button size="small">{record.signedDocumentUrl ? "Replace signed copy" : "Attach signed copy"}</Button></Upload>
               <Popconfirm
-                title="Approve loan and start payroll EMI deduction?"
+                title={record.signedDocumentUrl ? "Approve loan and start payroll EMI deduction?" : "Attach the signed printed form before approving."}
+                disabled={!record.signedDocumentUrl}
                 onConfirm={() => handleStatusChange(record.id, "Approved")}
               >
-                <Button size="small" type="primary" className="bg-emerald-600 hover:bg-emerald-700 text-xs">
-                  Approve
+                <Button disabled={!record.signedDocumentUrl} size="small" type="primary" className="bg-emerald-600 hover:bg-emerald-700 text-xs">
+                  {record.signedDocumentUrl ? "Approve" : "Attach signed copy first"}
                 </Button>
               </Popconfirm>
               <Button
@@ -256,6 +266,7 @@ export default function LoansPage() {
           columns={columns}
           loading={isLoading}
           pagination={{ pageSize: 10 }}
+          scroll={{ x: 1450 }}
           className="custom_scroll"
         />
       </Card>

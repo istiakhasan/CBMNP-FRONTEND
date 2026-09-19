@@ -63,6 +63,10 @@ instance.defaults.timeout = 60000;
 
 instance.interceptors.request.use(
   function (config) {
+    if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+      // Let the browser add multipart/form-data including its required boundary.
+      config.headers?.delete?.("Content-Type");
+    }
     const accessToken = getFormLocalStorage(authKey);
     if (accessToken) {
       config.headers.Authorization =accessToken;

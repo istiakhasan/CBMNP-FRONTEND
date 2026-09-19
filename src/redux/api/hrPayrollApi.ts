@@ -126,10 +126,17 @@ export const hrPayrollApi = baseApi.injectEndpoints({
       query: () => ({ url: "/hr-payroll/self-service/profile", method: "GET" }),
       providesTags: [tagTypes.hrPayroll],
     }),
+    getSelfServiceWorkspace: build.query({
+      query: () => ({ url: "/hr-payroll/self-service/workspace", method: "GET" }),
+      providesTags: [tagTypes.hrPayroll],
+    }),
     applySelfServiceLeave: build.mutation({
       query: (data) => ({ url: "/hr-payroll/self-service/leaves", method: "POST", data }),
       invalidatesTags: [tagTypes.hrPayroll],
     }),
+    requestSelfServiceLoan: build.mutation({ query: (data) => ({ url: "/hr-payroll/self-service/loans", method: "POST", data }), invalidatesTags: [tagTypes.hrPayroll] }),
+    requestSelfServiceExpense: build.mutation({ query: (data) => ({ url: "/hr-payroll/self-service/expenses", method: "POST", data }), invalidatesTags: [tagTypes.hrPayroll] }),
+    requestSelfServiceOvertime: build.mutation({ query: (data) => ({ url: "/hr-payroll/self-service/overtime", method: "POST", data }), invalidatesTags: [tagTypes.hrPayroll] }),
     getEmployeeById: build.query({
       query: (id) => ({ url: `/hr-payroll/employees/${id}`, method: "GET" }),
       providesTags: [tagTypes.hrPayroll],
@@ -204,6 +211,7 @@ export const hrPayrollApi = baseApi.injectEndpoints({
       query: (data) => ({ url: "/hr-payroll/loans", method: "POST", data }),
       invalidatesTags: [tagTypes.hrPayroll],
     }),
+    uploadSignedLoanDocument: build.mutation({ query: ({ id, formData }) => ({ url: `/hr-payroll/loans/${id}/signed-document`, method: "POST", data: formData }), invalidatesTags: [tagTypes.hrPayroll] }),
     updateLoanStatus: build.mutation({
       query: ({ id, ...data }) => ({ url: `/hr-payroll/loans/${id}/status`, method: "PATCH", data }),
       invalidatesTags: [tagTypes.hrPayroll],
@@ -582,7 +590,11 @@ export const {
   useCreateOfficeMutation,
   useUpdateOfficeMutation,
   useGetSelfServiceProfileQuery,
+  useGetSelfServiceWorkspaceQuery,
   useApplySelfServiceLeaveMutation,
+  useRequestSelfServiceLoanMutation,
+  useRequestSelfServiceExpenseMutation,
+  useRequestSelfServiceOvertimeMutation,
 
   // Attendance & Leaves
   useClockInMutation,
@@ -600,6 +612,7 @@ export const {
   // Loans & Expenses
   useGetLoansQuery,
   useRequestLoanMutation,
+  useUploadSignedLoanDocumentMutation,
   useUpdateLoanStatusMutation,
   useGetExpenseClaimsQuery,
   useSubmitExpenseClaimMutation,

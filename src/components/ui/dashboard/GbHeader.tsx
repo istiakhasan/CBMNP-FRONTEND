@@ -14,6 +14,7 @@ import GbModal from "../GbModal";
 import UserPasswordChangeForm from "@/components/UserPasswordChangeForm";
 import ThemeSwitcher from "./ThemeSwitcher";
 import { useGetApprovalCenterItemsQuery } from "@/redux/api/hrPayrollApi";
+import { baseApi } from "@/redux/api/baseApi";
 
 const GbHeader = ({ title }: { title?: string }) => {
   const rstate = useSelector((state: RootState) => state.menu);
@@ -22,7 +23,9 @@ const GbHeader = ({ title }: { title?: string }) => {
   const local = useLocale();
   const userInfo: any = getUserInfo();
   const [openPasswordModal, setOpenPasswordModal] = useState(false);
-  const { data: approvals } = useGetApprovalCenterItemsQuery(undefined);
+  // Approval counts are user-specific. The RTK Query cache key has no user id,
+  // so force a fresh request whenever this header mounts after a login.
+  const { data: approvals } = useGetApprovalCenterItemsQuery(undefined, { refetchOnMountOrArgChange: true });
   const pendingApprovalCount = approvals?.data?.items?.length || 0;
 
   const items: MenuProps["items"] = [
@@ -57,6 +60,9 @@ const GbHeader = ({ title }: { title?: string }) => {
         <>
           <span
             onClick={() => {
+              // Do not allow any response cached for the previous account to
+              // remain visible during the next account's session.
+              dispatch(baseApi.util.resetApiState());
               removeUserInfo("token");
               router.push(`/${local}/login`);
             }}

@@ -18,14 +18,15 @@ export const axiosBaseQuery =
   > =>
   async ({ url, method, data, params, contentType }) => {
     try {
+      // Axios must create the multipart boundary itself. Setting JSON here
+      // caused Multer to receive no `document` field for file uploads.
+      const isFormData = typeof FormData !== "undefined" && data instanceof FormData;
       const result = await axiosInstance({
         url: baseUrl + url,
         method,
         data,
         params,
-        headers: {
-          "Content-Type": contentType || "application/json",
-        },
+        headers: isFormData ? undefined : { "Content-Type": contentType || "application/json" },
         withCredentials: true,
       });
       return {data:result?.data};
