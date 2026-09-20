@@ -10,9 +10,9 @@ interface OrderDataItem {
   count: string;
 }
 
-const DonutChart: React.FC = () => {
+const DonutChart: React.FC<{ enabled?: boolean }> = ({ enabled = true }) => {
   const { data: statusDistribution, isLoading } =
-    useStatusDistributionQuery(undefined);
+    useStatusDistributionQuery(undefined, { skip: !enabled });
     const [series, setSeries] = useState<number[]>([]);
     const [labels, setLabels] = useState<string[]>([]);
     const [options, setOptions] = useState<ApexOptions>({

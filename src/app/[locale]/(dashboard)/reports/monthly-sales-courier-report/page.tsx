@@ -4,13 +4,14 @@ import GbHeader from "@/components/ui/dashboard/GbHeader";
 import { useGetMonthlySalesCourierReportQuery } from "@/redux/api/orderApi";
 import {
   CarOutlined,
+  CheckCircleOutlined,
   DollarOutlined,
   InboxOutlined,
   RollbackOutlined,
   ShoppingCartOutlined,
   WalletOutlined,
 } from "@ant-design/icons";
-import { Card, DatePicker, Empty, Skeleton, Statistic } from "antd";
+import { Alert, Card, DatePicker, Empty, Skeleton, Statistic, Tag } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import { useState } from "react";
 
@@ -35,6 +36,13 @@ export default function MonthlySalesCourierReportPage() {
     { title: "Courier Delivery Charge", value: report?.courierDeliveryCharge, icon: <InboxOutlined />, tone: "text-amber-600 bg-amber-50" },
     { title: "Customer Delivery Charge", value: report?.customerDeliveryCharge, icon: <DollarOutlined />, tone: "text-cyan-600 bg-cyan-50" },
     { title: "Return Value", value: report?.returnValue, icon: <RollbackOutlined />, tone: "text-rose-600 bg-rose-50" },
+  ];
+  const settlementIsBalanced = Math.abs(Number(report?.settlementVariance || 0)) < 0.01;
+  const settlementCards = [
+    { title: "COD Settled", value: report?.receivedCod, icon: <CheckCircleOutlined />, tone: "text-emerald-600 bg-emerald-50" },
+    { title: "Approved Settlement Discount", value: report?.settlementDiscount, icon: <DollarOutlined />, tone: "text-amber-600 bg-amber-50" },
+    { title: "Courier Charge in Settlements", value: report?.settlementCourierCharge, icon: <CarOutlined />, tone: "text-violet-600 bg-violet-50" },
+    { title: "Net After Courier Charge", value: report?.settlementNetAmount, icon: <WalletOutlined />, tone: "text-cyan-600 bg-cyan-50" },
   ];
 
   return (
@@ -75,6 +83,39 @@ export default function MonthlySalesCourierReportPage() {
               ))}
             </section>
 
+            <section className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-4 sm:p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-base font-semibold text-slate-800">Confirmed courier settlements</h2>
+                    <Tag color={settlementIsBalanced ? "success" : "error"}>{settlementIsBalanced ? "Balanced" : "Needs review"}</Tag>
+                  </div>
+                  <p className="mt-1 text-sm text-slate-600">Only confirmed COD settlement records created in {month.format("MMMM YYYY")} are included.</p>
+                </div>
+                <div className="rounded-lg bg-white px-3 py-2 text-right shadow-sm">
+                  <div className="text-xs text-slate-500">Settled orders</div>
+                  <div className="text-lg font-bold text-slate-800">{report.settledOrderCount || 0}</div>
+                </div>
+              </div>
+              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                {settlementCards.map((card) => (
+                  <Card key={card.title} size="small" className="!border-slate-200" bodyStyle={{ padding: 14 }}>
+                    <div className="flex items-start justify-between gap-2">
+                      <Statistic title={card.title} value={money(card.value)} valueStyle={{ fontSize: 17, fontWeight: 650, color: "#172033" }} />
+                      <span className={`grid h-8 w-8 place-items-center rounded-lg ${card.tone}`}>{card.icon}</span>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+              <Alert
+                className="mt-4"
+                type={settlementIsBalanced ? "success" : "warning"}
+                showIcon
+                message={settlementIsBalanced ? "Settlement reconciliation is balanced" : "Settlement reconciliation needs review"}
+                description={`Expected COD ${money(report.expectedCod)} − courier received ${money(report.receivedCod)} − approved discount ${money(report.settlementDiscount)} = ${money(report.settlementVariance)}.`}
+              />
+            </section>
+
             <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
               <Card title="Order volume" className="!border-slate-200">
                 <Statistic value={report.totalOrders} suffix="orders" valueStyle={{ color: "#172033", fontWeight: 650 }} />
@@ -88,6 +129,7 @@ export default function MonthlySalesCourierReportPage() {
                 <div className="space-y-1.5 text-sm text-slate-600">
                   <p><b>Advance:</b> payments already collected from customers.</p>
                   <p><b>Courier receivable:</b> order total remaining after advance.</p>
+                  <p><b>Confirmed settlement:</b> actual COD and discounts recorded from courier settlement files in the selected month.</p>
                   <p><b>Delivery charges:</b> courier cost vs. amount charged to customer.</p>
                 </div>
               </Card>

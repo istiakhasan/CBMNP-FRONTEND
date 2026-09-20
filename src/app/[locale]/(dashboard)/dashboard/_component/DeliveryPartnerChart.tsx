@@ -11,9 +11,9 @@ interface OrderDataItem {
   count: string;
 }
 
-const DeliveryPartner: React.FC = () => {
+const DeliveryPartner: React.FC<{ enabled?: boolean }> = ({ enabled = true }) => {
   const { data: statusDistribution, isLoading } =
-    usePartnerDistributionQuery(undefined);
+    usePartnerDistributionQuery(undefined, { skip: !enabled });
   const [series, setSeries] = useState<number[]>([]);
   const [labels, setLabels] = useState<string[]>([]);
   const [options, setOptions] = useState<ApexOptions>({

@@ -38,6 +38,7 @@ const OrdersPage = () => {
   const [partnerIds, setPartnerIds] = useState<any>([]);
   const searchParams = useSearchParams();
   const [productSearchTerm, setProductSearchTerm] = useState("");
+  const [filterOpen, setFilterOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>(
     searchParams.get("tab") || "1",
   );
@@ -362,18 +363,15 @@ const OrdersPage = () => {
                       }
                     }}
                   />
-                  <Tooltip
-                    styles={{
-                      body: {
-                        background: "white",
-                        width: "500px",
-                        padding: "20px",
-                      },
-                    }}
-                    trigger={["click"]}
-                    placement="rightBottom"
-                    title={
-                      <div className="h-[500px] overflow-y-scroll">
+                  <Modal
+                    open={filterOpen}
+                    onCancel={() => setFilterOpen(false)}
+                    footer={null}
+                    width={720}
+                    title={<div><div className="text-lg font-semibold">Filter orders</div><div className="mt-1 text-xs font-normal text-gray-500">Choose filters for the current order view.</div></div>}
+                    destroyOnClose={false}
+                  >
+                      <div className="max-h-[68vh] overflow-y-auto px-1 py-2 custom_scroll">
                         <h1>Creation Date Range</h1>
                         <div className="flex gap-2 flex-wrap">
                           <RangePicker
@@ -567,22 +565,38 @@ const OrdersPage = () => {
                           />
                         </div>
 
-                        <div className="flex justify-end sticky bottom-0">
-                          <button className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-[5px] mt-3">
+                        <div className="sticky bottom-0 mt-4 flex justify-between border-t bg-white pt-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setOrderStatus([]);
+                              setWarehouseIds([]);
+                              setProductsIds([]);
+                              setPartnerIds([]);
+                              setRangeValue(null);
+                              setCreationRangeValue(null);
+                              setProductSearchTerm("");
+                            }}
+                            className="px-3 py-2 text-xs font-semibold text-gray-600 hover:text-red-600"
+                          >
+                            Reset all
+                          </button>
+                          <button type="button" onClick={() => setFilterOpen(false)} className="bg-primary text-[#fff] font-bold text-[12px] px-[20px] py-2 rounded-md">
                             Apply
                           </button>
                         </div>
                       </div>
-                    }
-                  >
-                    <div className="border p-2 h-[35px] flex items-center justify-center sm:justify-start gap-2 cursor-pointer w-full sm:w-auto">
+                  </Modal>
+                    <div
+                      onClick={() => setFilterOpen(true)}
+                      className="border p-2 h-[35px] flex items-center justify-center sm:justify-start gap-2 cursor-pointer w-full sm:w-auto"
+                    >
                       <i
                         style={{ fontSize: "24px" }}
                         className="ri-equalizer-line text-gray-600"
                       ></i>{" "}
                       Filter Orders
                     </div>
-                  </Tooltip>
 
                   <ScanOrderToIntransit />
                 </div>

@@ -409,7 +409,17 @@ aside.gb_sidebar.show {
 
 .ant-table-wrapper {
   max-width: 100%;
-  overflow-x: hidden;
+  min-width: 0;
+}
+
+/* GbTable determines whether fixed layout is safe. Theme-level CSS must not
+   override that decision: fixed layout with widthless columns cuts headers. */
+.gb-table-wrapper[data-table-layout="auto"] .ant-table table {
+  table-layout: auto !important;
+}
+
+.gb-table-wrapper[data-table-layout="fixed"] .ant-table table {
+  table-layout: fixed !important;
 }
 
 .ant-card,

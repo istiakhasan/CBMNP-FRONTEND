@@ -27,6 +27,7 @@ interface AreaWiseAnalyticsProps {
   startDate?: string;
   endDate?: string;
   dateField?: string;
+  enabled?: boolean;
 }
 
 // Status list — statusColor ম্যাপিং সহ, UI-তে দেখাতে
@@ -51,6 +52,7 @@ export default function AreaWiseAnalytics({
   startDate,
   endDate,
   dateField = "createdAt",
+  enabled = true,
 }: AreaWiseAnalyticsProps) {
   const [level, setLevel] = useState<"division" | "district" | "thana">("division");
   const [searchTerm, setSearchTerm] = useState("");
@@ -63,7 +65,7 @@ export default function AreaWiseAnalytics({
     endDate,
     dateField,
     statusId: selectedStatuses.length > 0 ? selectedStatuses.join(",") : undefined,
-  });
+  }, { skip: !enabled });
 
   const areaData = areaRes;
   const areas: any[] = areaData?.areas || [];

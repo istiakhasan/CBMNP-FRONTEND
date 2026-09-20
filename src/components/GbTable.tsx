@@ -65,7 +65,11 @@ const tableLayout =
     : design.tableLayout;
 
   return (
-    <div className="gb-table-wrapper w-full" data-full-height={design.tableFullHeight}>
+    <div
+      className="gb-table-wrapper w-full"
+      data-full-height={design.tableFullHeight}
+      data-table-layout={tableLayout}
+    >
       <Table
         className="gb-table"
         loading={loading}

@@ -432,7 +432,7 @@ export default function Dashboard() {
           {/* Order Status Distribution Ring */}
           <Col xs={24} lg={12}>
             <Card className="shadow-sm border-gray-200 rounded-xl h-full" bordered={false}>
-              <OrderStatusDistribution />
+              <OrderStatusDistribution enabled={Boolean(summary)} />
             </Card>
           </Col>
         </Row>
@@ -440,6 +440,7 @@ export default function Dashboard() {
         {/* SECTION 4: GEOGRAPHIC AREA-WISE ANALYTICS (DIVISION / DISTRICT / THANA) */}
         <div>
           <AreaWiseAnalytics
+            enabled={Boolean(summary)}
             period={period}
             startDate={queryParams.startDate}
             endDate={queryParams.endDate}
@@ -451,13 +452,13 @@ export default function Dashboard() {
         <Row gutter={[16, 16]}>
           <Col xs={24} lg={12}>
             <Card className="shadow-sm border-gray-200 rounded-xl h-full" bordered={false}>
-              <DeliveryPartner />
+              <DeliveryPartner enabled={Boolean(summary)} />
             </Card>
           </Col>
 
           <Col xs={24} lg={12}>
             <Card className="shadow-sm border-gray-200 rounded-xl h-full" bordered={false}>
-              <TopProducts />
+              <TopProducts items={summary?.topProducts} isLoading={summaryLoading} />
             </Card>
           </Col>
 
