@@ -22,6 +22,7 @@ import {
 } from "@/redux/api/logisticsOperationsApi";
 import { useGetDeliveryPartnersQuery } from "@/redux/api/partnerApi";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
+import CourierCodExcelReconciliation from "./CourierCodExcelReconciliation";
 
 const { Option } = Select;
 
@@ -133,6 +134,7 @@ export default function CourierSettlementsPage() {
         title="Settlement Statements"
         extra={
           <Space>
+            <CourierCodExcelReconciliation />
             <Button icon={<ReloadOutlined />} onClick={() => refetch()}>
               Refresh
             </Button>

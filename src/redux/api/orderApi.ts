@@ -142,6 +142,13 @@ export const orderApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [tagTypes.order],
     }),
+    previewCourierCodSettlement: build.mutation({
+      query: (rows) => ({ url: "/orders/courier-cod/preview", method: "POST", data: { rows } }),
+    }),
+    confirmCourierCodSettlement: build.mutation({
+      query: (rows) => ({ url: "/orders/courier-cod/confirm", method: "POST", data: { rows } }),
+      invalidatesTags: [tagTypes.order],
+    }),
     deleteOrdersByPhone: build.mutation({
       query: (data) => ({
         url: "/orders/delete-by-phone",
@@ -169,6 +176,8 @@ export const {
   useGetAllOrderStatusQuery,
   useCreateOrderMutation,
   useAddPaymentMutation,
+  usePreviewCourierCodSettlementMutation,
+  useConfirmCourierCodSettlementMutation,
   useChangeOrderStatusMutation,
   useGetOrdersLogsQuery,
   useChangeHoldOrderStatusMutation,

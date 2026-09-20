@@ -15,6 +15,8 @@ import {
   RiMoneyDollarCircleLine,
   RiSettings4Line,
   RiArrowLeftRightLine,
+  RiCheckboxCircleLine,
+  RiPriceTag3Line,
 } from "@remixicon/react"
 import { useState } from "react"
 import { useIsMobile } from "@/hook/useIsMobile"
@@ -163,6 +165,15 @@ const OrderInformationContent = ({ rowData, local }: any) => {
   ]
 
   const isMobile = useIsMobile()
+  const settlementItems = [...(rowData?.courierCodSettlementItems || [])].sort(
+    (a: any, b: any) => new Date(b?.createdAt || 0).getTime() - new Date(a?.createdAt || 0).getTime()
+  )
+  const latestSettlement = settlementItems[0]
+  const settlementDiscount = Number(latestSettlement?.adjustmentAmount || 0)
+  const hasSettlementDiscount = settlementDiscount > 0
+
+  const money = (amount: any) =>
+    `BDT ${Number(amount || 0).toLocaleString("en-BD", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
   return (
     <Space direction="vertical" size="large" className="w-full">
@@ -456,6 +467,57 @@ const OrderInformationContent = ({ rowData, local }: any) => {
           </div>
         </Space>
       </div>
+
+      {/* COD Settlement */}
+      {latestSettlement && (
+        <Card
+          title={
+            <Space>
+              <RiCheckboxCircleLine size={20} className="text-emerald-600" />
+              <span>COD Settlement</span>
+              <Tag color={hasSettlementDiscount ? "gold" : "success"}>
+                {hasSettlementDiscount ? "Settled with discount" : "Settled"}
+              </Tag>
+            </Space>
+          }
+          bordered={false}
+          className="rounded-xl border border-emerald-100 shadow-sm"
+          bodyStyle={{ padding: isMobile ? 16 : 24 }}
+        >
+          <div className="rounded-lg bg-emerald-50 p-4">
+            <Row gutter={[24, 16]}>
+              <Col xs={24} sm={12} lg={8}>
+                <Text type="secondary" className="text-xs">Settlement status</Text>
+                <div className="mt-1"><Text strong className="text-emerald-700">{latestSettlement?.status || "Settled"}</Text></div>
+              </Col>
+              <Col xs={24} sm={12} lg={8}>
+                <Text type="secondary" className="text-xs">Courier received</Text>
+                <div className="mt-1"><Text strong>{money(latestSettlement?.receivedCod)}</Text></div>
+              </Col>
+              <Col xs={24} sm={12} lg={8}>
+                <Text type="secondary" className="text-xs">Settled on</Text>
+                <div className="mt-1"><Text strong>{moment(latestSettlement?.createdAt).format("DD MMM YYYY, hh:mm A")}</Text></div>
+              </Col>
+            </Row>
+          </div>
+
+          {hasSettlementDiscount && (
+            <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
+              <Space align="start" size="middle" className="w-full">
+                <RiPriceTag3Line size={22} className="mt-0.5 shrink-0 text-amber-600" />
+                <div className="min-w-0">
+                  <Text type="secondary" className="text-xs">Settlement discount</Text>
+                  <div className="mt-1 text-xl font-bold text-amber-700">-{money(settlementDiscount)}</div>
+                  <Text strong className="mt-3 block text-sm">Reason</Text>
+                  <Text className="block break-words text-sm text-gray-700">
+                    {latestSettlement?.adjustmentReason || "No reason recorded"}
+                  </Text>
+                </div>
+              </Space>
+            </div>
+          )}
+        </Card>
+      )}
 
       {/* Return Products */}
       <Card
