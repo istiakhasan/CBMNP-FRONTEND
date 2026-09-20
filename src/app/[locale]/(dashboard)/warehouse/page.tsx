@@ -2,11 +2,12 @@
 "use client";
 import { useState } from "react";
 import GbTable from "@/components/GbTable";
-import { message, Pagination, Popconfirm } from "antd";
+import { Card, Input, message, Pagination, Popconfirm, Skeleton, Tag } from "antd";
 import { useSearchParams } from "next/navigation";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
 import {
   useLoadAllWarehouseQuery,
+  useGetWarehouseOverviewQuery,
   useSetDefaultWarehouseMutation,
 } from "@/redux/api/warehouse";
 import GbModal from "@/components/ui/GbModal";
@@ -25,8 +26,11 @@ const Page = () => {
   const [editWarehouse, setEditWarehouse] = useState(false);
   query["page"] = page;
   query["limit"] = size;
-  query["searchProducts"] = searchTerm;
+  query["searchTerm"] = searchTerm;
   const { data, isLoading, refetch } = useLoadAllWarehouseQuery(query);
+  const { data: overviewResponse, isLoading: overviewLoading } = useGetWarehouseOverviewQuery(undefined);
+  const overview = overviewResponse?.data;
+  const warehouseStock = new Map<string, any>((overview?.warehouses || []).map((item: any) => [item.warehouseId, item]));
   const [loading, setLoading] = useState(false);
   // table column
   const tableColumn = [
@@ -92,6 +96,24 @@ const Page = () => {
       },
     },
     {
+      title: "Stock overview",
+      key: "stockOverview",
+      render: (_: any, record: any) => {
+        const stock = warehouseStock.get(record.id);
+        return <div className="min-w-[130px] text-xs"><div className="font-semibold text-slate-700">{Number(stock?.availableQuantity || 0).toLocaleString()} available</div><div className="mt-0.5 text-slate-500">{Number(stock?.skuCount || 0).toLocaleString()} SKUs · {Number(stock?.allocatedQuantity || 0).toLocaleString()} allocated</div></div>;
+      },
+    },
+    {
+      title: "Stock health",
+      key: "stockHealth",
+      render: (_: any, record: any) => {
+        const stock = warehouseStock.get(record.id);
+        const expired = Number(stock?.expiredQuantity || 0);
+        const held = Number(stock?.holdQuantity || 0);
+        return expired > 0 ? <Tag color="error">{expired} expired</Tag> : held > 0 ? <Tag color="warning">{held} on hold</Tag> : <Tag color="success">Healthy</Tag>;
+      },
+    },
+    {
       title: "Action",
       key: 7,
       align: "end",
@@ -135,13 +157,26 @@ const Page = () => {
     <>
       <GbHeader title="Warehouse" />
       <div className="p-[16px]">
-        <div className="flex justify-end items-center py-4 px-2">
+        <section className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          {overviewLoading ? <Skeleton active className="xl:col-span-5" /> : [
+            ["Warehouses", overview?.totalWarehouses, "ri-building-2-line", "bg-blue-50 text-blue-600"],
+            ["Active SKUs", overview?.totalSkus, "ri-stack-line", "bg-violet-50 text-violet-600"],
+            ["Available stock", overview?.availableQuantity, "ri-inbox-archive-line", "bg-emerald-50 text-emerald-600"],
+            ["Allocated stock", overview?.allocatedQuantity, "ri-route-line", "bg-amber-50 text-amber-600"],
+            ["Expired stock", overview?.expiredQuantity, "ri-error-warning-line", "bg-rose-50 text-rose-600"],
+          ].map(([label, value, icon, tone]: any) => <Card key={label} className="!border-slate-200 shadow-sm" bodyStyle={{ padding: 16 }}><div className="flex items-center justify-between"><div><p className="m-0 text-xs font-medium text-slate-500">{label}</p><p className="mb-0 mt-1 text-xl font-bold text-slate-800">{Number(value || 0).toLocaleString()}</p></div><span className={`grid h-10 w-10 place-items-center rounded-xl text-lg ${tone}`}><i className={icon} /></span></div></Card>)}
+        </section>
+        <div className="mb-4 flex flex-col justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center">
+          <div><h1 className="m-0 text-base font-semibold text-slate-800">Warehouse directory</h1><p className="mb-0 mt-1 text-xs text-slate-500">Monitor stock health, default fulfillment location, and warehouse contacts.</p></div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Input value={searchTerm} onChange={(event) => { setSearchTerm(event.target.value); setPage(1); }} allowClear placeholder="Search warehouse" prefix={<i className="ri-search-line text-slate-400" />} className="sm:w-56" />
           <button
             onClick={() => setOpen(true)}
             className="bg-[#4F8A6D] text-[#fff] font-bold text-[12px]  px-[20px] py-[5px]"
           >
-            Create
+            <i className="ri-add-line mr-1" /> Create warehouse
           </button>
+          </div>
         </div>
         <div className="gb_border">
           <div className="flex justify-between gap-2 flex-wrap mt-2 p-3">

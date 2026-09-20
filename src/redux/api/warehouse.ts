@@ -34,6 +34,10 @@ export const warehouseApi = baseApi.injectEndpoints({
       }),
       providesTags: [tagTypes.warehouse],
     }),
+    getWarehouseOverview: build.query({
+      query: () => ({ url: "/warehouse/overview", method: "GET" }),
+      providesTags: [tagTypes.warehouse],
+    }),
     setDefaultWarehouse: build.mutation({
       query: (id: string) => ({
         url: `/warehouse/set-default/${id}`,
@@ -48,6 +52,7 @@ export const {
   useLoadAllWarehouseQuery,
   useCreateWarehouseMutation,
   useLoadAllWarehouseOptionsQuery,
+  useGetWarehouseOverviewQuery,
   useUpdateWarehouseMutation,
   useSetDefaultWarehouseMutation
 } = warehouseApi;

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import GbHeader from "@/components/ui/dashboard/GbHeader";
 import {
   Card,
@@ -14,6 +14,7 @@ import {
   Tooltip,
   Divider,
   Select,
+  Progress,
 } from "antd";
 import {
   ArrowUpOutlined,
@@ -41,6 +42,8 @@ import DeliveryPartner from "./DeliveryPartnerChart";
 import TopCustomers from "./TopCustomers";
 import TopProducts from "./TopProducts";
 import dayjs from "dayjs";
+import Link from "next/link";
+import { useLocale } from "next-intl";
 
 const { RangePicker } = DatePicker;
 
@@ -65,6 +68,8 @@ export default function Dashboard() {
   const [period, setPeriod] = useState<string>("month");
   const [customRange, setCustomRange] = useState<any>(null);
   const [dateField, setDateField] = useState<string>("createdAt");
+  const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null);
+  const locale = useLocale();
 
   const queryParams: any = {
     period,
@@ -89,6 +94,10 @@ export default function Dashboard() {
   });
 
   const summary = smData?.data;
+
+  useEffect(() => {
+    if (summary) setLastSyncedAt(new Date());
+  }, [summary]);
 
   const grossSales = summary?.salesOverview?.grossSales ?? 0;
   const totalOrders = summary?.salesOverview?.totalOrders ?? 0;
@@ -137,6 +146,8 @@ export default function Dashboard() {
   };
 
   const activePeriodLabel = periodLabels[period] || "Period";
+  const activePipelineCount = Number(pending.count || 0) + Number(inTransit.count || 0);
+  const attentionCount = Number(cancelled.count || 0) + Number(returned.count || 0);
 
   return (
     <div className="h-screen overflow-auto custom_scroll bg-[#f8fafc]">
@@ -203,6 +214,52 @@ export default function Dashboard() {
             </Tooltip>
           </div>
         </div>
+
+        {/* Operational control centre — derived from the already loaded summary. */}
+        <section className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+          <Card className="xl:col-span-2 !border-slate-200 shadow-sm" bodyStyle={{ padding: 20 }}>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="grid h-9 w-9 place-items-center rounded-xl bg-indigo-50 text-indigo-600"><i className="ri-radar-line text-lg" /></span>
+                  <div>
+                    <h2 className="m-0 text-base font-semibold text-slate-800">Operational control centre</h2>
+                    <p className="mt-0.5 text-xs text-slate-500">A quick health check for the selected period.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="text-right text-xs text-slate-500">
+                <span className="mr-1 inline-block h-2 w-2 rounded-full bg-emerald-500" />Live summary
+                <div className="mt-1">{lastSyncedAt ? `Synced ${dayjs(lastSyncedAt).format("hh:mm A")}` : "Syncing data…"}</div>
+              </div>
+            </div>
+            <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
+              <div className="rounded-xl bg-slate-50 p-3">
+                <div className="flex items-center justify-between text-xs font-medium text-slate-500"><span>Fulfilment rate</span><span className="font-semibold text-emerald-700">{delivered.rate || 0}%</span></div>
+                <Progress percent={Math.min(100, Number(delivered.rate || 0))} showInfo={false} strokeColor="#10b981" trailColor="#d1fae5" size="small" className="mt-2" />
+                <p className="mb-0 mt-2 text-xs text-slate-600"><b>{delivered.count || 0}</b> delivered of <b>{totalOrders || 0}</b> orders</p>
+              </div>
+              <div className="rounded-xl bg-amber-50 p-3">
+                <div className="text-xs font-medium text-amber-700">Active pipeline</div>
+                <div className="mt-1 text-2xl font-bold text-amber-800">{activePipelineCount.toLocaleString()}</div>
+                <p className="mb-0 mt-1 text-xs text-amber-700">Pending and in-transit orders</p>
+              </div>
+              <div className={`rounded-xl p-3 ${attentionCount > 0 ? "bg-rose-50" : "bg-emerald-50"}`}>
+                <div className={`text-xs font-medium ${attentionCount > 0 ? "text-rose-700" : "text-emerald-700"}`}>Needs attention</div>
+                <div className={`mt-1 text-2xl font-bold ${attentionCount > 0 ? "text-rose-800" : "text-emerald-800"}`}>{attentionCount.toLocaleString()}</div>
+                <p className={`mb-0 mt-1 text-xs ${attentionCount > 0 ? "text-rose-700" : "text-emerald-700"}`}>{attentionCount > 0 ? "Cancelled or returned orders" : "No cancellation or return risk"}</p>
+              </div>
+            </div>
+          </Card>
+          <Card className="!border-slate-200 shadow-sm" bodyStyle={{ padding: 20 }}>
+            <div className="flex items-center justify-between"><h2 className="m-0 text-base font-semibold text-slate-800">Quick workspace</h2><i className="ri-flashlight-line text-lg text-primary" /></div>
+            <p className="mt-1 text-xs text-slate-500">Common actions for daily operations.</p>
+            <div className="mt-4 grid gap-2">
+              <Link href={`/${locale}/orders`} className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:border-primary hover:bg-primary/5 hover:text-primary"><span><i className="ri-shopping-bag-3-line mr-2" />Manage orders</span><i className="ri-arrow-right-line" /></Link>
+              <Link href={`/${locale}/reports/monthly-sales-courier-report`} className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:border-primary hover:bg-primary/5 hover:text-primary"><span><i className="ri-file-chart-line mr-2" />Courier settlement report</span><i className="ri-arrow-right-line" /></Link>
+            </div>
+          </Card>
+        </section>
 
         {/* SECTION 1: CORE SALES & FULFILLMENT KPIS */}
         <div>
