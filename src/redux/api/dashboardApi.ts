@@ -59,6 +59,9 @@ export const dashboardApi = baseApi.injectEndpoints({
       }),
       providesTags: [tagTypes.dashboard],
     }),
+    getSfaDmsDashboard: build.query({
+      query: () => ({ url: "/sfa-dms/dashboard", method: "GET" }),
+    }),
   }),
 });
 
@@ -70,4 +73,5 @@ export const {
   useTopSellingProductsQuery,
   useGetAgentDashboardSummaryQuery,
   useGetAreaDistributionQuery,
+  useGetSfaDmsDashboardQuery,
 } = dashboardApi;

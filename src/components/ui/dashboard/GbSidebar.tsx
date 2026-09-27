@@ -45,6 +45,54 @@ const GbSidebar = () => {
       icon: "ri-shopping-bag-3-line",
     },
     {
+      href: "/ecommerce",
+      title: "E-Commerce",
+      icon: "ri-store-3-line",
+      children: [
+        {
+          href: "/ecommerce",
+          title: "Storefront & Live Preview",
+        },
+        {
+          href: "/ecommerce/customizer",
+          title: "Visual Theme Customizer",
+        },
+        {
+          href: "/ecommerce/banners",
+          title: "Hero Slides & Banners",
+        },
+        {
+          href: "/ecommerce/collections",
+          title: "Curated Collections",
+        },
+        {
+          href: "/ecommerce/coupons",
+          title: "Promo Coupons & Deals",
+        },
+        {
+          href: "/ecommerce/shipping",
+          title: "Shipping & Delivery Rates",
+        },
+        {
+          href: "/ecommerce/reviews",
+          title: "Reviews & Ratings",
+        },
+        {
+          href: "/ecommerce/pages",
+          title: "CMS Pages & Size Guides",
+        },
+        {
+          href: "/ecommerce/settings",
+          title: "Store & Payment Settings",
+        },
+      ],
+    },
+    {
+      href: "/sfa-dms",
+      title: "SFA & DMS",
+      icon: "ri-team-line",
+    },
+    {
       href: "/inventory",
       title: "Inventory",
       icon: "ri-store-3-line",
@@ -489,13 +537,14 @@ const GbSidebar = () => {
     if (mi.title === "HR & Payroll" && (userRole === "hr" || permission?.includes("HR") || permission?.includes("VIEW_HR_EMPLOYEES") || permission?.includes("VIEW_HR_ATTENDANCE"))) {
       return true;
     }
-    // Executive-tier roles inherently need this page (it's how they act on things
-    // routed to them) — don't require a separate manual permission grant on top of
-    // just being CEO/CCO. Department Heads / Reporting Managers with a plain role
-    // still get it via the normal "Approval Center" permission assignment below.
     if (mi.title === "Approval Center" && ["ceo", "cco"].includes(userRole)) {
       return true;
     }
+    if (mi.title === "E-Commerce" && (["admin", "super_admin", "owner", "master_admin"].includes(userRole) || permission?.includes("E-Commerce") || permission?.includes("ecommerce"))) {
+      return true;
+    }
+    if (["admin", "super_admin", "owner"].includes(userRole)) return true;
+
     return mi.children?.some((child: any) => permission?.includes(child.title));
   }
 );

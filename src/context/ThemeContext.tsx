@@ -651,6 +651,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       .gb-table .ant-table-tbody > tr:nth-child(even) > td {
         background: ${design.tableStriped ? "color-mix(in srgb, var(--bgbase) 58%, white)" : "#ffffff"} !important;
       }
+      /* Keep selection visible on every row, even when zebra-row styling is enabled. */
+      .ant-table-wrapper .ant-table-tbody > tr.ant-table-row-selected > td,
+      .gb-table .ant-table-tbody > tr.ant-table-row-selected > td {
+        background: color-mix(in srgb, var(--primaryColor) 22%, white) !important;
+      }
       .ant-table-wrapper .ant-table-container,
       .gb-table .ant-table-container {
         border: ${design.tableBordered ? "1px solid var(--borderColor)" : "0"} !important;
