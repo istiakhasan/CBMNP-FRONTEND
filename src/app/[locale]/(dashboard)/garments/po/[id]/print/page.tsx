@@ -34,12 +34,14 @@ export default function GarmentsPoPrintPage() {
   // Keep every saved line. The same product may intentionally appear more than
   // once—for example, one entry can have zero cost while another has the cost.
   const items = po.items || [];
+  const getSavedTotal = (record: any) =>
+    [record.totalCost, record.totalPrice, record.totalAmount, record.amount].find(
+      (total) => total !== undefined && total !== null && total !== "",
+    );
   const getItemTotal = (record: any) => {
     // A saved zero is intentional: retain it instead of recalculating from
     // quantity and unit price. Only calculate when no total was saved at all.
-    const savedTotal = [record.totalCost, record.totalPrice, record.totalAmount, record.amount].find(
-      (total) => total !== undefined && total !== null && total !== "",
-    );
+    const savedTotal = getSavedTotal(record);
 
     if (savedTotal !== undefined) return getNumber(savedTotal);
 
@@ -104,6 +106,21 @@ export default function GarmentsPoPrintPage() {
       align: "right" as const,
       render: (_: any, record: any) => {
         return getItemTotal(record).toFixed(2);
+      },
+    },
+    {
+      title: "Amount Status / Reason",
+      key: "amountStatus",
+      width: 175,
+      render: (_: any, record: any) => {
+        const savedTotal = getSavedTotal(record);
+        const isSavedZero = savedTotal !== undefined && getNumber(savedTotal) === 0;
+
+        return isSavedZero ? (
+          <span className="text-xs text-amber-700">No cost applied — saved amount is 0</span>
+        ) : (
+          <span className="text-xs text-green-700">Cost applied</span>
+        );
       },
     },
   ];
