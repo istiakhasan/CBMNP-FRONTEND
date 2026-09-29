@@ -35,11 +35,13 @@ export default function GarmentsPoPrintPage() {
   // once—for example, one entry can have zero cost while another has the cost.
   const items = po.items || [];
   const getItemTotal = (record: any) => {
-    const savedTotal = [record.totalCost, record.totalPrice, record.totalAmount, record.amount]
-      .map(getNumber)
-      .find((total) => total !== 0);
+    // A saved zero is intentional: retain it instead of recalculating from
+    // quantity and unit price. Only calculate when no total was saved at all.
+    const savedTotal = [record.totalCost, record.totalPrice, record.totalAmount, record.amount].find(
+      (total) => total !== undefined && total !== null && total !== "",
+    );
 
-    if (savedTotal !== undefined) return savedTotal;
+    if (savedTotal !== undefined) return getNumber(savedTotal);
 
     return getNumber(record.qty ?? record.quantity) * getNumber(record.unitCost ?? record.unitPrice);
   };
