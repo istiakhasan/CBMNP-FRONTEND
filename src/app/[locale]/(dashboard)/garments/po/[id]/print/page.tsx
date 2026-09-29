@@ -112,6 +112,8 @@ export default function GarmentsPoPrintPage() {
       title: "Amount Status / Reason",
       key: "amountStatus",
       width: 175,
+      className: "amount-status-column",
+      onHeaderCell: () => ({ className: "amount-status-column" }),
       render: (_: any, record: any) => {
         const savedTotal = getSavedTotal(record);
         const isSavedZero = savedTotal !== undefined && getNumber(savedTotal) === 0;
@@ -351,6 +353,12 @@ export default function GarmentsPoPrintPage() {
 
           .garments-po-items-table .ant-table-tbody > tr > td * {
             font-weight: 400 !important;
+          }
+
+          /* The status explains zero-cost lines on screen, but is internal
+             information and must not appear on the printed purchase order. */
+          .garments-po-items-table .amount-status-column {
+            display: none !important;
           }
 
           .garments-po-print tr,
