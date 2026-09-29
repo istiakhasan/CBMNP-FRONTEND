@@ -27,11 +27,13 @@ export default function GarmentsPoPrintPage() {
     return <div className="p-8 text-center text-red-500">Purchase Order not found.</div>;
   }
 
-  const items = po.items || [];
   const getNumber = (value: unknown) => {
     const number = Number(value);
     return Number.isFinite(number) ? number : 0;
   };
+  // Keep every saved line. The same product may intentionally appear more than
+  // once—for example, one entry can have zero cost while another has the cost.
+  const items = po.items || [];
   const getItemTotal = (record: any) => {
     const savedTotal = [record.totalCost, record.totalPrice, record.totalAmount, record.amount]
       .map(getNumber)
@@ -41,7 +43,6 @@ export default function GarmentsPoPrintPage() {
 
     return getNumber(record.qty ?? record.quantity) * getNumber(record.unitCost ?? record.unitPrice);
   };
-  // Calculate from line items so an incomplete API total cannot make a valid PO line show as 0.00.
   const subtotal = items.reduce((total: number, item: any) => total + getItemTotal(item), 0);
   const taxAmount = (subtotal * getNumber(po.taxRatePercent)) / 100;
   const grandTotal = subtotal + taxAmount;

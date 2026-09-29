@@ -154,7 +154,7 @@ function GarmentsPoContent() {
     setSelectedBom(null);
 
     form.setFieldsValue({
-      currency: "USD",
+      currency: "BDT",
       paymentTerms: "30 Days Net",
       deliveryTerms: "FOB Factory",
       expectedDeliveryDate: dayjs().add(15, "day"),
@@ -254,7 +254,7 @@ function GarmentsPoContent() {
         const amt = record.totalAmount !== undefined ? record.totalAmount : record.grandTotal;
         return (
           <span className="font-bold text-gray-800">
-            {record.currency || "USD"} {Number(amt || 0).toLocaleString()}
+            {record.currency || record.order?.currency || "BDT"} {Number(amt || 0).toLocaleString()}
           </span>
         );
       },
