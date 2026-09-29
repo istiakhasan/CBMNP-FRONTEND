@@ -361,6 +361,12 @@ export default function GarmentsPoPrintPage() {
             display: none !important;
           }
 
+          /* Ant Design keeps a colgroup width for hidden cells, so remove the
+             status column's colgroup entry as well to let the table fill A4. */
+          .garments-po-items-table colgroup col:last-child {
+            display: none !important;
+          }
+
           .garments-po-print tr,
           .garments-po-print .ant-table-row {
             break-inside: avoid;
