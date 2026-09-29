@@ -27,6 +27,26 @@ export default function GarmentsPoPrintPage() {
     return <div className="p-8 text-center text-red-500">Purchase Order not found.</div>;
   }
 
+  const items = po.items || [];
+  const getNumber = (value: unknown) => {
+    const number = Number(value);
+    return Number.isFinite(number) ? number : 0;
+  };
+  const getItemTotal = (record: any) => {
+    const savedTotal = [record.totalCost, record.totalPrice, record.totalAmount, record.amount]
+      .map(getNumber)
+      .find((total) => total !== 0);
+
+    if (savedTotal !== undefined) return savedTotal;
+
+    return getNumber(record.qty ?? record.quantity) * getNumber(record.unitCost ?? record.unitPrice);
+  };
+  // Calculate from line items so an incomplete API total cannot make a valid PO line show as 0.00.
+  const subtotal = items.reduce((total: number, item: any) => total + getItemTotal(item), 0);
+  const taxAmount = (subtotal * getNumber(po.taxRatePercent)) / 100;
+  const grandTotal = subtotal + taxAmount;
+  const currency = "BDT";
+
   const columns = [
     {
       title: "SL",
@@ -80,8 +100,7 @@ export default function GarmentsPoPrintPage() {
       width: 110,
       align: "right" as const,
       render: (_: any, record: any) => {
-        const total = record.totalCost !== undefined ? record.totalCost : record.totalPrice;
-        return Number(total || 0).toFixed(2);
+        return getItemTotal(record).toFixed(2);
       },
     },
   ];
@@ -153,7 +172,7 @@ export default function GarmentsPoPrintPage() {
 
         {/* Table of items */}
         <Table
-          dataSource={po.items || []}
+          dataSource={items}
           columns={columns}
           rowKey="id"
           pagination={false}
@@ -169,19 +188,19 @@ export default function GarmentsPoPrintPage() {
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Subtotal:</span>
               <span className="font-semibold">
-                {po.currency || "USD"} {Number(po.subtotal || po.totalAmount || po.grandTotal || 0).toFixed(2)}
+                {currency} {subtotal.toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Tax / VAT ({po.taxRatePercent || 0}%):</span>
               <span className="font-semibold">
-                {po.currency || "USD"} {((Number(po.subtotal || 0) * Number(po.taxRatePercent || 0)) / 100).toFixed(2)}
+                {currency} {taxAmount.toFixed(2)}
               </span>
             </div>
             <div className="border-t pt-2 flex justify-between text-base font-bold text-gray-900">
               <span>Grand Total:</span>
               <span className="text-purple-700">
-                {po.currency || "USD"} {Number(po.totalAmount || po.grandTotal || 0).toLocaleString()}
+                {currency} {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
           </div>
