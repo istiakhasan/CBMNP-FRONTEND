@@ -37,13 +37,31 @@ const Invoice = ({ rowData }: any) => {
       }
       .invoice-page {
         width: 102mm !important;
-        max-height: 148mm !important;
         margin: 0 !important;
-        overflow: hidden !important;
-        page-break-after: avoid !important;
-        page-break-before: avoid !important;
-        break-after: avoid !important;
       }
+      .invoice-page tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      /* Compact the printed invoice without cutting off totals for longer orders. */
+      .invoice-page {
+        padding: 2mm !important;
+        font-size: 8px !important;
+      }
+      .invoice-header { margin-bottom: 0.5mm !important; }
+      .invoice-header > div:first-child { font-size: 11px !important; }
+      .invoice-barcode { padding: 0.4mm 0 0 !important; margin-bottom: 0.5mm !important; }
+      .invoice-barcode svg { height: 20px !important; width: 105px !important; }
+      .invoice-customer { margin-bottom: 0.5mm !important; }
+      .invoice-customer > div { font-size: 7px !important; line-height: 1.1 !important; }
+      .invoice-customer > div:nth-child(2) { font-size: 8px !important; }
+      .invoice-items { font-size: 7px !important; }
+      .invoice-items th, .invoice-items td { padding-top: 0.3mm !important; padding-bottom: 0.3mm !important; }
+      .invoice-items th { font-size: 6.5px !important; }
+      .invoice-items td:nth-child(3) { line-height: 1.1 !important; }
+      .invoice-totals { margin-top: 0.5mm !important; padding-top: 0.3mm !important; }
+      .invoice-totals > div { padding-top: 0.15mm !important; padding-bottom: 0.15mm !important; font-size: 7px !important; }
+      .invoice-footer { margin-top: 0.5mm !important; padding-top: 0.3mm !important; }
     `,
   });
 
@@ -63,7 +81,7 @@ const Invoice = ({ rowData }: any) => {
         className="invoice-page"
         style={{
           width: "102mm",
-          maxHeight: "148mm",
+          minHeight: "152mm",
           padding: "3.5mm",
           background: "#fff",
           boxSizing: "border-box",
@@ -71,11 +89,10 @@ const Invoice = ({ rowData }: any) => {
           fontSize: "9.5px",
           color: "#1a1a1a",
           margin: "0 auto",
-          overflow: "hidden",
         }}
       >
         {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: "1.5mm" }}>
+        <div className="invoice-header" style={{ textAlign: "center", marginBottom: "1.5mm" }}>
           <div
             style={{
               fontSize: "15px",
@@ -95,6 +112,7 @@ const Invoice = ({ rowData }: any) => {
 
         {/* Barcode strip — integrated, bordered, full-width */}
         <div
+          className="invoice-barcode"
           style={{
             // border: "1px solid #000",
             borderRadius: "2px",
@@ -145,6 +163,7 @@ const Invoice = ({ rowData }: any) => {
 
         {/* Customer + Status box */}
         <div
+          className="invoice-customer"
           style={{
             background: "#f7f7f7",
             borderRadius: "2px",
@@ -176,6 +195,7 @@ const Invoice = ({ rowData }: any) => {
 
         {/* Item Table */}
         <table
+          className="invoice-items"
           style={{ width: "100%", borderCollapse: "collapse", fontSize: "9px" }}
         >
           <thead>
@@ -298,7 +318,7 @@ const Invoice = ({ rowData }: any) => {
         </table>
 
         {/* Totals */}
-        <div style={{ marginTop: "1.2mm", paddingTop: "0.8mm" }}>
+        <div className="invoice-totals" style={{ marginTop: "1.2mm", paddingTop: "0.8mm" }}>
           <div
             style={{
               display: "flex",
@@ -355,6 +375,7 @@ const Invoice = ({ rowData }: any) => {
 
         {/* Footer */}
         <div
+          className="invoice-footer"
           style={{
             marginTop: "1.2mm",
             textAlign: "center",
