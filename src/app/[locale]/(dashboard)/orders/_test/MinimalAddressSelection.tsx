@@ -46,6 +46,7 @@ export default function MinimalAddressSelection({
   const [districtData, setDistrictData] = useState<any[]>([]);
   const [thanaData, setThanaData] = useState<any[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isCreatingDefaultAddress, setIsCreatingDefaultAddress] = useState(false);
   const [form] = Form.useForm();
   const [createAddress] = useAddAddressMutation();
 
@@ -141,9 +142,12 @@ export default function MinimalAddressSelection({
       .catch((error) => console.log(error));
   };
 
-  const generateDefaultAddress = () => {
-    if (customer?.address) {
-      const defaultAddress: any = {
+  const generateDefaultAddress = async () => {
+    if (!customer?.address || isCreatingDefaultAddress) return;
+
+    setIsCreatingDefaultAddress(true);
+    try {
+      const payload = {
         label:
           customer.type === "Probashi" ? "Receiver Address" : "Main Address",
         district: customer?.district,
@@ -151,13 +155,22 @@ export default function MinimalAddressSelection({
         thana: customer?.thana,
         address: customer?.address,
         receiverName: customer?.customerName || customer.customerName,
-        receiverPhone:
+        receiverPhoneNumber:
           customer?.customerPhoneNumber || customer.customerPhoneNumber,
         type: "Home",
+        isDefault: true,
+        customerId: customer.id,
       };
-      onAddressUpdate([defaultAddress]);
-      onDeliveryAddressSelect(defaultAddress);
+
+      const response = await createAddress(payload).unwrap();
+      const savedAddress = response?.data;
+      onAddressUpdate([...addresses, savedAddress]);
+      onDeliveryAddressSelect(savedAddress);
       message.success("Default address created");
+    } catch (error) {
+      message.error("Could not create the default address");
+    } finally {
+      setIsCreatingDefaultAddress(false);
     }
   };
 
@@ -205,7 +218,9 @@ export default function MinimalAddressSelection({
           <EnvironmentOutlined style={{ fontSize: 40, color: "#d9d9d9" }} />
           <p>No delivery addresses found</p>
           <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-            <Button onClick={generateDefaultAddress}>Use Customer Info</Button>
+            <Button loading={isCreatingDefaultAddress} onClick={generateDefaultAddress}>
+              Use Customer Info
+            </Button>
             <Button type="primary" onClick={() => setShowAddModal(true)}>
               Add New
             </Button>
