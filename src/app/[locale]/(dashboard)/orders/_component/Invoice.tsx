@@ -55,9 +55,15 @@ const Invoice = ({ rowData }: any) => {
       .invoice-customer { margin-bottom: 0.5mm !important; }
       .invoice-customer > div { font-size: 7px !important; line-height: 1.1 !important; }
       .invoice-customer > div:nth-child(2) { font-size: 8px !important; }
-      .invoice-items { font-size: 7px !important; }
+      .invoice-items { width: 100% !important; table-layout: fixed; font-size: 7px !important; }
       .invoice-items th, .invoice-items td { padding-top: 0.3mm !important; padding-bottom: 0.3mm !important; }
       .invoice-items th { font-size: 6.5px !important; }
+      .invoice-items th:nth-child(1), .invoice-items td:nth-child(1) { width: 6% !important; }
+      .invoice-items th:nth-child(2), .invoice-items td:nth-child(2) { width: 14% !important; white-space: nowrap; }
+      .invoice-items th:nth-child(3), .invoice-items td:nth-child(3) { width: 38% !important; }
+      .invoice-items th:nth-child(4), .invoice-items td:nth-child(4) { width: 8% !important; white-space: nowrap; }
+      .invoice-items th:nth-child(5), .invoice-items td:nth-child(5) { width: 17% !important; white-space: nowrap; }
+      .invoice-items th:nth-child(6), .invoice-items td:nth-child(6) { width: 17% !important; white-space: nowrap; }
       .invoice-items td:nth-child(3) { line-height: 1.1 !important; }
       .invoice-totals { margin-top: 0.5mm !important; padding-top: 0.3mm !important; }
       .invoice-totals > div { padding-top: 0.15mm !important; padding-bottom: 0.15mm !important; font-size: 7px !important; }
@@ -66,7 +72,7 @@ const Invoice = ({ rowData }: any) => {
   });
 
   return (
-    <div>
+    <div className="max-h-[calc(100vh-64px)] overflow-y-auto pr-2 print:max-h-none print:overflow-visible print:pr-0">
       {/* Print Button - hidden on print */}
       {rowData?.status?.label !=="Approved"  &&  <button
         onClick={reactToPrintFn}
