@@ -213,7 +213,9 @@ const ProductSalesReportTable: React.FC<ProductSalesReportTableProps> = ({
       dataIndex: "products",
       key: "productsCount",
       align: "center" as const,
-      render: (products: any[]) => <Tag color="blue">{products?.length || 0} SKUs</Tag>,
+      render: (products: any[], record: any) => (
+        <Tag color="blue">{Number(record.productCount ?? products?.length ?? 0)} SKUs</Tag>
+      ),
     },
     {
       title: "Orders",
@@ -335,7 +337,7 @@ const ProductSalesReportTable: React.FC<ProductSalesReportTableProps> = ({
                   <Table
                     dataSource={record.products || []}
                     columns={dateProductColumns}
-                    rowKey={(p: any) => `${record.date}-${p.productId}`}
+                    rowKey={(p: any) => `${record.date}-${p.orderId || p.orderNumber}-${p.productId}`}
                     pagination={false}
                     size="small"
                     className="bg-gray-50 rounded-lg"

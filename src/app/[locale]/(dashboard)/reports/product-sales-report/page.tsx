@@ -67,7 +67,7 @@ const handleDownloadExcel = () => {
     const dateSummaryRows = dateBreakdown.map((d: any) => ({
       Date: d.date ? dayjs(d.date).format("DD MMM YYYY") : "N/A",
       Day: d.date ? dayjs(d.date).format("dddd") : "",
-      "SKUs Sold": Array.isArray(d.products) ? d.products.length : 0,
+      "SKUs Sold": Number(d.productCount ?? 0),
       Orders: Number(d.orderCount || 0),
       "Quantity Sold": Number(d.productQuantity || 0),
       "Sales Amount (Tk)": Number(d.saleAmount || 0),
@@ -76,7 +76,7 @@ const handleDownloadExcel = () => {
     XLSX.utils.book_append_sheet(workbook, dateSummarySheet, "Date Summary");
 
     // Sheet 3: Date-Product Detail — grouped visually with merged date cells
-    const header = ["Date", "Product Name", "SKU", "Quantity Sold", "Sales Amount (Tk)"];
+    const header = ["Date", "Order Number", "Product Name", "SKU", "Quantity Sold", "Sales Amount (Tk)"];
     const aoa: any[][] = [header];
     const merges: XLSX.Range[] = [];
 
@@ -99,6 +99,7 @@ const handleDownloadExcel = () => {
       products.forEach((p: any, idx: number) => {
         aoa.push([
           idx === 0 ? dateLabel : "", // date text only on first row of the block
+          p.orderNumber || "N/A",
           p.productName || "N/A",
           p.sku || "N/A",
           Number(p.quantity || 0),
@@ -120,6 +121,7 @@ const handleDownloadExcel = () => {
     // Optional: reasonable column widths for readability
     dateProductSheet["!cols"] = [
       { wch: 14 }, // Date
+      { wch: 18 }, // Order Number
       { wch: 55 }, // Product Name
       { wch: 16 }, // SKU
       { wch: 14 }, // Quantity Sold
