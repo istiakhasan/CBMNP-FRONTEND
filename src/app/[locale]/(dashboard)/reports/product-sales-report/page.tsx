@@ -99,7 +99,7 @@ const handleDownloadExcel = () => {
       products.forEach((p: any, idx: number) => {
         aoa.push([
           idx === 0 ? dateLabel : "", // date text only on first row of the block
-          p.orderNumber || "N/A",
+          p.invoiceNumber || "N/A",
           p.productName || "N/A",
           p.sku || "N/A",
           Number(p.quantity || 0),

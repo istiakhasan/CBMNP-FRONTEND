@@ -337,7 +337,7 @@ const ProductSalesReportTable: React.FC<ProductSalesReportTableProps> = ({
                   <Table
                     dataSource={record.products || []}
                     columns={dateProductColumns}
-                    rowKey={(p: any) => `${record.date}-${p.orderId || p.orderNumber}-${p.productId}`}
+                    rowKey={(p: any) => `${record.date}-${p.orderId || p.invoiceNumber}-${p.productId}`}
                     pagination={false}
                     size="small"
                     className="bg-gray-50 rounded-lg"
