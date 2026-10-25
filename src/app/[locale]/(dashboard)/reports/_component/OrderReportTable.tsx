@@ -59,7 +59,8 @@ const OrderReportTable = ({
               <th className="px-2 py-1">SL</th>
               <th className="px-2 py-1">Date</th>
               <th className="px-2 py-1">Status</th>
-              <th className="px-2 py-1">Order ID</th>
+              <th className="px-2 py-1">Invoice Number</th>
+              <th className="px-2 py-1">Order Number</th>
               <th className="px-2 py-1">Source</th>
               <th className="px-2 py-1">Delivery Partner</th>
               <th className="px-2 py-1">Delivery Charge</th>
@@ -67,6 +68,9 @@ const OrderReportTable = ({
               <th className="px-2 py-1">Total Price</th>
               <th className="px-2 py-1">Paid Amount</th>
               <th className="px-2 py-1">Payment Method</th>
+              <th className="px-2 py-1">Payment Status</th>
+              <th className="px-2 py-1">Transaction ID</th>
+              <th className="px-2 py-1">Transaction History</th>
               <th className="px-2 py-1">Due Amount</th>
             </tr>
           </thead>
@@ -80,6 +84,7 @@ const OrderReportTable = ({
                   <td className="px-2 py-1">
                     <Tag color="blue">{row?.invoiceNumber}</Tag>
                   </td>
+                  <td className="px-2 py-1"><Tag>{row?.orderNumber || "-"}</Tag></td>
                   <td className="px-2 py-1">{row?.orderSource || "-"}</td>
                   <td className="px-2 py-1">{row?.partner?.partnerName || "-"}</td>
                   <td className="px-2 py-1">{formatCurrency(row?.shippingCharge)}</td>
@@ -87,12 +92,15 @@ const OrderReportTable = ({
                   <td className="px-2 py-1">{formatCurrency(row?.totalPrice)}</td>
                   <td className="px-2 py-1 text-green-600">{formatCurrency(row?.totalPaidAmount)}</td>
                   <td className="px-2 py-1">{row?.paymentMethod || "-"}</td>
+                  <td className="px-2 py-1">{row?.paymentStatus || "-"}</td>
+                  <td className="px-2 py-1">{row?.paymentHistory?.map((item: any) => item.transactionId).filter(Boolean).join(", ") || "-"}</td>
+                  <td className="px-2 py-1 whitespace-pre-line text-left">{row?.paymentHistory?.map((item: any) => `${dayjs(item.createdAt).format("DD-MM-YYYY HH:mm")} | ${item.paymentMethod || "-"} | ${item.paidAmount || 0} | ${item.transactionId || "-"} | ${item.paymentStatus || "-"}`).join("\n") || "-"}</td>
                   <td className="px-2 py-1 text-red-500">{formatCurrency(row?.totalReceiveAbleAmount)}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={12} className="py-4 text-center text-gray-500">
+                <td colSpan={16} className="py-4 text-center text-gray-500">
                   No records found
                 </td>
               </tr>
