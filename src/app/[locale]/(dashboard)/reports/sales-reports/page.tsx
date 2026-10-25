@@ -18,6 +18,15 @@ const DATE_FIELD_OPTIONS = [
   { label: "Packing Date", value: "packingTime" },
 ];
 
+const PAYMENT_METHOD_OPTIONS = [
+  { label: "Cash on Delivery", value: "COD" },
+  { label: "bKash", value: "bKash" },
+  { label: "Nagad", value: "Nagad" },
+  { label: "Rocket", value: "Rocket" },
+  { label: "Bank Payment", value: "Bank Payment" },
+  { label: "Cash", value: "Cash" },
+];
+
 // Sentinel value for the "All" chip in every multi-select filter
 const ALL_VALUE = "__ALL__";
 
@@ -76,6 +85,7 @@ const Page = () => {
   const [agentIds, setAgentId] = useState<string[]>([]);
   const [warehosueIds, setWarehouseId] = useState<string[]>([]);
   const [courierIds, setCourierId] = useState<string[]>([]);
+  const [paymentMethodIds, setPaymentMethodIds] = useState<string[]>([]);
   const [dateField, setDateField] = useState<string>("createdAt");
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -112,6 +122,7 @@ const Page = () => {
         agentIds: agentIds,
         locationId: warehosueIds,
         currier: courierIds,
+        paymentMethodIds,
         dateField,
       }).unwrap();
       setData(result);
@@ -221,6 +232,22 @@ const Page = () => {
                 loading={courierLoading}
               />
             </FilterField>
+
+            <FilterField label="Payment Method">
+              <Select
+                mode="multiple"
+                maxTagCount="responsive"
+                allowClear
+                className="border_less_select"
+                placeholder="Select payment method"
+                value={getDisplayValue(paymentMethodIds)}
+                onChange={(vals) =>
+                  handleMultiSelectChange(vals, paymentMethodIds, setPaymentMethodIds)
+                }
+                style={{ width: "100%", borderRadius: 0 }}
+                options={withAllOption(PAYMENT_METHOD_OPTIONS)}
+              />
+            </FilterField>
           </div>
 
           <div className="flex justify-end gap-2 mt-2">
@@ -239,6 +266,7 @@ const Page = () => {
                 agentIds: agentIds,
                 locationId: warehosueIds,
                 currier: courierIds,
+                paymentMethodIds,
                 dateField,
               }}
             />
@@ -260,6 +288,7 @@ const Page = () => {
             agentIds={agentIds}
             warehosueIds={warehosueIds}
             courierIds={courierIds}
+            paymentMethodIds={paymentMethodIds}
             dateField={dateField}
           />
         )}
