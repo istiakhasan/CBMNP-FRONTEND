@@ -97,18 +97,10 @@ const Page = () => {
   const { data: statusOptions, isLoading: statusLoading } = useGetAllStatusQuery({ label: "all" });
 
   const handleStartChange = (date: Dayjs | null) => {
-    if (endDate && date && endDate.diff(date, "month", true) > 1) {
-      message.error("Date range cannot be more than 1 month");
-      return;
-    }
     setStartDate(date);
   };
 
   const handleEndChange = (date: Dayjs | null) => {
-    if (startDate && date && date.diff(startDate, "month", true) > 1) {
-      message.error("Date range cannot be more than 1 month");
-      return;
-    }
     setEndDate(date);
   };
 
