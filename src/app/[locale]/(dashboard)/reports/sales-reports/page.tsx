@@ -108,6 +108,8 @@ const Page = () => {
     setLoading(true);
     try {
       const result = await loadProcurement({
+        page: 1,
+        limit: 10,
         startDate: startDate || dayjs(),
         endDate: endDate || dayjs(),
         statusId: status,

@@ -135,7 +135,7 @@ const OrderReportTable = ({
             setData(result);
           }}
           showSizeChanger
-          pageSizeOptions={["5", "10", "20", "100", "500", "1000"]}
+          pageSizeOptions={["5", "10", "20", "50", "100"]}
         />
       </div>
     </div>
