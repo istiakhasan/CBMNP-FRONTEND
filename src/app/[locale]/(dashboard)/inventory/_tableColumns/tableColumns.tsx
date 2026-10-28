@@ -52,8 +52,8 @@ export const inventoryColumns = [
                     <tr className="bg-gray-100 text-sm">
                       <th className="border border-gray-200 px-3 py-2 text-center font-semibold text-gray-700 w-12">SL</th>
                       <th className="border border-gray-200 px-3 py-2 text-left font-semibold text-gray-700">Warehouse Location</th>
-                      <th className="border border-gray-200 px-3 py-2 text-center font-bold text-emerald-700">Available Stock</th>
-                      <th className="border border-gray-200 px-3 py-2 text-left font-semibold text-gray-700">Order Pipeline (Queue / Proc / Hold)</th>
+                      <th className="border border-gray-200 px-3 py-2 text-center font-bold text-emerald-700">Physical / Sellable Stock</th>
+                      <th className="border border-gray-200 px-3 py-2 text-left font-semibold text-gray-700">Reservations (Pending / Queue / Proc / Hold)</th>
                       <th className="border border-gray-200 px-3 py-2 text-left font-semibold text-gray-700">Loss / Shrinkage</th>
                     </tr>
                   </thead>
@@ -62,6 +62,8 @@ export const inventoryColumns = [
                       const q = item?.orderQue || 0;
                       const p = item?.processing || 0;
                       const h = item?.hoildQue || 0;
+                      const pending = Number(item?.pendingReservedQuantity || 0);
+                      const sellable = Math.max(0, Number(item?.quantity || 0) - pending - Number(q) - Number(p) - Number(h) - Number(item?.wastageQuantity || 0) - Number(item?.expiredQuantity || 0));
                       const w = item?.wastageQuantity || 0;
                       const e = item?.expiredQuantity || 0;
 
@@ -80,11 +82,13 @@ export const inventoryColumns = [
                           </td>
                           <td className="border border-gray-200 px-3 py-2.5 text-center">
                             <span className="font-extrabold text-emerald-700 text-base">
-                              {item?.quantity || 0} <span className="text-xs font-semibold text-emerald-600">pcs</span>
+                              {item?.quantity || 0} <span className="text-xs font-semibold text-emerald-600">physical</span>
                             </span>
+                            <span className="block text-xs font-bold text-sky-700 mt-1">{sellable} sellable</span>
                           </td>
                           <td className="border border-gray-200 px-3 py-2.5">
                             <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="inline-flex items-center gap-1 bg-cyan-50 text-cyan-800 border border-cyan-200 px-2 py-0.5 rounded text-xs font-semibold"><span className="text-[10px] text-cyan-500 font-medium">Pending:</span> {pending}</span>
                               <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-800 border border-blue-200 px-2 py-0.5 rounded text-xs font-semibold">
                                 <span className="text-[10px] text-blue-500 font-medium">Queue:</span> {q}
                               </span>
@@ -125,16 +129,14 @@ export const inventoryColumns = [
     },
   },
   {
-    title: "Available Stock",
+    title: "Physical / Sellable",
     key: "available_stock",
     width: "15%",
     //@ts-ignore
     render: (text, record) => {
-      return (
-        <span className="font-extrabold text-emerald-700 text-base block">
-          {record?.stock || 0} <span className="text-xs font-semibold text-emerald-600">pcs</span>
-        </span>
-      );
+      const physical = Number(record?.stock || 0);
+      const sellable = Math.max(0, physical - Number(record?.pendingReservedQuantity || 0) - Number(record?.orderQue || 0) - Number(record?.processing || 0) - Number(record?.hoildQue || 0) - Number(record?.wastageQuantity || 0) - Number(record?.expiredQuantity || 0));
+      return <div><span className="font-extrabold text-emerald-700 text-base block">{physical} <span className="text-xs font-semibold text-emerald-600">physical</span></span><span className="text-xs font-bold text-sky-700">{sellable} sellable</span></div>;
     },
   },
   {
@@ -146,8 +148,10 @@ export const inventoryColumns = [
       const q = record?.orderQue || 0;
       const p = record?.processing || 0;
       const h = record?.hoildQue || 0;
+      const pending = record?.pendingReservedQuantity || 0;
       return (
         <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="inline-flex items-center gap-1 bg-cyan-50 text-cyan-800 border border-cyan-200 px-2 py-0.5 rounded text-xs font-semibold" title="Pending order reservation"><span className="text-[10px] text-cyan-500">Pending:</span> {pending}</span>
           <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-800 border border-blue-200 px-2 py-0.5 rounded text-xs font-semibold" title="Order Queue">
             <span className="text-[10px] text-blue-500">Queue:</span> {q}
           </span>

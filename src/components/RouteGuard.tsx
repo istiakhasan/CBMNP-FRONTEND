@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { Row, Space, Spin } from "antd";
 import { useGetUserByIdQuery } from "@/redux/api/usersApi";
-import { getUserInfo } from "@/service/authService";
+import { getUserInfo, isLoggedIn } from "@/service/authService";
 import { getRequiredPermission, MASTER_ADMIN_ROLE } from "@/lib/route-permissions";
 
 interface RouteGuardProps {
@@ -14,6 +14,7 @@ interface RouteGuardProps {
 
 const RouteGuard = ({ children }: RouteGuardProps) => {
   const userInfo: any = getUserInfo();
+  const loggedIn = isLoggedIn();
   const local = useLocale();
   const router = useRouter();
   const pathName = usePathname();
@@ -49,13 +50,17 @@ const RouteGuard = ({ children }: RouteGuardProps) => {
   const isAuthorized = isMasterAdmin || hasRoleAccess || !requiredPermission || permission.includes(requiredPermission);
 
   useEffect(() => {
+    if (!loggedIn) {
+      router.replace(`/${local}/login`);
+      return;
+    }
     if (isLoading || isFetching) return;
     if (!isAuthorized) {
       router.replace(`/${local}/unauthorized`);
     }
-  }, [isAuthorized, isLoading, isFetching, local, router]);
+  }, [isAuthorized, isLoading, isFetching, local, loggedIn, router]);
 
-  if (isLoading || isFetching || !isAuthorized) {
+  if (!loggedIn || isLoading || isFetching || !isAuthorized) {
     return (
       <Row justify="center" align="middle" style={{ height: "70vh" }}>
         <Space>

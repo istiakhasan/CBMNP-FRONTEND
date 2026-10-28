@@ -24,7 +24,7 @@ const LoginPage = () => {
       const res = await handleUserLogin(data).unwrap();
       if (res?.data?.accessToken) {
         const result: { role: string } = jwtDecode(res?.data?.accessToken);
-        storeUserInfo({ accessToken: res?.data?.accessToken });
+        storeUserInfo({ accessToken: res?.data?.accessToken, refreshToken: res?.data?.refreshToken });
         router.push(`/${local}/dashboard`);
       }
     } catch (error: any) {

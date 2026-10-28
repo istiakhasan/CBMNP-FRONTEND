@@ -100,7 +100,10 @@ const Page = () => {
       key: "stockOverview",
       render: (_: any, record: any) => {
         const stock = warehouseStock.get(record.id);
-        return <div className="min-w-[130px] text-xs"><div className="font-semibold text-slate-700">{Number(stock?.availableQuantity || 0).toLocaleString()} available</div><div className="mt-0.5 text-slate-500">{Number(stock?.skuCount || 0).toLocaleString()} SKUs · {Number(stock?.allocatedQuantity || 0).toLocaleString()} allocated</div></div>;
+        const physical = Number(stock?.availableQuantity || 0);
+        const reserved = Number(stock?.pendingReservedQuantity || 0) + Number(stock?.allocatedQuantity || 0);
+        const sellable = Math.max(0, physical - reserved - Number(stock?.expiredQuantity || 0));
+        return <div className="min-w-[150px] text-xs"><div className="font-semibold text-slate-700">{physical.toLocaleString()} physical · <span className="text-sky-700">{sellable.toLocaleString()} sellable</span></div><div className="mt-0.5 text-slate-500">{Number(stock?.pendingReservedQuantity || 0).toLocaleString()} pending · {Number(stock?.allocatedQuantity || 0).toLocaleString()} allocated</div></div>;
       },
     },
     {
@@ -162,6 +165,7 @@ const Page = () => {
             ["Warehouses", overview?.totalWarehouses, "ri-building-2-line", "bg-blue-50 text-blue-600"],
             ["Active SKUs", overview?.totalSkus, "ri-stack-line", "bg-violet-50 text-violet-600"],
             ["Available stock", overview?.availableQuantity, "ri-inbox-archive-line", "bg-emerald-50 text-emerald-600"],
+            ["Pending reserved", overview?.pendingReservedQuantity, "ri-time-line", "bg-cyan-50 text-cyan-600"],
             ["Allocated stock", overview?.allocatedQuantity, "ri-route-line", "bg-amber-50 text-amber-600"],
             ["Expired stock", overview?.expiredQuantity, "ri-error-warning-line", "bg-rose-50 text-rose-600"],
           ].map(([label, value, icon, tone]: any) => <Card key={label} className="!border-slate-200 shadow-sm" bodyStyle={{ padding: 16 }}><div className="flex items-center justify-between"><div><p className="m-0 text-xs font-medium text-slate-500">{label}</p><p className="mb-0 mt-1 text-xl font-bold text-slate-800">{Number(value || 0).toLocaleString()}</p></div><span className={`grid h-10 w-10 place-items-center rounded-xl text-lg ${tone}`}><i className={icon} /></span></div></Card>)}

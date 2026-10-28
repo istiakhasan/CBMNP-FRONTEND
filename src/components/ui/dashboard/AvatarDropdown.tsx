@@ -6,8 +6,7 @@ import { DownOutlined } from "@ant-design/icons";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import AvatarImage from "../../../assets/images/icons/avatar.png";
-import { removeUserInfo } from "@/service/authService";
-import { authKey } from "@/constants/storageKey";
+import { clearAuth } from "@/service/authService";
 import { useGetProfileInfoQuery } from "@/redux/api/authApi";
 import { getBaseUrl } from "@/helpers/config/envConfig";
 
@@ -47,7 +46,7 @@ const AvatarDropdown = () => {
         <div className="min-w-[200px]">
           <h1
             onClick={() => {
-              removeUserInfo(authKey);
+              clearAuth();
               router.push("/login");
               message.success("Sign out successfully...");
             }}

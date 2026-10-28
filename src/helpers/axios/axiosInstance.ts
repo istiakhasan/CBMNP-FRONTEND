@@ -52,7 +52,7 @@
 
 // export { instance };
 import { authKey } from "@/constants/storageKey";
-import { getNewAccessToken, getUserInfo, removeUserInfo } from "@/service/authService";
+import { clearAuth, getNewAccessToken, getUserInfo } from "@/service/authService";
 import { getFormLocalStorage, setToLocalStorage } from "@/util/local-storage";
 import axios from "axios";
 
@@ -91,7 +91,9 @@ instance.interceptors.response.use(
   async function (error) {
     const config = error?.config;
 
-    if (error?.response?.status === 419 && !config?.sent) {
+    const status = error?.response?.status;
+    const isRefreshRequest = String(config?.url || "").includes("/auth/refresh-token");
+    if ([401, 403, 419].includes(status) && !config?.sent && !isRefreshRequest) {
       config.sent = true;
       try {
         const response = await getNewAccessToken();
@@ -119,8 +121,11 @@ instance.interceptors.response.use(
 );
 
 function handleLogout() {
-  // removeUserInfo(authKey);
-  // window.location.href = "/login";
+  clearAuth();
+  if (typeof window !== "undefined") {
+    const locale = window.location.pathname.split("/").filter(Boolean)[0] || "en";
+    window.location.replace(`/${locale}/login`);
+  }
 }
 
 export { instance };

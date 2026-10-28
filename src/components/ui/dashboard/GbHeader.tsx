@@ -3,7 +3,7 @@
 
 import { Avatar, Badge, MenuProps, Space, Tooltip } from "antd";
 import GbDropdown from "./GbDropdown";
-import { getUserInfo, removeUserInfo } from "@/service/authService";
+import { clearAuth, getUserInfo } from "@/service/authService";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { useDispatch, useSelector } from "react-redux";
@@ -63,7 +63,7 @@ const GbHeader = ({ title }: { title?: string }) => {
               // Do not allow any response cached for the previous account to
               // remain visible during the next account's session.
               dispatch(baseApi.util.resetApiState());
-              removeUserInfo("token");
+              clearAuth();
               router.push(`/${local}/login`);
             }}
             className="flex gap-2 text-[14px] text-[#144753] pr-[15px] font-[500] items-center"
