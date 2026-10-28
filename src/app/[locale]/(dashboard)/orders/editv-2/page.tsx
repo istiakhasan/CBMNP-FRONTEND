@@ -12,6 +12,7 @@ import { message } from "antd";
 import { getUserInfo } from "@/service/authService";
 import {
   useCreateOrderMutation,
+  useChangeOrderStatusMutation,
   useGetOrderByIdQuery,
   useUpdateOrderMutation,
 } from "@/redux/api/orderApi";
@@ -33,6 +34,7 @@ const Page = () => {
   const userInfo: any = getUserInfo();
   const params = useSearchParams();
   const [orderUpdateMutation,{ isLoading: isUpdatingOrder }] = useUpdateOrderMutation();
+  const [changeOrderStatus] = useChangeOrderStatusMutation();
   const editAbleCustomerId = params.get("customerId");
   const editAbleOrderId = params.get("orderId");
   const { data: customer, isLoading: customerLoading } =
@@ -256,14 +258,23 @@ const Page = () => {
       };
     }),
   };
-  if (orderDetails?.statusByAgent?.value) {
-    order["statusId"] = orderDetails?.statusByAgent?.value;
-  }
-
   const res: any = await orderUpdateMutation({
     data: order,
     id: orderData?.id,
   }).unwrap();
+
+  const requestedStatusId = orderDetails?.statusByAgent?.value
+    ? Number(orderDetails.statusByAgent.value)
+    : Number(orderData?.statusId);
+  const currentStatusId = Number(orderData?.statusId);
+  if (requestedStatusId && requestedStatusId !== currentStatusId) {
+    await changeOrderStatus({
+      orderIds: [orderData.id],
+      currentStatus: currentStatusId,
+      statusId: requestedStatusId,
+      agentId: userInfo?.userId,
+    }).unwrap();
+  }
   console.log(res, "res");
 
   if (res) {
