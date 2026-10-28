@@ -28,6 +28,7 @@ import {
   DeleteOutlined,
   ReloadOutlined,
   SendOutlined,
+  EditOutlined,
   EyeOutlined,
   InboxOutlined,
   AuditOutlined,
@@ -44,6 +45,7 @@ import {
   useGetAllGarmentsOrdersListQuery,
   useGetAllGarmentsBomsListQuery,
   useCreateGarmentsPoMutation,
+  useUpdateGarmentsPoMutation,
   useSubmitGarmentsPoCheckMutation,
   useDeleteGarmentsPoMutation,
 } from "@/redux/api/garmentsApi";
@@ -63,6 +65,7 @@ function GarmentsPoContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [selectedBom, setSelectedBom] = useState<any>(null);
+  const [editingPoId, setEditingPoId] = useState<string | null>(null);
 
   const [form] = Form.useForm();
 
@@ -79,6 +82,7 @@ function GarmentsPoContent() {
   const bomsList = bomsRes?.data || [];
 
   const [createPo, { isLoading: isCreating }] = useCreateGarmentsPoMutation();
+  const [updatePo, { isLoading: isUpdating }] = useUpdateGarmentsPoMutation();
   const [submitCheck, { isLoading: isSubmitting }] = useSubmitGarmentsPoCheckMutation();
   const [deletePo] = useDeleteGarmentsPoMutation();
 
@@ -149,6 +153,7 @@ function GarmentsPoContent() {
   };
 
   const handleOpenModal = () => {
+    setEditingPoId(null);
     form.resetFields();
     setSelectedOrder(null);
     setSelectedBom(null);
@@ -177,6 +182,23 @@ function GarmentsPoContent() {
     setIsModalOpen(true);
   };
 
+  const handleEdit = (po: any) => {
+    if (po.status !== "draft") return;
+    setEditingPoId(po.id);
+    setSelectedOrder(ordersList.find((order: any) => order.id === po.orderId) || null);
+    setSelectedBom(bomsList.find((bom: any) => bom.id === po.bomId) || null);
+    form.setFieldsValue({
+      ...po,
+      expectedDeliveryDate: po.expectedDeliveryDate || po.deliveryDate ? dayjs(po.expectedDeliveryDate || po.deliveryDate) : null,
+      items: (po.items || []).map((item: any) => ({
+        ...item,
+        quantity: Number(item.quantity ?? item.qty ?? 0),
+        unitPrice: Number(item.unitPrice ?? item.unitCost ?? 0),
+      })),
+    });
+    setIsModalOpen(true);
+  };
+
   useEffect(() => {
     if (preSelectedOrderId && ordersList.length > 0 && !isModalOpen) {
       handleOpenModal();
@@ -200,9 +222,15 @@ function GarmentsPoContent() {
           : null,
       };
 
-      await createPo(payload).unwrap();
-      message.success("Purchase Order created successfully in draft status");
+      if (editingPoId) {
+        await updatePo({ id: editingPoId, data: payload }).unwrap();
+        message.success("Draft purchase order updated successfully");
+      } else {
+        await createPo(payload).unwrap();
+        message.success("Purchase Order created successfully in draft status");
+      }
       setIsModalOpen(false);
+      setEditingPoId(null);
       form.resetFields();
       refetch();
     } catch (err: any) {
@@ -287,6 +315,13 @@ function GarmentsPoContent() {
       key: "actions",
       render: (_: any, record: any) => (
         <Space size="small">
+          {record.status === "draft" && canCreatePo && (
+            <Tooltip title="Edit Draft Purchase Order">
+              <Button size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
+                Edit
+              </Button>
+            </Tooltip>
+          )}
           {record.status === "draft" && canCheckPo && (
             <Tooltip title="Submit for Checker Verification">
               <Button
@@ -423,12 +458,12 @@ function GarmentsPoContent() {
         />
       </Card>
 
-      {/* Create PO Modal */}
+      {/* Draft PO create/edit modal */}
       <Modal
         title={
           <div className="flex items-center gap-2 text-purple-900">
             <BarcodeOutlined className="text-purple-600 text-lg" />
-            <span>Create Garments Purchase Order (Fabric, Trims & Accessories)</span>
+            <span>{editingPoId ? "Edit Draft Purchase Order" : "Create Garments Purchase Order (Fabric, Trims & Accessories)"}</span>
           </div>
         }
         open={isModalOpen}
@@ -645,8 +680,8 @@ function GarmentsPoContent() {
 
           <div className="flex justify-end gap-2 mt-4">
             <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
-            <Button type="primary" htmlType="submit" loading={isCreating} className="bg-purple-600">
-              Save Draft PO
+            <Button type="primary" htmlType="submit" loading={isCreating || isUpdating} className="bg-purple-600">
+              {editingPoId ? "Update Draft PO" : "Save Draft PO"}
             </Button>
           </div>
         </Form>
