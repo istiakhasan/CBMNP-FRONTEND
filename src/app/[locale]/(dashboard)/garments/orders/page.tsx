@@ -30,6 +30,7 @@ import {
   TagOutlined,
   ExperimentOutlined,
   ShoppingOutlined,
+  PrinterOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { Link } from "@/i18n/routing";
@@ -83,12 +84,19 @@ export default function BuyerOrdersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<any>(null);
   const [currentOrderType, setCurrentOrderType] = useState<"BULK" | "SAMPLE">("BULK");
+  const [printOrder, setPrintOrder] = useState<any>(null);
 
   // Dynamic Item Category state
   const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORIES);
   const [newCategoryName, setNewCategoryName] = useState("");
 
   const [form] = Form.useForm();
+
+  useEffect(() => {
+    if (!printOrder) return;
+    const timer = window.setTimeout(() => window.print(), 100);
+    return () => window.clearTimeout(timer);
+  }, [printOrder]);
 
   const { data: res, isLoading, refetch } = useGetGarmentsOrdersQuery({
     page,
@@ -359,6 +367,9 @@ export default function BuyerOrdersPage() {
       key: "actions",
       render: (_: any, record: any) => (
         <Space size="middle">
+          <Tooltip title="Print Buyer Order">
+            <Button size="small" icon={<PrinterOutlined />} onClick={() => setPrintOrder(record)}>Print</Button>
+          </Tooltip>
           {canCreateBom && (
             <Tooltip title="Create / View BOM">
               <Link href={`/garments/bom?orderId=${record.id}`}>
@@ -472,6 +483,49 @@ export default function BuyerOrdersPage() {
           }}
         />
       </Card>
+
+      {printOrder && (() => {
+        const quantity = Number(printOrder.orderQuantity || 0);
+        const unitPrice = Number(printOrder.unitPrice || 0);
+        const currency = printOrder.currency || "USD";
+        const deadline = printOrder.orderType === "SAMPLE" ? printOrder.sampleDeadline || printOrder.deliveryDate : printOrder.deliveryDate;
+        return (
+          <div className="buyer-order-inline-print">
+            <div className="print-header">
+              <div><div className="print-date">{dayjs().format("DD MMM YYYY, hh:mm A")}</div><h1>Buyer Order</h1></div>
+              <div className="print-brand"><strong>Tabaya</strong><span>Garments ERP</span></div>
+            </div>
+            <div className="print-info-grid">
+              <div>
+                <p><b>Company</b><strong>Tabaya</strong><span>Bangladesh</span></p>
+                <p><b>Order Date</b><strong>{dayjs(printOrder.createdAt).format("YYYY-MM-DD")}</strong></p>
+                <p><b>Buyer Order No.</b><strong>{printOrder.orderNo || printOrder.orderNumber || "—"}</strong></p>
+                <p><b>Buyer</b><strong>{printOrder.buyerName || "—"}</strong></p>
+              </div>
+              <div>
+                <p><b>Style Name</b><strong>{printOrder.styleName || "—"}</strong></p>
+                <p><b>Order Type</b><strong>{printOrder.orderType === "SAMPLE" ? printOrder.sampleType || "Sample" : "Bulk Production"}</strong></p>
+                <p><b>Category</b><strong>{printOrder.itemType || "Apparel"}</strong></p>
+                <p><b>Season</b><strong>{printOrder.season || "General"}</strong></p>
+                <p><b>Delivery / Deadline</b><strong>{deadline ? dayjs(deadline).format("YYYY-MM-DD") : "To be confirmed"}</strong></p>
+              </div>
+            </div>
+            <table className="print-items"><thead><tr><th>#</th><th>Description</th><th>Unit</th><th>Qty</th><th>Amount</th></tr></thead><tbody><tr><td>1</td><td><strong>{printOrder.styleName || "Garments Order"}</strong><small>{printOrder.itemType || "Apparel"} · {printOrder.season || "General"}</small></td><td>PCS</td><td>{quantity.toLocaleString()}</td><td>{currency} {(quantity * unitPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td></tr></tbody></table>
+            <div className="print-summary"><div><b>Comments / Special Instructions</b><span>{printOrder.remarks || "—"}</span></div><div><p>Unit Price / FOB <strong>{currency} {unitPrice.toFixed(2)}</strong></p><p>Total Quantity <strong>{quantity.toLocaleString()} pcs</strong></p><p>Status <strong>{printOrder.sampleStatus || printOrder.status || "pending"}</strong></p><p className="total">Total <strong>{currency} {(quantity * unitPrice).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p></div></div>
+            <div className="print-signatures"><div><span>Prepared by</span></div><div><span>Checked by</span></div></div>
+          </div>
+        );
+      })()}
+      <style jsx global>{`
+        .buyer-order-inline-print { display: none; }
+        @media print {
+          @page { size: A4 portrait; margin: 10mm; }
+          body * { visibility: hidden !important; }
+          .buyer-order-inline-print, .buyer-order-inline-print * { visibility: visible !important; }
+          .buyer-order-inline-print { display: block !important; position: absolute; left: 0; top: 0; width: 100%; min-height: 277mm; color: #1e293b; font-family: Arial, sans-serif; font-size: 17px; }
+          .print-header { display:flex; justify-content:space-between; border-bottom:1px solid #94a3b8; padding-bottom:20px; }.print-header h1{margin:30px 0 0;font-size:31px}.print-date{font-size:15px}.print-brand{display:flex; flex-direction:column; align-items:flex-end; gap:8px; color:#64748b;font-size:15px}.print-info-grid{display:grid;grid-template-columns:40% 40%;justify-content:space-between;padding:28px 0}.print-info-grid>div:last-child{text-align:right}.print-info-grid p{margin:0 0 16px;display:flex;flex-direction:column}.print-info-grid b,.print-summary b{font-size:14px;text-transform:uppercase;letter-spacing:.5px;color:#475569;margin-bottom:5px}.print-info-grid strong{font-size:17px}.print-info-grid span{font-size:15px}.print-items{width:100%;border-collapse:collapse;border-top:1px solid #94a3b8;border-bottom:1px solid #94a3b8}.print-items th{padding:13px 5px;text-align:left;font-size:14px;text-transform:uppercase;color:#475569;border-bottom:1px solid #cbd5e1}.print-items td{padding:16px 5px;vertical-align:top;font-size:16px}.print-items th:nth-last-child(-n+2),.print-items td:nth-last-child(-n+2){text-align:right}.print-items small{display:block;margin-top:4px;font-size:14px}.print-summary{display:grid;grid-template-columns:1fr 310px;gap:50px;padding:26px 0}.print-summary>div{display:flex;flex-direction:column;gap:10px}.print-summary p{display:flex;justify-content:space-between;margin:0;font-size:16px}.print-summary .total{border-top:1px solid #64748b;padding-top:9px;font-size:18px}.print-signatures{position:absolute;left:0;right:0;bottom:0;display:grid;grid-template-columns:40% 40%;justify-content:space-between;border-top:1px solid #cbd5e1;padding-top:55px;font-size:16px}.print-signatures div{border-top:1px solid #475569;padding-top:7px;font-weight:bold}
+        }
+      `}</style>
 
       {/* Modal for Create/Edit */}
       <Modal
