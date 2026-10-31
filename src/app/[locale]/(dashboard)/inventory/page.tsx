@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Button, Drawer, Input, Pagination, Select, Table, Tag } from "antd";
+import { Button, Drawer, Input, message, Pagination, Select, Table, Tag } from "antd";
 import { debounce } from "lodash";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
@@ -13,6 +13,7 @@ import {
   useLazyLoadTransactionByIdQuery,
   useLoadAllTransactionQuery,
   useWarehouseWiseProductStockQuery,
+  useRevalidateStockMutation,
 } from "@/redux/api/inventoryApi";
 import {
   inventoryColumns,
@@ -32,6 +33,8 @@ const Page = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [logDrawerOpen, setLogDrawerOpen] = useState(false);
+  const [revalidateStock, { isLoading: isRevalidatingStock }] =
+    useRevalidateStockMutation();
 
   const query = useMemo(
     () => ({
@@ -90,6 +93,19 @@ const Page = () => {
     setSearchTerm("");
     setwarehouseId("");
     setMovementType("");
+  };
+
+  const handleRevalidateStock = async () => {
+    try {
+      const result = await revalidateStock(undefined).unwrap();
+      message.success(
+        `Stock counters fixed: ${result?.masterChanges || 0} products and ${result?.warehouseChanges || 0} warehouse rows updated.`,
+      );
+    } catch (error: any) {
+      message.error(
+        error?.data?.message || "Stock revalidation failed. No changes were applied.",
+      );
+    }
   };
 
   const openProductLog = (record: any) => {
@@ -166,6 +182,16 @@ const Page = () => {
               {label}
             </Button>
           ))}
+          <Button
+            type="primary"
+            loading={isRevalidatingStock}
+            disabled={isRevalidatingStock}
+            onClick={handleRevalidateStock}
+            className="ml-auto"
+            title="Rebuild pending, queue, processing and hold counters from active order statuses"
+          >
+            {isRevalidatingStock ? "Revalidating stock..." : "Revalidate stock"}
+          </Button>
         </div>
 
         {/* Filters and Table Container */}

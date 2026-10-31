@@ -11,6 +11,14 @@ export const inventoryApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [tagTypes.inventory],
     }),
+    revalidateStock: build.mutation({
+      query: () => ({
+        url: "/inventory/reconcile-order-counters",
+        method: "POST",
+        data: { confirm: "REBUILD_ORDER_COUNTERS" },
+      }),
+      invalidatesTags: [tagTypes.inventory],
+    }),
     loadAllInventory: build.query({
       query: (arg) => ({
         url: "/inventory",
@@ -70,5 +78,6 @@ export const {
     useLoadStockByProductIdAndLocationIdQuery,
     useLazyLoadStockByProductIdAndLocationIdQuery,
     useUpdateInventoryMutation,
+    useRevalidateStockMutation,
     useWarehouseWiseProductStockQuery
 } = inventoryApi;
