@@ -28,7 +28,7 @@ import { useLoadAllWarehouseOptionsQuery } from "@/redux/api/warehouse";
 import { useReactToPrint } from "react-to-print";
 import copyToClipboard from "@/components/ui/GbCopyToClipBoard";
 import { useLocale } from "next-intl";
-import Invoice from "./Invoice";
+import Invoice, { invoicePrintPageStyle } from "./Invoice";
 import BulkInvoice from "@/components/BulkInvoice";
 
 const StoreOrders = ({
@@ -70,6 +70,7 @@ const [bulkPrintLoading, setBulkPrintLoading] = useState(false);
   const bulkPrintRef = useRef(null);
   const handlePrintAll = useReactToPrint({
     content: () => bulkPrintRef.current,
+    pageStyle: invoicePrintPageStyle,
   });
   const router = useRouter();
   const [open, setOpen] = useState(false);

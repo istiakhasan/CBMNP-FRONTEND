@@ -25,6 +25,7 @@ import {
   PlusOutlined,
   DeleteOutlined,
   ReloadOutlined,
+  EditOutlined,
   CheckCircleOutlined,
   EyeOutlined,
   FileDoneOutlined,
@@ -42,6 +43,7 @@ import {
   useGetGarmentsBomsQuery,
   useGetAllGarmentsOrdersListQuery,
   useCreateGarmentsBomMutation,
+  useUpdateGarmentsBomMutation,
   useApproveGarmentsBomMutation,
   useDeleteGarmentsBomMutation,
   useGetGarmentsBomByIdQuery} from "@/redux/api/garmentsApi";
@@ -249,6 +251,7 @@ function GarmentsBomContent() {
   const [selectedOrderId, setSelectedOrderId] = useState<string>(preSelectedOrderId || "");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingBomId, setEditingBomId] = useState<string | null>(null);
   const [viewingBomId, setViewingBomId] = useState<string | null>(null);
 
   const [form] = Form.useForm();
@@ -268,9 +271,15 @@ function GarmentsBomContent() {
     { skip: !viewingBomId }
   );
   const viewingBom = viewingBomRes?.data;
+  const { data: editingBomRes } = useGetGarmentsBomByIdQuery(
+    editingBomId!,
+    { skip: !editingBomId }
+  );
+  const editingBom = editingBomRes?.data;
 
   // Mutations
   const [createBom, { isLoading: isCreating }] = useCreateGarmentsBomMutation();
+  const [updateBom, { isLoading: isUpdating }] = useUpdateGarmentsBomMutation();
   const [approveBom, { isLoading: isApproving }] = useApproveGarmentsBomMutation();
   const [deleteBom] = useDeleteGarmentsBomMutation();
 
@@ -300,6 +309,7 @@ function GarmentsBomContent() {
   }, [preSelectedOrderId, ordersList]);
 
   const handleOpenCreateModal = () => {
+    setEditingBomId(null);
     form.resetFields();
     if (selectedOrderId) {
       form.setFieldsValue({ buyerOrderId: selectedOrderId, orderId: selectedOrderId });
@@ -310,6 +320,32 @@ function GarmentsBomContent() {
     });
     setIsModalOpen(true);
   };
+
+  const handleOpenEditModal = (id: string) => {
+    form.resetFields();
+    setEditingBomId(id);
+    setIsModalOpen(true);
+  };
+
+  useEffect(() => {
+    if (!editingBom || !isModalOpen) return;
+
+    const orderId = editingBom.orderId || editingBom.order?.id || editingBom.buyerOrder?.id;
+    form.setFieldsValue({
+      orderId,
+      items: (editingBom.items || []).map((item: any) => ({
+        itemCategory: item.itemCategory,
+        itemName: item.itemName,
+        specification: item.specification,
+        unit: item.unit,
+        consumption: Number(item.consumption),
+        wastagePercent: Number(item.wastagePercent),
+        itemPrice: Number(item.itemPrice),
+      })),
+      remarks: editingBom.remarks,
+    });
+    if (orderId) handleOrderChange(orderId);
+  }, [editingBom, isModalOpen, form]);
 
   const handleSubmit = async (values: any) => {
     try {
@@ -325,9 +361,15 @@ function GarmentsBomContent() {
         remarks: values.remarks,
       };
 
-      await createBom(payload).unwrap();
-      message.success("BOM created successfully with auto consumption & cost formulas");
+      if (editingBomId) {
+        await updateBom({ id: editingBomId, data: payload }).unwrap();
+        message.success("BOM updated successfully with recalculated consumption & cost formulas");
+      } else {
+        await createBom(payload).unwrap();
+        message.success("BOM created successfully with auto consumption & cost formulas");
+      }
       setIsModalOpen(false);
+      setEditingBomId(null);
       form.resetFields();
       refetch();
     } catch (err: any) {
@@ -432,6 +474,16 @@ function GarmentsBomContent() {
             >
               View
             </Button>
+
+            {canCreateBom && (
+              <Button
+                size="small"
+                icon={<EditOutlined />}
+                onClick={() => handleOpenEditModal(record.id)}
+              >
+                Edit
+              </Button>
+            )}
 
             {!approved && canApproveBom && (
               <Popconfirm
@@ -555,11 +607,15 @@ function GarmentsBomContent() {
         />
       </Card>
 
-      {/* Modal for Create BOM */}
+      {/* Modal for creating and editing BOMs */}
       <Modal
-        title="Create Bill of Materials (BOM) Sheet"
+        title={editingBomId ? "Edit Bill of Materials (BOM) Sheet" : "Create Bill of Materials (BOM) Sheet"}
         open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
+        onCancel={() => {
+          setIsModalOpen(false);
+          setEditingBomId(null);
+          form.resetFields();
+        }}
         footer={null}
         width={1000}
       >
@@ -750,9 +806,13 @@ function GarmentsBomContent() {
           </Form.Item>
 
           <div className="flex justify-end gap-2 mt-4">
-            <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
-            <Button type="primary" htmlType="submit" loading={isCreating} className="bg-green-600">
-              Save BOM Sheet
+            <Button onClick={() => {
+              setIsModalOpen(false);
+              setEditingBomId(null);
+              form.resetFields();
+            }}>Cancel</Button>
+            <Button type="primary" htmlType="submit" loading={isCreating || isUpdating} className="bg-green-600">
+              {editingBomId ? "Update BOM Sheet" : "Save BOM Sheet"}
             </Button>
           </div>
         </Form>

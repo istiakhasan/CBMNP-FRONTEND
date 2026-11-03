@@ -4,6 +4,28 @@ import { useGetOrganizationByIdQuery } from "@/redux/api/organizationApi";
 import { AiOutlinePrinter } from "react-icons/ai";
 import Barcode from "react-barcode";
 
+// Used by both a single invoice and the "Print Selected Orders" flow. The
+// latter prints the BulkInvoice root, so it does not inherit a child hook's
+// pageStyle automatically.
+export const invoicePrintPageStyle = `
+  @page { size: 4in 6in; margin: 0; }
+  html, body {
+    width: 4in !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .invoice-page {
+    width: 4in !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    break-after: auto !important;
+    page-break-after: auto !important;
+  }
+`;
+
 const Invoice = ({ rowData }: any) => {
   const { data } = useGetOrganizationByIdQuery(undefined);
   const organization = data?.data;
@@ -21,12 +43,20 @@ const Invoice = ({ rowData }: any) => {
       day: "numeric",
     });
   };
+  // Keep meaningful decimals (e.g. 12.50), but never print a needless .00.
+  const formatPrintNumber = (value: unknown) => {
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) return value ?? "0";
+    return Number.isInteger(numericValue)
+      ? String(numericValue)
+      : String(Number(numericValue.toFixed(2)));
+  };
 
   const reactToPrintFn = useReactToPrint({
     content: () => contentRef.current,
-    pageStyle: `
+    pageStyle: `${invoicePrintPageStyle}
       @page {
-        size: 102mm 152mm;
+        size: 4in 6in;
         margin: 0;
       }
       html, body {
@@ -35,29 +65,28 @@ const Invoice = ({ rowData }: any) => {
         height: auto !important;
         min-height: 0 !important;
       }
-      .invoice-page {
-        width: 102mm !important;
-        margin: 0 !important;
-      }
       .invoice-page tr {
         break-inside: avoid;
         page-break-inside: avoid;
       }
       /* Compact the printed invoice without cutting off totals for longer orders. */
       .invoice-page {
-        padding: 2mm !important;
-        font-size: 8px !important;
+        padding: 1.5mm !important;
+        font-size: 5px !important;
       }
       .invoice-header { margin-bottom: 0.5mm !important; }
-      .invoice-header > div:first-child { font-size: 11px !important; }
+      .invoice-header > div:first-child { font-size: 7px !important; }
+      .invoice-header > div:not(:first-child) { font-size: 5px !important; }
       .invoice-barcode { padding: 0.4mm 0 0 !important; margin-bottom: 0.5mm !important; }
       .invoice-barcode svg { height: 20px !important; width: 105px !important; }
+      .invoice-barcode svg text { font-size: 5px !important; }
+      .invoice-barcode > div { font-size: 5px !important; }
       .invoice-customer { margin-bottom: 0.5mm !important; }
-      .invoice-customer > div { font-size: 7px !important; line-height: 1.1 !important; }
-      .invoice-customer > div:nth-child(2) { font-size: 8px !important; }
-      .invoice-items { width: 100% !important; table-layout: fixed; font-size: 7px !important; }
+      .invoice-customer > div { font-size: 5px !important; line-height: 1.03 !important; }
+      .invoice-customer > div:nth-child(2) { font-size: 6px !important; }
+      .invoice-items { width: 100% !important; table-layout: fixed; font-size: 5px !important; }
       .invoice-items th, .invoice-items td { padding-top: 0.3mm !important; padding-bottom: 0.3mm !important; }
-      .invoice-items th { font-size: 6.5px !important; }
+      .invoice-items th { font-size: 4.8px !important; }
       .invoice-items th:nth-child(1), .invoice-items td:nth-child(1) { width: 6% !important; }
       .invoice-items th:nth-child(2), .invoice-items td:nth-child(2) { width: 14% !important; white-space: nowrap; }
       .invoice-items th:nth-child(3), .invoice-items td:nth-child(3) { width: 38% !important; }
@@ -66,8 +95,8 @@ const Invoice = ({ rowData }: any) => {
       .invoice-items th:nth-child(6), .invoice-items td:nth-child(6) { width: 17% !important; white-space: nowrap; }
       .invoice-items td:nth-child(3) { line-height: 1.1 !important; }
       .invoice-totals { margin-top: 0.5mm !important; padding-top: 0.3mm !important; }
-      .invoice-totals > div { padding-top: 0.15mm !important; padding-bottom: 0.15mm !important; font-size: 7px !important; }
-      .invoice-footer { margin-top: 0.5mm !important; padding-top: 0.3mm !important; }
+      .invoice-totals > div { padding-top: 0.1mm !important; padding-bottom: 0.1mm !important; font-size: 5px !important; }
+      .invoice-footer { margin-top: 0.5mm !important; padding-top: 0.3mm !important; font-size: 5px !important; }
     `,
   });
 
@@ -297,7 +326,7 @@ const Invoice = ({ rowData }: any) => {
                     verticalAlign: "top",
                   }}
                 >
-                  {item?.productQuantity}
+                  {formatPrintNumber(item?.productQuantity)}
                 </td>
                 <td
                   style={{
@@ -306,7 +335,7 @@ const Invoice = ({ rowData }: any) => {
                     verticalAlign: "top",
                   }}
                 >
-                  ৳{item?.productPrice}
+                  ৳{formatPrintNumber(item?.productPrice)}
                 </td>
                 <td
                   style={{
@@ -316,7 +345,7 @@ const Invoice = ({ rowData }: any) => {
                     fontWeight: 700,
                   }}
                 >
-                  ৳{item?.subtotal}
+                  ৳{formatPrintNumber(item?.subtotal)}
                 </td>
               </tr>
             ))}
@@ -335,7 +364,7 @@ const Invoice = ({ rowData }: any) => {
             }}
           >
             <span>Subtotal</span>
-            <span>৳{rowData?.productValue}</span>
+            <span>৳{formatPrintNumber(rowData?.productValue)}</span>
           </div>
           <div
             style={{
@@ -347,7 +376,7 @@ const Invoice = ({ rowData }: any) => {
             }}
           >
             <span>Delivery Charge</span>
-            <span>৳{rowData?.shippingCharge}</span>
+            <span>৳{formatPrintNumber(rowData?.shippingCharge)}</span>
           </div>
           <div
             style={{
@@ -359,7 +388,7 @@ const Invoice = ({ rowData }: any) => {
             }}
           >
             <span>Grand Total</span>
-            <span>৳{rowData?.totalPrice}</span>
+            <span>৳{formatPrintNumber(rowData?.totalPrice)}</span>
           </div>
           <div
             style={{
@@ -375,7 +404,7 @@ const Invoice = ({ rowData }: any) => {
             }}
           >
             <span>Due</span>
-            <span>৳{rowData?.totalReceiveAbleAmount}</span>
+            <span>৳{formatPrintNumber(rowData?.totalReceiveAbleAmount)}</span>
           </div>
         </div>
 

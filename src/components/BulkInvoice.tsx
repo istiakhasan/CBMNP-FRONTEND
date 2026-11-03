@@ -4,7 +4,11 @@ const BulkInvoice = ({ orders }: { orders: any[] }) => {
   return (
     <div>
       {orders.map((order, index) => (
-        <div key={order?.id} style={{ pageBreakAfter: "always" }}>
+        // Force a new sheet between invoices, never after the final one.
+        <div
+          key={order?.id}
+          style={index < orders.length - 1 ? { breakAfter: "page", pageBreakAfter: "always" } : undefined}
+        >
           <Invoice rowData={order} />
         </div>
       ))}

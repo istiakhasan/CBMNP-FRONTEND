@@ -33,7 +33,7 @@ import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import React, { useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
-import Invoice from "./Invoice";
+import Invoice, { invoicePrintPageStyle } from "./Invoice";
 import GeneratePreviewButton from "./GeneratePreviewButton";
 import BulkChangeOrders from "./BulkChangeOrders";
 import BulkInvoice from "@/components/BulkInvoice";
@@ -383,6 +383,7 @@ const ApprovedOrders = ({
   const bulkPrintRef = useRef(null);
   const handlePrintAll = useReactToPrint({
     content: () => bulkPrintRef.current,
+    pageStyle: invoicePrintPageStyle,
   });
   const handleBulkPrintClick = async () => {
     if (!selectedOrders?.length) {
