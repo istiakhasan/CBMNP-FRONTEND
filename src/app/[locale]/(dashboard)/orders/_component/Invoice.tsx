@@ -44,9 +44,9 @@ const Invoice = ({ rowData }: any) => {
     });
   };
   // Keep meaningful decimals (e.g. 12.50), but never print a needless .00.
-  const formatPrintNumber = (value: unknown) => {
+  const formatPrintNumber = (value: unknown): string => {
     const numericValue = Number(value);
-    if (!Number.isFinite(numericValue)) return value ?? "0";
+    if (!Number.isFinite(numericValue)) return value == null ? "0" : String(value);
     return Number.isInteger(numericValue)
       ? String(numericValue)
       : String(Number(numericValue.toFixed(2)));
