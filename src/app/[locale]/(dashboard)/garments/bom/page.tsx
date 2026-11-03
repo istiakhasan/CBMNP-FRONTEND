@@ -291,6 +291,9 @@ function GarmentsBomContent() {
   const handleOrderChange = (orderId: string) => {
     const found = ordersList.find((o: any) => o.id === orderId);
     setSelectedOrderDetails(found);
+    if (found?.orderQuantity !== undefined) {
+      form.setFieldValue("orderQuantity", Number(found.orderQuantity));
+    }
   };
 
   const handleApplyPreset = (presetKey: string) => {
@@ -331,8 +334,10 @@ function GarmentsBomContent() {
     if (!editingBom || !isModalOpen) return;
 
     const orderId = editingBom.orderId || editingBom.order?.id || editingBom.buyerOrder?.id;
+    if (orderId) handleOrderChange(orderId);
     form.setFieldsValue({
       orderId,
+      orderQuantity: Number(editingBom.orderQuantity || editingBom.order?.orderQuantity || 0),
       items: (editingBom.items || []).map((item: any) => ({
         itemCategory: item.itemCategory,
         itemName: item.itemName,
@@ -344,7 +349,6 @@ function GarmentsBomContent() {
       })),
       remarks: editingBom.remarks,
     });
-    if (orderId) handleOrderChange(orderId);
   }, [editingBom, isModalOpen, form]);
 
   const handleSubmit = async (values: any) => {
@@ -356,7 +360,7 @@ function GarmentsBomContent() {
         orderId,
         styleNo: foundOrder?.orderNo ? `BOM-${foundOrder.orderNo}` : `BOM-${Math.floor(1000 + Math.random() * 9000)}`,
         styleName: foundOrder?.styleName || "Apparel Style",
-        orderQuantity: Number(foundOrder?.orderQuantity || 1000),
+        orderQuantity: Number(values.orderQuantity || foundOrder?.orderQuantity || 1000),
         items: values.items,
         remarks: values.remarks,
       };
@@ -476,13 +480,16 @@ function GarmentsBomContent() {
             </Button>
 
             {canCreateBom && (
-              <Button
-                size="small"
-                icon={<EditOutlined />}
-                onClick={() => handleOpenEditModal(record.id)}
-              >
-                Edit
-              </Button>
+              <Tooltip title={approved ? "Approved BOM is locked to protect inventory and PO calculations" : "Edit BOM"}>
+                <Button
+                  size="small"
+                  icon={<EditOutlined />}
+                  disabled={approved}
+                  onClick={() => handleOpenEditModal(record.id)}
+                >
+                  Edit
+                </Button>
+              </Tooltip>
             )}
 
             {!approved && canApproveBom && (
@@ -635,6 +642,18 @@ function GarmentsBomContent() {
                 </Option>
               ))}
             </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="orderQuantity"
+            label="Order Quantity"
+            rules={[
+              { required: true, message: "Please enter the order quantity" },
+              { type: "number", min: 1, message: "Order quantity must be at least 1" },
+            ]}
+            extra="Required material and estimated cost are recalculated when you save."
+          >
+            <InputNumber min={1} precision={0} className="w-full" addonAfter="pcs" />
           </Form.Item>
 
           {selectedOrderDetails && (
